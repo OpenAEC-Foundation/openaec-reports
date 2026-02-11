@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "file_operations": { "disabled": false },
+    "business_admin": { "disabled": true },
+    "thunderbird": { "disabled": true },
+    "revit-mcp-python": { "disabled": true },
+    "desktop_vision": { "disabled": true },
+    "pyrevit_tools": { "disabled": true },
+    "wordpress": { "disabled": true }
+  }
+}

@@ -1,0 +1,134 @@
+# 3BM Report Template — Constructieve Berekening
+# Dit template definieert de lay-out en structuur van een constructief rapport.
+
+report_type: structural
+format: A4
+orientation: portrait
+
+margins:
+  top: 25       # mm
+  bottom: 20
+  left: 20
+  right: 15
+
+# Header configuratie (op elke content pagina)
+header:
+  height: 15    # mm
+  show_rule: true
+  elements:
+    - type: text
+      content: "{project_number} | {project}"
+      position: left
+      style: header_text
+    - type: image
+      src: assets/logos/3bm_logo.svg
+      position: right
+      height: 10  # mm
+
+# Footer configuratie (op elke content pagina)
+footer:
+  height: 12    # mm
+  show_rule: true
+  elements:
+    - type: text
+      content: "{author}"
+      position: left
+      style: footer_text
+    - type: text
+      content: "Pagina {page} van {total_pages}"
+      position: right
+      style: footer_text
+
+# Voorblad configuratie
+cover:
+  background_color: "#1B3A5C"
+  elements:
+    - type: color_bar
+      color: "#4A90A4"
+      position: top
+      height: 80     # mm
+    - type: image
+      src: "{cover_image}"
+      position: top
+      width: 170     # mm
+      offset_y: 10
+    - type: logo
+      src: assets/logos/3bm_logo.svg
+      position: bottom-left
+      width: 40
+    - type: title
+      content: "{project}"
+      style: cover_title
+      position: center-left
+      offset_y: -40
+    - type: subtitle
+      content: "{subtitle}"
+      style: cover_subtitle
+      position: center-left
+      offset_y: -60
+    - type: info_block
+      position: bottom-right
+      fields:
+        - label: "Projectnummer"
+          value: "{project_number}"
+        - label: "Opdrachtgever"
+          value: "{client}"
+        - label: "Datum"
+          value: "{date}"
+        - label: "Status"
+          value: "{status}"
+
+# Colofon (pagina 2)
+colofon:
+  enabled: true
+  fields:
+    - label: "Document"
+      value: "{subtitle}"
+    - label: "Projectnummer"
+      value: "{project_number}"
+    - label: "Opdrachtgever"
+      value: "{client}"
+    - label: "Auteur"
+      value: "{author}"
+    - label: "Datum"
+      value: "{date}"
+    - label: "Versie"
+      value: "{version}"
+    - label: "Status"
+      value: "{status}"
+  disclaimer: |
+    Dit rapport is opgesteld door 3BM Bouwkunde en is uitsluitend
+    bedoeld voor de opdrachtgever. Verspreiding aan derden is niet
+    toegestaan zonder schriftelijke toestemming.
+
+# Inhoudsopgave
+toc:
+  enabled: true
+  title: "Inhoudsopgave"
+  max_depth: 3
+
+# Achterblad
+backcover:
+  background_color: "#1B3A5C"
+  elements:
+    - type: logo
+      src: assets/logos/3bm_logo_white.svg
+      position: center
+      width: 60
+    - type: text
+      content: "3BM Bouwkunde"
+      style: backcover_title
+      position: center
+    - type: contact_block
+      position: center
+      fields:
+        - "www.3bm-bouwkunde.nl"
+        - "info@3bm-bouwkunde.nl"
+
+# Structuur definitie — welke secties in welke volgorde
+structure:
+  - cover
+  - colofon
+  - toc
+  - sections    # Dynamisch gevuld vanuit data
+  - backcover

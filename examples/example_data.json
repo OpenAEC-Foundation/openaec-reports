@@ -1,0 +1,87 @@
+{
+    "project": "Voorbeeld Woonhuis",
+    "project_number": "2026-001",
+    "client": "Particuliere Opdrachtgever",
+    "author": "3BM Bouwkunde",
+    "report_type": "structural",
+    "subtitle": "Constructieve berekening hoofddraagconstructie",
+    "date": "2026-02-11",
+    "version": "1.0",
+    "status": "CONCEPT",
+    "sections": [
+        {
+            "title": "Uitgangspunten",
+            "level": 1,
+            "content": [
+                {
+                    "type": "text",
+                    "value": "De berekening is uitgevoerd conform NEN-EN 1990 t/m 1999 met de Nederlandse Nationale Bijlage."
+                },
+                {
+                    "type": "table",
+                    "title": "Materialen",
+                    "headers": ["Onderdeel", "Materiaal", "Sterkteklasse"],
+                    "rows": [
+                        ["Fundering", "Beton", "C20/25"],
+                        ["Vloer BG", "Beton", "C28/35"],
+                        ["Kolommen", "Staal", "S235"],
+                        ["Liggers", "Staal", "S355"]
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Belastingen",
+            "level": 1,
+            "content": [
+                {
+                    "type": "text",
+                    "value": "Belastingen zijn bepaald conform NEN-EN 1991."
+                },
+                {
+                    "type": "table",
+                    "title": "Veranderlijke belastingen",
+                    "headers": ["Ruimte", "Cat.", "q_k [kN/m²]"],
+                    "rows": [
+                        ["Woonruimte", "A", "1.75"],
+                        ["Balkon", "A", "2.50"],
+                        ["Berging", "A", "2.50"]
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Staalligger L1 — vloer begane grond",
+            "level": 1,
+            "content": [
+                {
+                    "type": "calculation",
+                    "title": "Veldmoment",
+                    "formula": "M_Ed = q_d × l² / 8",
+                    "substitution": "M_Ed = 12.5 × 5.0² / 8",
+                    "result": "39.1",
+                    "unit": "kNm",
+                    "reference": "NEN-EN 1993-1-1 §6.2.5"
+                },
+                {
+                    "type": "check",
+                    "description": "Unity check buiging",
+                    "required": "UC ≤ 1.0",
+                    "calculated": "UC = M_Ed / M_Rd = 39.1 / 67.2 = 0.58",
+                    "unity_check": 0.58,
+                    "limit": 1.0,
+                    "reference": "NEN-EN 1993-1-1 §6.2.5"
+                },
+                {
+                    "type": "check",
+                    "description": "Unity check doorbuiging",
+                    "required": "δ ≤ l/250 = 20.0 mm",
+                    "calculated": "δ = 12.3 mm",
+                    "unity_check": 0.62,
+                    "limit": 1.0,
+                    "reference": "NEN-EN 1993-1-1 §7.2.1"
+                }
+            ]
+        }
+    ]
+}

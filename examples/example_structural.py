@@ -36,31 +36,31 @@ def main_manual():
     )
 
     report.add_cover(subtitle="Constructieve berekening")
-    report.add_colofon()
 
-    # Secties handmatig opbouwen
-    report.add_section("Uitgangspunten", level=1)
-    report.add_table(
-        headers=["Onderdeel", "Materiaal", "Sterkteklasse"],
-        rows=[
-            ["Fundering", "Beton", "C20/25"],
-            ["Vloer BG", "Beton", "C28/35"],
-        ],
-        title="Materialen",
-    )
+    # Secties met tekst content
+    report.add_section("Uitgangspunten", level=1, content=[
+        "Dit rapport beschrijft de constructieve berekening voor het project Voorbeeld Woonhuis.",
+        "Alle berekeningen zijn uitgevoerd conform de Eurocode (NEN-EN 1990 t/m 1999).",
+        "Materialen: beton C20/25 (fundering), beton C28/35 (vloer BG), staal S235 (liggers).",
+    ])
 
-    report.add_section("Staalligger L1", level=1)
-    report.add_calculation(
-        title="Veldmoment",
-        formula="M_Ed = q_d × l² / 8",
-        result="39.1",
-        unit="kNm",
-    )
-    report.add_check(
-        description="Unity check buiging",
-        unity_check=0.58,
-        limit=1.0,
-    )
+    report.add_section("Belastingen", level=1, content=[
+        "De belastingen zijn bepaald conform NEN-EN 1991.",
+    ])
+    report.add_section("Eigen gewicht", level=2, content=[
+        "Gewapend beton: 25 kN/m³",
+        "Dekvloer: 0.5 kN/m²",
+    ])
+    report.add_section("Veranderlijke belasting", level=2, content=[
+        "Nuttige belasting (wonen): 1.75 kN/m²",
+        "Scheidingswanden: 0.5 kN/m²",
+    ])
+
+    report.add_section("Staalligger L1", level=1, content=[
+        "HEA 200, staal S235, overspanning 6.0 m.",
+        "Veldmoment M_Ed = 39.1 kNm",
+        "Unity check buiging: 0.58 — VOLDOET",
+    ])
 
     report.add_backcover()
 

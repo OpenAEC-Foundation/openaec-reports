@@ -1,0 +1,170 @@
+{
+  "template": "structural",
+  "format": "A4",
+  "project": "Kijkduin Reddingspost",
+  "project_number": "2024-031",
+  "client": "Gemeente Den Haag",
+  "author": "OpenAEC",
+  "date": "2026-02-18",
+  "version": "1.0",
+  "status": "CONCEPT",
+
+  "cover": {
+    "subtitle": "Constructieve berekening hoofddraagconstructie",
+    "image": "renders/gevel_west.png",
+    "extra_fields": {
+      "Kenmerk": "OpenAEC-2024-031-R01"
+    }
+  },
+
+  "colofon": {
+    "enabled": true,
+    "revision_history": [
+      {
+        "version": "0.1",
+        "date": "2026-01-15",
+        "author": "J. Kolthof",
+        "description": "Eerste concept"
+      },
+      {
+        "version": "1.0",
+        "date": "2026-02-18",
+        "author": "J. Kolthof",
+        "description": "Definitieve berekening"
+      }
+    ]
+  },
+
+  "toc": {
+    "enabled": true,
+    "max_depth": 3
+  },
+
+  "sections": [
+    {
+      "title": "Uitgangspunten",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Dit rapport beschrijft de constructieve berekening voor de hoofddraagconstructie van de reddingspost te Kijkduin."
+        },
+        {
+          "type": "paragraph",
+          "text": "Alle berekeningen zijn uitgevoerd conform de Eurocode (NEN-EN 1990 t/m 1999) met de Nederlandse Nationale Bijlagen."
+        },
+        {
+          "type": "table",
+          "title": "Toegepaste materialen",
+          "headers": ["Onderdeel", "Materiaal", "Sterkteklasse"],
+          "rows": [
+            ["Fundering", "Gewapend beton", "C20/25"],
+            ["Vloer BG", "Gewapend beton", "C28/35"],
+            ["Liggers", "Staal", "S235"],
+            ["Kolommen", "Staal", "S355"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Belastingen",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De belastingen zijn bepaald conform NEN-EN 1991."
+        }
+      ]
+    },
+    {
+      "title": "Eigen gewicht",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Gewapend beton: 25 kN/m³. Dekvloer (50mm): 0.5 kN/m²."
+        }
+      ]
+    },
+    {
+      "title": "Veranderlijke belasting",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Nuttige belasting (categorie A — wonen): 1.75 kN/m². Toeslag scheidingswanden: 0.5 kN/m²."
+        }
+      ]
+    },
+    {
+      "title": "Staalligger L1 — HEA 200",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Staalligger L1 overspant 6.0 m tussen kolommen K1 en K2. Profiel: HEA 200, staal S235."
+        },
+        {
+          "type": "calculation",
+          "title": "Veldmoment",
+          "formula": "M_Ed = q × l² / 8",
+          "substitution": "M_Ed = 8.7 × 6.0² / 8",
+          "result": "39.1",
+          "unit": "kNm",
+          "reference": "NEN-EN 1993-1-1"
+        },
+        {
+          "type": "calculation",
+          "title": "Momentcapaciteit",
+          "formula": "M_Rd = W_pl × f_y / γ_M0",
+          "substitution": "M_Rd = 429.5e3 × 235 / 1.0",
+          "result": "100.9",
+          "unit": "kNm",
+          "reference": "NEN-EN 1993-1-1 §6.2.5"
+        },
+        {
+          "type": "check",
+          "description": "Unity check buiging ligger L1",
+          "required_value": "UC ≤ 1.0",
+          "calculated_value": "M_Ed / M_Rd = 39.1 / 100.9",
+          "unity_check": 0.39,
+          "limit": 1.0,
+          "reference": "NEN-EN 1993-1-1 §6.2.5"
+        },
+        {
+          "type": "check",
+          "description": "Unity check doorbuiging ligger L1",
+          "required_value": "δ ≤ l/250 = 24.0 mm",
+          "calculated_value": "δ = 18.2 mm",
+          "unity_check": 0.76,
+          "limit": 1.0,
+          "reference": "NEN-EN 1993-1-1 §7.2"
+        }
+      ]
+    },
+    {
+      "title": "Situering",
+      "level": 1,
+      "content": [
+        {
+          "type": "map",
+          "center": { "lat": 52.0975, "lon": 4.2200 },
+          "radius_m": 150,
+          "layers": ["percelen", "bebouwing", "luchtfoto"],
+          "caption": "Kadastrale situering projectlocatie Kijkduin"
+        }
+      ]
+    }
+  ],
+
+  "backcover": {
+    "enabled": true
+  },
+
+  "metadata": {
+    "software": "OpenAEC Report Generator v0.1.0",
+    "revit_model": "2024-031_Kijkduin_S.rvt",
+    "calculation_software": "Technosoft Frilo R-2024.1"
+  }
+}

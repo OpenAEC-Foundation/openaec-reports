@@ -1,0 +1,20 @@
+# 3BM Report Template — Blanco (geen speciale pagina's)
+
+report_type: custom
+format: A4
+orientation: portrait
+
+cover:
+  subtitle_hint: ""
+
+colofon:
+  enabled: false
+
+toc:
+  enabled: false
+
+backcover:
+  enabled: false
+
+structure:
+  - sections

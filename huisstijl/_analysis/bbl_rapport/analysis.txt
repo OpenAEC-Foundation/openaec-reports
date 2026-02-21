@@ -1,0 +1,259 @@
+
+============================================================
+PAGE 1 (size: 595 x 842 pt)
+============================================================
+
+--- TEXT BLOCKS ---
+  [54,721 -> 415,753] font=GothamBold, size=28.9, color=#401246: "BBL-toetsingsrapportage"
+  [55,763 -> 499,783] font=GothamBook, size=17.8, color=#38bdab: "Transformatie Data center Spaarneplein Den Haag"
+  [401,53 -> 478,67] font=GothamMedium, size=13.0, color=#ffffff: "Ontdek ons"
+  [478,53 -> 540,67] font=GothamMedium, size=13.0, color=#38bdab: "3bm.co.nl"
+  [378,566 -> 464,577] font=GothamMedium, size=10.2, color=#ffffff: "BETROUWBAAR"
+  [465,520 -> 526,531] font=GothamMedium, size=10.2, color=#401246: "PRAKTISCH"
+  [329,520 -> 397,531] font=GothamMedium, size=10.2, color=#401246: "MEEDENKEN"
+
+--- IMAGES ---
+  Image xref=56, size=927x1074
+
+--- DRAWINGS ---
+  rect(0,0,595x624) fill=(0.25,0.07,0.28) no-stroke
+  line(83,53->83,53) | line(83,53->71,65) | line(71,68->76,73) | line(76,73->83,66) | line(83,66->83,53) fill=(0.53,0.43,0.54) no-stroke
+  line(74,34->69,39) | line(69,39->83,53) | line(83,53->83,40) | line(83,40->78,34) fill=(0.53,0.43,0.54) no-stroke
+  line(97,67->97,67) | line(97,67->83,80) | line(83,80->88,85) | line(91,85->97,80) | line(97,80->97,67) fill=(0.53,0.43,0.54) no-stroke
+  line(62,59->69,52) | line(69,52->69,39) | line(69,39->57,51) | line(57,55->62,59) fill=(1.00,1.00,1.00) no-stroke
+  line(88,48->83,53) | line(83,53->97,67) | line(97,67->97,54) | line(97,54->91,48) fill=(1.00,1.00,1.00) no-stroke
+  line(113,61->118,57) | line(128,57->128,57) | line(123,53->120,53) | line(120,53->119,49) | line(119,49->126,43) | line(126,43->115,43) | line(115,43->115,37) | line(115,37->132,37) | line(132,44->127,49) | line(134,57->134,57) fill=(1.00,1.00,1.00) no-stroke
+  line(154,55->154,55) | line(144,55->144,55) | line(144,62->144,65) | line(144,65->138,65) | line(138,65->138,37) | line(138,37->144,37) | line(144,37->144,47) | line(160,55->160,55) fill=(1.00,1.00,1.00) no-stroke
+  line(163,44->169,44) | line(169,44->169,47) | line(196,51->196,65) | line(196,65->190,65) | line(190,65->190,53) | line(182,53->182,65) | line(182,65->176,65) | line(176,65->176,53) | line(169,53->169,65) | line(169,65->163,65) | line(163,65->163,44) fill=(1.00,1.00,1.00) no-stroke
+  rect(116,74,1x8) fill=(1.00,1.00,1.00) no-stroke
+  line(119,76->120,76) | line(120,76->120,77) | line(124,78->124,82) | line(124,82->123,82) | line(123,82->123,78) | line(120,78->120,82) | line(120,82->119,82) | line(119,82->119,76) fill=(1.00,1.00,1.00) no-stroke
+  line(130,79->130,79) | line(126,79->126,79) | line(125,83->126,82) | line(130,81->130,80) | line(125,79->125,79) | line(130,77->130,76) | line(130,76->131,76) | line(131,76->131,81) fill=(1.00,1.00,1.00) no-stroke
+  line(133,78->137,78) | line(137,80->137,81) | line(137,79->137,79) | line(137,79->137,79) | line(137,79->133,79) fill=(1.00,1.00,1.00) no-stroke
+  line(139,76->140,76) | line(140,76->140,77) | line(144,78->144,82) | line(144,82->143,82) | line(143,82->143,78) | line(140,78->140,82) | line(140,82->139,82) | line(139,82->139,76) fill=(1.00,1.00,1.00) no-stroke
+  rect(146,76,1x6) | rect(145,74,1x1) fill=(1.00,1.00,1.00) no-stroke
+  line(149,78->152,78) | line(152,80->153,81) | line(153,79->153,79) | line(153,79->153,79) | line(153,79->149,79) fill=(1.00,1.00,1.00) no-stroke
+  line(155,79->155,76) | line(155,76->155,76) | line(155,76->155,79) | line(159,79->159,76) | line(159,76->159,76) | line(159,76->159,82) | line(159,82->159,82) | line(159,82->159,81) fill=(1.00,1.00,1.00) no-stroke
+  line(161,76->162,76) | line(162,76->162,77) | line(164,76->164,77) | line(164,77->164,77) | line(162,79->162,82) | line(162,82->161,82) | line(161,82->161,76) fill=(1.00,1.00,1.00) no-stroke
+  line(165,81->166,80) | line(169,80->169,80) | line(165,78->165,78) | line(169,77->169,77) | line(166,77->166,77) | line(169,80->169,80) fill=(1.00,1.00,1.00) no-stroke
+  line(174,76->175,76) | line(175,76->176,81) | line(176,81->178,76) | line(178,76->179,76) | line(179,76->177,82) | line(177,82->176,82) | line(176,82->174,76) fill=(1.00,1.00,1.00) no-stroke
+
+============================================================
+PAGE 2 (size: 595 x 842 pt)
+============================================================
+
+--- TEXT BLOCKS ---
+  [71,57 -> 345,82] font=GothamBold, size=22.0, color=#401246: "BBL-toetsingsrapportage"
+  [103,321 -> 140,332] font=GothamBold, size=10.0, color=#401246: "Project"
+  [103,369 -> 183,380] font=GothamBold, size=10.0, color=#401246: "In opdracht van"
+  [103,489 -> 148,500] font=GothamBold, size=10.0, color=#38bdab: "Adviseur"
+  [103,525 -> 207,536] font=GothamBold, size=10.0, color=#38bdab: "Toegepaste Normen"
+  [103,549 -> 205,560] font=GothamBold, size=10.0, color=#38bdab: "Documentgegevens"
+  [103,573 -> 178,584] font=GothamBold, size=10.0, color=#38bdab: "Datum rapport"
+  [103,597 -> 205,608] font=GothamBold, size=10.0, color=#38bdab: "Fase in bouwproces"
+  [103,621 -> 175,632] font=GothamBold, size=10.0, color=#38bdab: "Rapportstatus"
+  [103,645 -> 199,656] font=GothamBold, size=10.0, color=#38bdab: "Documentkenmerk"
+  [229,321 -> 514,332] font=GothamBook, size=10.0, color=#401246: "2707 - Transformatie Data center Spaarneplein Den Haag"
+  [229,369 -> 313,380] font=GothamBook, size=10.0, color=#401246: "Mounir Riffi MSc"
+  [229,382 -> 317,393] font=GothamBook, size=10.0, color=#401246: "Sping Real Estate"
+  [229,395 -> 332,405] font=GothamBook, size=10.0, color=#401246: "Lange Voorhout 46,"
+  [229,407 -> 321,418] font=GothamBook, size=10.0, color=#401246: "2514 EG Den Haag"
+  [229,489 -> 309,500] font=GothamBook, size=10.0, color=#401246: "3BM Cooperatie"
+  [229,501 -> 235,512] font=Gotham-BookItalic, size=10.0, color=#401246: "J"
+  [235,501 -> 284,512] font=GothamBook, size=10.0, color=#401246: ". Kolthof ("
+  [284,501 -> 289,512] font=Gotham-BookItalic, size=10.0, color=#401246: "J"
+  [289,501 -> 328,512] font=GothamBook, size=10.0, color=#401246: "ochem)"
+  [229,525 -> 413,536] font=GothamBook, size=10.0, color=#401246: "BBL, NEN 2057, NEN 2580, NEN1087"
+  [229,549 -> 411,560] font=GothamBook, size=10.0, color=#401246: "BBL-toetsing, pg 1-19 (excl. Bijlagen)"
+  [229,573 -> 289,584] font=GothamBook, size=10.0, color=#401246: "05-07-2025"
+  [229,597 -> 330,608] font=GothamBook, size=10.0, color=#401246: "Haalbaarheidsstudie"
+  [229,621 -> 270,632] font=GothamBook, size=10.0, color=#401246: "concept"
+  [229,645 -> 294,656] font=GothamBook, size=10.0, color=#401246: "2707-BBL-01"
+  [71,87 -> 421,102] font=GothamBook, size=14.0, color=#38bdab: "Transformatie Data center Spaarneplein Den Haag"
+  [534,796 -> 539,810] font=SegoeUI-Bold, size=8.0, color=#38bdab: "2"
+
+--- IMAGES ---
+
+--- DRAWINGS ---
+  line(103,772->103,842) | line(103,842->281,842) | line(281,842->220,772) | line(220,772->103,772) | line(0,842->61,842) | line(61,842->0,773) | line(0,773->0,842) fill=(0.22,0.74,0.67) no-stroke
+  line(103,518->420,518) no-fill stroke=(0.25,0.07,0.28)
+  line(103,543->420,543) no-fill stroke=(0.25,0.07,0.28)
+  line(103,566->420,566) no-fill stroke=(0.25,0.07,0.28)
+  line(103,590->420,590) no-fill stroke=(0.25,0.07,0.28)
+  line(103,615->420,615) no-fill stroke=(0.25,0.07,0.28)
+  line(103,639->420,639) no-fill stroke=(0.25,0.07,0.28)
+  line(368,784->358,794) | line(358,796->362,800) | line(362,800->368,794) | line(368,794->368,784) fill=(0.25,0.74,0.67) no-stroke
+  line(360,769->357,773) | line(357,773->368,784) | line(368,784->368,774) | line(368,774->363,769) fill=(0.25,0.74,0.67) no-stroke
+  line(368,806->371,810) | line(374,810->379,805) | line(379,805->379,795) | line(379,795->368,806) fill=(0.25,0.74,0.67) no-stroke
+  line(351,789->357,783) | line(357,783->357,773) | line(357,773->347,783) | line(347,785->351,789) fill=(0.25,0.07,0.28) no-stroke
+  line(371,780->368,784) | line(368,784->379,795) | line(379,795->379,784) | line(379,784->374,780) fill=(0.25,0.07,0.28) no-stroke
+  line(392,790->395,787) | line(403,787->403,787) | line(399,784->397,784) | line(397,784->396,781) | line(396,781->402,776) | line(402,776->393,776) | line(393,776->393,772) | line(393,772->406,772) | line(407,776->402,781) | line(408,787->408,787) fill=(0.25,0.07,0.28) no-stroke
+  line(424,785->424,785) | line(416,785->416,785) | line(416,792->416,794) | line(416,794->411,794) | line(411,794->411,772) | line(411,772->416,772) | line(416,772->416,779) | line(429,785->429,785) fill=(0.25,0.07,0.28) no-stroke
+  line(431,777->436,777) | line(436,777->436,779) | line(457,783->457,794) | line(457,794->452,794) | line(452,794->452,784) | line(446,784->446,794) | line(446,794->442,794) | line(442,794->442,784) | line(436,784->436,794) | line(436,794->431,794) | line(431,794->431,777) fill=(0.25,0.07,0.28) no-stroke
+  rect(393,801,1x6) fill=(0.25,0.07,0.28) no-stroke
+  line(396,802->396,802) | line(396,802->396,803) | line(400,804->400,807) | line(400,807->399,807) | line(399,807->399,804) | line(396,804->396,807) | line(396,807->396,807) | line(396,807->396,802) fill=(0.25,0.07,0.28) no-stroke
+  line(405,804->405,804) | line(401,804->401,804) | line(401,808->401,807) | line(405,806->405,805) | line(401,804->401,804) | line(405,803->405,802) | line(405,802->405,802) | line(405,802->405,806) fill=(0.25,0.07,0.28) no-stroke
+  line(407,804->410,804) | line(410,806->410,806) | line(411,805->411,805) | line(411,805->407,805) fill=(0.25,0.07,0.28) no-stroke
+  line(412,802->412,802) | line(412,802->412,803) | line(416,804->416,807) | line(416,807->415,807) | line(415,807->415,804) | line(412,804->412,807) | line(412,807->412,807) | line(412,807->412,802) fill=(0.25,0.07,0.28) no-stroke
+
+============================================================
+PAGE 3 (size: 595 x 842 pt)
+============================================================
+
+--- TEXT BLOCKS ---
+  [533,794 -> 542,803] font=Gotham-Book, size=9.5, color=#45243d: "3"
+  [90,75 -> 157,93] font=Gotham-Book, size=18.0, color=#45243d: "Inhoud"
+  [90,127 -> 315,139] font=Gotham-Book, size=12.0, color=#56b49b: "Bijbehorende tekeningen en bijlagen:"
+  [515,127 -> 524,139] font=Gotham-Book, size=12.0, color=#56b49b: "4"
+  [90,147 -> 99,157] font=Gotham-Book, size=9.5, color=#45243d: "1.1"
+  [161,147 -> 284,157] font=Gotham-Book, size=9.5, color=#45243d: "Toegepaste documenten:"
+  [515,147 -> 522,157] font=Gotham-Book, size=9.5, color=#45243d: "4"
+  [90,165 -> 101,174] font=Gotham-Book, size=9.5, color=#45243d: "1.2"
+  [161,165 -> 317,174] font=Gotham-Book, size=9.5, color=#45243d: "Wetten, besluiten en regelingen:"
+  [515,165 -> 522,174] font=Gotham-Book, size=9.5, color=#45243d: "4"
+  [90,182 -> 102,192] font=Gotham-Book, size=9.5, color=#45243d: "1.3"
+  [161,182 -> 430,192] font=Gotham-Book, size=9.5, color=#45243d: "NEN normen. Direct aangestuurde normbladen (1e Lijns)"
+  [515,182 -> 522,192] font=Gotham-Book, size=9.5, color=#45243d: "4"
+  [90,219 -> 97,231] font=Gotham-Book, size=12.0, color=#56b49b: "2"
+  [161,219 -> 215,231] font=Gotham-Book, size=12.0, color=#56b49b: "Inleiding"
+  [515,219 -> 523,231] font=Gotham-Book, size=12.0, color=#56b49b: "5"
+  [90,258 -> 97,270] font=Gotham-Book, size=12.0, color=#56b49b: "3"
+  [161,258 -> 247,270] font=Gotham-Book, size=12.0, color=#56b49b: "Samenvatting"
+  [515,258 -> 523,270] font=Gotham-Book, size=12.0, color=#56b49b: "7"
+  [90,278 -> 102,288] font=Gotham-Book, size=9.5, color=#45243d: "3.1"
+  [161,278 -> 232,288] font=Gotham-Book, size=9.5, color=#45243d: "Bruikbaarheid:"
+  [515,278 -> 521,288] font=Gotham-Book, size=9.5, color=#45243d: "7"
+  [90,296 -> 104,305] font=Gotham-Book, size=9.5, color=#45243d: "3.2"
+  [161,296 -> 211,305] font=Gotham-Book, size=9.5, color=#45243d: "Ventilatie:"
+  [515,296 -> 521,305] font=Gotham-Book, size=9.5, color=#45243d: "7"
+  [90,313 -> 104,322] font=Gotham-Book, size=9.5, color=#45243d: "3.3"
+  [161,313 -> 298,322] font=Gotham-Book, size=9.5, color=#45243d: "Brandveiligheid en vluchten:"
+  [515,313 -> 521,322] font=Gotham-Book, size=9.5, color=#45243d: "7"
+  [90,330 -> 105,340] font=Gotham-Book, size=9.5, color=#45243d: "3.4"
+  [161,330 -> 206,340] font=Gotham-Book, size=9.5, color=#45243d: "Parkeren"
+  [515,330 -> 521,340] font=Gotham-Book, size=9.5, color=#45243d: "7"
+  [90,367 -> 98,379] font=Gotham-Book, size=12.0, color=#56b49b: "4"
+  [161,367 -> 410,379] font=Gotham-Book, size=12.0, color=#56b49b: "Oppervlakte toets en daglichtberekening"
+  [515,367 -> 523,379] font=Gotham-Book, size=12.0, color=#56b49b: "8"
+  [90,387 -> 102,397] font=Gotham-Book, size=9.5, color=#45243d: "4.1"
+  [161,387 -> 208,397] font=Gotham-Book, size=9.5, color=#45243d: "conclusie"
+  [515,387 -> 521,397] font=Gotham-Book, size=9.5, color=#45243d: "8"
+  [90,424 -> 97,436] font=Gotham-Book, size=12.0, color=#56b49b: "5"
+  [161,424 -> 258,436] font=Gotham-Book, size=12.0, color=#56b49b: "Brandveiligheid"
+  [515,424 -> 523,436] font=Gotham-Book, size=12.0, color=#56b49b: "9"
+  [90,444 -> 102,454] font=Gotham-Book, size=9.5, color=#45243d: "5.1"
+  [161,444 -> 322,454] font=Gotham-Book, size=9.5, color=#45243d: "Indeling in brandcompartimenten"
+  [515,444 -> 522,454] font=Gotham-Book, size=9.5, color=#45243d: "9"
+  [90,461 -> 104,471] font=Gotham-Book, size=9.5, color=#45243d: "5.2"
+  [161,461 -> 339,471] font=Gotham-Book, size=9.5, color=#45243d: "Indeling in subbrandcompartimenten"
+  [515,461 -> 523,471] font=Gotham-Book, size=9.5, color=#45243d: "11"
+  [90,479 -> 104,488] font=Gotham-Book, size=9.5, color=#45243d: "5.3"
+  [161,479 -> 216,488] font=Gotham-Book, size=9.5, color=#45243d: "WRD eisen"
+  [515,479 -> 523,488] font=Gotham-Book, size=9.5, color=#45243d: "11"
+  [90,496 -> 105,505] font=Gotham-Book, size=9.5, color=#45243d: "5.4"
+  [161,496 -> 303,505] font=Gotham-Book, size=9.5, color=#45243d: "Wbdbo en brandwerendheid."
+  [515,496 -> 525,505] font=Gotham-Book, size=9.5, color=#45243d: "12"
+  [90,533 -> 98,545] font=Gotham-Book, size=12.0, color=#56b49b: "6"
+  [161,533 -> 255,545] font=Gotham-Book, size=12.0, color=#56b49b: "Veilig Vluchten"
+  [515,533 -> 528,545] font=Gotham-Book, size=12.0, color=#56b49b: "16"
+  [90,553 -> 102,562] font=Gotham-Book, size=9.5, color=#45243d: "6.1"
+  [161,553 -> 220,562] font=Gotham-Book, size=9.5, color=#45243d: "Vluchtroute"
+  [515,553 -> 525,562] font=Gotham-Book, size=9.5, color=#45243d: "16"
+  [90,570 -> 104,580] font=Gotham-Book, size=9.5, color=#45243d: "6.2"
+  [161,570 -> 341,580] font=Gotham-Book, size=9.5, color=#45243d: "inrichting en afmetingen vluchtroutes"
+  [515,570 -> 525,580] font=Gotham-Book, size=9.5, color=#45243d: "16"
+  [90,607 -> 97,619] font=Gotham-Book, size=12.0, color=#56b49b: "7"
+  [161,607 -> 221,619] font=Gotham-Book, size=12.0, color=#56b49b: "Parkeren."
+  [515,607 -> 531,619] font=Gotham-Book, size=12.0, color=#56b49b: "20"
+  [90,646 -> 98,658] font=Gotham-Book, size=12.0, color=#56b49b: "8"
+  [161,646 -> 391,658] font=Gotham-Book, size=12.0, color=#56b49b: "bouwbesluit toets en daglichttoetsing"
+  [515,646 -> 527,658] font=Gotham-Book, size=12.0, color=#56b49b: "21"
+
+--- IMAGES ---
+  Image xref=91, size=1240x1754
+
+--- DRAWINGS ---
+  rect(0,0,595x842) fill=(1.00,1.00,1.00) no-stroke
+
+============================================================
+PAGE 4 (size: 595 x 842 pt)
+============================================================
+
+--- TEXT BLOCKS ---
+  [532,794 -> 542,803] font=Gotham-Book, size=9.5, color=#45243d: "4"
+  [90,75 -> 427,93] font=Gotham-Book, size=18.0, color=#45243d: "Bijbehorende tekeningen en bijlagen:"
+  [125,130 -> 135,140] font=Gotham-Book, size=10.0, color=#56b49b: "1.1"
+  [147,127 -> 316,140] font=Gotham-Book, size=13.0, color=#56b49b: "Toegepaste documenten:"
+  [125,149 -> 130,162] font=SymbolMT, size=11.0, color=#000000: "•"
+  [143,152 -> 383,162] font=Gotham-Book, size=9.5, color=#45243d: "24.084 ONT-04 010325PM Datacenter Studie VO+"
+  [383,151 -> 389,162] font=Gotham-Book, size=11.0, color=#000000: ","
+  [389,152 -> 530,162] font=Gotham-Book, size=9.5, color=#45243d: "gedateerd d.d. 02 Maart 2025"
+  [530,151 -> 536,162] font=Gotham-Book, size=11.0, color=#000000: "."
+  [125,202 -> 138,212] font=Gotham-Book, size=10.0, color=#56b49b: "1.2"
+  [147,200 -> 360,212] font=Gotham-Book, size=13.0, color=#56b49b: "Wetten, besluiten en regelingen:"
+  [125,222 -> 130,234] font=SymbolMT, size=9.5, color=#45243d: "•"
+  [143,224 -> 542,234] font=Gotham-Book, size=9.5, color=#45243d: "Besluit bouwwerken leefomgeving, Een bouwwerk mag geen gevaar opleveren voor"
+  [143,236 -> 541,246] font=Gotham-Book, size=9.5, color=#45243d: "gebruikers en omgeving. Daarom heeft de overheid in het Besluit bouwwerken"
+  [143,248 -> 541,258] font=Gotham-Book, size=9.5, color=#45243d: "leefomgeving (voorheen het Bouwbesluit) regels vastgelegd voor veiligheid,"
+  [143,260 -> 542,270] font=Gotham-Book, size=9.5, color=#45243d: "gezondheid, bruikbaarheid en duurzaamheid (energiezuinigheid en milieu). Een"
+  [143,272 -> 196,282] font=Gotham-Book, size=9.5, color=#45243d: "bouwwerk"
+  [226,272 -> 253,282] font=Gotham-Book, size=9.5, color=#45243d: "moet"
+  [283,272 -> 309,282] font=Gotham-Book, size=9.5, color=#45243d: "altijd"
+  [340,272 -> 380,282] font=Gotham-Book, size=9.5, color=#45243d: "voldoen"
+  [411,272 -> 430,282] font=Gotham-Book, size=9.5, color=#45243d: "aan"
+  [460,272 -> 478,282] font=Gotham-Book, size=9.5, color=#45243d: "die"
+  [508,272 -> 541,282] font=Gotham-Book, size=9.5, color=#45243d: "regels."
+  [143,284 -> 408,294] font=Gotham-Book, size=9.5, color=#45243d: "https://wetten.overheid.nl/BWBR0041297/2025-05-21;"
+  [125,334 -> 138,344] font=Gotham-Book, size=10.0, color=#56b49b: "1.3"
+  [147,332 -> 515,345] font=Gotham-Book, size=13.0, color=#56b49b: "NEN normen. Direct aangestuurde normbladen (1e Lijns)"
+  [125,355 -> 130,366] font=SymbolMT, size=9.5, color=#45243d: "•"
+  [143,357 -> 542,366] font=Gotham-Book, size=9.5, color=#45243d: "NEN 2057 (nieuwbouw), Daglichtopeningen van gebouwen - Bepaling van de"
+  [143,369 -> 539,378] font=Gotham-Book, size=9.5, color=#45243d: "equivalente daglichtoppervlakte van een ruimte (versie 2011). Publicatiedatum: 0"
+  [143,381 -> 408,390] font=Gotham-Book, size=9.5, color=#45243d: "06-2011. Inclusief wijzigingsblad NEN 2057:2011/C1:2011."
+  [125,391 -> 130,402] font=SymbolMT, size=9.5, color=#45243d: "•"
+  [143,393 -> 542,402] font=Gotham-Book, size=9.5, color=#45243d: "NEN 2580:2007+C1:2008, Oppervlakten en inhouden van gebouwen - Termen,"
+  [143,405 -> 542,414] font=Gotham-Book, size=9.5, color=#45243d: "definities en bepalingsmethoden. Publicatiedatum: 01-05-2007. Publicatiedatum C1"
+  [143,417 -> 541,426] font=Gotham-Book, size=9.5, color=#45243d: "01-12-2008. Inclusief NEN 2580:2007/C1:2008. Vervangt NEN 2580:1997, NEN"
+  [143,429 -> 359,438] font=Gotham-Book, size=9.5, color=#45243d: "2580:1997/A1:2001 en NEN 2580:2005 Ontw."
+  [125,439 -> 130,450] font=SymbolMT, size=9.5, color=#45243d: "•"
+  [143,441 -> 542,450] font=Gotham-Book, size=9.5, color=#45243d: "NEN 1087 (nieuwbouw), Ventilatie van gebouwen - Bepalingsmethoden voor"
+  [143,453 -> 462,462] font=Gotham-Book, size=9.5, color=#45243d: "nieuwbouw. Publicatiedatum: 01-12-2001. Vervangt NEN 1087:1997."
+
+--- IMAGES ---
+  Image xref=91, size=1240x1754
+
+--- DRAWINGS ---
+  rect(0,0,595x842) fill=(1.00,1.00,1.00) no-stroke
+
+============================================================
+PAGE 36 (size: 595 x 842 pt)
+============================================================
+
+--- TEXT BLOCKS ---
+  [422,794 -> 498,808] font=GothamMedium, size=12.9, color=#401246: "Ontdek ons"
+  [498,794 -> 559,808] font=GothamMedium, size=12.9, color=#ffffff: "3bm.co.nl"
+  [36,788 -> 118,797] font=GothamBold, size=8.0, color=#4d2651: "3bm Coöperatie U.A."
+  [36,799 -> 254,807] font=GothamBook, size=8.0, color=#4d2651: "Wattstraat 17  |  3335 LV Zwijndrecht  |  T. 078 7400 250"
+
+--- IMAGES ---
+
+--- DRAWINGS ---
+  rect(1,91,595x751) fill=(0.22,0.74,0.67) no-stroke
+  line(0,0->0,698) | line(0,698->0,698) | line(0,698->0,842) | line(0,842->268,842) | line(268,842->432,698) | line(432,698->595,555) | line(595,555->595,320) | line(595,320->436,320) | line(436,320->436,320) | line(436,320->436,320) | line(436,320->436,320) | line(436,320->595,178) | line(595,178->595,0) | line(595,0->0,0) fill=(1.00,1.00,1.00) no-stroke
+  line(0,0->0,303) | line(0,303->170,154) | line(170,154->170,0) | line(170,0->0,0) fill=(0.25,0.07,0.28) no-stroke
+  line(173,409->153,430) | line(153,435->161,443) | line(161,443->173,431) | line(173,431->173,409) fill=(0.25,0.74,0.67) no-stroke
+  line(158,378->150,386) | line(150,386->173,409) | line(173,409->173,388) | line(173,388->164,378) fill=(0.25,0.74,0.67) no-stroke
+  line(173,455->181,464) | line(187,464->196,454) | line(196,454->196,432) | line(196,432->173,455) fill=(0.25,0.74,0.67) no-stroke
+  line(138,420->150,408) | line(150,408->150,386) | line(150,386->130,407) | line(130,412->138,420) fill=(0.25,0.07,0.28) no-stroke
+  line(181,401->173,409) | line(173,409->196,432) | line(196,432->196,411) | line(196,411->187,401) fill=(0.25,0.07,0.28) no-stroke
+  line(223,423->230,416) | line(248,416->248,416) | line(239,410->235,410) | line(235,410->233,404) | line(233,404->244,392) | line(244,392->226,392) | line(226,392->226,384) | line(226,384->254,384) | line(255,394->246,403) | line(258,416->258,416) fill=(0.25,0.07,0.28) no-stroke
+  line(291,412->291,412) | line(274,412->274,412) | line(274,425->274,430) | line(274,430->264,430) | line(264,430->264,384) | line(264,384->274,384) | line(274,384->274,400) | line(302,412->302,412) fill=(0.25,0.07,0.28) no-stroke
+  line(306,394->317,394) | line(317,394->317,400) | line(361,407->361,430) | line(361,430->351,430) | line(351,430->351,410) | line(339,410->339,430) | line(339,430->329,430) | line(329,430->329,410) | line(317,410->317,430) | line(317,430->306,430) | line(306,430->306,394) fill=(0.25,0.07,0.28) no-stroke
+  rect(227,445,1x13) fill=(0.25,0.07,0.28) no-stroke
+  line(232,448->234,448) | line(234,448->234,450) | line(240,452->240,457) | line(240,457->239,457) | line(239,457->239,452) | line(234,452->234,457) | line(234,457->232,457) | line(232,457->232,448) fill=(0.25,0.07,0.28) no-stroke
+  line(251,452->251,452) | line(244,452->244,452) | line(243,459->244,458) | line(251,456->251,455) | line(243,452->243,452) | line(251,450->251,448) | line(251,448->252,448) | line(252,448->252,456) fill=(0.25,0.07,0.28) no-stroke
+  line(256,452->262,452) | line(262,455->263,456) | line(264,453->264,453) | line(264,453->256,453) fill=(0.25,0.07,0.28) no-stroke
+  line(266,448->267,448) | line(267,448->267,450) | line(274,452->274,457) | line(274,457->273,457) | line(273,457->273,452) | line(267,452->267,457) | line(267,457->266,457) | line(266,457->266,448) fill=(0.25,0.07,0.28) no-stroke
+  rect(277,448,1x9) | rect(277,445,2x2) fill=(0.25,0.07,0.28) no-stroke
+  line(283,452->289,452) | line(289,455->290,456) | line(290,453->290,453) | line(290,453->283,453) fill=(0.25,0.07,0.28) no-stroke
+  line(292,454->292,448) | line(292,448->294,448) | line(294,448->294,454) | line(299,453->299,448) | line(299,448->300,448) | line(300,448->300,457) | line(300,457->299,457) | line(299,457->299,456) fill=(0.25,0.07,0.28) no-stroke
+  line(303,448->305,448) | line(305,448->305,451) | line(309,448->309,450) | line(309,450->309,450) | line(305,454->305,457) | line(305,457->303,457) | line(303,457->303,448) fill=(0.25,0.07,0.28) no-stroke

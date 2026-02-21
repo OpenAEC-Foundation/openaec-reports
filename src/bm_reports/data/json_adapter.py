@@ -3,8 +3,13 @@
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
+
+SCHEMA_PATH = Path(__file__).parent.parent.parent.parent / "schemas" / "report.schema.json"
 
 
 class JsonAdapter:
@@ -74,7 +79,34 @@ class JsonAdapter:
         return self.data.get("sections", [])
 
     def validate(self) -> list[str]:
-        """Valideer de data structuur.
+        """Valideer data tegen report.schema.json.
+
+        Gebruikt jsonschema voor volledige validatie als beschikbaar.
+        Valt terug op basis checks als jsonschema niet geïnstalleerd is
+        of het schema bestand niet gevonden wordt.
+
+        Returns:
+            Lijst van validatie fouten (leeg = geldig).
+        """
+        try:
+            import jsonschema
+        except ImportError:
+            logger.debug("jsonschema niet beschikbaar, basis validatie gebruikt")
+            return self._validate_basic()
+
+        if not SCHEMA_PATH.exists():
+            logger.debug("Schema bestand niet gevonden: %s", SCHEMA_PATH)
+            return self._validate_basic()
+
+        schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+        validator = jsonschema.Draft7Validator(schema)
+        return [
+            f"{'/'.join(str(p) for p in e.absolute_path)}: {e.message}"
+            for e in validator.iter_errors(self.data)
+        ]
+
+    def _validate_basic(self) -> list[str]:
+        """Basis validatie zonder jsonschema library.
 
         Returns:
             Lijst van validatie fouten (leeg = geldig).
@@ -82,6 +114,6 @@ class JsonAdapter:
         errors = []
         if not self.data.get("project"):
             errors.append("Verplicht veld ontbreekt: 'project'")
-        if not self.data.get("project_number"):
-            errors.append("Verplicht veld ontbreekt: 'project_number'")
+        if not self.data.get("template"):
+            errors.append("Verplicht veld ontbreekt: 'template'")
         return errors

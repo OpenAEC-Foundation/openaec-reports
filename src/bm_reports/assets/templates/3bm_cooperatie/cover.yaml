@@ -1,0 +1,41 @@
+# =============================================================
+# 3BM Cooperatie - Cover Page Template
+# =============================================================
+#
+# 3-lagen aanpak:
+#   1. Projectfoto (of teal placeholder)
+#   2. Stationery overlay PNG (alpha-gat voor foto)
+#   3. Dynamische tekst (rapport type + project naam)
+#
+# Coordinaten: PDF-native (y=0 = onderkant, y_bl = baseline)
+# =============================================================
+
+page:
+  width: 595.3
+  height: 841.9
+  type: cover
+
+photo:
+  x: 55.6
+  y: 161.7
+  width: 484.0
+  height: 560.8
+  fit: cover
+
+overlay:
+  file: 2707_BBLrapportage_v01_1.png
+
+dynamic_fields:
+  rapport_type:
+    x: 54.3
+    y_bl: 120.5
+    font: GothamBold
+    size: 28.9
+    color: "#401246"
+
+  project_naam:
+    x: 55.0
+    y_bl: 78.6
+    font: GothamBook
+    size: 17.8
+    color: "#38BDAB"

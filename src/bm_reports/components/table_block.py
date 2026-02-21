@@ -49,8 +49,8 @@ class TableBlock(Flowable):
 
         style_commands = [
             # Header styling
-            ("BACKGROUND", (0, 0), (-1, 0), HexColor(BM_COLORS.primary)),
-            ("TEXTCOLOR", (0, 0), (-1, 0), HexColor("#FFFFFF")),
+            ("BACKGROUND", (0, 0), (-1, 0), HexColor(BM_COLORS.table_header_bg)),
+            ("TEXTCOLOR", (0, 0), (-1, 0), HexColor(BM_COLORS.table_header_text)),
             ("FONTNAME", (0, 0), (-1, 0), BM_FONTS.heading),
             ("FONTSIZE", (0, 0), (-1, 0), BM_FONTS.body_size),
             # Body styling

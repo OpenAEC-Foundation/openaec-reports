@@ -1,0 +1,326 @@
+brand:
+  name: "3BM Coöperatie"
+  slug: "3bm-cooperatie"
+
+colors:
+  primary: "#401246"
+  secondary: "#38BDAB"
+  text: "#45243D"
+  text_accent: "#56B49B"
+  accent: "#2ECC71"
+  warning: "#E74C3C"
+  text_light: "#7F8C8D"
+  table_header_bg: "#45233C"
+  table_header_text: "#FFFFFF"
+  table_footer_bg: "#55B49B"
+  separator: "#E0D0E8"
+
+fonts:
+  heading: "GothamBold"
+  body: "GothamBook"
+  medium: "GothamMedium"
+  italic: "GothamBookItalic"
+
+logos:
+  main: "logos/3bm-cooperatie.png"
+  tagline: "logos/3bm-cooperatie-tagline.png"
+  white: "logos/3bm-cooperatie-wit.png"
+
+contact:
+  name: "3bm Coöperatie U.A."
+  address: "Wattstraat 17  |  3335 LV Zwijndrecht  |  T. 078 7400 250"
+  website: "3bm.co.nl"
+
+header:
+  height: 0
+  elements: []
+
+footer:
+  height: 17
+  elements:
+    - type: text
+      content: "{page}"
+      x: 188
+      y: 5
+      font: "$body"
+      size: 9.5
+      color: "$text"
+      align: right
+
+styles:
+  Normal:
+    fontName: "GothamBook"
+    fontSize: 9.5
+    leading: 12.0
+    textColor: "#45243D"
+  Heading1:
+    fontName: "GothamBook"
+    fontSize: 18.0
+    leading: 23.4
+    textColor: "#45243D"
+  Heading2:
+    fontName: "GothamBook"
+    fontSize: 13.0
+    leading: 16.9
+    textColor: "#56B49B"
+  Heading3:
+    fontName: "GothamBook"
+    fontSize: 11.0
+    leading: 14.3
+    textColor: "#56B49B"
+
+pages:
+  cover:
+    # Paars vlak (A4 reference coords)
+    purple_rect_y_ref: 218.268
+    purple_rect_h_ref: 623.622
+
+    # Clip-path polygon voor projectfoto (A4 reference coords, PDF y-up)
+    clip_polygon:
+      - [350.809, 159.816]
+      - [383.673, 192.680]
+      - [538.583, 347.589]
+      - [538.583, 519.656]
+      - [386.850, 519.656]
+      - [538.583, 674.565]
+      - [538.583, 723.175]
+      - [56.693, 723.171]
+      - [56.693, 192.680]
+      - [56.697, 159.816]
+
+    # Foto rect (x, y, w, h in A4 reference)
+    photo_rect: [55.636, 161.648, 484.002, 560.753]
+
+    # Logo
+    logo_key: "white"
+    logo_fallback: "main"
+    logo_x_ref: 62
+    logo_y_ref: 775
+    logo_w_ref: 100
+
+    # "Ontdek ons" tekst
+    ontdek_text: "Ontdek ons "
+    ontdek_url: "3bm.co.nl"
+    ontdek_size_ref: 13.0
+    ontdek_y_ref: 788.7
+    ontdek_x_ref: 401.3
+    ontdek_url_x_ref: 477.9
+
+    # Badges
+    badges:
+      - label: "MEEDENKEN"
+        bg_color: "#f0c385"
+        text_color: "#401246"
+        x_ref: 297.64
+        y_ref: 298.82
+        w_ref: 112.05
+        h_ref: 33.97
+      - label: "PRAKTISCH"
+        bg_color: "#37bcab"
+        text_color: "#401246"
+        x_ref: 426.53
+        y_ref: 298.82
+        w_ref: 112.05
+        h_ref: 33.97
+      - label: "BETROUWBAAR"
+        bg_color: "#e1574b"
+        text_color: "#FFFFFF"
+        x_ref: 341.76
+        y_ref: 253.04
+        w_ref: 134.70
+        h_ref: 33.97
+    badge_radius_ref: 17
+    badge_font_size_ref: 10.2
+
+    # Titel
+    title_size_ref: 28.9
+    title_x_ref: 54.28
+    title_y_ref: 93.47
+
+    # Subtitel
+    subtitle_size_ref: 17.8
+    subtitle_x_ref: 55.0
+    subtitle_y_ref: 63.0
+
+  backcover:
+    # Wit polygon (A4 reference coords, PDF y-up)
+    white_polygon:
+      - [0, 0]
+      - [0, 698]
+      - [268, 842]
+      - [432, 842]
+      - [432, 698]
+      - [595, 555]
+      - [595, 320]
+      - [436, 320]
+      - [595, 178]
+      - [595, 0]
+
+    # Paars driehoek
+    purple_triangle:
+      - [0, 842]
+      - [0, 539]
+      - [170, 688]
+      - [170, 842]
+
+    # Logo
+    logo_key: "main"
+    logo_x_ref: 268
+    logo_y_ref: 337
+    logo_w_ref: 170
+
+    # Contactgegevens
+    contact_x_ref: 268
+    contact_y_ref: 185
+    contact_line_h_ref: 20
+    contact_name_size_ref: 11
+    contact_detail_size_ref: 9
+    ontdek_prefix: "Ontdek ons  \u2192  "
+
+  colofon:
+    # Header zone
+    report_type_font: "GothamBold"
+    report_type_size: 22.0
+    report_type_color: "#401246"
+    report_type_x_pt: 70.9
+    report_type_y_pt: 57.3
+    subtitle_font: "GothamBook"
+    subtitle_size: 14.0
+    subtitle_color: "#38BDAB"
+    subtitle_x_pt: 70.9
+    subtitle_y_pt: 86.8
+    # Label kolom
+    label_x_pt: 103
+    value_x_pt: 229
+    # Kleuren
+    first_labels_color: "#401246"
+    other_labels_color: "#38BDAB"
+    value_color: "#401246"
+    # Fonts
+    label_font: "GothamBold"
+    label_size: 10.0
+    value_font: "GothamBook"
+    value_size: 10.0
+    # Scheidingslijnen
+    line_x1_pt: 102
+    line_x2_pt: 420
+    line_stroke_pt: 0.25
+    line_color: "#401146"
+    # Footer (turquoise blok + logo, alleen op colofon)
+    footer_rect: [0, 771, 282, 842]
+    footer_rect_color: "#38BDAB"
+    # Paginanummer op colofon
+    page_num_x_pt: 534
+    page_num_y_pt: 796.3
+    page_num_font: "GothamBook"
+    page_num_size: 9.5
+    page_num_color: "#38BDAB"
+    # Veld volgorde met y_pt posities
+    fields:
+      - {label: "Project", type: "project", y_pt: 320.8}
+      - {label: "In opdracht van", type: "client", y_pt: 368.8}
+      - {type: "line", y_pt: 517}
+      - {label: "Adviseur", type: "author", y_pt: 488.8}
+      - {label: "Toegepaste Normen", type: "norms", y_pt: 524.8}
+      - {type: "line", y_pt: 542}
+      - {label: "Documentgegevens", type: "document_description", y_pt: 548.8}
+      - {type: "line", y_pt: 566}
+      - {label: "Datum rapport", type: "date", y_pt: 572.8}
+      - {type: "line", y_pt: 590}
+      - {label: "Fase in bouwproces", type: "phase", y_pt: 596.8}
+      - {type: "line", y_pt: 614}
+      - {label: "Rapportstatus", type: "status", y_pt: 620.8}
+      - {type: "line", y_pt: 638}
+      - {label: "Documentkenmerk", type: "document_code", y_pt: 644.8}
+
+  toc:
+    title: "Inhoud"
+    title_font: "GothamBook"
+    title_size: 18.0
+    title_color: "#45243D"
+    title_x_pt: 90
+    title_y_pt: 74.9
+    # Level 1 (hoofdstukken)
+    level1_font: "GothamBook"
+    level1_size: 12.0
+    level1_color: "#56B49B"
+    # Level 2 (subsecties)
+    level2_font: "GothamBook"
+    level2_size: 9.5
+    level2_color: "#45243D"
+    # Kolommen
+    number_x_pt: 90
+    text_x_pt: 160.9
+    page_x_pt: 515.4
+    # Spacing
+    chapter_spacing_pt: 39
+    item_spacing_pt: 17
+
+  appendix_divider:
+    bg_color: "#37BCAB"
+    # Paurs blok linksonder
+    purple_rect: [0, 771, 282, 842]
+    purple_color: "#401246"
+    # Bijlage nummer
+    number_font: "GothamBold"
+    number_size: 41.4
+    number_color: "#401246"
+    number_x_pt: 103
+    number_y_pt: 193.9
+    # Titel regels
+    title_font: "GothamBook"
+    title_size: 41.4
+    title_color: "#FFFFFF"
+    title_x_pt: 136.1
+    title_first_y_pt: 262.2
+    title_line_spacing_pt: 66.4
+    # Tagline
+    tagline: "Projecten die inspireren"
+    tagline_font: "GothamBold"
+    tagline_size: 17.9
+    tagline_color: "#401246"
+    tagline_x_pt: 330.5
+    tagline_y_pt: 785.1
+
+stationery:
+  cover:
+    source: ""
+    text_zones: []
+  colofon:
+    source: ""
+    header_footer: "colofon"
+    text_zones: []
+  content:
+    source: ""
+    header_footer: "content"
+    content_frame:
+      x_pt: 90.0
+      y_pt: 38.9
+      width_pt: 451.6
+      height_pt: 746.0
+  toc:
+    source: ""
+    header_footer: "content"
+  appendix_divider:
+    source: ""
+    header_footer: null
+    text_zones: []
+  backcover:
+    source: ""
+    header_footer: null
+    text_zones: []
+
+modules:
+  table:
+    header_bg: "$colors.table_header_bg"
+    header_text_color: "#FFFFFF"
+    body_font: "GothamBook"
+    body_size: 9.0
+    footer_bg: "$colors.table_footer_bg"
+    grid_color: "$colors.separator"
+  calculation:
+    title_color: "$colors.primary"
+    accent_line_color: "$colors.secondary"
+  check:
+    pass_color: "$colors.accent"
+    fail_color: "$colors.warning"

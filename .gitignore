@@ -21,9 +21,13 @@ env/
 
 # Testing
 .pytest_cache/
+pytest-cache-files-*/
 .coverage
 htmlcov/
 .mypy_cache/
+
+# Test output (mockups, vergelijkingen)
+test_output/
 
 # OS
 .DS_Store
@@ -33,6 +37,10 @@ desktop.ini
 # Output
 output/
 *.pdf
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
 
 # Claude Code
 SESSION_STATUS.md

@@ -1,0 +1,470 @@
+# ==============================================================================
+# 3BM Coöperatie — Pixel-perfect template
+# ==============================================================================
+# Geëxtraheerd uit: 2707_BBLrapportage_v01.pdf (BBL rapport)
+# Extractie datum: 2026-02-18
+# Alle coördinaten in PDF y-up systeem (origin = linksonder, A4 = 595.28 x 841.89 pt)
+# ==============================================================================
+
+template:
+  name: "3BM Coöperatie"
+  version: "2.0"
+  source_pdf: "2707_BBLrapportage_v01.pdf"
+  brand: "3bm_cooperatie"
+
+colors:
+  primary: "#401146"          # Donkerpaars (CMYK 0.76/1/0.36/0.43)
+  secondary: "#38bdab"        # Turquoise
+  text_dark: "#45243d"        # Donkerpaars tekst (content pages)
+  text_purple: "#401246"      # Paars tekst
+  badge_gold: "#f0c385"       # Badge MEEDENKEN
+  badge_turquoise: "#37bcab"  # Badge PRAKTISCH
+  badge_coral: "#e1574b"      # Badge BETROUWBAAR
+  badge_icon_dark: "#2d0435"  # Badge icoon kleur
+  footer_purple: "#4d2651"    # Achterpagina tekst kleur
+  separator: "#E0D0E8"        # Lichte scheidingslijnen
+
+fonts:
+  heading: "GothamBold"       # Titels, labels
+  body: "GothamBook"          # Lopende tekst, waarden
+  medium: "GothamMedium"      # Website tekst, badges
+  body_italic: "Gotham-BookItalic"
+  # Fallbacks als Gotham niet beschikbaar:
+  heading_fb: "Helvetica-Bold"
+  body_fb: "Helvetica"
+  medium_fb: "Helvetica"
+
+# ==============================================================================
+# PAGINA TYPES
+# ==============================================================================
+
+pages:
+
+  # ============================================================
+  # COVER — Voorpagina met hero foto
+  # ============================================================
+  cover:
+    source_page: 0
+    layers:
+      # 1. Paarse achtergrond (bovenste 74% van pagina)
+      - type: rect
+        role: background
+        static: true
+        x: 0
+        y: 218.27
+        w: 595.28
+        h: 623.62
+        fill: "$colors.primary"
+
+      # 2. Hero foto met clip-path
+      - type: clipped_image
+        role: hero_photo
+        static: false
+        bind: "cover.image"
+        image_rect:
+          x: 55.64
+          y: 161.65
+          w: 484.00
+          h: 560.75
+        clip_polygon:
+          - [350.81, 159.82]
+          - [383.67, 192.68]
+          - [538.58, 347.59]
+          - [538.58, 519.66]
+          - [386.85, 519.66]
+          - [538.58, 674.57]
+          - [538.58, 723.18]
+          - [56.69, 723.17]
+          - [56.69, 192.68]
+          - [56.70, 159.82]
+
+      # 3. Wit logo linksboven in paars vlak
+      - type: image
+        role: logo
+        static: true
+        source: "logos/3bm-cooperatie-wit.png"
+        x: 62
+        y: 775
+        w: 100
+
+      # 4. "Ontdek ons 3bm.co.nl" tekst rechtsboven
+      - type: text_block
+        role: website_label
+        static: true
+        spans:
+          - content: "Ontdek ons "
+            font: "$fonts.medium"
+            size: 13.0
+            color: "white"
+            x: 401.3
+            y: 788.7
+          - content: "3bm.co.nl"
+            font: "$fonts.medium"
+            size: 13.0
+            color: "$colors.secondary"
+            x: 477.9
+            y: 788.7
+
+      # 5. Keyword badges
+      - type: badge_group
+        role: keywords
+        static: true
+        badges:
+          - text: "MEEDENKEN"
+            fill: "$colors.badge_gold"
+            text_color: "$colors.primary"
+            rect: [297.64, 298.82, 112.05, 33.97]
+            radius: 17
+            font: "$fonts.medium"
+            font_size: 10.2
+          - text: "PRAKTISCH"
+            fill: "$colors.badge_turquoise"
+            text_color: "$colors.primary"
+            rect: [426.53, 298.82, 112.05, 33.97]
+            radius: 17
+            font: "$fonts.medium"
+            font_size: 10.2
+          - text: "BETROUWBAAR"
+            fill: "$colors.badge_coral"
+            text_color: "white"
+            rect: [341.76, 253.04, 134.70, 33.97]
+            radius: 17
+            font: "$fonts.medium"
+            font_size: 10.2
+
+      # 6. Rapport titel (dynamisch)
+      - type: text
+        role: title
+        static: false
+        bind: "project"
+        font: "$fonts.heading"
+        size: 28.9
+        color: "$colors.primary"
+        x: 54.28
+        y: 93.47
+
+      # 7. Ondertitel (dynamisch)
+      - type: text
+        role: subtitle
+        static: false
+        bind: "cover.subtitle"
+        font: "$fonts.body"
+        size: 17.8
+        color: "$colors.secondary"
+        x: 55.0
+        y: 63.0
+
+  # ============================================================
+  # COLOFON — Projectinformatie pagina
+  # ============================================================
+  colofon:
+    source_page: 1
+    layers:
+      # 1. Rapport titel bovenaan
+      - type: text
+        role: title
+        static: false
+        bind: "project"
+        font: "$fonts.heading"
+        size: 22.0
+        color: "$colors.primary"
+        x: 70.9
+        y: 760.3
+
+      # 2. Ondertitel
+      - type: text
+        role: subtitle
+        static: false
+        bind: "cover.subtitle"
+        font: "$fonts.body"
+        size: 14.0
+        color: "$colors.secondary"
+        x: 70.9
+        y: 740.0
+
+      # 3. Metadata tabel
+      - type: table
+        role: project_info
+        static: false
+        y_start: 521.1
+        col1_x: 103.0
+        col2_x: 229.1
+        row_height: 24.0
+        label_font: "$fonts.heading"
+        label_size: 10.0
+        label_color: "$colors.primary"
+        value_font: "$fonts.body"
+        value_size: 10.0
+        value_color: "$colors.primary"
+        separator_color: "$colors.separator"
+        separator_width: 0.3
+        separator_x_end: 419.8
+        rows:
+          - label: "Project"
+            bind: "colofon.project_description"
+          - label: "In opdracht van"
+            bind: "colofon.client_block"
+
+      # 4. Adviseur sectie (turquoise labels)
+      - type: table
+        role: advisor_info
+        static: false
+        y_start: 353.1
+        col1_x: 103.0
+        col2_x: 229.1
+        row_height: 24.0
+        label_font: "$fonts.heading"
+        label_size: 10.0
+        label_color: "$colors.secondary"
+        value_font: "$fonts.body"
+        value_size: 10.0
+        value_color: "$colors.primary"
+        separator_color: "$colors.separator"
+        separator_width: 0.3
+        separator_x_end: 419.8
+        rows:
+          - label: "Adviseur"
+            bind: "colofon.advisor"
+          - label: "Toegepaste Normen"
+            bind: "colofon.norms"
+          - label: "Documentgegevens"
+            bind: "colofon.document_info"
+          - label: "Datum rapport"
+            bind: "colofon.date"
+          - label: "Fase in bouwproces"
+            bind: "colofon.phase"
+          - label: "Rapportstatus"
+            bind: "colofon.status"
+          - label: "Documentkenmerk"
+            bind: "colofon.document_code"
+
+      # 5. Footer balk linksonder (turquoise)
+      - type: rect
+        role: footer_bar
+        static: true
+        x: 0
+        y: 0
+        w: 281.2
+        h: 70.3
+        fill: "$colors.badge_turquoise"
+
+      # 6. Paginanummer
+      - type: page_number
+        role: page_number
+        static: false
+        x: 538.6
+        y: 35.7
+        font: "$fonts.heading"
+        size: 8.0
+        color: "$colors.secondary"
+        align: right
+
+  # ============================================================
+  # CONTENT — Standaard inhoudspagina's (header/footer + content frame)
+  # ============================================================
+  content:
+    source_page: 2
+    content_frame:
+      x: 56.69
+      y: 48.0
+      w: 481.89
+      h: 746.0
+    layers:
+      # 1. Paginanummer rechtsonder
+      - type: page_number
+        role: page_number
+        static: false
+        x: 541.6
+        y: 35.7
+        font: "$fonts.body"
+        size: 9.5
+        color: "$colors.text_dark"
+        align: right
+
+  # ============================================================
+  # TOC — Inhoudsopgave
+  # ============================================================
+  toc:
+    source_page: 2
+    content_frame:
+      x: 56.69
+      y: 48.0
+      w: 481.89
+      h: 700.0
+    layers:
+      # 1. Titel "Inhoud"
+      - type: text
+        role: toc_title
+        static: true
+        content: "Inhoud"
+        font: "$fonts.body"
+        size: 18.0
+        color: "$colors.text_dark"
+        x: 90.0
+        y: 749.0
+
+      # 2. Paginanummer
+      - type: page_number
+        role: page_number
+        static: false
+        x: 541.6
+        y: 35.7
+        font: "$fonts.body"
+        size: 9.5
+        color: "$colors.text_dark"
+        align: right
+
+  # ============================================================
+  # BIJLAGE — Bijlage scheidingspagina
+  # ============================================================
+  appendix_divider:
+    source_page: 20
+    layers:
+      # 1. Turquoise achtergrond (gehele pagina)
+      - type: rect
+        role: background
+        static: true
+        x: 0
+        y: 0
+        w: 595.28
+        h: 841.89
+        fill: "$colors.badge_turquoise"
+
+      # 2. Bijlage nummer (dynamisch, groot paars)
+      - type: text
+        role: appendix_label
+        static: false
+        bind: "appendix.label"
+        font: "$fonts.heading"
+        size: 41.4
+        color: "$colors.primary"
+        x: 103.0
+        y: 602.3
+
+      # 3. Bijlage titel (dynamisch, groot wit)
+      - type: text
+        role: appendix_title
+        static: false
+        bind: "appendix.title_line1"
+        font: "$fonts.body"
+        size: 41.4
+        color: "white"
+        x: 136.1
+        y: 535.2
+
+      # 4. Bijlage titel regel 2
+      - type: text
+        role: appendix_title_2
+        static: false
+        bind: "appendix.title_line2"
+        font: "$fonts.body"
+        size: 41.4
+        color: "white"
+        x: 136.1
+        y: 469.0
+
+      # 5. Paarse footer balk linksonder
+      - type: rect
+        role: footer_bar
+        static: true
+        x: 0
+        y: 0
+        w: 281.2
+        h: 70.3
+        fill: "$colors.primary"
+
+      # 6. Tagline rechtsonder
+      - type: text
+        role: tagline
+        static: true
+        content: "Projecten die inspireren"
+        font: "$fonts.heading"
+        size: 17.9
+        color: "$colors.primary"
+        x: 330.5
+        y: 36.9
+
+  # ============================================================
+  # BACKCOVER — Achterpagina
+  # ============================================================
+  backcover:
+    source_page: 35
+    layers:
+      # 1. Turquoise achtergrond (bovenste deel)
+      - type: rect
+        role: turquoise_bg
+        static: true
+        x: 0.73
+        y: 91.19
+        w: 594.55
+        h: 750.70
+        fill: "$colors.badge_turquoise"
+
+      # 2. Paars vlak linksboven
+      - type: rect
+        role: purple_corner
+        static: true
+        x: 0
+        y: 539.0
+        w: 170.1
+        h: 302.9
+        fill: "$colors.primary"
+
+      # 3. 3BM logo (kleur variant) midden op pagina
+      - type: image
+        role: logo
+        static: true
+        source: "logos/3bm-cooperatie.png"
+        x: 128
+        y: 377
+        w: 340
+
+      # 4. Footer balk
+      - type: rect
+        role: footer_area
+        static: true
+        x: 0
+        y: 0
+        w: 595.28
+        h: 91.19
+        fill: "white"
+
+      # 5. Bedrijfsnaam
+      - type: text
+        role: company_name
+        static: true
+        content: "3bm Coöperatie U.A."
+        font: "$fonts.heading"
+        size: 8.0
+        color: "$colors.footer_purple"
+        x: 36.0
+        y: 53.9
+
+      # 6. Adresgegevens
+      - type: text
+        role: address
+        static: true
+        content: "Wattstraat 17  |  3335 LV Zwijndrecht  |  T. 078 7400 250"
+        font: "$fonts.body"
+        size: 8.0
+        color: "$colors.footer_purple"
+        x: 36.0
+        y: 43.3
+
+      # 7. "Ontdek ons 3bm.co.nl"
+      - type: text_block
+        role: website
+        static: true
+        spans:
+          - content: "Ontdek ons "
+            font: "$fonts.medium"
+            size: 12.9
+            color: "$colors.primary"
+            x: 422.1
+            y: 47.9
+          - content: "3bm.co.nl"
+            font: "$fonts.medium"
+            size: 12.9
+            color: "white"
+            x: 498.1
+            y: 47.9

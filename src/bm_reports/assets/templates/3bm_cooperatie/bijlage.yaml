@@ -1,0 +1,30 @@
+# =============================================================
+# 3BM Cooperatie - Bijlage Divider Template
+# =============================================================
+#
+# Achtergrond: bijlagen.pdf (teal vlak + paarse balk + tagline)
+# Dynamisch: bijlage nummer + titel (multiline)
+# =============================================================
+
+page:
+  type: bijlage_divider
+  width: 595.3
+  height: 841.9
+  background: bijlagen.pdf
+
+dynamic_fields:
+  nummer:
+    x: 103.0
+    y_td: 193.9
+    font: GothamBold
+    size: 41.4
+    color: "#401246"
+
+  titel:
+    x: 136.1
+    y_td: 262.2
+    font: GothamBook
+    size: 20.0
+    color: "#FFFFFF"
+    line_height: 32.0
+    multiline: true

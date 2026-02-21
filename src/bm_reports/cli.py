@@ -36,6 +36,54 @@ def main():
     val_parser = subparsers.add_parser("validate", help="Valideer data bestand")
     val_parser.add_argument("--data", "-d", required=True, help="JSON data bestand")
 
+    # Serve command
+    serve_parser = subparsers.add_parser("serve", help="Start API server")
+    serve_parser.add_argument("--host", default="0.0.0.0", help="Host adres")
+    serve_parser.add_argument("--port", "-p", type=int, default=8000, help="Poort")
+    serve_parser.add_argument("--reload", action="store_true", default=False, help="Auto-reload")
+
+    # Analyze brand command
+    ab_parser = subparsers.add_parser("analyze-brand", help="Analyseer brand uit referentie-PDF")
+    ab_parser.add_argument("pdf", help="Pad naar referentie-PDF")
+    ab_parser.add_argument("--output-dir", "-o", default="./brand_analysis", help="Output directory")
+    ab_parser.add_argument("--brand-name", default="Brand", help="Brand weergavenaam")
+    ab_parser.add_argument("--brand-slug", default="brand", help="Brand slug")
+    ab_parser.add_argument("--dpi", type=int, default=150, help="DPI voor pagina renders")
+
+    # Build brand command
+    bb_parser = subparsers.add_parser("build-brand", help="Genereer complete brand directory")
+    bb_parser.add_argument("--rapport", "-r", required=True, help="Pad naar referentie-rapport PDF")
+    bb_parser.add_argument("--stamkaart", "-s", help="Pad naar stamkaart PDF")
+    bb_parser.add_argument("--briefpapier", "-b", help="Pad naar briefpapier PDF")
+    bb_parser.add_argument("--logos", "-l", help="Pad naar logo directory")
+    bb_parser.add_argument("--fonts", help="Pad naar fonts directory")
+    bb_parser.add_argument("--base-brand", help="Pad naar bestaande brand directory (voor varianten)")
+    bb_parser.add_argument("--name", required=True, help="Brand weergavenaam")
+    bb_parser.add_argument("--slug", required=True, help="Brand slug (machine-leesbaar)")
+    bb_parser.add_argument("--output", "-o", required=True, help="Output directory")
+    bb_parser.add_argument("--dpi", type=int, default=150, help="DPI voor pagina renders")
+
+    # Extract layout command
+    el_parser = subparsers.add_parser(
+        "extract-layout", help="Extraheer layout uit referentie-PDF"
+    )
+    el_parser.add_argument("pdf", help="Pad naar referentie-PDF")
+    el_parser.add_argument(
+        "--output", "-o", default="./extracted", help="Output directory"
+    )
+    el_parser.add_argument("--dpi", type=int, default=150, help="DPI voor renders")
+
+    # Visual diff command
+    vd_parser = subparsers.add_parser(
+        "visual-diff", help="Vergelijk gegenereerde PDF met referentie"
+    )
+    vd_parser.add_argument("generated", help="Pad naar gegenereerde PDF")
+    vd_parser.add_argument("reference", help="Pad naar referentie PDF")
+    vd_parser.add_argument(
+        "--output", "-o", default="./diffs", help="Output directory voor diff images"
+    )
+    vd_parser.add_argument("--dpi", type=int, default=150, help="Render DPI")
+
     args = parser.parse_args()
 
     if args.command is None:
@@ -48,6 +96,16 @@ def main():
         _cmd_templates(args)
     elif args.command == "validate":
         _cmd_validate(args)
+    elif args.command == "serve":
+        _cmd_serve(args)
+    elif args.command == "analyze-brand":
+        _cmd_analyze_brand(args)
+    elif args.command == "build-brand":
+        _cmd_build_brand(args)
+    elif args.command == "extract-layout":
+        _cmd_extract_layout(args)
+    elif args.command == "visual-diff":
+        _cmd_visual_diff(args)
 
 
 def _cmd_generate(args):
@@ -62,7 +120,7 @@ def _cmd_generate(args):
     print(f"  Data: {args.data}")
     print(f"  Formaat: {args.format}")
 
-    report = Report.from_json(args.data, template=args.template)
+    report = Report.from_json(args.data)
     output = report.build(args.output)
     print(f"  ✓ Rapport gegenereerd: {output}")
 
@@ -93,6 +151,145 @@ def _cmd_validate(args):
         sys.exit(1)
     else:
         print("✓ Data is geldig.")
+
+
+def _cmd_analyze_brand(args):
+    """Analyseer brand uit referentie-PDF."""
+    from bm_reports.tools import (
+        extract_pdf,
+        classify_pages,
+        analyze_brand,
+        generate_brand_yaml,
+        generate_analysis_report,
+    )
+
+    pdf_path = Path(args.pdf)
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    pages_dir = output_dir / "pages"
+
+    print(f"Analyseer: {pdf_path}")
+    print(f"  Output: {output_dir}")
+
+    # Stap 1: Extractie
+    print("  [1/5] PDF extractie...")
+    pages = extract_pdf(pdf_path, pages_dir, dpi=args.dpi)
+    page_images = [p.page_image_path for p in pages if p.page_image_path]
+    print(f"         {len(pages)} pagina's geëxtraheerd")
+
+    # Stap 2: Classificatie
+    print("  [2/5] Pagina classificatie...")
+    classified = classify_pages(pages)
+    for cp in classified:
+        if cp.page_type.value != "content":
+            print(f"         p{cp.page.page_number}: {cp.page_type.value} ({cp.confidence:.0%})")
+
+    # Stap 3: Patroon detectie
+    print("  [3/5] Patroon detectie...")
+    analysis = analyze_brand(classified, str(pdf_path), page_images)
+
+    # Stap 4: YAML generatie
+    print("  [4/5] Brand YAML generatie...")
+    yaml_str = generate_brand_yaml(analysis, args.brand_name, args.brand_slug)
+    yaml_path = output_dir / f"{args.brand_slug}.yaml"
+    yaml_path.write_text(yaml_str, encoding="utf-8")
+    print(f"         {yaml_path}")
+
+    # Stap 5: Rapport
+    print("  [5/5] Analyse rapport...")
+    report_str = generate_analysis_report(analysis)
+    report_path = output_dir / "analysis_report.md"
+    report_path.write_text(report_str, encoding="utf-8")
+    print(f"         {report_path}")
+
+    # Samenvatting
+    print()
+    print("Samenvatting:")
+    print(f"  Kleuren: {analysis.colors}")
+    print(f"  Fonts:   {analysis.fonts}")
+    print(f"  Marges:  {analysis.margins_mm}")
+    print(f"  Footer:  {analysis.footer_zone.get('height_mm', 0)}mm")
+    if analysis.styles:
+        for name, style in analysis.styles.items():
+            print(f"  {name}: {style.get('font', '?')} {style.get('size', '?')}pt")
+
+
+def _cmd_serve(args):
+    """Start de FastAPI server."""
+    import uvicorn
+
+    print(f"3BM Report API server op http://{args.host}:{args.port}")
+    print(f"  Docs: http://localhost:{args.port}/docs")
+    uvicorn.run(
+        "bm_reports.api:app",
+        host=args.host,
+        port=args.port,
+        reload=args.reload,
+    )
+
+
+def _cmd_build_brand(args):
+    """Genereer complete brand directory."""
+    from bm_reports.tools.brand_builder import BrandBuilder
+
+    builder = BrandBuilder(
+        output_dir=Path(args.output),
+        brand_name=args.name,
+        brand_slug=args.slug,
+    )
+
+    result = builder.build(
+        referentie_rapport=Path(args.rapport),
+        stamkaart=Path(args.stamkaart) if args.stamkaart else None,
+        briefpapier=Path(args.briefpapier) if args.briefpapier else None,
+        logo_dir=Path(args.logos) if args.logos else None,
+        font_dir=Path(args.fonts) if args.fonts else None,
+        base_brand=Path(args.base_brand) if args.base_brand else None,
+        dpi=args.dpi,
+    )
+
+    print(f"Brand directory gegenereerd: {result}")
+
+
+def _cmd_extract_layout(args):
+    """Extraheer volledige layout uit een referentie-PDF."""
+    from bm_reports.tools.pdf_extractor import extract_pdf
+    from bm_reports.tools.page_classifier import classify_pages
+    from bm_reports.tools.layout_extractor import extract_page_layouts
+
+    pdf_path = Path(args.pdf)
+    output_dir = Path(args.output)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    print(f"Extraheer layout uit: {pdf_path}")
+    pages = extract_pdf(pdf_path, output_dir / "pages", dpi=args.dpi)
+    classified = classify_pages(pages)
+    layouts = extract_page_layouts(classified)
+
+    for page_type, layout in layouts.items():
+        print(f"\n{page_type.value.upper()} (pagina {layout.page_number}):")
+        print(f"  Statische elementen: {len(layout.static_elements)}")
+        print(f"  Tekst zones: {len(layout.text_zones)}")
+        print(f"  Badges: {len(layout.badges)}")
+        if layout.clip_polygon:
+            print(f"  Clip polygon: {len(layout.clip_polygon)} punten")
+        if layout.photo_rect:
+            print(f"  Photo rect: {layout.photo_rect}")
+
+    print(f"\nLayout extractie voltooid: {len(layouts)} pagina-types")
+
+
+def _cmd_visual_diff(args):
+    """Vergelijk gegenereerde PDF met referentie."""
+    from bm_reports.tools.visual_diff import compare_pdfs, print_diff_report
+
+    generated = Path(args.generated)
+    reference = Path(args.reference)
+    output_dir = Path(args.output)
+
+    print(f"Vergelijk: {generated.name} vs {reference.name}")
+    diffs = compare_pdfs(generated, reference, output_dir, dpi=args.dpi)
+    print_diff_report(diffs)
 
 
 if __name__ == "__main__":

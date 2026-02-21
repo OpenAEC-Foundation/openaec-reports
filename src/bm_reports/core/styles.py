@@ -1,32 +1,58 @@
 """Huisstijl definities — kleuren, fonts, spacing, paragraph styles."""
 
-from dataclasses import dataclass
-from reportlab.lib.colors import HexColor
-from reportlab.lib.styles import StyleSheet1, ParagraphStyle
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
+from __future__ import annotations
 
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+from reportlab.lib.colors import HexColor
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib.styles import ParagraphStyle, StyleSheet1
+
+# Registreer custom fonts bij import (graceful fallback naar Helvetica)
+from bm_reports.core.fonts import get_font_name, register_fonts
+
+if TYPE_CHECKING:
+    from bm_reports.core.brand import BrandConfig
+
+_font_map = register_fonts()
 
 # ============================================================
 # 3BM Huisstijl Kleuren
 # ============================================================
-# TODO: Vervang met daadwerkelijke 3BM huisstijl kleuren
 
 @dataclass(frozen=True)
 class Colors:
     """3BM Huisstijl kleurenpalet."""
 
-    primary: str = "#1B3A5C"       # Donkerblauw
-    secondary: str = "#4A90A4"     # Middenblauw
+    primary: str = "#401246"       # Donkerpaars (3BM huisstijl)
+    secondary: str = "#38BDAB"     # Turquoise (3BM huisstijl)
     accent: str = "#2ECC71"        # Groen (voldoet)
     warning: str = "#E74C3C"       # Rood (voldoet niet)
-    text: str = "#2C3E50"          # Donkergrijs
+    text: str = "#45243D"          # Donkerpaars tekst
+    text_accent: str = "#56B49B"   # H2/H3 headings, TOC level 1
     text_light: str = "#7F8C8D"    # Lichtgrijs
     background: str = "#FFFFFF"    # Wit
     background_alt: str = "#F8F9FA"  # Lichtgrijs achtergrond
     rule: str = "#BDC3C7"          # Lijn kleur
+    table_header_bg: str = "#45233C"   # Tabel header achtergrond
+    table_header_text: str = "#FFFFFF"  # Tabel header tekst
+    table_footer_bg: str = "#55B49B"   # Tabel footer/totaal rij
+    separator: str = "#E0D0E8"     # Scheidingslijnen
 
     def as_hex(self, name: str) -> HexColor:
-        """Retourneer kleur als ReportLab HexColor."""
+        """Retourneer kleur als ReportLab HexColor.
+
+        Args:
+            name: Kleurnaam (bijv. 'primary', 'text_light').
+        """
+        return HexColor(getattr(self, name))
+
+    def hex(self, name: str) -> HexColor:
+        """Shortcut voor as_hex() — retourneer kleur als ReportLab HexColor.
+
+        Gebruik: BM_COLORS.hex('primary') in plaats van HexColor(BM_COLORS.primary).
+        """
         return HexColor(getattr(self, name))
 
 
@@ -36,32 +62,54 @@ BM_COLORS = Colors()
 # ============================================================
 # Font Configuratie
 # ============================================================
-# TODO: Registreer custom fonts (bijv. eigen huisstijl font)
 
 @dataclass(frozen=True)
 class FontConfig:
-    """Font configuratie."""
+    """Font configuratie.
 
-    heading: str = "Helvetica-Bold"
-    body: str = "Helvetica"
+    Gebruikt Gotham fonts als ze beschikbaar zijn in assets/fonts/.
+    Valt automatisch terug op Helvetica als Gotham niet geïnstalleerd is.
+    """
+
+    heading: str = "GothamBold"       # Fallback: Helvetica-Bold
+    body: str = "GothamBook"          # Fallback: Helvetica
+    medium: str = "GothamMedium"      # Fallback: Helvetica
+    italic: str = "GothamBookItalic"  # Fallback: Helvetica-Oblique
     mono: str = "Courier"
-    body_size: float = 9.0
-    heading1_size: float = 16.0
+    body_size: float = 9.5
+    heading1_size: float = 18.0
     heading2_size: float = 13.0
     heading3_size: float = 11.0
     caption_size: float = 8.0
     footer_size: float = 7.5
 
 
-BM_FONTS = FontConfig()
+def _make_font_config() -> FontConfig:
+    """Maak FontConfig met effectieve font namen (Gotham of Helvetica fallback)."""
+    return FontConfig(
+        heading=get_font_name("GothamBold"),
+        body=get_font_name("GothamBook"),
+        medium=get_font_name("GothamMedium"),
+        italic=get_font_name("GothamBookItalic"),
+    )
+
+
+BM_FONTS = _make_font_config()
 
 
 # ============================================================
 # Stylesheet
 # ============================================================
 
-def create_stylesheet() -> StyleSheet1:
-    """Maak de 3BM stylesheet met alle paragraph styles."""
+def create_stylesheet(brand: BrandConfig | None = None) -> StyleSheet1:
+    """Maak de 3BM stylesheet, optioneel met brand-specifieke overrides.
+
+    Args:
+        brand: Optionele brand configuratie met style overrides.
+
+    Returns:
+        StyleSheet1 met alle paragraph styles.
+    """
     styles = StyleSheet1()
 
     styles.add(ParagraphStyle(
@@ -77,10 +125,10 @@ def create_stylesheet() -> StyleSheet1:
     styles.add(ParagraphStyle(
         name="Heading1",
         parent=styles["Normal"],
-        fontName=BM_FONTS.heading,
+        fontName=BM_FONTS.body,            # GothamBook, NIET Bold
         fontSize=BM_FONTS.heading1_size,
         leading=BM_FONTS.heading1_size * 1.3,
-        textColor=HexColor(BM_COLORS.primary),
+        textColor=HexColor(BM_COLORS.text),  # text kleur, NIET primary
         spaceBefore=12,
         spaceAfter=6,
     ))
@@ -88,10 +136,10 @@ def create_stylesheet() -> StyleSheet1:
     styles.add(ParagraphStyle(
         name="Heading2",
         parent=styles["Normal"],
-        fontName=BM_FONTS.heading,
+        fontName=BM_FONTS.body,            # GothamBook
         fontSize=BM_FONTS.heading2_size,
         leading=BM_FONTS.heading2_size * 1.3,
-        textColor=HexColor(BM_COLORS.primary),
+        textColor=HexColor(BM_COLORS.text_accent),  # turquoise
         spaceBefore=10,
         spaceAfter=4,
     ))
@@ -99,10 +147,10 @@ def create_stylesheet() -> StyleSheet1:
     styles.add(ParagraphStyle(
         name="Heading3",
         parent=styles["Normal"],
-        fontName=BM_FONTS.heading,
+        fontName=BM_FONTS.body,            # GothamBook
         fontSize=BM_FONTS.heading3_size,
         leading=BM_FONTS.heading3_size * 1.3,
-        textColor=HexColor(BM_COLORS.secondary),
+        textColor=HexColor(BM_COLORS.text_accent),  # turquoise
         spaceBefore=8,
         spaceAfter=3,
     ))
@@ -141,6 +189,18 @@ def create_stylesheet() -> StyleSheet1:
         textColor=HexColor(BM_COLORS.secondary),
         alignment=TA_LEFT,
     ))
+
+    # Brand style overrides toepassen
+    if brand and brand.styles:
+        for style_name, overrides in brand.styles.items():
+            if style_name in styles.byName:
+                style = styles[style_name]
+                for attr, value in overrides.items():
+                    if attr == "textColor":
+                        value = HexColor(value)
+                    elif attr == "fontName":
+                        value = get_font_name(value)
+                    setattr(style, attr, value)
 
     return styles
 

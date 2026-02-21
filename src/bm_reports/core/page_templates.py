@@ -2,86 +2,67 @@
 
 from __future__ import annotations
 
-from reportlab.platypus import PageTemplate, Frame
-from reportlab.lib.units import mm
+from pathlib import Path
 
-from bm_reports.core.document import DocumentConfig, MM_TO_PT
-from bm_reports.core.styles import BM_COLORS, BM_FONTS
+from reportlab.lib.colors import HexColor
+from reportlab.platypus import Frame, PageTemplate
 
+from bm_reports.core.brand import BrandConfig, BrandLoader
+from bm_reports.core.brand_renderer import BrandRenderer
+from bm_reports.core.document import MM_TO_PT, DocumentConfig
+from bm_reports.core.fonts import get_font_name
+from bm_reports.core.special_pages import (
+    draw_appendix_divider_page,
+    draw_backcover_page,
+    draw_colofon_page,
+    draw_cover_page,
+)
+from bm_reports.core.stationery import StationeryRenderer
 
-def _draw_header(canvas, doc, config: DocumentConfig):
-    """Teken header op content pagina's."""
-    canvas.saveState()
-
-    page_width = config.format.width_pt
-    margin_left = config.margins.left_pt
-    margin_right = config.margins.right_pt
-    header_y = config.format.height_pt - config.margins.top_pt + 5
-
-    # Projectinfo links
-    canvas.setFont(BM_FONTS.body, 7.5)
-    canvas.setFillColor(config.format.width_pt and BM_COLORS.text_light or BM_COLORS.text_light)
-    text = f"{config.project_number} | {config.project}"
-    canvas.drawString(margin_left, header_y, text)
-
-    # Horizontale lijn
-    line_y = header_y - 3
-    canvas.setStrokeColor(BM_COLORS.rule)
-    canvas.setLineWidth(0.5)
-    canvas.line(margin_left, line_y, page_width - margin_right, line_y)
-
-    canvas.restoreState()
+# Assets directory voor afbeeldingen in brand elementen
+ASSETS_DIR = Path(__file__).parent.parent / "assets"
 
 
-def _draw_footer(canvas, doc, config: DocumentConfig):
-    """Teken footer op content pagina's."""
-    canvas.saveState()
-
-    page_width = config.format.width_pt
-    margin_left = config.margins.left_pt
-    margin_right = config.margins.right_pt
-    footer_y = config.margins.bottom_pt - 5
-
-    # Horizontale lijn
-    line_y = footer_y + 10
-    canvas.setStrokeColor(BM_COLORS.rule)
-    canvas.setLineWidth(0.5)
-    canvas.line(margin_left, line_y, page_width - margin_right, line_y)
-
-    # Bedrijfsnaam links
-    canvas.setFont(BM_FONTS.body, 7)
-    canvas.setFillColor(BM_COLORS.text_light)
-    canvas.drawString(margin_left, footer_y, config.author)
-
-    # Paginanummer rechts
-    page_num = canvas.getPageNumber()
-    canvas.drawRightString(
-        page_width - margin_right,
-        footer_y,
-        f"Pagina {page_num}",
-    )
-
-    canvas.restoreState()
-
-
-def create_page_templates(config: DocumentConfig) -> list[PageTemplate]:
+def create_page_templates(
+    config: DocumentConfig,
+    brand: BrandConfig | None = None,
+    colofon_data: dict | None = None,
+    cover_image: str | Path | None = None,
+) -> list[PageTemplate]:
     """Maak PageTemplates voor het document.
 
+    Elke pagina volgt het 3-lagenmodel:
+    1. Stationery achtergrond (optioneel PDF/PNG)
+    2. Header/footer
+    3. Dynamische content
+
+    Args:
+        config: Document configuratie.
+        brand: Optionele brand configuratie. Laadt default als None.
+        colofon_data: Extra gegevens voor de colofon pagina.
+        cover_image: Optioneel pad naar projectfoto voor cover.
+
     Returns:
-        Lijst met templates: [cover, content, backcover].
+        Lijst met templates: [cover, colofon, content, appendix_divider, backcover].
     """
-    page_w = config.format.width_pt
-    page_h = config.format.height_pt
+    if brand is None:
+        brand = BrandLoader().load_default()
+
+    renderer = BrandRenderer(brand, assets_dir=ASSETS_DIR)
+    stationery = StationeryRenderer(brand_dir=brand.brand_dir)
+
+    page_w = config.effective_width_pt
+    page_h = config.effective_height_pt
     ml = config.margins.left_pt
     mr = config.margins.right_pt
     mt = config.margins.top_pt
     mb = config.margins.bottom_pt
 
-    # Header en footer ruimte (in points)
-    header_h = 15 * MM_TO_PT
-    footer_h = 12 * MM_TO_PT
+    # Header en footer ruimte uit brand config (in points)
+    header_h = brand.header.height * MM_TO_PT
+    footer_h = brand.footer.height * MM_TO_PT
 
-    # Cover: volledig pagina frame, geen header/footer
+    # Cover: volledig pagina frame
     cover_frame = Frame(
         ml, mb, page_w - ml - mr, page_h - mt - mb,
         id="cover_frame",
@@ -89,24 +70,58 @@ def create_page_templates(config: DocumentConfig) -> list[PageTemplate]:
     cover_template = PageTemplate(
         id="cover",
         frames=[cover_frame],
-        # Geen onPage callback = geen header/footer
+        onPage=lambda c, d: _on_page_cover(c, d, config, brand, stationery, cover_image),
+    )
+
+    # Colofon: volledig pagina frame
+    colofon_frame = Frame(
+        ml, mb, page_w - ml - mr, page_h - mt - mb,
+        id="colofon_frame",
+    )
+    colofon_template = PageTemplate(
+        id="colofon",
+        frames=[colofon_frame],
+        onPage=lambda c, d: _on_page_colofon(c, d, config, brand, stationery, colofon_data),
     )
 
     # Content: frame met ruimte voor header en footer
-    content_frame = Frame(
-        ml,
-        mb + footer_h,
-        page_w - ml - mr,
-        page_h - mt - mb - header_h - footer_h,
-        id="content_frame",
-    )
+    # Gebruik brand stationery content_frame als beschikbaar
+    content_spec = brand.stationery.get("content")
+    if content_spec and content_spec.content_frame:
+        cf = content_spec.content_frame
+        content_frame = Frame(
+            cf["x_pt"],
+            cf.get("y_pt", mb),
+            cf["width_pt"],
+            cf["height_pt"],
+            id="content_frame",
+        )
+    else:
+        content_frame = Frame(
+            ml,
+            mb + footer_h,
+            page_w - ml - mr,
+            page_h - mt - mb - header_h - footer_h,
+            id="content_frame",
+        )
     content_template = PageTemplate(
         id="content",
         frames=[content_frame],
-        onPage=lambda canvas, doc: _on_content_page(canvas, doc, config),
+        onPage=lambda c, d: _on_page_content(c, d, config, brand, renderer, stationery),
     )
 
-    # Achterblad: volledig pagina frame, geen header/footer
+    # Bijlage divider: volledig pagina frame
+    appendix_frame = Frame(
+        ml, mb, page_w - ml - mr, page_h - mt - mb,
+        id="appendix_frame",
+    )
+    appendix_template = PageTemplate(
+        id="appendix_divider",
+        frames=[appendix_frame],
+        onPage=lambda c, d: _on_page_appendix(c, d, config, brand, stationery),
+    )
+
+    # Achterblad: volledig pagina frame
     backcover_frame = Frame(
         ml, mb, page_w - ml - mr, page_h - mt - mb,
         id="backcover_frame",
@@ -114,12 +129,151 @@ def create_page_templates(config: DocumentConfig) -> list[PageTemplate]:
     backcover_template = PageTemplate(
         id="backcover",
         frames=[backcover_frame],
+        onPage=lambda c, d: _on_page_backcover(c, d, config, brand, stationery),
     )
 
-    return [cover_template, content_template, backcover_template]
+    return [cover_template, colofon_template, content_template, appendix_template, backcover_template]
 
 
-def _on_content_page(canvas, doc, config: DocumentConfig):
-    """Callback voor content pagina's — tekent header en footer."""
-    _draw_header(canvas, doc, config)
-    _draw_footer(canvas, doc, config)
+# ============================================================
+# Stationery-first page callbacks
+# ============================================================
+
+def _on_page_cover(canvas, doc, config, brand, stationery, cover_image):
+    """Cover: stationery-first, fallback naar programmatisch."""
+    pw = config.effective_width_pt
+    ph = config.effective_height_pt
+
+    spec = brand.stationery.get("cover")
+    if spec and spec.source and stationery.draw(canvas, spec.source, pw, ph):
+        _draw_text_zones(canvas, spec.text_zones, config, brand, pw, ph)
+    else:
+        draw_cover_page(canvas, doc, config, brand, cover_image)
+
+
+def _on_page_colofon(canvas, doc, config, brand, stationery, colofon_data):
+    """Colofon: stationery-first, fallback naar programmatisch."""
+    pw = config.effective_width_pt
+    ph = config.effective_height_pt
+
+    spec = brand.stationery.get("colofon")
+    if spec and spec.source and stationery.draw(canvas, spec.source, pw, ph):
+        _draw_text_zones(canvas, spec.text_zones, config, brand, pw, ph)
+    else:
+        draw_colofon_page(canvas, doc, config, brand, colofon_data)
+
+
+def _on_page_content(canvas, doc, config, brand, renderer, stationery):
+    """Content: stationery achtergrond (optioneel) + header/footer."""
+    pw = config.effective_width_pt
+    ph = config.effective_height_pt
+
+    spec = brand.stationery.get("content")
+    if spec and spec.source:
+        stationery.draw(canvas, spec.source, pw, ph)
+
+    # Header/footer altijd tekenen (via BrandRenderer)
+    renderer.draw_page(canvas, doc, config)
+
+
+def _on_page_appendix(canvas, doc, config, brand, stationery):
+    """Appendix divider: stationery-first, fallback naar programmatisch."""
+    pw = config.effective_width_pt
+    ph = config.effective_height_pt
+
+    spec = brand.stationery.get("appendix_divider")
+    if spec and spec.source and stationery.draw(canvas, spec.source, pw, ph):
+        _draw_text_zones(canvas, spec.text_zones, config, brand, pw, ph)
+    else:
+        draw_appendix_divider_page(canvas, doc, config, brand)
+
+
+def _on_page_backcover(canvas, doc, config, brand, stationery):
+    """Backcover: stationery-first, fallback naar programmatisch."""
+    pw = config.effective_width_pt
+    ph = config.effective_height_pt
+
+    spec = brand.stationery.get("backcover")
+    if spec and spec.source and stationery.draw(canvas, spec.source, pw, ph):
+        _draw_text_zones(canvas, spec.text_zones, config, brand, pw, ph)
+    else:
+        draw_backcover_page(canvas, doc, config, brand)
+
+
+# ============================================================
+# Text zone rendering
+# ============================================================
+
+def _draw_text_zones(canvas, text_zones, config, brand, pw, ph):
+    """Teken dynamische tekst in text zones op de stationery.
+
+    Text zones zijn gedefinieerd met y_pt in top-down coördinaten.
+    ReportLab canvas gebruikt bottom-up. Converteer: rl_y = ph - y_pt
+    """
+    for zone in text_zones:
+        zone_type = zone.get("type", "text")
+
+        if zone_type != "text":
+            continue  # clipped_image en key_value_table later implementeren
+
+        # Resolve font
+        font_ref = zone.get("font", "$fonts.body")
+        if font_ref.startswith("$fonts."):
+            font_key = font_ref.replace("$fonts.", "")
+            font_name = brand.fonts.get(font_key, "GothamBook")
+        else:
+            font_name = font_ref
+        font_name = get_font_name(font_name)
+
+        # Resolve kleur
+        color_ref = zone.get("color", "$colors.text")
+        if color_ref.startswith("$colors."):
+            color_key = color_ref.replace("$colors.", "")
+            color_hex = brand.colors.get(color_key, "#45243D")
+        else:
+            color_hex = color_ref
+
+        # Resolve tekst via data binding
+        bind = zone.get("bind", zone.get("role", ""))
+        text = _resolve_binding(bind, config, brand)
+        if not text:
+            continue
+
+        size = zone.get("size", 10.0)
+        x_pt = zone.get("x_pt", 0)
+        y_pt = zone.get("y_pt", 0)
+        align = zone.get("align", "left")
+
+        # Converteer top-down y naar bottom-up
+        rl_y = ph - y_pt
+
+        canvas.saveState()
+        canvas.setFont(font_name, size)
+        canvas.setFillColor(HexColor(color_hex))
+
+        if align == "right":
+            canvas.drawRightString(x_pt, rl_y, text)
+        elif align == "center":
+            canvas.drawCentredString(x_pt, rl_y, text)
+        else:
+            canvas.drawString(x_pt, rl_y, text)
+
+        canvas.restoreState()
+
+
+def _resolve_binding(bind, config, brand):
+    """Resolve data binding naar tekst waarde."""
+    bindings = {
+        "project": config.project,
+        "project_number": config.project_number,
+        "client": config.client,
+        "author": config.author,
+        "report_type": config.report_type,
+        "subtitle": getattr(config, "subtitle", ""),
+    }
+    # Contact velden
+    if bind.startswith("contact."):
+        key = bind.replace("contact.", "")
+        return brand.contact.get(key, "")
+
+    return bindings.get(bind, "")

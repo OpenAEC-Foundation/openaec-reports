@@ -1,0 +1,375 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://3bm-bouwkunde.nl/schemas/report.schema.json",
+  "title": "3BM Report Definition",
+  "description": "JSON schema voor het definiëren van een 3BM rapport. Dit schema is het contract tussen de library, API en frontend.",
+  "type": "object",
+  "required": ["template", "project"],
+  "properties": {
+    "template": {
+      "type": "string",
+      "description": "Template naam (correspondeert met YAML in assets/templates/)",
+      "examples": ["structural", "daylight", "building_code", "custom"]
+    },
+    "format": {
+      "type": "string",
+      "enum": ["A4", "A3"],
+      "default": "A4"
+    },
+    "orientation": {
+      "type": "string",
+      "enum": ["portrait", "landscape"],
+      "default": "portrait"
+    },
+
+    "project": {
+      "type": "string",
+      "description": "Projectnaam",
+      "examples": ["Kijkduin Reddingspost"]
+    },
+    "project_number": {
+      "type": "string",
+      "description": "Projectnummer",
+      "examples": ["2026-031"]
+    },
+    "client": {
+      "type": "string",
+      "description": "Opdrachtgever",
+      "examples": ["Gemeente Den Haag"]
+    },
+    "author": {
+      "type": "string",
+      "default": "3BM Bouwkunde"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Rapportdatum (ISO 8601). Default: vandaag.",
+      "examples": ["2026-02-18"]
+    },
+    "version": {
+      "type": "string",
+      "default": "1.0",
+      "examples": ["1.0", "2.1", "CONCEPT"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["CONCEPT", "DEFINITIEF", "REVISIE"],
+      "default": "CONCEPT"
+    },
+
+    "cover": {
+      "$ref": "#/$defs/cover"
+    },
+    "colofon": {
+      "$ref": "#/$defs/colofon"
+    },
+    "toc": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "title": { "type": "string", "default": "Inhoudsopgave" },
+        "max_depth": { "type": "integer", "minimum": 1, "maximum": 3, "default": 3 }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "description": "Rapport secties in volgorde",
+      "items": { "$ref": "#/$defs/section" }
+    },
+    "backcover": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true }
+      }
+    },
+
+    "metadata": {
+      "type": "object",
+      "description": "Vrije metadata (bijv. Revit model info, berekeningssoftware versie)",
+      "additionalProperties": true
+    }
+  },
+
+  "$defs": {
+
+    "cover": {
+      "type": "object",
+      "description": "Voorblad configuratie",
+      "properties": {
+        "subtitle": {
+          "type": "string",
+          "description": "Ondertitel op voorblad",
+          "examples": ["Constructieve berekening hoofddraagconstructie"]
+        },
+        "image": {
+          "$ref": "#/$defs/image_source",
+          "description": "Cover afbeelding (render, foto)"
+        },
+        "extra_fields": {
+          "type": "object",
+          "description": "Extra velden op voorblad (key-value)",
+          "additionalProperties": { "type": "string" },
+          "examples": [{"Kenmerk": "3BM-2026-031-R01", "Classificatie": "Vertrouwelijk"}]
+        }
+      }
+    },
+
+    "colofon": {
+      "type": "object",
+      "description": "Colofon / documentinformatie pagina",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "extra_fields": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "revision_history": {
+          "type": "array",
+          "description": "Revisiegeschiedenis",
+          "items": {
+            "type": "object",
+            "required": ["version", "date", "description"],
+            "properties": {
+              "version": { "type": "string" },
+              "date": { "type": "string", "format": "date" },
+              "author": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "disclaimer": {
+          "type": "string",
+          "description": "Disclaimer tekst. Default uit template."
+        }
+      }
+    },
+
+    "section": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Sectietitel (komt in inhoudsopgave)"
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3,
+          "default": 1,
+          "description": "Heading niveau: 1=hoofdstuk, 2=paragraaf, 3=subparagraaf"
+        },
+        "content": {
+          "type": "array",
+          "description": "Inhoud van de sectie — lijst van content blocks",
+          "items": { "$ref": "#/$defs/content_block" }
+        },
+        "page_break_before": {
+          "type": "boolean",
+          "default": false,
+          "description": "Forceer nieuwe pagina voor deze sectie"
+        }
+      }
+    },
+
+    "content_block": {
+      "type": "object",
+      "required": ["type"],
+      "description": "Eén content element binnen een sectie",
+      "oneOf": [
+        { "$ref": "#/$defs/block_paragraph" },
+        { "$ref": "#/$defs/block_calculation" },
+        { "$ref": "#/$defs/block_check" },
+        { "$ref": "#/$defs/block_table" },
+        { "$ref": "#/$defs/block_image" },
+        { "$ref": "#/$defs/block_map" },
+        { "$ref": "#/$defs/block_spacer" },
+        { "$ref": "#/$defs/block_page_break" },
+        { "$ref": "#/$defs/block_raw_flowable" }
+      ]
+    },
+
+    "block_paragraph": {
+      "type": "object",
+      "required": ["type", "text"],
+      "properties": {
+        "type": { "const": "paragraph" },
+        "text": {
+          "type": "string",
+          "description": "Tekst. Ondersteunt basis ReportLab XML markup: <b>, <i>, <sub>, <sup>"
+        },
+        "style": {
+          "type": "string",
+          "description": "Stijlnaam uit stylesheet (default: Normal)",
+          "default": "Normal"
+        }
+      }
+    },
+
+    "block_calculation": {
+      "type": "object",
+      "required": ["type", "title"],
+      "properties": {
+        "type": { "const": "calculation" },
+        "title": { "type": "string", "description": "Naam van de berekening" },
+        "formula": { "type": "string", "description": "Wiskundige formule", "examples": ["M_Ed = q × l² / 8"] },
+        "substitution": { "type": "string", "description": "Ingevulde waarden", "examples": ["M_Ed = 8.5 × 6.0² / 8"] },
+        "result": { "type": "string", "description": "Berekend resultaat", "examples": ["38.3"] },
+        "unit": { "type": "string", "examples": ["kNm", "mm", "kN/m²"] },
+        "reference": { "type": "string", "description": "Normreferentie", "examples": ["NEN-EN 1992-1-1 §6.1"] }
+      }
+    },
+
+    "block_check": {
+      "type": "object",
+      "required": ["type", "description"],
+      "properties": {
+        "type": { "const": "check" },
+        "description": { "type": "string", "description": "Omschrijving van de toets" },
+        "required_value": { "type": "string", "description": "Eis / grenswaarde als tekst" },
+        "calculated_value": { "type": "string", "description": "Berekende waarde als tekst" },
+        "unity_check": { "type": "number", "description": "UC waarde (0.0 - ∞)" },
+        "limit": { "type": "number", "default": 1.0 },
+        "result": {
+          "type": "string",
+          "enum": ["VOLDOET", "VOLDOET NIET"],
+          "description": "Expliciet resultaat. Als weggelaten: automatisch op basis van unity_check vs limit."
+        },
+        "reference": { "type": "string" }
+      }
+    },
+
+    "block_table": {
+      "type": "object",
+      "required": ["type", "headers", "rows"],
+      "properties": {
+        "type": { "const": "table" },
+        "title": { "type": "string", "description": "Tabeltitel (optioneel)" },
+        "headers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Kolomnamen"
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {}
+          },
+          "description": "Data rijen (2D array)"
+        },
+        "column_widths": {
+          "type": "array",
+          "items": { "type": "number" },
+          "description": "Kolombreedte in mm (optioneel, auto als weggelaten)"
+        },
+        "style": {
+          "type": "string",
+          "enum": ["default", "minimal", "striped"],
+          "default": "default"
+        }
+      }
+    },
+
+    "block_image": {
+      "type": "object",
+      "required": ["type", "src"],
+      "properties": {
+        "type": { "const": "image" },
+        "src": { "$ref": "#/$defs/image_source" },
+        "caption": { "type": "string" },
+        "width_mm": { "type": "number", "description": "Breedte in mm (auto-fit als weggelaten)" },
+        "alignment": {
+          "type": "string",
+          "enum": ["left", "center", "right"],
+          "default": "center"
+        }
+      }
+    },
+
+    "block_map": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "map" },
+        "center": {
+          "type": "object",
+          "required": ["lat", "lon"],
+          "properties": {
+            "lat": { "type": "number" },
+            "lon": { "type": "number" }
+          }
+        },
+        "bbox": {
+          "type": "object",
+          "description": "Bounding box als alternatief voor center + radius",
+          "properties": {
+            "min_x": { "type": "number" },
+            "min_y": { "type": "number" },
+            "max_x": { "type": "number" },
+            "max_y": { "type": "number" }
+          }
+        },
+        "radius_m": { "type": "number", "default": 100, "description": "Straal in meters rond center" },
+        "layers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["percelen", "bebouwing", "bestemmingsplan", "luchtfoto"]
+          },
+          "default": ["percelen", "bebouwing"]
+        },
+        "width_mm": { "type": "number", "default": 170 },
+        "caption": { "type": "string" }
+      }
+    },
+
+    "block_spacer": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "spacer" },
+        "height_mm": { "type": "number", "default": 5 }
+      }
+    },
+
+    "block_page_break": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "page_break" }
+      }
+    },
+
+    "block_raw_flowable": {
+      "type": "object",
+      "required": ["type", "class_name"],
+      "description": "Escape hatch: directe ReportLab Flowable instantie (alleen voor library gebruik, niet via API)",
+      "properties": {
+        "type": { "const": "raw_flowable" },
+        "class_name": { "type": "string" },
+        "kwargs": { "type": "object", "additionalProperties": true }
+      }
+    },
+
+    "image_source": {
+      "description": "Afbeelding bron — ondersteunt pad, URL, of base64 encoded data",
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Bestandspad (relatief of absoluut) of URL"
+        },
+        {
+          "type": "object",
+          "required": ["data", "media_type"],
+          "properties": {
+            "data": { "type": "string", "contentEncoding": "base64", "description": "Base64 encoded afbeeldingsdata" },
+            "media_type": { "type": "string", "enum": ["image/png", "image/jpeg", "image/svg+xml"] },
+            "filename": { "type": "string", "description": "Originele bestandsnaam (optioneel)" }
+          }
+        }
+      ]
+    }
+  }
+}

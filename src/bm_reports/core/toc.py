@@ -4,10 +4,16 @@ from __future__ import annotations
 
 from typing import Any
 
-from reportlab.platypus import Flowable, Paragraph, TableOfContents
+from reportlab.lib.colors import HexColor
 from reportlab.lib.styles import ParagraphStyle
+from reportlab.platypus.tableofcontents import TableOfContents
 
-from bm_reports.core.styles import BM_STYLES, BM_COLORS, BM_FONTS
+from bm_reports.core.styles import BM_COLORS, BM_FONTS
+
+# Heading style names die de TOC moet detecteren.
+# Gebruikt door BMDocTemplate.afterFlowable() om automatisch
+# TOC entries te registreren wanneer een heading wordt gerenderd.
+TOC_HEADING_STYLES = ("Heading1", "Heading2", "Heading3")
 
 
 class TOCBuilder:
@@ -40,6 +46,7 @@ class TOCBuilder:
                 leading=14,
                 leftIndent=0,
                 spaceBefore=4,
+                textColor=HexColor(BM_COLORS.secondary),
             ),
             ParagraphStyle(
                 name="TOCLevel2",
@@ -69,7 +76,8 @@ class TOCBuilder:
     def notify(self, canvas, title: str, level: int = 0):
         """Registreer een heading voor de TOC.
 
-        Wordt aangeroepen door de engine voor elke sectietitel.
+        Wordt aangeroepen door BMDocTemplate.afterFlowable() voor elke
+        sectietitel.
 
         Args:
             canvas: ReportLab canvas.

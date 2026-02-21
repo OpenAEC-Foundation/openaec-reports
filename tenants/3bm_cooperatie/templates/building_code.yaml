@@ -1,0 +1,26 @@
+# 3BM Report Template — Bouwbesluit toetsing
+
+report_type: building_code
+format: A4
+orientation: portrait
+
+cover:
+  subtitle_hint: "Bouwbesluit toetsing"
+
+colofon:
+  enabled: true
+
+toc:
+  enabled: true
+  title: "Inhoudsopgave"
+  max_depth: 2
+
+backcover:
+  enabled: true
+
+structure:
+  - cover
+  - colofon
+  - toc
+  - sections
+  - backcover

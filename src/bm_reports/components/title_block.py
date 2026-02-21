@@ -1,31 +1,26 @@
-"""Title block — Titelblok voor voorblad."""
+"""Title block — Titelblok voor voorblad.
+
+.. deprecated::
+    TitleBlock wordt niet gebruikt door de engine en wordt vervangen
+    door canvas-functies in core/special_pages.py (cover page).
+    Niet gebruiken voor nieuwe code.
+"""
 
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
-from reportlab.platypus import Flowable
 
-from bm_reports.core.document import MM_TO_PT
+from reportlab.platypus import Flowable
 
 
 class TitleBlock(Flowable):
     """Titelblok voor het voorblad.
 
-    Bevat:
-    - Projectnaam (groot)
-    - Ondertitel / rapporttype
-    - Projectnummer
-    - Opdrachtgever
-    - Datum
-    - Optionele afbeelding
-
-    Args:
-        project: Projectnaam.
-        subtitle: Ondertitel.
-        project_number: Projectnummer.
-        client: Opdrachtgever.
-        date_str: Datum.
-        image_path: Optioneel pad naar cover afbeelding.
+    .. deprecated::
+        Wordt vervangen door draw_cover_page() in core/special_pages.py.
+        De engine gebruikt TitleBlock niet — cover wordt direct op het
+        canvas getekend.
     """
 
     def __init__(
@@ -37,6 +32,12 @@ class TitleBlock(Flowable):
         date_str: str = "",
         image_path: str | Path | None = None,
     ):
+        warnings.warn(
+            "TitleBlock is deprecated en wordt vervangen door "
+            "draw_cover_page() in core/special_pages.py",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         super().__init__()
         self.project = project
         self.subtitle = subtitle
@@ -47,16 +48,8 @@ class TitleBlock(Flowable):
 
     def wrap(self, available_width, available_height):
         self.width = available_width
-        self.height = available_height  # Voorblad vult hele pagina
+        self.height = available_height
         return (self.width, self.height)
 
     def draw(self):
-        """Render het titelblok."""
-        # TODO: Implementeer cover page layout
-        # - Grafische elementen (balk, kleurvlak)
-        # - Logo
-        # - Project titel
-        # - Ondertitel
-        # - Projectinfo tabel
-        # - Optionele afbeelding
-        pass
+        """Render het titelblok (no-op, deprecated)."""

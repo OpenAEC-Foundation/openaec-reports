@@ -1,0 +1,132 @@
+# =============================================================
+# 3BM Cooperatie - Content Block Styles
+# =============================================================
+#
+# Definieert hoe elk type content block wordt gerenderd.
+# De renderer gebruikt deze stijlen bij het opbouwen van 
+# dynamische content op standaard pagina's.
+#
+# X-posities (tabs):
+#   90.0  = Hoofdstuk nummer (H1)
+#   108.0 = Hoofdstuk titel (H1)
+#   125.4 = Paragraaf nummer (H2) + body text + bullet marker
+#   143.4 = Bullet text (ingesprongen)
+#   147.0 = Paragraaf titel (H2)
+#
+# =============================================================
+
+# --- Kleuren ---
+colors:
+  purple: "#401246"
+  teal: "#56B49B"
+  white: "#FFFFFF"
+  red: "#FF0000"
+
+# --- Fonts ---
+fonts:
+  book: GothamBook
+  bold: GothamBold
+  book_italic: GothamBookItalic
+  symbol: SymbolMT            # bullet character (•)
+
+# =============================================================
+# BLOCK TYPES
+# =============================================================
+
+blocks:
+
+  # --- H1: Hoofdstuk titel ---
+  heading_1:
+    number:
+      x: 90.0
+      font: GothamBook
+      size: 18.0
+      color: "#401246"
+    title:
+      x: 108.0
+      font: GothamBook
+      size: 18.0
+      color: "#401246"
+    spacing_before: 0.0       # staat altijd bovenaan of na grote gap
+    spacing_after: 33.9       # gap naar eerste content (126.8 - 74.9 - 18)
+
+  # --- H2: Paragraaf titel ---
+  heading_2:
+    number:
+      x: 125.4
+      font: GothamBook
+      size: 10.0
+      color: "#56B49B"
+    title:
+      x: 147.0
+      font: GothamBook
+      size: 13.0
+      color: "#56B49B"
+    spacing_before: 30.0      # gap voor H2 (vanuit extractie)
+    spacing_after: 20.5       # gap naar eerste bullet/body
+
+  # --- Body text (paragraaf) ---
+  paragraph:
+    x: 125.4
+    font: GothamBook
+    size: 9.5
+    color: "#401246"
+    line_height: 12.3         # regelafstand (562.9 - 550.6)
+    max_width: 393.0          # rechterrand ~518pt (uit font meting)
+    spacing_before: 12.0
+    spacing_after: 12.0
+
+  # --- Bullet list ---
+  bullet_list:
+    marker:
+      x: 125.4
+      font: SymbolMT
+      size: 9.5
+      color: "#401246"
+      character: "\u0007"      # bullet symbol in SymbolMT
+    text:
+      x: 143.4
+      font: GothamBook
+      size: 9.5
+      color: "#401246"
+      line_height: 12.0       # regelafstand binnen bullet
+      max_width: 387.0        # rechterrand ~530pt (uit font meting)
+    spacing_between: 10.1     # afstand tussen bullets (204.6 - 194.5)
+    spacing_before: 0.0       # direct na H2
+    spacing_after: 12.0
+
+  # --- Tabel ---
+  table:
+    header:
+      font: GothamBook
+      size: 12.0
+      color: "#FFFFFF"         # witte tekst
+      background: "#56B49B"    # teal achtergrond
+      height: 24.0
+    body:
+      font: GothamBook
+      size: 9.0
+      color: "#401246"
+      line_height: 20.8       # rijhoogte (493.8 - 473.0)
+      alternating_bg: null     # geen zebra-striping in BBL
+    x: 125.4
+    max_width: 415.9
+    spacing_before: 20.0
+    spacing_after: 20.0
+
+  # --- Superscript (m², etc.) ---
+  superscript:
+    font: GothamBook
+    size: 6.0
+    color: "#401246"
+    y_offset: -4.0            # naar boven verschoven
+
+# =============================================================
+# PAGE NUMBER (herhaling voor completeness)
+# =============================================================
+page_number:
+  x: 533.0
+  y_td: 793.5
+  font: GothamBook
+  size: 9.5
+  color: "#401246"

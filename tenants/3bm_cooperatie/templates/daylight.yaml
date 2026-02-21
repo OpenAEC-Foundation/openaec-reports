@@ -1,0 +1,29 @@
+# 3BM Report Template — Daglichtberekening
+
+report_type: daylight
+format: A4
+orientation: portrait
+
+cover:
+  subtitle_hint: "Daglichtberekening"
+
+colofon:
+  enabled: true
+  disclaimer: |
+    Dit rapport is opgesteld door 3BM Bouwkunde en is uitsluitend
+    bedoeld voor de opdrachtgever.
+
+toc:
+  enabled: true
+  title: "Inhoudsopgave"
+  max_depth: 2
+
+backcover:
+  enabled: true
+
+structure:
+  - cover
+  - colofon
+  - toc
+  - sections
+  - backcover

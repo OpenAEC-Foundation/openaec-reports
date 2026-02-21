@@ -1,0 +1,239 @@
+{
+  "template": "3bm_cooperatie",
+  "format": "A4",
+  "project": "Nieuwbouw Wooncomplex De Horizon - Scheveningen",
+  "project_number": "2801",
+  "client": "Van der Berg Ontwikkeling B.V.",
+  "author": "3BM Coöperatie",
+  "report_type": "Constructief adviesrapport",
+  "date": "20-02-2026",
+  "version": "1.0",
+  "status": "Concept",
+
+  "cover": {
+    "subtitle": "Constructief adviesrapport",
+    "image": null
+  },
+
+  "colofon": {
+    "enabled": true,
+    "opdrachtgever_contact": "Dhr. P. van der Berg",
+    "opdrachtgever_naam": "Van der Berg Ontwikkeling B.V.",
+    "opdrachtgever_adres": "Koninginnegracht 12,\n2514 AA Den Haag",
+    "adviseur_bedrijf": "3BM Coöperatie",
+    "adviseur_naam": "Ir. S. de Vries",
+    "normen": "Eurocode, NEN-EN 1990, NEN-EN 1992",
+    "documentgegevens": "Constructief advies, pg 1-14",
+    "fase": "Definitief Ontwerp",
+    "kenmerk": "2801-CA-01"
+  },
+
+  "toc": {
+    "enabled": true,
+    "title": "Inhoud",
+    "max_depth": 2
+  },
+
+  "sections": [
+    {
+      "number": "1",
+      "title": "Inleiding",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "In opdracht van Van der Berg Ontwikkeling B.V. is door 3BM Coöperatie een constructief adviesrapport opgesteld voor het project Nieuwbouw Wooncomplex De Horizon te Scheveningen. Het betreft een woongebouw met 48 appartementen, een ondergrondse parkeergarage en commerciële ruimten op de begane grond."
+        },
+        {
+          "type": "paragraph",
+          "text": "Het doel van dit rapport is het vastleggen van de constructieve uitgangspunten en het geven van een advies over de draagconstructie. De volgende aspecten worden behandeld:"
+        },
+        {
+          "type": "bullet_list",
+          "items": [
+            "Constructieve opzet en materialisatie van de hoofddraagconstructie",
+            "Stabiliteitsvoorzieningen en windbelasting conform Eurocode",
+            "Funderingsadvies op basis van beschikbare sonderingsgegevens",
+            "Toelichting op de gekozen vloerconstructie en overspanningen",
+            "Aandachtspunten voor de verdere uitwerking in de volgende ontwerpfase"
+          ]
+        }
+      ]
+    },
+    {
+      "number": "2",
+      "title": "Uitgangspunten",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Het constructief ontwerp is gebaseerd op de volgende uitgangspunten en randvoorwaarden. De belastingen zijn bepaald conform NEN-EN 1991 en de constructieve toetsing is uitgevoerd conform NEN-EN 1992 (beton) en NEN-EN 1993 (staal)."
+        },
+        {
+          "type": "heading_2",
+          "number": "2.1",
+          "title": "Gebouwgeometrie"
+        },
+        {
+          "type": "paragraph",
+          "text": "Het gebouw bestaat uit een kelder, begane grond en 6 verdiepingen. De totale bouwhoogte bedraagt circa 24 meter boven maaiveld. De ondergrondse parkeergarage heeft een vrije hoogte van 2.600 mm en biedt ruimte aan 36 parkeerplaatsen conform NEN 2443."
+        },
+        {
+          "type": "heading_2",
+          "number": "2.2",
+          "title": "Belastingen"
+        },
+        {
+          "type": "table",
+          "title": "Overzicht belastingen",
+          "headers": ["Belasting", "Waarde", "Norm"],
+          "rows": [
+            ["Permanente belasting", "1,5 kN/m²", "NEN-EN 1991-1-1"],
+            ["Veranderlijke (wonen)", "1,75 kN/m²", "NEN-EN 1991-1-1 tabel NB.1"],
+            ["Veranderlijke (parkeer)", "2,5 kN/m²", "Categorie F"],
+            ["Windbelasting", "Zie §3.2", "NEN-EN 1991-1-4"],
+            ["Sneeuwbelasting", "0,56 kN/m²", "NEN-EN 1991-1-3"]
+          ]
+        },
+        {
+          "type": "spacer",
+          "height_mm": 5
+        },
+        {
+          "type": "heading_2",
+          "number": "2.3",
+          "title": "Materialen"
+        },
+        {
+          "type": "paragraph",
+          "text": "De hoofddraagconstructie wordt uitgevoerd in gewapend beton sterkteklasse C30/37 met betonstaal B500B. De staalconstructie voor de commerciële ruimten op de begane grond wordt uitgevoerd in staal S355. Alle materialen voldoen aan de eisen gesteld in de relevante Eurocodes."
+        }
+      ]
+    },
+    {
+      "number": "3",
+      "title": "Constructief ontwerp",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Het constructief concept is gebaseerd op een combinatie van dragende wanden en kolommen. De stabiliteit wordt verzorgd door betonnen schijfwanden in beide richtingen."
+        },
+        {
+          "type": "heading_2",
+          "number": "3.1",
+          "title": "Hoofddraagconstructie"
+        },
+        {
+          "type": "paragraph",
+          "text": "De verticale krachtsafdracht vindt plaats via betonnen draagwanden met een dikte van 200 mm en kolommen 400x400 mm. De vloeren zijn uitgevoerd als breedplaatvloeren met een totale dikte van 260 mm."
+        },
+        {
+          "type": "bullet_list",
+          "items": [
+            "Draagwanden: gewapend beton C30/37, dikte 200 mm, wapening volgens berekening",
+            "Kolommen begane grond: 400x400 mm, C30/37, belasting tot 2.800 kN per kolom",
+            "Breedplaatvloeren: totale dikte 260 mm, maximale overspanning 7.200 mm",
+            "Balkons: uitkragende betonvloer 1.500 mm met thermische onderbreking"
+          ]
+        },
+        {
+          "type": "heading_2",
+          "number": "3.2",
+          "title": "Stabiliteit"
+        },
+        {
+          "type": "paragraph",
+          "text": "De horizontale stabiliteit wordt verzorgd door vier betonnen schijfwanden rondom de trappen- en liftkernen. De windbelasting op de gevel wordt via de stijve vloerschijven naar de stabiliteitskernen geleid."
+        },
+        {
+          "type": "heading_2",
+          "number": "3.3",
+          "title": "Fundering"
+        },
+        {
+          "type": "paragraph",
+          "text": "Op basis van de beschikbare sondering wordt een paalfundering geadviseerd. De eerste zandlaag is aangetroffen op NAP -14,0 m. Geadviseerd wordt om te heien met prefab betonpalen 320x320 mm tot een diepte van circa NAP -16,0 m. Het geschatte draagvermogen bedraagt 900 kN per paal."
+        },
+        {
+          "type": "calculation",
+          "title": "Buigend moment vloerveld",
+          "formula": "M = q × l² / 8",
+          "substitution": "M = 8.5 × 7.2² / 8",
+          "result": "55.1",
+          "unit": "kNm",
+          "reference": "NEN-EN 1992-1-1 §6.1"
+        },
+        {
+          "type": "check",
+          "description": "Toetsing buigend moment vloerveld",
+          "required_value": "55.1 kNm",
+          "calculated_value": "72.4 kNm",
+          "unity_check": 0.76,
+          "result": "VOLDOET"
+        }
+      ]
+    },
+    {
+      "number": "4",
+      "title": "Aandachtspunten en aanbevelingen",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Op basis van het uitgevoerde constructief advies worden de volgende aandachtspunten en aanbevelingen meegegeven:"
+        },
+        {
+          "type": "bullet_list",
+          "items": [
+            "De definitieve wapeningsberekening dient te worden uitgevoerd in de volgende fase op basis van het uitgewerkte DO",
+            "Voor de parkeergarage wordt aanbevolen een trillingsanalyse uit te voeren i.v.m. de bovengelegen woonfunctie",
+            "De thermische onderbrekingen bij de balkons dienen vroegtijdig te worden gespecificeerd",
+            "Bij de verdere uitwerking van de fundering dient rekening te worden gehouden met negatieve kleef",
+            "De stabiliteitsberekening dient in de volgende fase te worden geverifieerd met een eindig-elementenmodel",
+            "Aanbevolen wordt om de mogelijkheid van een staalconstructie voor de begane grondverdieping nader te onderzoeken"
+          ]
+        }
+      ]
+    }
+  ],
+
+  "appendices": [
+    {
+      "number": 1,
+      "label": "Bijlage 1",
+      "title": "Sonderingsgegevens en\nfunderingsadvies",
+      "content_sections": [
+        {
+          "number": "B1",
+          "title": "Sonderingsgegevens",
+          "level": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Onderstaand zijn de sonderingsresultaten weergegeven van sondering S01, uitgevoerd door Fugro Geoservices B.V. op 15 januari 2026."
+            },
+            {
+              "type": "bullet_list",
+              "items": [
+                "Maaiveld: NAP +1,2 m",
+                "Eerste zandlaag: NAP -14,0 m (qc = 15-22 MPa)",
+                "Geadviseerde paallengte: circa 17 meter onder maaiveld",
+                "Geschat draagvermogen: 900 kN per paal (prefab beton 320x320 mm)",
+                "Negatieve kleef: rekening houden met 80 kN per paal"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Voor de definitieve funderingsberekening dient een aanvullende sondering te worden uitgevoerd ter plaatse van de zwaarst belaste kolommen."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "backcover": {
+    "enabled": true
+  }
+}

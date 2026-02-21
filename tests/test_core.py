@@ -52,3 +52,108 @@ class TestDocument:
         doc = Document()
         doc.add_element("dummy")
         assert len(doc.elements) == 1
+
+
+class TestPageTemplates:
+    def test_create_page_templates_returns_five(self):
+        from bm_reports.core.page_templates import create_page_templates
+
+        config = DocumentConfig()
+        templates = create_page_templates(config)
+        assert len(templates) == 5
+
+    def test_template_ids(self):
+        from bm_reports.core.page_templates import create_page_templates
+
+        config = DocumentConfig()
+        templates = create_page_templates(config)
+        ids = [t.id for t in templates]
+        assert ids == ["cover", "colofon", "content", "appendix_divider", "backcover"]
+
+    def test_content_template_has_onpage(self):
+        from bm_reports.core.page_templates import create_page_templates
+
+        config = DocumentConfig()
+        templates = create_page_templates(config)
+        # content is nu de derde template (index 2)
+        content_template = templates[2]
+        assert content_template.id == "content"
+        # Content template moet een onPage callback hebben
+        assert content_template.onPage is not None
+
+
+class TestStyles:
+    def test_bm_colors(self):
+        from bm_reports.core.styles import BM_COLORS
+
+        assert BM_COLORS.primary == "#401246"
+        assert BM_COLORS.secondary == "#38BDAB"
+        assert BM_COLORS.accent == "#2ECC71"
+        assert BM_COLORS.warning == "#E74C3C"
+
+    def test_bm_colors_as_hex(self):
+        from bm_reports.core.styles import BM_COLORS
+        from reportlab.lib.colors import Color
+
+        color = BM_COLORS.as_hex("primary")
+        assert isinstance(color, Color)
+
+    def test_bm_colors_hex_shortcut(self):
+        from bm_reports.core.styles import BM_COLORS
+        from reportlab.lib.colors import Color
+
+        color = BM_COLORS.hex("primary")
+        assert isinstance(color, Color)
+
+    def test_create_stylesheet_has_expected_styles(self):
+        from bm_reports.core.styles import create_stylesheet
+
+        styles = create_stylesheet()
+        expected_names = [
+            "Normal", "Heading1", "Heading2", "Heading3",
+            "Caption", "Footer", "CoverTitle", "CoverSubtitle",
+        ]
+        for name in expected_names:
+            assert name in styles, f"Style '{name}' ontbreekt in stylesheet"
+
+
+class TestSmokeImports:
+    """Smoke tests: controleer dat imports werken na architectuur opschoning."""
+
+    def test_import_bm_reports(self):
+        from bm_reports import Report, A4, A3, Document
+
+        assert Report is not None
+        assert A4 is not None
+        assert A3 is not None
+        assert Document is not None
+
+    def test_no_header_footer_in_components(self):
+        try:
+            import bm_reports.components as comp
+        except ImportError:
+            pytest.skip("Optional dependency (svglib) not installed")
+
+        assert not hasattr(comp, "Header"), "Header mag niet meer in components staan"
+        assert not hasattr(comp, "Footer"), "Footer mag niet meer in components staan"
+
+    def test_components_exports(self):
+        try:
+            from bm_reports.components import (
+                TitleBlock,
+                ImageBlock,
+                TableBlock,
+                CalculationBlock,
+                CheckBlock,
+                KadasterMap,
+            )
+        except ImportError:
+            pytest.skip("Optional dependency (svglib) not installed")
+
+        assert TitleBlock is not None
+        assert CalculationBlock is not None
+
+    def test_bm_doc_template_exists(self):
+        from bm_reports.core.engine import BMDocTemplate
+
+        assert BMDocTemplate is not None

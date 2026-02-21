@@ -1,0 +1,70 @@
+# =============================================================
+# 3BM Cooperatie - Colofon Page Template
+# =============================================================
+#
+# Coordinaten: y_td = top-down (afstand vanaf bovenkant pagina)
+#
+# De colofon.pdf stationery bevat al:
+#   - 3BM logo + tagline (rechtsboven)
+#   - Turquoise hoekblok (linksboven)
+#   - Labels: Project, In opdracht van, Adviseur, etc.
+#   - Scheidingslijnen
+# =============================================================
+
+page:
+  width: 595.3
+  height: 841.9
+  type: colofon
+
+background:
+  file: colofon.pdf
+
+dynamic_fields:
+  titel:
+    x: 70.9
+    y_td: 57.3
+    font: GothamBold
+    size: 22.0
+    color: "#401246"
+  subtitel:
+    x: 70.9
+    y_td: 86.8
+    font: GothamBook
+    size: 14.0
+    color: "#38BDAB"
+
+table:
+  value_x: 229.1
+  value_size: 10
+  rows:
+    - key: project
+      y_td: 321.1
+    - key: opdrachtgever_contact
+      y_td: 369.1
+    - key: opdrachtgever_naam
+      y_td: 381.8
+    - key: opdrachtgever_adres
+      y_td: 394.6
+    - key: adviseur_bedrijf
+      y_td: 489.1
+    - key: adviseur_naam
+      y_td: 501.1
+    - key: normen
+      y_td: 525.1
+    - key: documentgegevens
+      y_td: 549.1
+    - key: datum
+      y_td: 573.1
+    - key: fase
+      y_td: 597.1
+    - key: status
+      y_td: 621.1
+    - key: kenmerk
+      y_td: 645.1
+
+page_number:
+  x: 534.0
+  y_td: 796.3
+  font: GothamBold
+  size: 8.0
+  color: "#38BDAB"

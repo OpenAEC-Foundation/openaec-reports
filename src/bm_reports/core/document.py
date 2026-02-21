@@ -77,14 +77,31 @@ class DocumentConfig:
     subtitle: str = ""
 
     @property
+    def effective_pagesize(self) -> tuple[float, float]:
+        """Retourneer (width, height) in points, rekening houdend met oriëntatie."""
+        if self.orientation == "landscape":
+            return (self.format.height_pt, self.format.width_pt)
+        return self.format.size_pt
+
+    @property
+    def effective_width_pt(self) -> float:
+        """Effectieve paginabreedte in points (rekening houdend met oriëntatie)."""
+        return self.effective_pagesize[0]
+
+    @property
+    def effective_height_pt(self) -> float:
+        """Effectieve paginahoogte in points (rekening houdend met oriëntatie)."""
+        return self.effective_pagesize[1]
+
+    @property
     def content_width_pt(self) -> float:
         """Beschikbare breedte voor content in points."""
-        return self.format.width_pt - self.margins.left_pt - self.margins.right_pt
+        return self.effective_width_pt - self.margins.left_pt - self.margins.right_pt
 
     @property
     def content_height_pt(self) -> float:
         """Beschikbare hoogte voor content in points."""
-        return self.format.height_pt - self.margins.top_pt - self.margins.bottom_pt
+        return self.effective_height_pt - self.margins.top_pt - self.margins.bottom_pt
 
 
 class Document:

@@ -1,0 +1,259 @@
+"""Template loader — YAML rapport templates inlezen en parsen."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from datetime import date
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+# Standaard locatie van templates binnen het package
+TEMPLATES_DIR = Path(__file__).parent.parent / "assets" / "templates"
+
+
+@dataclass
+class TemplateConfig:
+    """Geparseerde template configuratie.
+
+    Attrs:
+        name: Template bestandsnaam (zonder extensie).
+        report_type: Type rapport (bijv. 'structural', 'daylight').
+        format: Paginaformaat ('A4' of 'A3').
+        orientation: Oriëntatie ('portrait' of 'landscape').
+        margins: Marges in mm (dict met top, bottom, left, right).
+        header: Header configuratie.
+        footer: Footer configuratie.
+        cover: Voorblad configuratie.
+        colofon: Colofon configuratie.
+        toc: Inhoudsopgave configuratie.
+        backcover: Achterblad configuratie.
+        structure: Volgorde van secties.
+        raw: Volledige ongeparseerde YAML data.
+    """
+
+    name: str = ""
+    report_type: str = ""
+    format: str = "A4"
+    orientation: str = "portrait"
+    margins: dict[str, float] = field(default_factory=lambda: {
+        "top": 25.0, "bottom": 20.0, "left": 20.0, "right": 15.0,
+    })
+    header: dict[str, Any] = field(default_factory=dict)
+    footer: dict[str, Any] = field(default_factory=dict)
+    cover: dict[str, Any] = field(default_factory=dict)
+    colofon: dict[str, Any] = field(default_factory=dict)
+    toc: dict[str, Any] = field(default_factory=dict)
+    backcover: dict[str, Any] = field(default_factory=dict)
+    structure: list[str] = field(default_factory=list)
+    raw: dict[str, Any] = field(default_factory=dict, repr=False)
+
+
+class TemplateLoader:
+    """Laad en parseer YAML rapport templates.
+
+    Zoekt templates in de standaard assets/templates/ directory,
+    of in een custom directory. Ondersteunt meerdere directories
+    (tenant-specifiek + package defaults).
+
+    Usage:
+        loader = TemplateLoader()
+        config = loader.load("structural_report")
+        available = loader.list_templates()
+
+        # Multi-tenant: meerdere directories
+        loader = TemplateLoader(templates_dirs=[tenant_dir, package_dir])
+    """
+
+    def __init__(
+        self,
+        templates_dir: Path | None = None,
+        templates_dirs: list[Path] | None = None,
+    ):
+        if templates_dirs:
+            self._templates_dirs = templates_dirs
+        else:
+            self._templates_dirs = [templates_dir or TEMPLATES_DIR]
+        # Backward compat: eerste directory is de "primaire"
+        self.templates_dir = self._templates_dirs[0]
+
+    def load(self, name: str) -> TemplateConfig:
+        """Laad een template op naam.
+
+        Zoekt in alle geconfigureerde directories (tenant eerst, dan package).
+
+        Args:
+            name: Template naam (zonder .yaml extensie).
+
+        Returns:
+            TemplateConfig met de geparseerde template data.
+
+        Raises:
+            FileNotFoundError: Als het template niet gevonden wordt.
+            yaml.YAMLError: Als het YAML bestand ongeldig is.
+        """
+        path = self._resolve_path(name)
+        if not path.exists():
+            raise FileNotFoundError(
+                f"Template '{name}' niet gevonden in {self._templates_dirs}"
+            )
+
+        with path.open("r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+
+        if data is None:
+            data = {}
+
+        return TemplateConfig(
+            name=name,
+            report_type=data.get("report_type", ""),
+            format=data.get("format", "A4"),
+            orientation=data.get("orientation", "portrait"),
+            margins=data.get("margins", {
+                "top": 25.0, "bottom": 20.0, "left": 20.0, "right": 15.0,
+            }),
+            header=data.get("header", {}),
+            footer=data.get("footer", {}),
+            cover=data.get("cover", {}),
+            colofon=data.get("colofon", {}),
+            toc=data.get("toc", {}),
+            backcover=data.get("backcover", {}),
+            structure=data.get("structure", []),
+            raw=data,
+        )
+
+    def list_templates(self) -> list[dict[str, str]]:
+        """Lijst alle beschikbare templates (merged uit alle directories).
+
+        Tenant templates komen eerst; bij dubbele namen wint de eerste hit.
+
+        Returns:
+            Lijst van dicts met 'name' en 'report_type' per template.
+        """
+        seen: set[str] = set()
+        templates = []
+
+        for tdir in self._templates_dirs:
+            if not tdir.exists():
+                continue
+            for path in sorted(tdir.glob("*.yaml")):
+                if path.stem in seen:
+                    continue
+                seen.add(path.stem)
+                try:
+                    with path.open("r", encoding="utf-8") as f:
+                        data = yaml.safe_load(f)
+                    templates.append({
+                        "name": path.stem,
+                        "report_type": data.get("report_type", "") if data else "",
+                    })
+                except yaml.YAMLError:
+                    templates.append({
+                        "name": path.stem,
+                        "report_type": "(ongeldig YAML)",
+                    })
+
+        return templates
+
+    def to_scaffold(self, name: str) -> dict[str, Any]:
+        """Genereer een leeg JSON scaffold vanuit een template.
+
+        Het scaffold bevat alle metadata velden met defaults uit het template,
+        cover/colofon/toc/backcover configuratie, en een lege sections array.
+        Geschikt als startpunt voor de frontend.
+
+        Args:
+            name: Template naam.
+
+        Returns:
+            Dict conform report.schema.json, klaar voor de frontend.
+
+        Raises:
+            FileNotFoundError: Als het template niet gevonden wordt.
+        """
+        config = self.load(name)
+        today = date.today().isoformat()
+
+        _DEFAULT_DISCLAIMER = (
+            "Dit rapport is opgesteld door 3BM Bouwkunde en is uitsluitend "
+            "bedoeld voor de opdrachtgever. Verspreiding aan derden is niet "
+            "toegestaan zonder schriftelijke toestemming."
+        )
+
+        # Colofon
+        colofon_raw = config.colofon
+        colofon_enabled = colofon_raw.get("enabled", True) if colofon_raw else False
+        disclaimer = colofon_raw.get("disclaimer", "").strip() if colofon_raw else ""
+        if not disclaimer:
+            disclaimer = _DEFAULT_DISCLAIMER
+
+        colofon: dict[str, Any] = {
+            "enabled": colofon_enabled,
+            "extra_fields": {},
+            "revision_history": [
+                {
+                    "version": "0.1",
+                    "date": today,
+                    "author": "",
+                    "description": "Eerste opzet",
+                },
+            ],
+            "disclaimer": disclaimer,
+        }
+
+        # TOC
+        toc_raw = config.toc
+        toc: dict[str, Any] = {
+            "enabled": toc_raw.get("enabled", True) if toc_raw else False,
+            "title": toc_raw.get("title", "Inhoudsopgave") if toc_raw else "Inhoudsopgave",
+            "max_depth": toc_raw.get("max_depth", 3) if toc_raw else 3,
+        }
+
+        # Cover
+        cover_raw = config.cover
+        cover: dict[str, Any] = {
+            "subtitle": cover_raw.get("subtitle_hint", "") if cover_raw else "",
+        }
+
+        # Backcover
+        backcover_raw = config.backcover
+        backcover: dict[str, Any] = {
+            "enabled": backcover_raw.get("enabled", True) if backcover_raw else False,
+        }
+
+        scaffold: dict[str, Any] = {
+            "template": name,
+            "format": config.format,
+            "orientation": config.orientation,
+            "project": "",
+            "project_number": "",
+            "client": "",
+            "author": "3BM Bouwkunde",
+            "date": today,
+            "version": "1.0",
+            "status": "CONCEPT",
+            "report_type": config.report_type,
+            "cover": cover,
+            "colofon": colofon,
+            "toc": toc,
+            "sections": [],
+            "backcover": backcover,
+            "metadata": {},
+        }
+
+        return scaffold
+
+    def _resolve_path(self, name: str) -> Path:
+        """Resolve template naam naar bestandspad.
+
+        Zoekt in alle directories (tenant eerst). Bij niet gevonden,
+        retourneer het pad in de eerste directory (voor foutmelding).
+        """
+        filename = name if name.endswith(".yaml") else f"{name}.yaml"
+        for tdir in self._templates_dirs:
+            candidate = tdir / filename
+            if candidate.exists():
+                return candidate
+        # Niet gevonden — retourneer pad in eerste dir voor foutmelding
+        return self._templates_dirs[0] / filename

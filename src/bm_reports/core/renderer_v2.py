@@ -720,6 +720,31 @@ class ContentRenderer:
         """Resolve image source: file path or base64 dict."""
         return _resolve_image(src)
 
+    # --- Map ---
+
+    def map_block(self, block: dict) -> None:
+        """Render a map block placeholder (PDOK WMS not available in v2 yet)."""
+        s = self.blocks.get("paragraph", {})
+        x = s.get("x", 125.4)
+        max_w = s.get("max_width", 393.0)
+
+        self.y += 12
+        self._check_overflow(60)
+
+        # Placeholder box
+        rect = fitz.Rect(x, self.y, x + max_w, self.y + 50)
+        self.page.draw_rect(rect, color=_hex_to_rgb("#CCCCCC"), fill=_hex_to_rgb("#F0F0F0"))
+
+        center = block.get("center", {})
+        lat = center.get("lat", "?")
+        lon = center.get("lon", "?")
+        self._text(x + 8, self.y + 12, f"[Kaart: {lat}, {lon}]", "GothamBook", 9.5, "#666666")
+        layers = ", ".join(block.get("layers", []))
+        if layers:
+            self._text(x + 8, self.y + 28, f"Lagen: {layers}", "GothamBook", 8.0, "#999999")
+
+        self.y += 58
+
     # --- Spacer ---
 
     def spacer(self, block: dict) -> None:
@@ -881,6 +906,8 @@ class ContentRenderer:
             self.calculation(block)
         elif block_type == "check":
             self.check(block)
+        elif block_type == "map":
+            self.map_block(block)
         else:
             logger.warning("Unsupported block type: %s", block_type)
 

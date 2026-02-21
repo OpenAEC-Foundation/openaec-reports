@@ -35,6 +35,7 @@ interface GeoResult {
   type: string;
   lat: number;
   lon: number;
+  gekoppeld_perceel?: string[];
 }
 
 export function MapEditor({ block, onChange }: MapEditorProps) {
@@ -58,6 +59,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
   const [cadastral, setCadastral] = useState<CadastralInfo | null>(block.cadastral ?? null);
   const [isCadastralLoading, setIsCadastralLoading] = useState(false);
   const [cadastralError, setCadastralError] = useState('');
+  const [linkedPerceel, setLinkedPerceel] = useState<string | null>(null);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const suggestionsRef = useRef<HTMLDivElement>(null);
@@ -69,7 +71,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
       return;
     }
     try {
-      const res = await fetch(`${PDOK_SUGGEST_URL}?q=${encodeURIComponent(q)}&rows=5`);
+      const res = await fetch(`${PDOK_SUGGEST_URL}?q=${encodeURIComponent(q)}&rows=5&fl=*`);
       const data = await res.json();
       const docs = data?.response?.docs ?? [];
       const results: GeoResult[] = [];
@@ -83,6 +85,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
             type: doc.type ?? '',
             lat: parseFloat(coords[1]),
             lon: parseFloat(coords[0]),
+            gekoppeld_perceel: doc.gekoppeld_perceel ?? undefined,
           });
         }
       }
@@ -108,6 +111,8 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
     // Clear cadastral when address changes
     setCadastral(null);
     setCadastralError('');
+    // Store linked parcel ID from BAG for accurate cadastral lookup
+    setLinkedPerceel(result.gekoppeld_perceel?.[0] ?? null);
 
     onChange({
       address: result.weergavenaam,
@@ -163,24 +168,46 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
     setIsCadastralLoading(true);
     setCadastralError('');
     try {
-      const res = await fetch(
-        `${PDOK_REVERSE_URL}?lat=${resolvedCoords.lat}&lon=${resolvedCoords.lon}&type=perceel&rows=1&fl=*`
-      );
-      const data = await res.json();
-      const docs = data?.response?.docs ?? [];
-      if (docs.length === 0) {
+      let doc: Record<string, unknown> | null = null;
+
+      // Strategy 1: Use gekoppeld_perceel from BAG (accurate, linked to address)
+      if (linkedPerceel) {
+        const res = await fetch(
+          `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=${encodeURIComponent(linkedPerceel)}&fq=type:perceel&rows=1&fl=*`
+        );
+        const data = await res.json();
+        const docs = data?.response?.docs ?? [];
+        // Verify we got the right parcel (exact match on identificatie)
+        if (docs.length > 0 && docs[0].identificatie === linkedPerceel) {
+          doc = docs[0];
+        }
+      }
+
+      // Strategy 2: Fallback to reverse geocode on coordinates
+      if (!doc) {
+        const res = await fetch(
+          `${PDOK_REVERSE_URL}?lat=${resolvedCoords.lat}&lon=${resolvedCoords.lon}&type=perceel&rows=1&fl=*`
+        );
+        const data = await res.json();
+        const docs = data?.response?.docs ?? [];
+        if (docs.length > 0) {
+          doc = docs[0];
+        }
+      }
+
+      if (!doc) {
         setCadastralError('Geen kadastraal perceel gevonden op deze locatie.');
         return;
       }
-      const doc = docs[0];
+
       const info: CadastralInfo = {
-        identificatie: doc.identificatie ?? '',
-        gemeentecode: doc.kadastrale_gemeentecode ?? '',
-        gemeentenaam: doc.kadastrale_gemeentenaam ?? '',
-        sectie: doc.kadastrale_sectie ?? '',
-        perceelnummer: doc.perceelnummer ?? '',
-        grootte: doc.kadastrale_grootte ?? 0,
-        weergavenaam: doc.weergavenaam ?? '',
+        identificatie: (doc.identificatie as string) ?? '',
+        gemeentecode: (doc.kadastrale_gemeentecode as string) ?? '',
+        gemeentenaam: (doc.kadastrale_gemeentenaam as string) ?? '',
+        sectie: (doc.kadastrale_sectie as string) ?? '',
+        perceelnummer: (doc.perceelnummer as string) ?? '',
+        grootte: (doc.kadastrale_grootte as number) ?? 0,
+        weergavenaam: (doc.weergavenaam as string) ?? '',
       };
       setCadastral(info);
       onChange({ cadastral: info });
@@ -559,6 +586,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
           setResolvedCoords({ lat, lon });
           setCadastral(null);
           setCadastralError('');
+          setLinkedPerceel(null);
           onChange({ center: { lat, lon }, cadastral: undefined });
           updatePreview(lat, lon, zoom, layers[0] ?? 'brt');
         }}

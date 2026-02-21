@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useReportStore } from '@/stores/reportStore';
 import { BlockIcon } from '@/components/shared/BlockIcons';
 import type { EditableBlockType } from '@/types/report';
@@ -29,11 +29,22 @@ interface BlockToolboxProps {
 
 export function BlockToolbox({ sectionId, onAdd }: BlockToolboxProps) {
   const [open, setOpen] = useState(false);
+  const [openUp, setOpenUp] = useState(false);
   const addNewBlock = useReportStore((s) => s.addNewBlock);
   const menuRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+
+  const calcDirection = useCallback(() => {
+    if (!btnRef.current) return;
+    const rect = btnRef.current.getBoundingClientRect();
+    const menuHeight = BLOCK_OPTIONS.length * 40 + 8; // approx
+    const spaceBelow = window.innerHeight - rect.bottom;
+    setOpenUp(spaceBelow < menuHeight && rect.top > menuHeight);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
+    calcDirection();
     function handleClickOutside(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpen(false);
@@ -41,7 +52,7 @@ export function BlockToolbox({ sectionId, onAdd }: BlockToolboxProps) {
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [open]);
+  }, [open, calcDirection]);
 
   function handleAdd(type: EditableBlockType) {
     if (onAdd) {
@@ -55,6 +66,7 @@ export function BlockToolbox({ sectionId, onAdd }: BlockToolboxProps) {
   return (
     <div className="relative" ref={menuRef}>
       <button
+        ref={btnRef}
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 rounded-md border border-dashed border-gray-300 px-3 py-2 text-sm text-gray-500 hover:border-brand-primary hover:text-brand-primary-dark transition-colors"
       >
@@ -65,7 +77,9 @@ export function BlockToolbox({ sectionId, onAdd }: BlockToolboxProps) {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-20 mt-1 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+        <div className={`absolute left-0 z-20 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg max-h-[calc(100vh-120px)] overflow-y-auto ${
+          openUp ? 'bottom-full mb-1' : 'top-full mt-1'
+        }`}>
           {BLOCK_OPTIONS.map((opt) => (
             <button
               key={opt.type}

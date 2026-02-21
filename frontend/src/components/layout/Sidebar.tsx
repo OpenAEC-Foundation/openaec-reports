@@ -487,9 +487,16 @@ export function Sidebar() {
                     onToggleCollapse={() => toggleCollapse(section.id)}
                   />
                   {confirmDeleteId === section.id && (
-                    <div className="absolute right-0 top-0 z-10 rounded bg-red-600 px-2 py-1 text-xs text-white shadow-md">
-                      Nogmaals klikken om te verwijderen
-                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeSection(section.id);
+                        setConfirmDeleteId(null);
+                      }}
+                      className="absolute right-7 top-1 z-10 rounded bg-red-600 px-2 py-1 text-xs text-white shadow-md hover:bg-red-700 transition-colors cursor-pointer"
+                    >
+                      Klik om te verwijderen
+                    </button>
                   )}
                 </div>
               ))}
@@ -542,9 +549,16 @@ export function Sidebar() {
                     onRemove={() => handleConfirmDelete(appendix.id, removeAppendix)}
                   />
                   {confirmDeleteId === appendix.id && (
-                    <div className="absolute right-0 top-0 z-10 rounded bg-red-600 px-2 py-1 text-xs text-white shadow-md">
-                      Nogmaals klikken om te verwijderen
-                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeAppendix(appendix.id);
+                        setConfirmDeleteId(null);
+                      }}
+                      className="absolute right-7 top-1 z-10 rounded bg-red-600 px-2 py-1 text-xs text-white shadow-md hover:bg-red-700 transition-colors cursor-pointer"
+                    >
+                      Klik om te verwijderen
+                    </button>
                   )}
                 </div>
               ))}

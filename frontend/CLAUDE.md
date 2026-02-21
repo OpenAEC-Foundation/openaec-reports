@@ -18,16 +18,16 @@ npm run build        # Productie build naar dist/
 
 ## Context
 
-Dit project is **Layer 3** van een drielaags platform:
+Dit project is **Layer 3** van een drielaags platform, nu een **monorepo** (`openaec-reports`):
 
 ```
-Layer 1: LIBRARY (bm-reports)         ← Python, ReportLab — APART PROJECT
+Layer 1: LIBRARY (bm-reports)         ← ../src/bm_reports/ (zelfde repo)
          Consumeert JSON → genereert PDF
 
-Layer 2: API SERVER (bm-reports-api)  ← FastAPI in bm-reports/api.py
+Layer 2: API SERVER (bm-reports-api)  ← ../src/bm_reports/api.py
          POST JSON → ontvang PDF
 
-Layer 3: FRONTEND (bm-reports-ui)     ← DIT PROJECT
+Layer 3: FRONTEND (bm-reports-ui)     ← DIT DIRECTORY (frontend/)
          Visuele editor → produceert JSON
 ```
 
@@ -147,20 +147,19 @@ Conversie: `reportStore` state → API JSON via `utils/conversion.ts`
 
 ---
 
-## Relatie met Library Project
+## Relatie met Backend (Monorepo)
 
 ```
-Report_generator/                    <- Python library (bm-reports)
+openaec-reports/                     <- Monorepo
 ├── schemas/
 │   ├── report.schema.json          <- BRON — schema wordt hier beheerd
 │   └── example_structural.json     <- Testdata
-└── src/bm_reports/                 <- Python code
-
-Report_generator_frontend/           <- Dit project (bm-reports-ui)
-├── schemas/
-│   ├── report.schema.json          <- KOPIE — niet wijzigen
-│   └── example_structural.json     <- Testdata voor development
-└── src/                            <- React/TypeScript code
+├── src/bm_reports/                 <- Python library + API
+├── frontend/                       <- DIT DIRECTORY
+│   ├── schemas/
+│   │   └── report.schema.json      <- KOPIE — niet wijzigen
+│   └── src/                        <- React/TypeScript code
+└── Dockerfile                      <- Multi-stage: node build + python runtime
 ```
 
 ---

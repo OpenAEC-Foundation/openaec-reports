@@ -70,8 +70,7 @@ src/bm_reports/
 | **core/template_loader.py** | ✅ Compleet | ✅ test_templates.py + test_template_scaffold.py | 94% |
 | **core/toc.py** | ✅ Compleet | ✅ via integratietests | 100% |
 | **core/fonts.py** | ✅ Compleet | — | 66% |
-| **core/template_renderer.py** | ⚠️ Dead code | — | 0% (niet geimporteerd) |
-| **core/template_schema.py** | ⚠️ Dead code | — | 0% (niet geimporteerd) |
+| **core/renderer_v2.py** | ✅ Compleet | ✅ test_renderer_v2.py (52 tests) | — |
 | **components/calculation.py** | ✅ Compleet | ✅ test_engine.py | 100% |
 | **components/check_block.py** | ✅ Compleet | ✅ test_block_registry.py | 100% |
 | **components/table_block.py** | ✅ Compleet | ✅ test_block_registry.py | 97% |
@@ -116,7 +115,7 @@ tests/
 └── test_templates.py              ✅ 10 tests
 ```
 
-**Totaal:** 555 tests (553 pass, 2 fail: pdfrw niet geïnstalleerd) | **Coverage:** 75% | **Dead code:** template_renderer.py, template_schema.py, reports/
+**Totaal:** 577 tests (575 pass, 2 fail: pdfrw niet geïnstalleerd) | **Coverage:** 75%
 
 ## API Endpoints
 

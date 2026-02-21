@@ -45,3 +45,12 @@ frontend/dist/
 # Claude Code
 SESSION_STATUS.md
 .claude/
+CLAUDE.md
+
+# Development artifacts (prompts, analysis, archive)
+_archive/
+huisstijl/
+DIAGNOSE_*.md
+PROMPT_*.md
+frontend/_archive/
+frontend/PROMPT_*.md

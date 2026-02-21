@@ -1,5 +1,12 @@
-# ---- API-only container ----
-# Frontend wordt apart gedeployed via Caddy static files
+# ---- Stage 1: Frontend build ----
+FROM node:20-alpine AS frontend-build
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ ./
+RUN npm run build
+
+# ---- Stage 2: Python runtime ----
 FROM python:3.12-slim
 
 WORKDIR /app
@@ -19,6 +26,9 @@ COPY src/ ./src/
 COPY schemas/ ./schemas/
 COPY tenants/ ./tenants/
 RUN pip install --no-cache-dir .
+
+# Frontend dist van stage 1
+COPY --from=frontend-build /app/frontend/dist /app/static
 
 RUN mkdir -p /app/uploads
 

@@ -10,7 +10,7 @@ export type Orientation = 'portrait' | 'landscape';
 export type Status = 'CONCEPT' | 'DEFINITIEF' | 'REVISIE';
 export type TableStyle = 'default' | 'minimal' | 'striped';
 export type ImageAlignment = 'left' | 'center' | 'right';
-export type MapLayer = 'percelen' | 'bebouwing' | 'bestemmingsplan' | 'luchtfoto';
+export type MapLayer = 'brt' | 'brt_grijs' | 'luchtfoto' | 'kadastraal';
 export type CheckResult = 'VOLDOET' | 'VOLDOET NIET';
 export type ImageMediaType = 'image/png' | 'image/jpeg' | 'image/svg+xml';
 
@@ -129,11 +129,13 @@ export interface MapBBox {
 
 export interface MapBlock {
   type: 'map';
+  address?: string;
   center?: MapCenter;
   bbox?: MapBBox;
-  radius_m?: number;
+  zoom?: number;
   layers?: MapLayer[];
   width_mm?: number;
+  height_mm?: number;
   caption?: string;
 }
 

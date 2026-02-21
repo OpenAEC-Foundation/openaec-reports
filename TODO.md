@@ -45,17 +45,6 @@
 
 ---
 
-## 🟡 P2 — Opschonen
-
-**Prompt:** `PROMPT_P2_CLEANUP.md`
-
-- [ ] ~50 `pytest-cache-files-*` mappen verwijderen
-- [ ] Afgeronde PROMPT bestanden archiveren naar `_archive/`
-- [ ] `CLAUDE.md` actualiseren (beide repos)
-- [ ] Dead code verwijderen: `template_renderer.py`, `template_schema.py`
-
----
-
 ## 🟢 P5 — Toekomstige Features
 
 ### Multi-bureau support
@@ -110,3 +99,5 @@
 | **Multi-stage Dockerfile (node build + python runtime)** | **Week 8** |
 | **StaticFiles mount in FastAPI (SPA serving)** | **Week 8** |
 | **Vite dev proxy voor lokale ontwikkeling** | **Week 8** |
+| **JSON alignment fixes (6 fixes, 22 tests)** | **Week 8** |
+| **P2: Opschonen — dead code, docs archiveren, CLAUDE.md** | **Week 8** |

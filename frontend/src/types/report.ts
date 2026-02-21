@@ -127,6 +127,16 @@ export interface MapBBox {
   max_y?: number;
 }
 
+export interface CadastralInfo {
+  identificatie: string;     // "LDN03-H-8575"
+  gemeentecode: string;      // "LDN03"
+  gemeentenaam: string;      // "Loosduinen"
+  sectie: string;            // "H"
+  perceelnummer: number | string;
+  grootte: number;           // m²
+  weergavenaam?: string;
+}
+
 export interface MapBlock {
   type: 'map';
   address?: string;
@@ -137,6 +147,7 @@ export interface MapBlock {
   width_mm?: number;
   height_mm?: number;
   caption?: string;
+  cadastral?: CadastralInfo;
 }
 
 export interface SpacerBlock {

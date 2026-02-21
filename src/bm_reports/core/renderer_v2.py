@@ -891,7 +891,7 @@ class ContentRenderer:
     # --- Map ---
 
     def map_block(self, block: dict) -> None:
-        """Render map images from PDOK WMS services.
+        """Render map images from PDOK services with POI marker.
 
         Accepts:
             address: Dutch address string (geocoded via PDOK)
@@ -900,6 +900,13 @@ class ContentRenderer:
             layers: List of layer keys: "brt", "brt_grijs", "luchtfoto", "kadastraal"
             width_mm: Image width in report (default: full content width)
             height_mm: Image height in report (default: auto from aspect)
+            cadastral: Optional dict with kadastrale gegevens:
+                - identificatie: "LDN03-H-8575"
+                - gemeentecode: "LDN03"
+                - gemeentenaam: "Loosduinen"
+                - sectie: "H"
+                - perceelnummer: 8575
+                - grootte: area in m²
         """
         from bm_reports.core.map_generator import MapGenerator
 
@@ -916,6 +923,7 @@ class ContentRenderer:
         width_mm = block.get("width_mm")
         height_mm = block.get("height_mm")
         caption = block.get("caption", "")
+        cadastral = block.get("cadastral")
 
         # Normalize layer names
         layer_map = {
@@ -929,14 +937,13 @@ class ContentRenderer:
         # Calculate image dimensions in points
         target_w = (width_mm * 2.8346) if width_mm else max_w
         target_w = min(target_w, max_w)
-        # Aspect ratio: 3:2 default (landscape)
         if height_mm:
             target_h = height_mm * 2.8346
         else:
             target_h = target_w * 0.667  # 3:2
 
         # WMS pixel dimensions (higher res for print quality)
-        px_w = int(target_w * 2.5)  # ~300dpi equivalent
+        px_w = int(target_w * 2.5)
         px_h = int(target_h * 2.5)
 
         try:
@@ -946,14 +953,15 @@ class ContentRenderer:
                 maps = gen.generate_maps(
                     address, layers=normalized_layers,
                     zoom=zoom, width_px=px_w, height_px=px_h,
+                    show_poi=True,
                 )
             elif lat is not None and lon is not None:
                 maps = gen.generate_maps_from_coords(
                     lat, lon, layers=normalized_layers,
                     zoom=zoom, width_px=px_w, height_px=px_h,
+                    show_poi=True,
                 )
             else:
-                # No location data
                 self.y += 12
                 self._text(x, self.y, "[Kaart: geen adres of coördinaten opgegeven]",
                            "GothamBook", 9.5, "#FF0000")
@@ -973,7 +981,7 @@ class ContentRenderer:
                 img_path = map_result["path"]
                 map_caption = caption or map_result.get("caption", "")
 
-                needed = target_h + 24  # image + caption
+                needed = target_h + 24
                 self._check_overflow(needed)
 
                 self.y += 8
@@ -986,18 +994,20 @@ class ContentRenderer:
                                "GothamBook", 9.5, "#FF0000")
                 self.y += target_h + 4
 
-                # Caption
                 if map_caption:
                     self._text(x, self.y, map_caption, "GothamBook", 8.0, "#401246")
                     self.y += 14
 
                 self.y += 8
 
-                # Clean up temp file
                 try:
                     img_path.unlink(missing_ok=True)
                 except Exception:
                     pass
+
+            # Render cadastral info below all maps
+            if cadastral:
+                self._render_cadastral_info(x, max_w, cadastral)
 
         except ImportError:
             logger.warning("Map generator dependencies not available")
@@ -1010,6 +1020,63 @@ class ContentRenderer:
             self.y += 12
             self._text(x, self.y, f"[Kaart fout: {e}]", "GothamBook", 9.5, "#FF0000")
             self.y += 20
+
+    def _render_cadastral_info(self, x: float, max_w: float, cadastral: dict) -> None:
+        """Render cadastral parcel information below map images.
+        
+        Renders a styled info box with:
+        - Kadastraal perceel: GEM-SECTIE-NUMMER
+        - Gemeente: naam (code)
+        - Oppervlakte: xxx m²
+        """
+        identificatie = cadastral.get("identificatie", "")
+        gemeentenaam = cadastral.get("gemeentenaam", "")
+        gemeentecode = cadastral.get("gemeentecode", "")
+        grootte = cadastral.get("grootte", 0)
+
+        if not identificatie:
+            return
+
+        # Calculate block height
+        lines = 1  # perceel ID
+        if gemeentenaam:
+            lines += 1
+        if grootte:
+            lines += 1
+        block_h = lines * 14 + 12  # line height + padding
+
+        self._check_overflow(block_h + 8)
+
+        # Light background box
+        bg_rect = fitz.Rect(x, self.y, x + max_w, self.y + block_h)
+        self.page.draw_rect(bg_rect, color=None, fill=_hex_to_rgb("#F8F8F8"))
+        # Left accent bar
+        accent_rect = fitz.Rect(x, self.y, x + 3, self.y + block_h)
+        self.page.draw_rect(accent_rect, color=None, fill=_hex_to_rgb("#56B49B"))
+
+        inner_x = x + 10
+        y_line = self.y + 4
+
+        # Perceel identification (bold)
+        self._text(inner_x, y_line, f"Kadastraal perceel:  {identificatie}",
+                   "GothamBold", 8.5, "#401246")
+        y_line += 14
+
+        # Gemeente
+        if gemeentenaam:
+            gem_str = f"Kadastrale gemeente:  {gemeentenaam}"
+            if gemeentecode:
+                gem_str += f" ({gemeentecode})"
+            self._text(inner_x, y_line, gem_str, "GothamBook", 8.5, "#401246")
+            y_line += 14
+
+        # Oppervlakte
+        if grootte:
+            opp_str = f"Perceeloppervlakte:  {grootte:,.0f} m²".replace(",", ".")
+            self._text(inner_x, y_line, opp_str, "GothamBook", 8.5, "#401246")
+            y_line += 14
+
+        self.y += block_h + 8
 
     # --- Spacer ---
 

@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import type { MapBlock, MapLayer } from '@/types/report';
+import type { MapBlock, MapLayer, CadastralInfo } from '@/types/report';
 
 interface MapEditorProps {
   block: MapBlock & { id: string };
@@ -26,8 +26,8 @@ const ZOOM_LABELS: Record<number, string> = {
   18: 'Perceel (~1:1k)',
 };
 
-// PDOK Locatieserver — publieke API, CORS-enabled
 const PDOK_SUGGEST_URL = 'https://api.pdok.nl/bzk/locatieserver/search/v3_1/suggest';
+const PDOK_REVERSE_URL = 'https://api.pdok.nl/bzk/locatieserver/search/v3_1/reverse';
 
 interface GeoResult {
   id: string;
@@ -53,6 +53,11 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
   );
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // Cadastral state
+  const [cadastral, setCadastral] = useState<CadastralInfo | null>(block.cadastral ?? null);
+  const [isCadastralLoading, setIsCadastralLoading] = useState(false);
+  const [cadastralError, setCadastralError] = useState('');
 
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const suggestionsRef = useRef<HTMLDivElement>(null);
@@ -100,24 +105,24 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
     setResolvedCoords({ lat: result.lat, lon: result.lon });
     setShowSuggestions(false);
     setSuggestions([]);
+    // Clear cadastral when address changes
+    setCadastral(null);
+    setCadastralError('');
 
     onChange({
       address: result.weergavenaam,
       center: { lat: result.lat, lon: result.lon },
+      cadastral: undefined,
     });
 
-    // Generate preview
     updatePreview(result.lat, result.lon, zoom, layers[0] ?? 'brt');
   }
 
   function handleAddressBlur() {
-    // Delay to allow click on suggestion
     setTimeout(() => setShowSuggestions(false), 200);
 
     if (address !== (block.address ?? '')) {
       onChange({ address });
-
-      // If no coords yet, try geocoding the typed address
       if (!resolvedCoords && address.length >= 3) {
         geocodeAddress(address);
       }
@@ -146,15 +151,54 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
         }
       }
     } catch {
-      // Geocoding fails silently — backend will retry
+      // silent
     } finally {
       setIsGeocoding(false);
     }
   }
 
+  // --- Cadastral lookup ---
+  async function lookupCadastral() {
+    if (!resolvedCoords) return;
+    setIsCadastralLoading(true);
+    setCadastralError('');
+    try {
+      const res = await fetch(
+        `${PDOK_REVERSE_URL}?lat=${resolvedCoords.lat}&lon=${resolvedCoords.lon}&type=perceel&rows=1&fl=*`
+      );
+      const data = await res.json();
+      const docs = data?.response?.docs ?? [];
+      if (docs.length === 0) {
+        setCadastralError('Geen kadastraal perceel gevonden op deze locatie.');
+        return;
+      }
+      const doc = docs[0];
+      const info: CadastralInfo = {
+        identificatie: doc.identificatie ?? '',
+        gemeentecode: doc.kadastrale_gemeentecode ?? '',
+        gemeentenaam: doc.kadastrale_gemeentenaam ?? '',
+        sectie: doc.kadastrale_sectie ?? '',
+        perceelnummer: doc.perceelnummer ?? '',
+        grootte: doc.kadastrale_grootte ?? 0,
+        weergavenaam: doc.weergavenaam ?? '',
+      };
+      setCadastral(info);
+      onChange({ cadastral: info });
+    } catch {
+      setCadastralError('Fout bij ophalen kadastrale gegevens.');
+    } finally {
+      setIsCadastralLoading(false);
+    }
+  }
+
+  function removeCadastral() {
+    setCadastral(null);
+    setCadastralError('');
+    onChange({ cadastral: undefined });
+  }
+
   // --- Map preview ---
   function updatePreview(lat: number, lon: number, z: number, layer: string) {
-    // BRT layers use WMTS tiles, others use WMS
     const wmtsLayers: Record<string, string> = {
       brt: 'standaard',
       brt_grijs: 'grijs',
@@ -162,9 +206,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
 
     const wmtsLayer = wmtsLayers[layer];
     if (wmtsLayer) {
-      // WMTS: calculate tile x,y from lat/lon at zoom level
       const latRad = (lat * Math.PI) / 180;
-      // Use z-1 for wider preview coverage
       const pz = Math.max(z - 1, 10);
       const pn = Math.pow(2, pz);
       const px = Math.floor(((lon + 180) / 360) * pn);
@@ -175,7 +217,6 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
       return;
     }
 
-    // WMS services (luchtfoto, kadastraal)
     const wmsServices: Record<string, { url: string; layers: string }> = {
       luchtfoto: { url: 'https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0', layers: 'Actueel_orthoHR' },
       kadastraal: { url: 'https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0', layers: 'Kadastralekaart' },
@@ -195,56 +236,43 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
     const bbox = `${lat - dlat},${lon - dlon},${lat + dlat},${lon + dlon}`;
 
     const params = new URLSearchParams({
-      SERVICE: 'WMS',
-      VERSION: '1.3.0',
-      REQUEST: 'GetMap',
-      LAYERS: svc.layers,
-      CRS: 'EPSG:4326',
-      BBOX: bbox,
-      WIDTH: '400',
-      HEIGHT: '266',
-      FORMAT: 'image/png',
-      STYLES: '',
+      SERVICE: 'WMS', VERSION: '1.3.0', REQUEST: 'GetMap',
+      LAYERS: svc.layers, CRS: 'EPSG:4326', BBOX: bbox,
+      WIDTH: '400', HEIGHT: '266', FORMAT: 'image/png', STYLES: '',
     });
     setPreviewUrl(`${svc.url}?${params.toString()}`);
   }
 
-  // Update preview when zoom or layers change
   useEffect(() => {
     if (resolvedCoords) {
       updatePreview(resolvedCoords.lat, resolvedCoords.lon, zoom, layers[0] ?? 'brt');
     }
   }, [zoom, layers, resolvedCoords]);
 
-  // --- Layer toggle ---
   function handleLayerToggle(layer: MapLayer) {
     const newLayers = layers.includes(layer)
       ? layers.filter((l) => l !== layer)
       : [...layers, layer];
-    if (newLayers.length === 0) return; // Minimaal 1 laag
+    if (newLayers.length === 0) return;
     setLayers(newLayers);
     onChange({ layers: newLayers });
   }
 
-  // --- Zoom ---
   function handleZoomChange(value: number) {
     setZoom(value);
     onChange({ zoom: value });
   }
 
-  // --- Caption ---
   function handleCaptionBlur() {
     if (caption !== (block.caption ?? '')) {
       onChange({ caption: caption || undefined });
     }
   }
 
-  // --- Width ---
   function handleWidthCommit() {
     onChange({ width_mm: widthMm });
   }
 
-  // Close suggestions on outside click
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node)) {
@@ -318,7 +346,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
 
       {/* Map preview */}
       {previewUrl && (
-        <div className="rounded-md overflow-hidden border border-gray-200 bg-gray-100">
+        <div className="rounded-md overflow-hidden border border-gray-200 bg-gray-100 relative">
           <img
             src={previewUrl}
             alt="Kaart preview"
@@ -328,6 +356,15 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
               (e.target as HTMLImageElement).style.display = 'none';
             }}
           />
+          {/* Red POI marker overlay (center of preview) */}
+          {resolvedCoords && (
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full pointer-events-none">
+              <svg width="28" height="40" viewBox="0 0 28 40" fill="none">
+                <path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 26 14 26s14-15.5 14-26C28 6.268 21.732 0 14 0z" fill="#DC2626" stroke="#fff" strokeWidth="2"/>
+                <circle cx="14" cy="14" r="5" fill="#fff"/>
+              </svg>
+            </div>
+          )}
         </div>
       )}
 
@@ -423,13 +460,106 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
         </div>
       </div>
 
+      {/* Cadastral lookup */}
+      <div className="border-t border-gray-100 pt-3">
+        <label className={labelClass}>Kadastrale gegevens</label>
+
+        {!cadastral ? (
+          <div className="space-y-2">
+            <button
+              type="button"
+              disabled={!resolvedCoords || isCadastralLoading}
+              onClick={lookupCadastral}
+              className={`flex items-center gap-2 rounded border px-3 py-2 text-xs font-medium transition-colors ${
+                resolvedCoords && !isCadastralLoading
+                  ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100'
+                  : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              {isCadastralLoading ? (
+                <>
+                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Ophalen…
+                </>
+              ) : (
+                <>
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                  </svg>
+                  Kadastrale gegevens ophalen
+                </>
+              )}
+            </button>
+            {!resolvedCoords && (
+              <p className="text-[10px] text-gray-400">Selecteer eerst een adres om kadastrale gegevens op te halen.</p>
+            )}
+            {cadastralError && (
+              <p className="text-[11px] text-red-500">{cadastralError}</p>
+            )}
+          </div>
+        ) : (
+          <div className="rounded-md border border-amber-200 bg-amber-50 p-3 space-y-1.5">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <svg className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                  </svg>
+                  <span className="text-sm font-bold text-amber-800 font-mono tracking-wide">
+                    {cadastral.identificatie}
+                  </span>
+                </div>
+                <div className="text-[11px] text-amber-700 pl-6 space-y-0.5">
+                  <div>
+                    <span className="text-amber-500">Gemeente:</span>{' '}
+                    {cadastral.gemeentenaam}
+                    {cadastral.gemeentecode && (
+                      <span className="text-amber-400 ml-1">({cadastral.gemeentecode})</span>
+                    )}
+                  </div>
+                  <div>
+                    <span className="text-amber-500">Sectie:</span> {cadastral.sectie}
+                    {' · '}
+                    <span className="text-amber-500">Perceelnr:</span> {cadastral.perceelnummer}
+                  </div>
+                  {cadastral.grootte > 0 && (
+                    <div>
+                      <span className="text-amber-500">Oppervlakte:</span>{' '}
+                      {cadastral.grootte.toLocaleString('nl-NL')} m²
+                    </div>
+                  )}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={removeCadastral}
+                title="Kadastrale gegevens verwijderen"
+                className="text-amber-400 hover:text-red-500 transition-colors p-1"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p className="text-[10px] text-amber-500 pl-6">
+              Wordt onder de kaartafbeelding(en) in het rapport getoond.
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* Manual coordinates (collapsible) */}
       <ManualCoords
         lat={resolvedCoords?.lat}
         lon={resolvedCoords?.lon}
         onUpdate={(lat, lon) => {
           setResolvedCoords({ lat, lon });
-          onChange({ center: { lat, lon } });
+          setCadastral(null);
+          setCadastralError('');
+          onChange({ center: { lat, lon }, cadastral: undefined });
           updatePreview(lat, lon, zoom, layers[0] ?? 'brt');
         }}
       />
@@ -451,7 +581,6 @@ function ManualCoords({
   const [latVal, setLatVal] = useState(lat ?? 52.0907);
   const [lonVal, setLonVal] = useState(lon ?? 5.1214);
 
-  // Sync when parent changes
   useEffect(() => {
     if (lat !== undefined) setLatVal(lat);
     if (lon !== undefined) setLonVal(lon);

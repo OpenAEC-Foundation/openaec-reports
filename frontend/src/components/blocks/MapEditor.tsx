@@ -28,7 +28,6 @@ const ZOOM_LABELS: Record<number, string> = {
 
 // PDOK Locatieserver — publieke API, CORS-enabled
 const PDOK_SUGGEST_URL = 'https://api.pdok.nl/bzk/locatieserver/search/v3_1/suggest';
-const PDOK_LOOKUP_URL = 'https://api.pdok.nl/bzk/locatieserver/search/v3_1/lookup';
 
 interface GeoResult {
   id: string;
@@ -169,12 +168,12 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
       kadastraal: { url: 'https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0', layers: 'Kadastralekaart' },
     };
 
-    const svc = serviceUrls[layer] ?? serviceUrls.brt;
+    const svc = serviceUrls[layer] ?? serviceUrls['brt'];
     const params = new URLSearchParams({
       SERVICE: 'WMS',
       VERSION: '1.3.0',
       REQUEST: 'GetMap',
-      LAYERS: svc.layers,
+      LAYERS: svc!.layers,
       CRS: 'EPSG:4326',
       BBOX: bbox,
       WIDTH: '400',
@@ -182,7 +181,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
       FORMAT: 'image/png',
       STYLES: '',
     });
-    setPreviewUrl(`${svc.url}?${params.toString()}`);
+    setPreviewUrl(`${svc!.url}?${params.toString()}`);
   }
 
   // Update preview when zoom or layers change

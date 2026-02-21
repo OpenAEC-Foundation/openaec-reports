@@ -152,8 +152,41 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
     }
   }
 
-  // --- WMS preview ---
+  // --- Map preview ---
   function updatePreview(lat: number, lon: number, z: number, layer: string) {
+    // BRT layers use WMTS tiles, others use WMS
+    const wmtsLayers: Record<string, string> = {
+      brt: 'standaard',
+      brt_grijs: 'grijs',
+    };
+
+    const wmtsLayer = wmtsLayers[layer];
+    if (wmtsLayer) {
+      // WMTS: calculate tile x,y from lat/lon at zoom level
+      const latRad = (lat * Math.PI) / 180;
+      // Use z-1 for wider preview coverage
+      const pz = Math.max(z - 1, 10);
+      const pn = Math.pow(2, pz);
+      const px = Math.floor(((lon + 180) / 360) * pn);
+      const py = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * pn);
+      setPreviewUrl(
+        `https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/${wmtsLayer}/EPSG:3857/${pz}/${px}/${py}.png`
+      );
+      return;
+    }
+
+    // WMS services (luchtfoto, kadastraal)
+    const wmsServices: Record<string, { url: string; layers: string }> = {
+      luchtfoto: { url: 'https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0', layers: 'Actueel_orthoHR' },
+      kadastraal: { url: 'https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0', layers: 'Kadastralekaart' },
+    };
+
+    const svc = wmsServices[layer];
+    if (!svc) {
+      setPreviewUrl(null);
+      return;
+    }
+
     const metersPerPx = (156543.03 * Math.cos((lat * Math.PI) / 180)) / Math.pow(2, z);
     const halfW = 200 * metersPerPx;
     const halfH = 133 * metersPerPx;
@@ -161,19 +194,11 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
     const dlon = halfW / (111320.0 * Math.cos((lat * Math.PI) / 180));
     const bbox = `${lat - dlat},${lon - dlon},${lat + dlat},${lon + dlon}`;
 
-    const serviceUrls: Record<string, { url: string; layers: string }> = {
-      brt: { url: 'https://service.pdok.nl/brt/achtergrondkaart/wms/v2_0', layers: 'standaard' },
-      brt_grijs: { url: 'https://service.pdok.nl/brt/achtergrondkaart/wms/v2_0', layers: 'grijs' },
-      luchtfoto: { url: 'https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0', layers: 'Actueel_orthoHR' },
-      kadastraal: { url: 'https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0', layers: 'Kadastralekaart' },
-    };
-
-    const svc = serviceUrls[layer] ?? serviceUrls['brt'];
     const params = new URLSearchParams({
       SERVICE: 'WMS',
       VERSION: '1.3.0',
       REQUEST: 'GetMap',
-      LAYERS: svc!.layers,
+      LAYERS: svc.layers,
       CRS: 'EPSG:4326',
       BBOX: bbox,
       WIDTH: '400',
@@ -181,7 +206,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
       FORMAT: 'image/png',
       STYLES: '',
     });
-    setPreviewUrl(`${svc!.url}?${params.toString()}`);
+    setPreviewUrl(`${svc.url}?${params.toString()}`);
   }
 
   // Update preview when zoom or layers change

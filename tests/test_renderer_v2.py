@@ -10,7 +10,7 @@ fitz = pytest.importorskip("fitz", reason="pymupdf niet geinstalleerd")
 
 from bm_reports.core.renderer_v2 import (
     ReportGeneratorV2, TemplateSet, FontManager, ContentRenderer,
-    CoverGenerator, ColofonGenerator, _hex_to_rgb, _strip_html,
+    CoverGenerator, ColofonGenerator, _hex_to_rgb, _strip_html, _resolve_image,
 )
 
 BASE = Path(__file__).parent.parent
@@ -61,6 +61,35 @@ class TestStripHtml:
     def test_no_html_shortcircuit(self):
         # No < in text → fast path
         assert _strip_html("Geen tags hier") == "Geen tags hier"
+
+
+class TestResolveImage:
+    def test_none_returns_none(self):
+        assert _resolve_image(None) is None
+
+    def test_empty_string_returns_none(self):
+        assert _resolve_image("") is None
+
+    def test_nonexistent_path_returns_none(self):
+        assert _resolve_image("/nonexistent/path.png") is None
+
+    def test_existing_file(self, tmp_path):
+        img = tmp_path / "test.png"
+        img.write_bytes(b"\x89PNG\r\n\x1a\n")
+        result = _resolve_image(str(img))
+        assert result == img
+
+    def test_base64_dict(self):
+        import base64
+        data = base64.b64encode(b"\x89PNG\r\n\x1a\nfakedata").decode()
+        result = _resolve_image({"data": data, "media_type": "image/png"})
+        assert result is not None
+        assert result.exists()
+        result.unlink()  # cleanup
+
+    def test_base64_invalid_data(self):
+        result = _resolve_image({"data": "!!!invalid!!!", "media_type": "image/png"})
+        assert result is None
 
 
 # ============================================================

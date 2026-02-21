@@ -165,6 +165,38 @@ class FontManager:
 
 
 # ---------------------------------------------------------------------------
+# Shared image resolver
+# ---------------------------------------------------------------------------
+
+
+def _resolve_image(src) -> Path | None:
+    """Resolve image source: file path, base64 dict, or None."""
+    if not src:
+        return None
+
+    if isinstance(src, dict):
+        # Base64 encoded image
+        data = src.get("data", "")
+        media_type = src.get("media_type", "image/png")
+        ext = ".png" if "png" in media_type else ".jpg"
+        try:
+            raw = base64.b64decode(data)
+            tmp = tempfile.NamedTemporaryFile(suffix=ext, delete=False)
+            tmp.write(raw)
+            tmp.close()
+            return Path(tmp.name)
+        except Exception as e:
+            logger.warning("Base64 decode failed: %s", e)
+            return None
+
+    # File path
+    p = Path(src)
+    if p.exists():
+        return p
+    return None
+
+
+# ---------------------------------------------------------------------------
 # Cover Generator (ReportLab)
 # ---------------------------------------------------------------------------
 class CoverGenerator:
@@ -187,11 +219,12 @@ class CoverGenerator:
         c = rl_canvas.Canvas(str(output), pagesize=A4)
 
         # Layer 1: Project photo placeholder (or actual image)
-        cover_image = data.get("cover", {}).get("image")
-        if cover_image and Path(cover_image).exists():
+        cover_image_src = data.get("cover", {}).get("image")
+        cover_image_path = _resolve_image(cover_image_src)
+        if cover_image_path:
             from reportlab.lib.utils import ImageReader
 
-            img = ImageReader(cover_image)
+            img = ImageReader(str(cover_image_path))
             # Photo area from template
             c.drawImage(img, 55.6, 161.7, width=484.0, height=560.8,
                         preserveAspectRatio=True, anchor="c")
@@ -685,29 +718,7 @@ class ContentRenderer:
 
     def _resolve_image(self, src) -> Path | None:
         """Resolve image source: file path or base64 dict."""
-        if not src:
-            return None
-
-        if isinstance(src, dict):
-            # Base64 encoded image
-            data = src.get("data", "")
-            media_type = src.get("media_type", "image/png")
-            ext = ".png" if "png" in media_type else ".jpg"
-            try:
-                raw = base64.b64decode(data)
-                tmp = tempfile.NamedTemporaryFile(suffix=ext, delete=False)
-                tmp.write(raw)
-                tmp.close()
-                return Path(tmp.name)
-            except Exception as e:
-                logger.warning("Base64 decode failed: %s", e)
-                return None
-
-        # File path
-        p = Path(src)
-        if p.exists():
-            return p
-        return None
+        return _resolve_image(src)
 
     # --- Spacer ---
 

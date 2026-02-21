@@ -407,3 +407,47 @@ class TestIntegration:
 
         assert result.exists()
         assert result.stat().st_size > 10000
+
+    def test_generate_content_only(self, tmp_path):
+        """Genereer rapport zonder cover, colofon, toc, backcover."""
+        data = {
+            "project": "Testproject",
+            "report_type": "Berekening",
+            "cover": {"enabled": False},
+            "colofon": {"enabled": False},
+            "toc": {"enabled": False},
+            "backcover": {"enabled": False},
+            "sections": [
+                {
+                    "number": "1",
+                    "title": "Buigmoment",
+                    "level": 1,
+                    "content": [
+                        {
+                            "type": "calculation",
+                            "title": "M_Ed",
+                            "formula": "M = q * l^2 / 8",
+                            "result": "55.1",
+                            "unit": "kNm",
+                        },
+                        {
+                            "type": "check",
+                            "description": "Toetsing buigend moment",
+                            "required_value": "55.1 kNm",
+                            "calculated_value": "72.4 kNm",
+                            "unity_check": 0.76,
+                            "result": "VOLDOET",
+                        },
+                    ],
+                }
+            ],
+        }
+        output = tmp_path / "content_only.pdf"
+        gen = ReportGeneratorV2(brand="default")
+        result = gen.generate(data, STATIONERY_DIR, output)
+        assert result.exists()
+        doc = fitz.open(str(result))
+        assert doc.page_count >= 1
+        # Geen cover, colofon, toc, backcover → max 2 pagina's
+        assert doc.page_count <= 2
+        doc.close()

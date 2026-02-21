@@ -154,6 +154,41 @@ class TestFontManager:
 
 
 @SKIP_NO_STATIONERY
+class TestColofonFieldMap:
+    """Test ColofonGenerator._build_field_map status fallback."""
+
+    def test_status_from_root(self):
+        ts = TemplateSet("default")
+        fm = FontManager()
+        gen = ColofonGenerator(ts, fm)
+        fm_result = gen._build_field_map({"status": "DEFINITIEF"}, {})
+        assert fm_result["status"] == "DEFINITIEF"
+
+    def test_status_from_colofon(self):
+        ts = TemplateSet("default")
+        fm = FontManager()
+        gen = ColofonGenerator(ts, fm)
+        fm_result = gen._build_field_map({}, {"status_colofon": "CONCEPT v2"})
+        assert fm_result["status"] == "CONCEPT v2"
+
+    def test_status_colofon_overrides_root(self):
+        ts = TemplateSet("default")
+        fm = FontManager()
+        gen = ColofonGenerator(ts, fm)
+        fm_result = gen._build_field_map(
+            {"status": "DEFINITIEF"},
+            {"status_colofon": "CONCEPT v2"},
+        )
+        assert fm_result["status"] == "CONCEPT v2"
+
+    def test_status_default(self):
+        ts = TemplateSet("default")
+        fm = FontManager()
+        gen = ColofonGenerator(ts, fm)
+        fm_result = gen._build_field_map({}, {})
+        assert fm_result["status"] == "CONCEPT"
+
+
 class TestContentRendererBlocks:
     """Test alle block types in isolatie."""
 

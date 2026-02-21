@@ -107,7 +107,11 @@ export function CoverForm() {
   let imagePreviewSrc: string | null = null;
   if (hasImage) {
     if (typeof cover.image === 'string') {
-      imagePreviewSrc = cover.image;
+      // URL or data URI — show if valid, ignore file paths
+      if (cover.image.startsWith('data:') || cover.image.startsWith('http')) {
+        imagePreviewSrc = cover.image;
+      }
+      // else: local file path like "renders/gevel_west.png" — can't preview in browser
     } else if (cover.image) {
       imagePreviewSrc = `data:${cover.image.media_type};base64,${cover.image.data}`;
     }
@@ -167,6 +171,11 @@ export function CoverForm() {
               Klik of sleep een afbeelding hierheen
             </p>
             <p className="text-xs text-gray-300 mt-1">PNG, JPG of SVG</p>
+            {typeof cover.image === 'string' && !imagePreviewSrc && (
+              <p className="text-xs text-amber-500 mt-2">
+                Huidig pad: {cover.image} (niet beschikbaar in browser)
+              </p>
+            )}
           </div>
         )}
         <input

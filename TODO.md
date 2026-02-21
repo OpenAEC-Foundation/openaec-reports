@@ -1,43 +1,30 @@
 # TODO — bm-reports
 
 > Prioriteit: 🔴 Hoog | 🟡 Middel | 🟢 Laag
-> Laatst bijgewerkt: 2026-02-20
+> Laatst bijgewerkt: 2026-02-21
 
 ---
 
-## 🔴 D1 — Frontend Deploy op VPS
+## 🔴 D1 — Monorepo Deploy op VPS
 
-**Status:** Build klaar, deploy pending
+**Status:** Monorepo merge klaar, deploy pending
 
-- [ ] `npm run build` met `VITE_API_URL=https://report.3bm.co.nl`
-- [ ] Dist bestanden uploaden naar server: `/opt/3bm/bm-reports-ui/dist/`
-- [ ] Verifiëren: https://report.3bm.co.nl laadt frontend
+- [ ] `git push` naar GitHub
+- [ ] Op server: `git pull` + `docker compose build --no-cache bm-reports-api`
+- [ ] `docker compose up -d bm-reports-api`
+- [ ] Verifiëren: https://report.3bm.co.nl/ laadt frontend (via StaticFiles)
+- [ ] Verifiëren: https://report.3bm.co.nl/api/health werkt
 - [ ] End-to-end test: template laden → rapport genereren → PDF download
-
----
-
-## 🔴 D2 — Tenant Separation
-
-**Prompt:** `PROMPT_TENANT_SEPARATION.md`
-
-Architectureel kritiek voor multi-tenant SaaS. Huidige situatie: alle client-specifieke assets (templates, brands, fonts, stationery) zitten gebundeld in het Python package. Andere bedrijven zouden 3BM's templates zien.
-
-- [ ] Stap 1: TenantConfig class + BM_TENANT_DIR environment variable
-- [ ] Stap 2: Loader refactors (brand, template, stationery, fonts)
-- [ ] Stap 3: API endpoints updaten (tenant-aware)
-- [ ] Stap 4: Font registratie per tenant
-- [ ] Stap 5: Assets migreren naar `tenants/3bm_cooperatie/`
-- [ ] Stap 6: Fallback chain: tenant → package defaults
-- [ ] Stap 7: Tests aanpassen
-- [ ] Stap 8: Documentatie
+- [ ] Caddyfile vereenvoudigen: enkele `reverse_proxy` naar API container
+- [ ] Verwijder `bm-reports-ui/dist` volume mount uit docker-compose.yml
 
 ---
 
 ## 🔴 D3 — CI/CD Pipeline
 
-- [ ] GitHub Actions workflow: build + push Docker image
+- [ ] GitHub Actions workflow: build + push Docker image (multi-stage)
 - [ ] Auto-deploy op VPS bij push naar main
-- [ ] Frontend build als apart CI step
+- [ ] Frontend + backend in één pipeline
 
 ---
 
@@ -118,3 +105,8 @@ Architectureel kritiek voor multi-tenant SaaS. Huidige situatie: alle client-spe
 | **Cutlist Optimizer gemigreerd naar Caddy stack** | **Week 8** |
 | **SSL auto-provisioned (Let's Encrypt)** | **Week 8** |
 | **Dockerfile + pyproject.toml fixes (pycairo, README, force-include)** | **Week 8** |
+| **D2: Tenant Separation (TenantConfig, loaders, tests)** | **Week 8** |
+| **Monorepo merge: frontend + backend in één repo** | **Week 8** |
+| **Multi-stage Dockerfile (node build + python runtime)** | **Week 8** |
+| **StaticFiles mount in FastAPI (SPA serving)** | **Week 8** |
+| **Vite dev proxy voor lokale ontwikkeling** | **Week 8** |

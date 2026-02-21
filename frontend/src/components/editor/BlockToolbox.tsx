@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, type CSSProperties } from 'react';
 import { useReportStore } from '@/stores/reportStore';
 import { BlockIcon } from '@/components/shared/BlockIcons';
 import type { EditableBlockType } from '@/types/report';
@@ -29,30 +29,61 @@ interface BlockToolboxProps {
 
 export function BlockToolbox({ sectionId, onAdd }: BlockToolboxProps) {
   const [open, setOpen] = useState(false);
-  const [openUp, setOpenUp] = useState(false);
+  const [menuStyle, setMenuStyle] = useState<CSSProperties>({});
   const addNewBlock = useReportStore((s) => s.addNewBlock);
   const menuRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
-  const calcDirection = useCallback(() => {
+  const calcPosition = useCallback(() => {
     if (!btnRef.current) return;
     const rect = btnRef.current.getBoundingClientRect();
-    const menuHeight = BLOCK_OPTIONS.length * 40 + 8; // approx
-    const spaceBelow = window.innerHeight - rect.bottom;
-    setOpenUp(spaceBelow < menuHeight && rect.top > menuHeight);
+    const menuHeight = BLOCK_OPTIONS.length * 40 + 8;
+    const spaceBelow = window.innerHeight - rect.bottom - 8;
+    const spaceAbove = rect.top - 8;
+
+    if (spaceBelow >= menuHeight) {
+      // Open below
+      setMenuStyle({
+        position: 'fixed',
+        top: rect.bottom + 4,
+        left: rect.left,
+        maxHeight: spaceBelow,
+      });
+    } else if (spaceAbove >= menuHeight) {
+      // Open above
+      setMenuStyle({
+        position: 'fixed',
+        bottom: window.innerHeight - rect.top + 4,
+        left: rect.left,
+        maxHeight: spaceAbove,
+      });
+    } else {
+      // Not enough room either way — use whichever is bigger
+      const usedSpace = spaceBelow > spaceAbove
+        ? { top: rect.bottom + 4, maxHeight: spaceBelow }
+        : { bottom: window.innerHeight - rect.top + 4, maxHeight: spaceAbove };
+      setMenuStyle({ position: 'fixed', left: rect.left, ...usedSpace });
+    }
   }, []);
 
   useEffect(() => {
     if (!open) return;
-    calcDirection();
+    calcPosition();
     function handleClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node) &&
+          btnRef.current && !btnRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     }
+    function handleScroll() { setOpen(false); }
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [open, calcDirection]);
+    // Close on scroll in any parent (split view scrolls)
+    window.addEventListener('scroll', handleScroll, true);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, [open, calcPosition]);
 
   function handleAdd(type: EditableBlockType) {
     if (onAdd) {
@@ -77,9 +108,10 @@ export function BlockToolbox({ sectionId, onAdd }: BlockToolboxProps) {
       </button>
 
       {open && (
-        <div className={`absolute left-0 z-20 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg max-h-[calc(100vh-120px)] overflow-y-auto ${
-          openUp ? 'bottom-full mb-1' : 'top-full mt-1'
-        }`}>
+        <div
+          style={menuStyle}
+          className="z-50 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg overflow-y-auto"
+        >
           {BLOCK_OPTIONS.map((opt) => (
             <button
               key={opt.type}

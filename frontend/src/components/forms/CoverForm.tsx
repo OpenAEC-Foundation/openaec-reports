@@ -145,7 +145,7 @@ export function CoverForm() {
             <img
               src={imagePreviewSrc}
               alt="Cover preview"
-              className="max-h-48 w-full rounded object-contain"
+              className="max-h-48 w-full rounded object-cover"
             />
             <button
               onClick={removeImage}

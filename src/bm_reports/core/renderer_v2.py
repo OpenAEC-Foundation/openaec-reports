@@ -1010,28 +1010,34 @@ class ReportGeneratorV2:
         tmp_content = tmp_dir / "_tmp_content.pdf"
 
         try:
-            # 1. Cover
-            logger.info("Generating cover...")
-            cover_gen = CoverGenerator(self.templates, self.fonts)
-            cover_gen.generate(data, stationery_png, tmp_cover)
+            parts: list[Path] = []
 
-            # 2. Colofon
-            logger.info("Generating colofon...")
-            colofon_gen = ColofonGenerator(self.templates, self.fonts)
-            colofon_gen.generate(data, stationery["colofon"], tmp_colofon)
+            # 1. Cover (optioneel)
+            if data.get("cover", {}).get("enabled", True):
+                logger.info("Generating cover...")
+                cover_gen = CoverGenerator(self.templates, self.fonts)
+                cover_gen.generate(data, stationery_png, tmp_cover)
+                parts.append(tmp_cover)
+
+            # 2. Colofon (optioneel)
+            if data.get("colofon", {}).get("enabled", True):
+                logger.info("Generating colofon...")
+                colofon_gen = ColofonGenerator(self.templates, self.fonts)
+                colofon_gen.generate(data, stationery["colofon"], tmp_colofon)
+                parts.append(tmp_colofon)
 
             # 3. Content (TOC + sections + appendices + backcover)
             logger.info("Generating content...")
             content = ContentRenderer(self.templates, self.fonts, stationery)
+            # Adjust page numbering based on which parts are included
+            content.current_page_nr = len(parts) + 1
             self._render_content(content, data)
             content.save(tmp_content)
+            parts.append(tmp_content)
 
             # 4. Merge
             logger.info("Merging PDF...")
-            self._merge_pdfs(
-                [tmp_cover, tmp_colofon, tmp_content],
-                output_path,
-            )
+            self._merge_pdfs(parts, output_path)
 
             # Report stats
             result = fitz.open(str(output_path))

@@ -176,6 +176,27 @@ class TestContentRendererBlocks:
         assert renderer.y > y_before
         renderer.save(tmp_path / "para.pdf")
 
+    def test_paragraph_style_heading1(self, renderer, tmp_path):
+        """Paragraph with style=Heading1 dispatches to heading_1."""
+        y_before = renderer.y
+        renderer._render_block({"type": "paragraph", "text": "Hoofdstuk", "style": "Heading1", "number": "1"})
+        assert renderer.y > y_before
+        renderer.save(tmp_path / "para_h1.pdf")
+
+    def test_paragraph_style_heading2(self, renderer, tmp_path):
+        """Paragraph with style=Heading2 dispatches to heading_2."""
+        y_before = renderer.y
+        renderer._render_block({"type": "paragraph", "text": "Paragraaf", "style": "Heading2", "number": "1.1"})
+        assert renderer.y > y_before
+        renderer.save(tmp_path / "para_h2.pdf")
+
+    def test_paragraph_no_style_is_normal(self, renderer, tmp_path):
+        """Paragraph without style renders as normal paragraph."""
+        y_before = renderer.y
+        renderer._render_block({"type": "paragraph", "text": "Gewone tekst"})
+        assert renderer.y > y_before
+        renderer.save(tmp_path / "para_normal.pdf")
+
     def test_paragraph_html_stripped(self, renderer, tmp_path):
         """HTML tags from Tiptap editor should be stripped, not rendered literally."""
         y_before = renderer.y

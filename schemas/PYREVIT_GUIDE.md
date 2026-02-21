@@ -13,9 +13,7 @@ Vanuit pyRevit (CPython 3.8+) stuur je een HTTP POST met de rapportdata.
 pyRevit script  →  bouwt JSON dict  →  POST naar API  →  ontvangt PDF bytes  →  slaat op
 ```
 
-**API URL:**
-- Productie: `https://report.3bm.co.nl/api/generate/v2`
-- Lokaal: `http://localhost:8000/api/generate/v2`
+**API Base URL:** `https://report.3bm.co.nl`
 
 ---
 
@@ -342,9 +340,11 @@ block = {
 ### 3. Upload via API (voor grote bestanden)
 
 ```python
+UPLOAD_URL = "https://report.3bm.co.nl/api/upload"
+
 # Stap 1: upload
 with open("grote_render.png", "rb") as f:
-    resp = requests.post(f"{API_URL.replace('/generate/v2', '/upload')}", files={"file": f})
+    resp = requests.post(UPLOAD_URL, files={"file": f})
     upload_path = resp.json()["path"]
 
 # Stap 2: gebruik pad in rapport JSON
@@ -379,34 +379,25 @@ Elk van de vier speciale pagina's kan onafhankelijk worden in- of uitgeschakeld:
 
 ## API Referentie
 
-### `POST /api/generate/v2`
+Alle endpoints op `https://report.3bm.co.nl`:
 
-Genereert PDF met pixel-perfecte huisstijl (renderer v2).
+| Methode | Endpoint | Omschrijving |
+|---------|----------|--------------|
+| `POST` | `/api/generate/v2` | **PDF genereren** — JSON in, PDF uit |
+| `POST` | `/api/validate` | JSON valideren tegen schema |
+| `POST` | `/api/upload` | Afbeelding uploaden |
+| `GET` | `/api/templates` | Beschikbare templates |
+| `GET` | `/api/templates/{name}/scaffold` | Leeg JSON-startpunt voor template |
+| `GET` | `/api/brands` | Beschikbare huisstijlen |
+| `GET` | `/api/health` | Health check |
 
-**Request:** `Content-Type: application/json`
-**Response:** `application/pdf` (binary)
-**Verplicht veld:** `project`
+**`POST /api/generate/v2`**
+- **Request:** `Content-Type: application/json`
+- **Response:** `application/pdf` (binary)
+- **Verplicht veld:** `project`
 
-### `POST /api/validate`
-
-Valideert JSON tegen het schema zonder PDF te genereren.
-
-**Response:**
-```json
-{"valid": true, "errors": []}
-```
-
-### `GET /api/templates`
-
-Lijst beschikbare templates.
-
-### `GET /api/templates/{name}/scaffold`
-
-Leeg JSON-startpunt voor een template (handig voor defaults).
-
-### `GET /api/health`
-
-Health check: `{"status": "ok", "version": "0.1.0"}`
+**`POST /api/validate`**
+- **Response:** `{"valid": true, "errors": []}`
 
 ---
 
@@ -505,20 +496,29 @@ print("PDF gegenereerd: {}".format(output))
 
 ## JSON Schema
 
-Het volledige JSON Schema staat in `schemas/report.schema.json`.
-Gebruik dit voor validatie in je IDE of tooling:
-
-```
-https://report.3bm.co.nl/api/validate   (POST, stuurt errors terug)
-```
-
-Of lokaal:
+Het volledige JSON Schema staat in `schemas/report.schema.json` in de repo.
+Valideer je JSON via de API voordat je genereert:
 
 ```python
-import jsonschema, json
+import requests
 
-with open("schemas/report.schema.json") as f:
-    schema = json.load(f)
-
-jsonschema.validate(data, schema)  # Raises ValidationError bij fouten
+data = { ... }  # je rapport JSON
+resp = requests.post("https://report.3bm.co.nl/api/validate", json=data)
+result = resp.json()
+if not result["valid"]:
+    for err in result["errors"]:
+        print(f"  {err['path']}: {err['message']}")
 ```
+
+---
+
+## Lokaal Ontwikkelen
+
+Voor lokaal testen zonder de productieserver:
+
+```bash
+pip install -e ".[dev]"
+bm-report serve --port 8000 --reload
+```
+
+Pas dan `API_URL` aan naar `http://localhost:8000/api/generate/v2`.

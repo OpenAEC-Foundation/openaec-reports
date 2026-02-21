@@ -1,6 +1,8 @@
 import type { ReportDefinition } from '@/types/report';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// Leeg = relatieve URLs, werkt achter reverse proxy (Caddy)
+// Voor lokale dev: stel VITE_API_URL=http://localhost:8000 in .env.development
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export interface ApiError {
   status: number;

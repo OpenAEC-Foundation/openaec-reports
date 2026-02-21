@@ -284,7 +284,7 @@ async def generate_report_v2(request: Request):
 
     output_path: Path | None = None
     try:
-        brand = data.get("template", data.get("brand", "3bm_cooperatie"))
+        brand = data.get("brand", "3bm_cooperatie")
         stationery_dir = STATIONERY_DIR
 
         # Check tenant stationery eerst, dan brand-specifiek in package

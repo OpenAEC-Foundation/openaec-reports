@@ -148,20 +148,64 @@ class FontManager:
     def wrap_text(
         self, text: str, fontsize: float, max_width: float, bold: bool = False
     ) -> list[str]:
-        """Word-wrap text to fit within max_width."""
-        words = text.split()
+        """Word-wrap text to fit within max_width.
+
+        Splits on spaces first, then on underscores/hyphens for long tokens,
+        and finally breaks mid-character as last resort.
+        """
+        if not text:
+            return [""]
+        if max_width <= 0:
+            return [text]
+
+        # First split on spaces
+        tokens = text.split()
         lines: list[str] = []
         current = ""
-        for w in words:
-            test = f"{current} {w}".strip()
-            if self.measure(test, fontsize, bold) > max_width and current:
-                lines.append(current)
-                current = w
-            else:
+
+        for token in tokens:
+            test = f"{current} {token}".strip()
+            if self.measure(test, fontsize, bold) <= max_width:
                 current = test
+                continue
+
+            # Token doesn't fit on current line
+            if current:
+                lines.append(current)
+                current = ""
+
+            # Check if single token fits on a fresh line
+            if self.measure(token, fontsize, bold) <= max_width:
+                current = token
+                continue
+
+            # Token too wide — split on underscores/hyphens first
+            sub_parts = re.split(r'(?<=[_\-/.])', token)  # keep delimiter at end of part
+            for sp in sub_parts:
+                if not sp:
+                    continue
+                test = f"{current}{sp}" if current else sp
+                if self.measure(test, fontsize, bold) <= max_width:
+                    current = test
+                else:
+                    if current:
+                        lines.append(current)
+                    # If sub-part itself is too wide, break by character
+                    if self.measure(sp, fontsize, bold) > max_width:
+                        current = ""
+                        for ch in sp:
+                            test_ch = current + ch
+                            if self.measure(test_ch, fontsize, bold) > max_width and current:
+                                lines.append(current)
+                                current = ch
+                            else:
+                                current = test_ch
+                    else:
+                        current = sp
+
         if current:
             lines.append(current)
-        return lines
+        return lines if lines else [""]
 
 
 # ---------------------------------------------------------------------------
@@ -847,27 +891,125 @@ class ContentRenderer:
     # --- Map ---
 
     def map_block(self, block: dict) -> None:
-        """Render a map block placeholder (PDOK WMS not available in v2 yet)."""
+        """Render map images from PDOK WMS services.
+
+        Accepts:
+            address: Dutch address string (geocoded via PDOK)
+            center: {lat, lon} coordinates (used if no address)
+            zoom: Zoom level (default 16, ~1:5000)
+            layers: List of layer keys: "brt", "brt_grijs", "luchtfoto", "kadastraal"
+            width_mm: Image width in report (default: full content width)
+            height_mm: Image height in report (default: auto from aspect)
+        """
+        from bm_reports.core.map_generator import MapGenerator
+
         s = self.blocks.get("paragraph", {})
         x = s.get("x", 125.4)
         max_w = s.get("max_width", 393.0)
 
-        self.y += 12
-        self._check_overflow(60)
-
-        # Placeholder box
-        rect = fitz.Rect(x, self.y, x + max_w, self.y + 50)
-        self.page.draw_rect(rect, color=_hex_to_rgb("#CCCCCC"), fill=_hex_to_rgb("#F0F0F0"))
-
+        address = block.get("address", "")
         center = block.get("center", {})
-        lat = center.get("lat", "?")
-        lon = center.get("lon", "?")
-        self._text(x + 8, self.y + 12, f"[Kaart: {lat}, {lon}]", "GothamBook", 9.5, "#666666")
-        layers = ", ".join(block.get("layers", []))
-        if layers:
-            self._text(x + 8, self.y + 28, f"Lagen: {layers}", "GothamBook", 8.0, "#999999")
+        lat = center.get("lat")
+        lon = center.get("lon")
+        zoom = block.get("zoom", 16)
+        layers = block.get("layers", ["brt"])
+        width_mm = block.get("width_mm")
+        height_mm = block.get("height_mm")
+        caption = block.get("caption", "")
 
-        self.y += 58
+        # Normalize layer names
+        layer_map = {
+            "topografie": "brt", "topo": "brt", "standaard": "brt",
+            "grijs": "brt_grijs",
+            "luchtfoto": "luchtfoto", "satellite": "luchtfoto", "aerial": "luchtfoto",
+            "kadastraal": "kadastraal", "kadaster": "kadastraal", "cadastral": "kadastraal",
+        }
+        normalized_layers = [layer_map.get(l.lower(), l.lower()) for l in layers]
+
+        # Calculate image dimensions in points
+        target_w = (width_mm * 2.8346) if width_mm else max_w
+        target_w = min(target_w, max_w)
+        # Aspect ratio: 3:2 default (landscape)
+        if height_mm:
+            target_h = height_mm * 2.8346
+        else:
+            target_h = target_w * 0.667  # 3:2
+
+        # WMS pixel dimensions (higher res for print quality)
+        px_w = int(target_w * 2.5)  # ~300dpi equivalent
+        px_h = int(target_h * 2.5)
+
+        try:
+            gen = MapGenerator(timeout=20)
+
+            if address:
+                maps = gen.generate_maps(
+                    address, layers=normalized_layers,
+                    zoom=zoom, width_px=px_w, height_px=px_h,
+                )
+            elif lat is not None and lon is not None:
+                maps = gen.generate_maps_from_coords(
+                    lat, lon, layers=normalized_layers,
+                    zoom=zoom, width_px=px_w, height_px=px_h,
+                )
+            else:
+                # No location data
+                self.y += 12
+                self._text(x, self.y, "[Kaart: geen adres of coördinaten opgegeven]",
+                           "GothamBook", 9.5, "#FF0000")
+                self.y += 20
+                return
+
+            if not maps:
+                self.y += 12
+                loc_str = address or f"{lat}, {lon}"
+                self._text(x, self.y, f"[Kaart kon niet worden opgehaald voor: {loc_str}]",
+                           "GothamBook", 9.5, "#FF0000")
+                self.y += 20
+                return
+
+            # Render each map layer as an image
+            for map_result in maps:
+                img_path = map_result["path"]
+                map_caption = caption or map_result.get("caption", "")
+
+                needed = target_h + 24  # image + caption
+                self._check_overflow(needed)
+
+                self.y += 8
+                rect = fitz.Rect(x, self.y, x + target_w, self.y + target_h)
+                try:
+                    self.page.insert_image(rect, filename=str(img_path))
+                except Exception as e:
+                    logger.warning("Map image insert failed: %s", e)
+                    self._text(x, self.y + 10, f"[Kaart fout: {e}]",
+                               "GothamBook", 9.5, "#FF0000")
+                self.y += target_h + 4
+
+                # Caption
+                if map_caption:
+                    self._text(x, self.y, map_caption, "GothamBook", 8.0, "#401246")
+                    self.y += 14
+
+                self.y += 8
+
+                # Clean up temp file
+                try:
+                    img_path.unlink(missing_ok=True)
+                except Exception:
+                    pass
+
+        except ImportError:
+            logger.warning("Map generator dependencies not available")
+            self.y += 12
+            self._text(x, self.y, "[Kaartmodule niet beschikbaar — PIL/requests ontbreekt]",
+                       "GothamBook", 9.5, "#FF0000")
+            self.y += 20
+        except Exception as e:
+            logger.error("Map generation failed: %s", e)
+            self.y += 12
+            self._text(x, self.y, f"[Kaart fout: {e}]", "GothamBook", 9.5, "#FF0000")
+            self.y += 20
 
     # --- Spacer ---
 

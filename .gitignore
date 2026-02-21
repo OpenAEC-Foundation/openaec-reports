@@ -37,6 +37,8 @@ desktop.ini
 # Output
 output/
 *.pdf
+# Stationery PDF's zijn wél nodig
+!tenants/**/stationery/*.pdf
 
 # Frontend
 frontend/node_modules/

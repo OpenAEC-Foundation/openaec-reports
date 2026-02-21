@@ -267,6 +267,25 @@ class TestContentRendererBlocks:
         })
         renderer.save(tmp_path / "check_fail.pdf")
 
+    def test_map_placeholder(self, renderer, tmp_path):
+        """Map block renders placeholder with coordinates."""
+        y_before = renderer.y
+        renderer.map_block({
+            "center": {"lat": 52.08, "lon": 4.31},
+            "layers": ["percelen", "gebouwen"],
+        })
+        assert renderer.y > y_before
+        renderer.save(tmp_path / "map.pdf")
+
+    def test_map_dispatch(self, renderer, tmp_path):
+        """Map block dispatched via _render_block."""
+        renderer._render_block({
+            "type": "map",
+            "center": {"lat": 52.0, "lon": 4.3},
+            "layers": ["percelen"],
+        })
+        renderer.save(tmp_path / "map_dispatch.pdf")
+
     def test_image_missing(self, renderer, tmp_path):
         """Ontbrekende image geeft placeholder, geen crash."""
         renderer.image({"src": "/nonexistent/image.png"})

@@ -602,7 +602,15 @@ class ContentRenderer:
     # --- Table ---
 
     def table(self, block: dict) -> None:
-        """Render a table block with header and rows."""
+        """Render a table block with header and rows.
+
+        Supports:
+        - column_widths as proportional values (scaled to available width)
+        - auto-fit when column_widths not provided
+        - style "striped" for alternating row colors
+        - vertical grid lines between columns
+        - text truncation for cells that exceed column width
+        """
         s = self.blocks.get("table", {})
         header_s = s.get("header", {})
         body_s = s.get("body", {})
@@ -611,65 +619,186 @@ class ContentRenderer:
 
         headers = block.get("headers", [])
         rows = block.get("rows", [])
-        col_widths = block.get("column_widths")
+        raw_widths = block.get("column_widths")
         title = block.get("title", "")
+        style = block.get("style", "")
         num_cols = len(headers) if headers else (len(rows[0]) if rows else 0)
         if num_cols == 0:
             return
 
-        if not col_widths:
-            col_widths = [max_w / num_cols] * num_cols
+        # --- Resolve column widths ---
+        # Interpret column_widths as proportional values and scale to max_w
+        cell_pad = 6  # horizontal padding per cell
+        if raw_widths and len(raw_widths) >= num_cols:
+            total = sum(raw_widths[:num_cols])
+            if total > 0:
+                col_widths_pt = [(w / total) * max_w for w in raw_widths[:num_cols]]
+            else:
+                col_widths_pt = [max_w / num_cols] * num_cols
+        else:
+            # Auto-fit: measure header text and distribute proportionally
+            header_font_size = header_s.get("size", 9)
+            measured = []
+            for i in range(num_cols):
+                h_text = str(headers[i]) if i < len(headers) else ""
+                # Also check a sample of row data for wider content
+                max_cell_w = self.fonts.measure(h_text, header_font_size, bold=True)
+                body_font_size = body_s.get("size", 8)
+                for row in rows[:10]:  # sample first 10 rows
+                    if i < len(row):
+                        cell_w = self.fonts.measure(str(row[i]), body_font_size)
+                        max_cell_w = max(max_cell_w, cell_w)
+                measured.append(max_cell_w + cell_pad * 2)
+            total_measured = sum(measured)
+            if total_measured > 0:
+                col_widths_pt = [(m / total_measured) * max_w for m in measured]
+            else:
+                col_widths_pt = [max_w / num_cols] * num_cols
 
-        header_h = header_s.get("height", 24.0)
-        row_h = body_s.get("line_height", 20.8)
+        header_h = header_s.get("height", 20.0)
+        row_h = body_s.get("line_height", 16.0)
         total_h = header_h + len(rows) * row_h
         self.y += s.get("spacing_before", 20.0)
 
         # Title above table
         if title:
-            self._check_overflow(14 + total_h)
+            self._check_overflow(16 + total_h)
             self._text(x, self.y, title, "GothamBold", 9.5, "#401246")
             self.y += 16
 
-        self._check_overflow(total_h)
+        self._check_overflow(header_h + row_h)  # at least header + 1 row
 
-        # Header row — background rect
+        # --- Header row ---
         bg_color = _hex_to_rgb(header_s.get("background", "#56B49B"))
-        rect = fitz.Rect(x, self.y, x + max_w, self.y + header_h)
-        self.page.draw_rect(rect, color=None, fill=bg_color)
+        header_rect = fitz.Rect(x, self.y, x + max_w, self.y + header_h)
+        self.page.draw_rect(header_rect, color=None, fill=bg_color)
 
-        # Header text
+        h_fontname = header_s.get("font", "GothamBold")
+        h_fontsize = header_s.get("size", 9)
+        h_color = _hex_to_rgb(header_s.get("color", "#FFFFFF"))
         cx = x
         for i, h in enumerate(headers):
-            w = col_widths[i] if i < len(col_widths) else col_widths[-1]
+            w = col_widths_pt[i] if i < len(col_widths_pt) else col_widths_pt[-1]
+            # Truncate text to fit column
+            cell_text = self._truncate_text(str(h), h_fontsize, w - cell_pad * 2, bold=True)
             self.page.insert_text(
-                (cx + 4, self.y + header_s.get("size", 12) * 0.8 + 6),
-                str(h),
-                fontname=header_s.get("font", "GothamBook"),
-                fontsize=header_s.get("size", 12),
-                color=_hex_to_rgb(header_s.get("color", "#FFFFFF")),
+                (cx + cell_pad, self.y + h_fontsize * 0.8 + (header_h - h_fontsize) / 2),
+                cell_text,
+                fontname=h_fontname,
+                fontsize=h_fontsize,
+                color=h_color,
             )
             cx += w
+
+        # Vertical grid lines in header
+        line_color = _hex_to_rgb("#FFFFFF")
+        cx = x
+        for i in range(num_cols - 1):
+            cx += col_widths_pt[i]
+            self.page.draw_line(
+                fitz.Point(cx, self.y),
+                fitz.Point(cx, self.y + header_h),
+                color=line_color, width=0.5,
+            )
+
         self.y += header_h
 
-        # Body rows
-        for row in rows:
+        # --- Body rows ---
+        b_fontname = body_s.get("font", "GothamBook")
+        b_fontsize = body_s.get("size", 8)
+        b_color = _hex_to_rgb(body_s.get("color", "#401246"))
+        stripe_color = _hex_to_rgb("#F5F5F5")
+        grid_color = _hex_to_rgb("#E0E0E0")
+
+        for row_idx, row in enumerate(rows):
             if self._check_overflow(row_h):
-                pass  # overflow handled, new page started
+                # Re-render header on new page
+                header_rect = fitz.Rect(x, self.y, x + max_w, self.y + header_h)
+                self.page.draw_rect(header_rect, color=None, fill=bg_color)
+                cx = x
+                for i, h in enumerate(headers):
+                    w = col_widths_pt[i] if i < len(col_widths_pt) else col_widths_pt[-1]
+                    cell_text = self._truncate_text(str(h), h_fontsize, w - cell_pad * 2, bold=True)
+                    self.page.insert_text(
+                        (cx + cell_pad, self.y + h_fontsize * 0.8 + (header_h - h_fontsize) / 2),
+                        cell_text,
+                        fontname=h_fontname,
+                        fontsize=h_fontsize,
+                        color=h_color,
+                    )
+                    cx += w
+                # Vertical lines in repeated header
+                cx = x
+                for i in range(num_cols - 1):
+                    cx += col_widths_pt[i]
+                    self.page.draw_line(
+                        fitz.Point(cx, self.y),
+                        fitz.Point(cx, self.y + header_h),
+                        color=line_color, width=0.5,
+                    )
+                self.y += header_h
+
+            # Striped background
+            if style == "striped" and row_idx % 2 == 1:
+                row_rect = fitz.Rect(x, self.y, x + max_w, self.y + row_h)
+                self.page.draw_rect(row_rect, color=None, fill=stripe_color)
+
+            # Bottom border for each row
+            self.page.draw_line(
+                fitz.Point(x, self.y + row_h),
+                fitz.Point(x + max_w, self.y + row_h),
+                color=grid_color, width=0.3,
+            )
+
+            # Cell text
             cx = x
             for i, cell in enumerate(row):
-                w = col_widths[i] if i < len(col_widths) else col_widths[-1]
+                w = col_widths_pt[i] if i < len(col_widths_pt) else col_widths_pt[-1]
+                cell_text = self._truncate_text(str(cell), b_fontsize, w - cell_pad * 2)
                 self.page.insert_text(
-                    (cx + 4, self.y + body_s.get("size", 9) * 0.8 + 6),
-                    str(cell),
-                    fontname=body_s.get("font", "GothamBook"),
-                    fontsize=body_s.get("size", 9),
-                    color=_hex_to_rgb(body_s.get("color", "#401246")),
+                    (cx + cell_pad, self.y + b_fontsize * 0.8 + (row_h - b_fontsize) / 2),
+                    cell_text,
+                    fontname=b_fontname,
+                    fontsize=b_fontsize,
+                    color=b_color,
                 )
                 cx += w
+
+            # Vertical grid lines between columns
+            cx = x
+            for i in range(num_cols - 1):
+                cx += col_widths_pt[i]
+                self.page.draw_line(
+                    fitz.Point(cx, self.y),
+                    fitz.Point(cx, self.y + row_h),
+                    color=grid_color, width=0.3,
+                )
+
             self.y += row_h
 
+        # Outer border
+        table_top = self.y - len(rows) * row_h - header_h
+        # Only draw if we didn't page-break (simplified: draw bottom border)
+        self.page.draw_line(
+            fitz.Point(x, self.y),
+            fitz.Point(x + max_w, self.y),
+            color=grid_color, width=0.5,
+        )
+
         self.y += s.get("spacing_after", 20.0)
+
+    def _truncate_text(self, text: str, fontsize: float, max_width: float, bold: bool = False) -> str:
+        """Truncate text with ellipsis if it exceeds max_width."""
+        if max_width <= 0:
+            return ""
+        if self.fonts.measure(text, fontsize, bold) <= max_width:
+            return text
+        # Binary search for truncation point
+        for end in range(len(text), 0, -1):
+            truncated = text[:end] + "…"
+            if self.fonts.measure(truncated, fontsize, bold) <= max_width:
+                return truncated
+        return "…"
 
     # --- Image ---
 

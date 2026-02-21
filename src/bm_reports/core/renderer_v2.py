@@ -887,7 +887,13 @@ class ContentRenderer:
         """Dispatch a content block to the appropriate renderer."""
         block_type = block.get("type", "")
         if block_type == "paragraph":
-            self.paragraph(block.get("text", ""))
+            style = block.get("style", "")
+            if style in ("Heading1", "heading_1"):
+                self.heading_1(block.get("number", ""), block.get("text", ""))
+            elif style in ("Heading2", "heading_2"):
+                self.heading_2(block.get("number", ""), block.get("text", ""))
+            else:
+                self.paragraph(block.get("text", ""))
         elif block_type == "bullet_list":
             self.bullet_list(block.get("items", []))
         elif block_type == "heading_2":

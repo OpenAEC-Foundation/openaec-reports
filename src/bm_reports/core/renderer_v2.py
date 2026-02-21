@@ -19,6 +19,7 @@ from __future__ import annotations
 import base64
 import json
 import logging
+import re
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -45,6 +46,19 @@ def _hex_to_rgb(h: str) -> tuple[float, float, float]:
     """Convert hex color string to (r, g, b) tuple with 0-1 range."""
     h = h.lstrip("#")
     return tuple(int(h[i : i + 2], 16) / 255 for i in (0, 2, 4))
+
+
+_RE_HTML_TAG = re.compile(r"<[^>]+>")
+
+
+def _strip_html(text: str) -> str:
+    """Strip HTML tags from text, preserving readable content."""
+    if "<" not in text:
+        return text
+    clean = _RE_HTML_TAG.sub("", text)
+    # Collapse whitespace from removed tags
+    clean = re.sub(r"[ \t]+", " ", clean).strip()
+    return clean
 
 
 # ---------------------------------------------------------------------------
@@ -507,6 +521,7 @@ class ContentRenderer:
     def paragraph(self, text: str) -> None:
         s = self.blocks.get("paragraph", {})
         self.y += s.get("spacing_before", 12.0)
+        text = _strip_html(text)
         lines = self.fonts.wrap_text(text, s["size"], s["max_width"])
         self._check_overflow(len(lines) * s["line_height"])
         for line in lines:
@@ -519,6 +534,7 @@ class ContentRenderer:
         marker = sb.get("marker", {})
         text_s = sb.get("text", {})
         for item in items:
+            item = _strip_html(item)
             lines = self.fonts.wrap_text(item, text_s["size"], text_s["max_width"])
             needed = len(lines) * text_s["line_height"] + sb.get("spacing_between", 10.1)
             self._check_overflow(needed)

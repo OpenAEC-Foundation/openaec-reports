@@ -10,7 +10,7 @@ fitz = pytest.importorskip("fitz", reason="pymupdf niet geinstalleerd")
 
 from bm_reports.core.renderer_v2 import (
     ReportGeneratorV2, TemplateSet, FontManager, ContentRenderer,
-    CoverGenerator, ColofonGenerator, _hex_to_rgb,
+    CoverGenerator, ColofonGenerator, _hex_to_rgb, _strip_html,
 )
 
 BASE = Path(__file__).parent.parent
@@ -40,6 +40,27 @@ class TestHexToRgb:
     def test_purple(self):
         r, g, b = _hex_to_rgb("#401246")
         assert r == pytest.approx(64 / 255)
+
+
+class TestStripHtml:
+    def test_plain_text_unchanged(self):
+        assert _strip_html("Gewone tekst") == "Gewone tekst"
+
+    def test_strips_p_tags(self):
+        assert _strip_html("<p>Tekst in paragraaf</p>") == "Tekst in paragraaf"
+
+    def test_strips_bold_italic(self):
+        assert _strip_html("<p>Dit is <strong>vet</strong> en <em>schuin</em></p>") == "Dit is vet en schuin"
+
+    def test_strips_nested_html(self):
+        assert _strip_html("<p><span class=\"x\">Hello</span></p>") == "Hello"
+
+    def test_empty_string(self):
+        assert _strip_html("") == ""
+
+    def test_no_html_shortcircuit(self):
+        # No < in text → fast path
+        assert _strip_html("Geen tags hier") == "Geen tags hier"
 
 
 # ============================================================
@@ -125,6 +146,13 @@ class TestContentRendererBlocks:
         renderer.paragraph("Dit is een test paragraaf.")
         assert renderer.y > y_before
         renderer.save(tmp_path / "para.pdf")
+
+    def test_paragraph_html_stripped(self, renderer, tmp_path):
+        """HTML tags from Tiptap editor should be stripped, not rendered literally."""
+        y_before = renderer.y
+        renderer.paragraph("<p>Dit is <strong>vetgedrukt</strong> en <em>schuin</em></p>")
+        assert renderer.y > y_before
+        renderer.save(tmp_path / "para_html.pdf")
 
     def test_heading_1(self, renderer, tmp_path):
         renderer.heading_1("1", "Hoofdstuk titel")

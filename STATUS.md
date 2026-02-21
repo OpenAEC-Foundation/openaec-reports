@@ -1,13 +1,13 @@
 # Backend Status — bm-reports
 
-> Laatst bijgewerkt: 2026-02-20
+> Laatst bijgewerkt: 2026-02-21
 
 ## Deployment
 
 | Component | URL | Status |
 |-----------|-----|--------|
 | **API (productie)** | https://report.open-aec.com/api/* | ✅ Live |
-| **Frontend (productie)** | https://report.open-aec.com/ | ⏳ Placeholder (build klaar, deploy pending) |
+| **Frontend (productie)** | https://report.open-aec.com/ | ⏳ Monorepo klaar, deploy pending |
 | **Cutlist Optimizer** | https://zaagplan.open-aec.com/ | ✅ Live |
 | **CrowdSec IPS** | — | ✅ Monitoring |
 
@@ -23,9 +23,21 @@
 ```
 caddy           → Ports 80, 443 (reverse proxy + SSL)
 crowdsec        → Log analysis + IP blocking
-bm-reports-api  → Python 3.12-slim, uvicorn, 2 workers
+bm-reports-api  → Multi-stage: node:20-alpine (frontend build) + python:3.12-slim (runtime)
+                  Frontend served as static files via FastAPI, uvicorn, 2 workers
 cutlist-frontend → nginx
 cutlist-backend  → Python
+```
+
+### Monorepo Structuur
+
+```
+openaec-reports/
+├── frontend/       # React/TypeScript UI (Vite, Tailwind, Zustand)
+├── src/bm_reports/ # Python library + FastAPI API
+├── schemas/        # JSON Schema (single source of truth)
+├── tenants/        # Klantspecifieke assets (buiten package)
+└── Dockerfile      # Multi-stage: frontend build + python runtime
 ```
 
 ## Architectuur
@@ -37,7 +49,7 @@ src/bm_reports/
 ├── tools/          # Brand analyzer, stationery extractor, brand builder
 ├── utils/          # Logo prep, fonts
 ├── assets/         # Templates (YAML), brands (YAML), logos, fonts, graphics
-├── api.py          # FastAPI endpoints (CORS: report.open-aec.com + localhost)
+├── api.py          # FastAPI endpoints + StaticFiles mount (SPA serving)
 ├── cli.py          # CLI: analyze-brand, build-brand, serve
 └── schemas/        # JSON Schema + example
 ```
@@ -104,7 +116,7 @@ tests/
 └── test_templates.py              ✅ 10 tests
 ```
 
-**Totaal:** 559 tests | **Coverage:** 75% | **Dead code:** template_renderer.py, template_schema.py, reports/
+**Totaal:** 555 tests (553 pass, 2 fail: pdfrw niet geïnstalleerd) | **Coverage:** 75% | **Dead code:** template_renderer.py, template_schema.py, reports/
 
 ## API Endpoints
 

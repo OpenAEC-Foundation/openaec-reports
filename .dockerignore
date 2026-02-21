@@ -1,3 +1,42 @@
+# Frontend build artifacts
 frontend/node_modules
 frontend/dist
 frontend/.env.local
+
+# Python
+__pycache__
+*.py[cod]
+*.egg-info
+.eggs
+.venv
+venv
+
+# Testing & dev
+tests/
+test_output/
+.pytest_cache
+pytest-cache-files-*
+.coverage
+htmlcov
+.mypy_cache
+
+# Archive & docs
+_archive/
+huisstijl/
+output/
+uploads/
+prompts/
+
+# IDE & OS
+.vscode
+.idea
+.DS_Store
+.claude
+
+# Git
+.git
+.gitignore
+
+# Docs (niet nodig in container)
+*.md
+!README.md

@@ -363,7 +363,7 @@ class ColofonGenerator:
             "documentgegevens": colofon.get("documentgegevens", ""),
             "datum": data.get("date", ""),
             "fase": colofon.get("fase", ""),
-            "status": data.get("status", "CONCEPT"),
+            "status": colofon.get("status_colofon", data.get("status", "CONCEPT")),
             "kenmerk": colofon.get("kenmerk", ""),
         }
 

@@ -225,9 +225,23 @@ class CoverGenerator:
             from reportlab.lib.utils import ImageReader
 
             img = ImageReader(str(cover_image_path))
-            # Photo area from template
-            c.drawImage(img, 55.6, 161.7, width=484.0, height=560.8,
-                        preserveAspectRatio=True, anchor="c")
+            # "Cover" style: fill entire area, crop overflow
+            iw, ih = img.getSize()
+            box_w, box_h = 484.0, 560.8
+            box_x, box_y = 55.6, 161.7
+            scale = max(box_w / iw, box_h / ih)
+            draw_w = iw * scale
+            draw_h = ih * scale
+            # Center the oversized image within the box
+            draw_x = box_x - (draw_w - box_w) / 2
+            draw_y = box_y - (draw_h - box_h) / 2
+            # Clip to the box area
+            c.saveState()
+            p = c.beginPath()
+            p.rect(box_x, box_y, box_w, box_h)
+            c.clipPath(p, stroke=0)
+            c.drawImage(img, draw_x, draw_y, width=draw_w, height=draw_h)
+            c.restoreState()
         else:
             # Teal gradient placeholder
             c.setFillColor(HexColor("#38BDAB"))

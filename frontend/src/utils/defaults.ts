@@ -69,7 +69,7 @@ const blockDefaults: Record<EditableBlockType, () => ContentBlock> = {
   check: (): CheckBlock => ({ type: 'check', description: '', limit: 1.0 }),
   table: (): TableBlock => ({ type: 'table', headers: ['Kolom 1', 'Kolom 2'], rows: [['', '']] }),
   image: (): ImageBlock => ({ type: 'image', src: '', alignment: 'center' }),
-  map: (): MapBlock => ({ type: 'map', address: '', layers: ['brt'], zoom: 16 }),
+  map: (): MapBlock => ({ type: 'map', address: '', layers: ['percelen'], zoom: 16 }),
   spacer: (): SpacerBlock => ({ type: 'spacer', height_mm: 5 }),
   page_break: (): PageBreakBlock => ({ type: 'page_break' }),
   bullet_list: (): BulletListBlock => ({ type: 'bullet_list', items: [''] }),

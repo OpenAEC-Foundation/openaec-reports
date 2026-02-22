@@ -1,7 +1,75 @@
 # TODO — bm-reports
 
 > Prioriteit: 🔴 Hoog | 🟡 Middel | 🟢 Laag
-> Laatst bijgewerkt: 2026-02-21
+> Laatst bijgewerkt: 2026-02-23
+
+---
+
+## 🟡 Code Quality Audit (7 fasen)
+
+### Fase 1 — Kritieke fixes (schema & security) ✅
+
+- [x] 1.1 MapLayer type mismatch: frontend TypeScript aligned met schema/Python (`percelen`, `bebouwing`, etc.)
+- [x] 1.2 `bullet_list` en `heading_2` block types toegevoegd aan JSON schema (backend ondersteunde ze al)
+- [x] 1.3 `tempfile.mktemp()` → `NamedTemporaryFile(delete=False)` in `block_registry.py`
+- [x] 1.4 Colofon schema uitgebreid met renderer_v2 velden (`opdrachtgever_naam`, `adviseur_bedrijf`, etc.)
+
+### Fase 2 — PEP8 & consistentie ✅
+
+- [x] 2.1 Bare `except Exception:` vervangen door specifieke types in 7 bestanden
+- [x] 2.2 Duplicate `Colors.hex()` → alias van `as_hex`
+- [x] 2.3 Foutafhandelingsstrategie gedocumenteerd (components raise, registry graceful, API catch)
+- [x] 2.4 Lange regels opgesplitst in `api.py`
+- [x] 2.5 Whitespace fixes in `special_pages.py`
+- [x] 2.6 Volledige autoformat met `ruff format` (28 bestanden)
+- [x] 2.7 Import ordering met `ruff check --select I --fix` (14 fixes)
+
+### Fase 3 — Code duplication reduceren ✅
+
+- [x] 3.1 `BLOCK_PADDING = 6` constante in `styles.py`, gebruikt in 3 componenten
+- [x] 3.2 `_generate_and_respond()` helper in `api.py` (dedupliceert generate endpoints)
+- [x] 3.3 `BMFlowable` base class met standaard `wrap()`/`draw()` (4 componenten, map_block uitgezonderd)
+- [x] 3.4 Gedeelde style factories in `styles.py` voor calculation/check_block (~30 regels minder)
+- [x] 3.5 Dead code verwijderd: ongebruikte `_brand_primary`/`_brand_secondary`/`_brand_text` uit special_pages
+
+### Fase 4 — Performance & efficiëntie ✅
+
+- [x] 4.1 Image size caching in `ImageBlock._get_natural_size()`
+- [x] 4.2 Cached `_template_loader` en `_brand_loader` in `api.py` (module-level)
+- [x] 4.3 Map cache LRU eviction (`_CACHE_MAX_FILES = 200`) in `KadasterMap`
+- [x] 4.4 Lazy font initialization via `@functools.cache` in `_ensure_fonts_registered()`
+
+### Fase 5 — Type hints ✅
+
+- [x] 5.1 `wrap()` return type hints op alle Flowable componenten
+- [x] 5.2 `TableBlock.wrap()` zet `self.width`/`self.height` consistent
+- [x] 5.3 `**_kwargs` verwijderd uit block_registry factories (niet nodig, `create_block()` geeft selectief door)
+- [x] 5.4 PEP 604 union syntax — al consistent (`from __future__ import annotations` + `str | Path` overal)
+
+### Fase 6 — Configuratie & build ✅
+
+- [x] 6.1 Dockerfile vereenvoudigd: `pip install .` ipv hardcoded deps
+- [x] 6.2 CORS origins configureerbaar via `CORS_ORIGINS` env var
+- [x] 6.3 Brand kleuren geünificeerd: `#40124A` (primary), `#38BDA0` (secondary) in 15+ bestanden
+- [x] 6.4 Schema sync validatie script: `python scripts/check_schema_sync.py`
+
+### Fase 7 — Dead code & cleanup ✅
+
+- [x] 7.1 STATUS.md bijgewerkt (datum, test count, deps)
+- [x] 7.2 Test assertions bijgewerkt voor nieuwe kleurwaarden
+- [x] 7.3 `TOCBuilder._entries` lijst → vervangen door `_entry_count` counter (alleen len() werd gebruikt)
+- [x] 7.4 `special_pages._build_colofon_rows()` verwijderd (dead code, 45 regels + 7 tests)
+- [x] 7.5 STATUS.md verrijkt: recente features, correcte test counts (603+), nieuwe modules
+
+### Fase 8 — Hardcoded data eliminatie ✅
+
+- [x] 8.1 `special_pages.py`: 15+ hardcoded hex fallbacks vervangen door `BM_COLORS.*` constanten
+- [x] 8.2 `page_templates.py`: `"Inter-Regular"` → `BM_FONTS.body`, `"#45243D"` → `BM_COLORS.text`
+- [x] 8.3 `page_templates.py`: Return type hints toegevoegd aan 7 functies
+- [x] 8.4 `brand_renderer.py`: `"#000000"` fallbacks → `BM_COLORS.text`
+- [x] 8.5 `map_block.py`: Magic DPI `150` → `_MAP_DPI` constante, `"#F0F0F0"` → `BM_COLORS.background_alt`
+- [x] 8.6 `check_block.py`: Magic `bar_h = 8` → `_UC_BAR_HEIGHT` constante
+- [x] 8.7 `api.py`: `"default"` → `_DEFAULT_BRAND` constante
 
 ---
 
@@ -101,3 +169,7 @@
 | **Vite dev proxy voor lokale ontwikkeling** | **Week 8** |
 | **JSON alignment fixes (6 fixes, 22 tests)** | **Week 8** |
 | **P2: Opschonen — dead code, docs archiveren, CLAUDE.md** | **Week 8** |
+| **Code Quality Audit Fase 1-6 (schema fixes, PEP8, DRY, perf, types, config)** | **Week 8** |
+| **Brand kleur unificatie (#40124A, #38BDA0) in 15+ bestanden** | **Week 8** |
+| **bullet_list + heading_2 block types in JSON schema** | **Week 8** |
+| **Fase 8: Hardcoded data eliminatie (BM_COLORS, constanten, type hints)** | **Week 8** |

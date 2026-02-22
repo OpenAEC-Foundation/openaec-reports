@@ -38,7 +38,7 @@ class TestHexToRgb:
         assert g == pytest.approx(1.0)
 
     def test_purple(self):
-        r, g, b = _hex_to_rgb("#401246")
+        r, g, b = _hex_to_rgb("#40124A")
         assert r == pytest.approx(64 / 255)
 
 

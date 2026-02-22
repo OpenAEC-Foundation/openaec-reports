@@ -11,7 +11,6 @@ from bm_reports import A4, Report
 from bm_reports.core.brand import BrandConfig, BrandLoader
 from bm_reports.core.document import DocumentConfig
 from bm_reports.core.special_pages import (
-    _build_colofon_rows,
     _brand_color,
     _resolve_logo_path,
     draw_appendix_divider_page,
@@ -73,51 +72,6 @@ class TestResolveLogoPath:
         path = _resolve_logo_path(brand, "white", "default-wit.png")
         assert isinstance(path, Path)
         assert "default-wit.png" in str(path)
-
-
-class TestBuildColofonRows:
-    def test_project_appears_as_row(self):
-        config = _make_config()
-        rows = _build_colofon_rows(config, {})
-        labels = [r[0] for r in rows]
-        assert "Project" in labels
-
-    def test_project_number_appears(self):
-        config = _make_config()
-        rows = _build_colofon_rows(config, {})
-        labels = [r[0] for r in rows]
-        assert "Projectnummer" in labels
-
-    def test_client_appears(self):
-        config = _make_config()
-        rows = _build_colofon_rows(config, {})
-        labels = [r[0] for r in rows]
-        assert "In opdracht van" in labels
-
-    def test_extra_data_appears(self):
-        config = _make_config()
-        extra = {"versie": "1.0", "status": "CONCEPT"}
-        rows = _build_colofon_rows(config, extra)
-        labels = [r[0] for r in rows]
-        assert "Versie" in labels
-        assert "Status" in labels
-
-    def test_empty_extra_data(self):
-        config = _make_config()
-        rows = _build_colofon_rows(config, {})
-        assert len(rows) > 0
-
-    def test_empty_config_no_crash(self):
-        config = DocumentConfig(format=A4)  # Alles leeg
-        rows = _build_colofon_rows(config, {})
-        assert isinstance(rows, list)
-
-    def test_values_are_strings(self):
-        config = _make_config()
-        rows = _build_colofon_rows(config, {"cijfer": 42})
-        for label, value in rows:
-            assert isinstance(label, str)
-            assert isinstance(value, str)
 
 
 class TestDrawCoverPage:
@@ -437,7 +391,7 @@ class TestCoverFromBrandConfig:
     def test_cover_uses_brand_title_position(self):
         """Cover titel positie komt uit brand.pages.cover."""
         brand = BrandConfig(
-            colors={"primary": "#401246", "secondary": "#38BDA0"},
+            colors={"primary": "#40124A", "secondary": "#38BDA0"},
             fonts={"heading": "Helvetica-Bold", "body": "Helvetica", "medium": "Helvetica"},
         )
         brand.pages["cover"] = {
@@ -459,7 +413,7 @@ class TestCoverFromBrandConfig:
     def test_cover_uses_brand_badges(self):
         """Cover badges komen uit brand.pages.cover.badges."""
         brand = BrandConfig(
-            colors={"primary": "#401246", "secondary": "#38BDA0"},
+            colors={"primary": "#40124A", "secondary": "#38BDA0"},
             fonts={"heading": "Helvetica-Bold", "body": "Helvetica", "medium": "Helvetica"},
         )
         brand.pages["cover"] = {
@@ -493,7 +447,7 @@ class TestCoverFromBrandConfig:
     def test_cover_uses_brand_ontdek_text(self):
         """Cover ontdek tekst komt uit brand.pages.cover."""
         brand = BrandConfig(
-            colors={"primary": "#401246", "secondary": "#38BDA0"},
+            colors={"primary": "#40124A", "secondary": "#38BDA0"},
             fonts={"heading": "Helvetica-Bold", "body": "Helvetica", "medium": "Helvetica"},
         )
         brand.pages["cover"] = {
@@ -517,7 +471,7 @@ class TestCoverFromBrandConfig:
     def test_cover_defaults_without_spec(self):
         """Cover werkt zonder pages.cover in brand YAML."""
         brand = BrandConfig(
-            colors={"primary": "#401246", "secondary": "#38BDA0"},
+            colors={"primary": "#40124A", "secondary": "#38BDA0"},
             fonts={"heading": "Helvetica-Bold", "body": "Helvetica", "medium": "Helvetica"},
         )
         canvas = _make_canvas()
@@ -535,7 +489,7 @@ class TestBackcoverFromBrandConfig:
     def test_backcover_uses_brand_polygons(self):
         """Backcover polygonen komen uit brand.pages.backcover."""
         brand = BrandConfig(
-            colors={"primary": "#401246", "secondary": "#38BDA0"},
+            colors={"primary": "#40124A", "secondary": "#38BDA0"},
             fonts={"heading": "Helvetica-Bold", "body": "Helvetica"},
         )
         brand.pages["backcover"] = {
@@ -564,7 +518,7 @@ class TestBackcoverFromBrandConfig:
     def test_backcover_uses_brand_contact_position(self):
         """Backcover contact posities komen uit brand.pages.backcover."""
         brand = BrandConfig(
-            colors={"primary": "#401246", "secondary": "#38BDA0"},
+            colors={"primary": "#40124A", "secondary": "#38BDA0"},
             fonts={"heading": "Helvetica-Bold", "body": "Helvetica"},
             contact={"name": "Test BV", "address": "Teststraat 1", "website": "test.nl"},
         )
@@ -586,7 +540,7 @@ class TestBackcoverFromBrandConfig:
     def test_backcover_uses_brand_ontdek_prefix(self):
         """Backcover ontdek prefix komt uit brand.pages.backcover."""
         brand = BrandConfig(
-            colors={"primary": "#401246", "secondary": "#38BDA0"},
+            colors={"primary": "#40124A", "secondary": "#38BDA0"},
             fonts={"heading": "Helvetica-Bold", "body": "Helvetica"},
             contact={"name": "Test", "website": "test.nl"},
         )
@@ -605,7 +559,7 @@ class TestBackcoverFromBrandConfig:
     def test_backcover_defaults_without_spec(self):
         """Backcover werkt zonder pages.backcover in brand YAML."""
         brand = BrandConfig(
-            colors={"primary": "#401246", "secondary": "#38BDA0"},
+            colors={"primary": "#40124A", "secondary": "#38BDA0"},
             fonts={"heading": "Helvetica-Bold", "body": "Helvetica"},
         )
         canvas = _make_canvas()

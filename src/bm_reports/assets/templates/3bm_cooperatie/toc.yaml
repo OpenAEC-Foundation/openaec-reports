@@ -12,7 +12,7 @@ title:
   y_td: 74.9
   font: GothamBook
   size: 18.0
-  color: "#401246"
+  color: "#40124A"
 
 entries_start_y: 127.2
 
@@ -30,7 +30,7 @@ levels:
   2:
     font: GothamBook
     size: 9.5
-    color: "#401246"
+    color: "#40124A"
     number_x: 90.0
     title_x: 160.9
     page_x: 515.4
@@ -42,4 +42,4 @@ page_number:
   y_td: 793.5
   font: GothamBook
   size: 9.5
-  color: "#401246"
+  color: "#40124A"

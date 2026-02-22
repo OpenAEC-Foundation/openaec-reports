@@ -78,10 +78,7 @@ def analyze_brand(
 
     # Filter op hoofdformaat (A4) — appendix pages hebben vaak afwijkende fonts/sizes
     main_page_height = first.height_pt
-    main_content = [
-        p for p in content_pages
-        if abs(p.page.height_pt - main_page_height) < 10
-    ]
+    main_content = [p for p in content_pages if abs(p.page.height_pt - main_page_height) < 10]
     if not main_content:
         main_content = content_pages
 
@@ -112,6 +109,7 @@ def analyze_brand(
 # ============================================================
 # Kleurenpalet
 # ============================================================
+
 
 def _cluster_color(hex_color: str, existing: list[str], threshold: int = 10) -> str | None:
     """Vind een bestaande kleur die dichtbij genoeg is."""
@@ -226,9 +224,7 @@ def extract_color_palette(pages: list[ClassifiedPage]) -> dict[str, str]:
     return result
 
 
-def _count_color(
-    hex_color: str, counter: Counter, clustered: list[str]
-) -> None:
+def _count_color(hex_color: str, counter: Counter, clustered: list[str]) -> None:
     """Tel een kleur, cluster met bestaande kleuren."""
     if not hex_color or hex_color == "None":
         return
@@ -243,6 +239,7 @@ def _count_color(
 # ============================================================
 # Font mapping
 # ============================================================
+
 
 def extract_font_map(
     pages: list[ClassifiedPage],
@@ -286,9 +283,7 @@ def extract_font_map(
 
     # Body: meest voorkomende font in main content (size < 12)
     # Filter CIDFont+ namen (embedded fonts zonder leesbare naam)
-    content_for_body = main_content or [
-        p for p in pages if p.page_type == PageType.CONTENT
-    ]
+    content_for_body = main_content or [p for p in pages if p.page_type == PageType.CONTENT]
     font_counter: Counter = Counter()
     all_fonts_set: set[str] = set()
     for cp in content_for_body:
@@ -316,6 +311,7 @@ def _font_family(font_name: str) -> str:
             return font_name.split(sep)[0]
     # Probeer CamelCase te splitsen
     import re
+
     parts = re.findall(r"[A-Z][a-z]+", font_name)
     return parts[0] if parts else font_name
 
@@ -323,6 +319,7 @@ def _font_family(font_name: str) -> str:
 # ============================================================
 # Marges
 # ============================================================
+
 
 def detect_margins(content_pages: list[ClassifiedPage]) -> dict[str, float]:
     """Detecteer marges uit content pagina's.
@@ -361,6 +358,7 @@ def detect_margins(content_pages: list[ClassifiedPage]) -> dict[str, float]:
 # Header / footer zones
 # ============================================================
 
+
 def detect_header_zone(content_pages: list[ClassifiedPage]) -> dict:
     """Detecteer herhalend header patroon.
 
@@ -379,9 +377,7 @@ def detect_footer_zone(content_pages: list[ClassifiedPage]) -> dict:
     return _detect_zone(content_pages, zone="footer")
 
 
-def _detect_zone(
-    content_pages: list[ClassifiedPage], zone: str
-) -> dict:
+def _detect_zone(content_pages: list[ClassifiedPage], zone: str) -> dict:
     """Detecteer herhalende elementen in header of footer zone.
 
     Args:
@@ -490,16 +486,18 @@ def _detect_zone(
             if sample_font:
                 break
 
-        elements.append({
-            "type": "text",
-            "content": content,
-            "x": round(x_pt * PT_TO_MM, 1),
-            "y": y_mm,
-            "font": sample_font,
-            "size": sample_size,
-            "color": sample_color,
-            "align": align,
-        })
+        elements.append(
+            {
+                "type": "text",
+                "content": content,
+                "x": round(x_pt * PT_TO_MM, 1),
+                "y": y_mm,
+                "font": sample_font,
+                "size": sample_size,
+                "color": sample_color,
+                "align": align,
+            }
+        )
 
     # Voeg rects toe
     for (x_pt, y_pt, w_pt, h_pt), count in rect_positions.items():
@@ -515,13 +513,15 @@ def _detect_zone(
         if zone_y_min_pt is None or y_pt < zone_y_min_pt:
             zone_y_min_pt = y_pt
 
-        elements.append({
-            "type": "rect",
-            "x": round(x_pt * PT_TO_MM, 1),
-            "y": y_mm,
-            "width": round(w_pt * PT_TO_MM, 1),
-            "height": round(h_pt * PT_TO_MM, 1),
-        })
+        elements.append(
+            {
+                "type": "rect",
+                "x": round(x_pt * PT_TO_MM, 1),
+                "y": y_mm,
+                "width": round(w_pt * PT_TO_MM, 1),
+                "height": round(h_pt * PT_TO_MM, 1),
+            }
+        )
 
     # Bereken zone hoogte
     if zone_y_min_pt is not None:
@@ -553,6 +553,7 @@ def _is_page_number_sequence(texts: list[str]) -> bool:
 # ============================================================
 # Stijlen
 # ============================================================
+
 
 def extract_styles(content_pages: list[ClassifiedPage]) -> dict[str, dict]:
     """Extraheer tekststijlen uit content pagina's.
@@ -614,9 +615,7 @@ def extract_styles(content_pages: list[ClassifiedPage]) -> dict[str, dict]:
     normal_size = result.get("Normal", {}).get("size", 10)
     h2_size = result.get("Heading2", {}).get("size", 14)
     for s in all_styles:
-        if normal_size < s[1] < h2_size and s not in [
-            _key_for(n, result) for n in result
-        ]:
+        if normal_size < s[1] < h2_size and s not in [_key_for(n, result) for n in result]:
             result["Heading3"] = _style_dict(s, leadings)
             break
 
@@ -648,6 +647,7 @@ def _key_for(name: str, result: dict) -> tuple | None:
 # Tabelstijlen
 # ============================================================
 
+
 def detect_table_styles(content_pages: list[ClassifiedPage]) -> dict | None:
     """Detecteer tabelstijlen uit content pagina's.
 
@@ -674,7 +674,8 @@ def detect_table_styles(content_pages: list[ClassifiedPage]) -> dict | None:
 
             # Zoek tekst die overlapt
             overlapping_texts = [
-                t for t in p.texts
+                t
+                for t in p.texts
                 if t.x >= r.x - 5
                 and t.x2 <= r.x + r.width + 5
                 and t.y_top >= r.y - 5

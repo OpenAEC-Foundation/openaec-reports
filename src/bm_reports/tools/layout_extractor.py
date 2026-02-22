@@ -5,8 +5,8 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 
-from .pdf_extractor import RawPageData, TextElement, RectElement, ImageElement, PathElement
 from .page_classifier import ClassifiedPage, PageType
+from .pdf_extractor import ImageElement, PathElement, RawPageData, RectElement, TextElement
 
 logger = logging.getLogger(__name__)
 
@@ -112,57 +112,65 @@ def _extract_single_page_layout(cp: ClassifiedPage) -> PageLayout:
         el_type = r.element_type
         if r.corner_radius > 0 and el_type == "rect":
             el_type = "rounded_rect"
-        layout.static_elements.append(StaticElement(
-            element_type=el_type,
-            x_pt=round(r.x, 1),
-            y_pt=round(ph - r.y - r.height, 1),
-            width_pt=round(r.width, 1),
-            height_pt=round(r.height, 1),
-            fill_color=r.fill_hex,
-            stroke_color=r.stroke_hex,
-            stroke_width=r.stroke_width,
-            corner_radius=r.corner_radius,
-        ))
+        layout.static_elements.append(
+            StaticElement(
+                element_type=el_type,
+                x_pt=round(r.x, 1),
+                y_pt=round(ph - r.y - r.height, 1),
+                width_pt=round(r.width, 1),
+                height_pt=round(r.height, 1),
+                fill_color=r.fill_hex,
+                stroke_color=r.stroke_hex,
+                stroke_width=r.stroke_width,
+                corner_radius=r.corner_radius,
+            )
+        )
 
     # 2. Converteer alle paths naar StaticElements
     for p in page.paths:
         td_points = [(round(x, 1), round(ph - y, 1)) for x, y in p.points]
-        layout.static_elements.append(StaticElement(
-            element_type="polygon",
-            x_pt=round(p.bbox_x, 1),
-            y_pt=round(ph - p.bbox_y - p.bbox_height, 1),
-            width_pt=round(p.bbox_width, 1),
-            height_pt=round(p.bbox_height, 1),
-            fill_color=p.fill_hex,
-            stroke_color=p.stroke_hex,
-            points=td_points,
-        ))
+        layout.static_elements.append(
+            StaticElement(
+                element_type="polygon",
+                x_pt=round(p.bbox_x, 1),
+                y_pt=round(ph - p.bbox_y - p.bbox_height, 1),
+                width_pt=round(p.bbox_width, 1),
+                height_pt=round(p.bbox_height, 1),
+                fill_color=p.fill_hex,
+                stroke_color=p.stroke_hex,
+                points=td_points,
+            )
+        )
 
     # 3. Converteer images
     for img in page.images:
         role = _classify_image_role(img, page)
-        layout.static_elements.append(StaticElement(
-            element_type="image",
-            x_pt=round(img.x, 1),
-            y_pt=round(ph - img.y - img.height, 1),
-            width_pt=round(img.width, 1),
-            height_pt=round(img.height, 1),
-            image_role=role,
-        ))
+        layout.static_elements.append(
+            StaticElement(
+                element_type="image",
+                x_pt=round(img.x, 1),
+                y_pt=round(ph - img.y - img.height, 1),
+                width_pt=round(img.width, 1),
+                height_pt=round(img.height, 1),
+                image_role=role,
+            )
+        )
 
     # 4. Classificeer tekstelementen
     for t in page.texts:
         y_td = round(ph - t.y_top, 1)
         is_dynamic = _is_dynamic_text(t, cp.page_type)
-        layout.text_zones.append(TextZone(
-            name=_guess_text_role(t, cp.page_type),
-            x_pt=round(t.x, 1),
-            y_pt=y_td,
-            font=t.font,
-            size=t.size,
-            color=t.color_hex,
-            is_dynamic=is_dynamic,
-        ))
+        layout.text_zones.append(
+            TextZone(
+                name=_guess_text_role(t, cp.page_type),
+                x_pt=round(t.x, 1),
+                y_pt=y_td,
+                font=t.font,
+                size=t.size,
+                color=t.color_hex,
+                is_dynamic=is_dynamic,
+            )
+        )
 
     # 5. Detecteer badges (rounded rects met tekst erin)
     layout.badges = _detect_badges(page)
@@ -192,8 +200,14 @@ def _classify_image_role(img: ImageElement, page: RawPageData) -> str:
 def _is_dynamic_text(text: TextElement, page_type: PageType) -> bool:
     """Bepaal of tekst dynamisch is (ingevuld bij generatie) of statisch."""
     static_texts = {
-        "ontdek ons", "3bm.co.nl", "meedenken", "praktisch", "betrouwbaar",
-        "projecten die inspireren", "coöperatie", "bijlage",
+        "ontdek ons",
+        "3bm.co.nl",
+        "meedenken",
+        "praktisch",
+        "betrouwbaar",
+        "projecten die inspireren",
+        "coöperatie",
+        "bijlage",
         "betrouwbaar | praktisch | meedenken",
     }
 
@@ -208,8 +222,15 @@ def _is_dynamic_text(text: TextElement, page_type: PageType) -> bool:
 
     if page_type == PageType.COLOFON:
         colofon_labels = {
-            "project", "in opdracht van", "adviseur", "datum",
-            "fase", "status", "normen", "documentgegevens", "documentkenmerk",
+            "project",
+            "in opdracht van",
+            "adviseur",
+            "datum",
+            "fase",
+            "status",
+            "normen",
+            "documentgegevens",
+            "documentkenmerk",
         }
         if text_lower in colofon_labels:
             return False
@@ -255,19 +276,25 @@ def _detect_badges(page: RawPageData) -> list[BadgeSpec]:
             continue
 
         for t in page.texts:
-            if (t.x >= r.x - 2 and t.x2 <= r.x + r.width + 2
-                    and t.y_top >= r.y - 2 and t.y_bottom <= r.y + r.height + 2):
-                badges.append(BadgeSpec(
-                    label=t.text.strip(),
-                    bg_color=r.fill_hex or "#808080",
-                    text_color=t.color_hex,
-                    x_pt=round(r.x, 1),
-                    y_pt=round(ph - r.y - r.height, 1),
-                    width_pt=round(r.width, 1),
-                    height_pt=round(r.height, 1),
-                    corner_radius=r.corner_radius,
-                    font_size=t.size,
-                ))
+            if (
+                t.x >= r.x - 2
+                and t.x2 <= r.x + r.width + 2
+                and t.y_top >= r.y - 2
+                and t.y_bottom <= r.y + r.height + 2
+            ):
+                badges.append(
+                    BadgeSpec(
+                        label=t.text.strip(),
+                        bg_color=r.fill_hex or "#808080",
+                        text_color=t.color_hex,
+                        x_pt=round(r.x, 1),
+                        y_pt=round(ph - r.y - r.height, 1),
+                        width_pt=round(r.width, 1),
+                        height_pt=round(r.height, 1),
+                        corner_radius=r.corner_radius,
+                        font_size=t.size,
+                    )
+                )
                 break
 
     return badges
@@ -301,6 +328,5 @@ def _find_photo_rect(
     for img in page.images:
         img_area = img.width * img.height
         if img_area > page.width_pt * page.height_pt * 0.15:
-            return (round(img.x, 1), round(img.y, 1),
-                    round(img.width, 1), round(img.height, 1))
+            return (round(img.x, 1), round(img.y, 1), round(img.width, 1), round(img.height, 1))
     return None

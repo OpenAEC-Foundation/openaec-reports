@@ -13,6 +13,7 @@ Supports:
 - Configurable zoom, size
 - Returns PIL Image or saves to file
 """
+
 from __future__ import annotations
 
 import logging
@@ -81,30 +82,39 @@ DEFAULT_LAYERS = ["brt"]
 TILE_SIZE = 256  # WMTS standard tile size
 
 # POI marker colors
-POI_COLOR = (220, 38, 38)       # Red-600
-POI_BORDER = (255, 255, 255)    # White border
-POI_DOT = (255, 255, 255)       # White inner dot
+POI_COLOR = (220, 38, 38)  # Red-600
+POI_BORDER = (255, 255, 255)  # White border
+POI_DOT = (255, 255, 255)  # White inner dot
 
 
 # ---------------------------------------------------------------------------
 # Coordinate math
 # ---------------------------------------------------------------------------
 
+
 def _lat_lon_to_pixel(lat: float, lon: float, zoom: int) -> tuple[float, float]:
     """Convert lat/lon to global pixel coordinates at given zoom."""
-    n = 2 ** zoom
+    n = 2**zoom
     px_x = (lon + 180.0) / 360.0 * n * TILE_SIZE
     lat_rad = math.radians(lat)
-    px_y = (1.0 - math.log(math.tan(lat_rad) + 1.0 / math.cos(lat_rad)) / math.pi) / 2.0 * n * TILE_SIZE
+    px_y = (
+        (1.0 - math.log(math.tan(lat_rad) + 1.0 / math.cos(lat_rad)) / math.pi)
+        / 2.0
+        * n
+        * TILE_SIZE
+    )
     return px_x, px_y
 
 
 def _lat_lon_to_bbox_wms(
-    lat: float, lon: float, zoom: int,
-    width_px: int, height_px: int,
+    lat: float,
+    lon: float,
+    zoom: int,
+    width_px: int,
+    height_px: int,
 ) -> tuple[float, float, float, float]:
     """Calculate WMS bounding box. Returns (minlon, minlat, maxlon, maxlat)."""
-    meters_per_px = 156543.03 * math.cos(math.radians(lat)) / (2 ** zoom)
+    meters_per_px = 156543.03 * math.cos(math.radians(lat)) / (2**zoom)
     half_w = (width_px / 2) * meters_per_px
     half_h = (height_px / 2) * meters_per_px
     dlat = half_h / 111320.0
@@ -116,15 +126,16 @@ def _lat_lon_to_bbox_wms(
 # POI Marker drawing
 # ---------------------------------------------------------------------------
 
+
 def _draw_poi_marker(img: Image.Image, cx: int, cy: int, scale: float = 1.0) -> Image.Image:
     """Draw a Google Maps-style red POI pin at (cx, cy) on the image.
-    
+
     The marker is drawn as a teardrop/pin shape: circle on top, pointed at bottom.
     The point of the pin sits exactly on (cx, cy).
     """
     # Scale marker based on image size (bigger image = bigger marker)
-    base_r = int(16 * scale)   # Radius of the circle part
-    pin_h = int(24 * scale)    # Height of the pointed part below circle center
+    base_r = int(16 * scale)  # Radius of the circle part
+    pin_h = int(24 * scale)  # Height of the pointed part below circle center
     border_w = max(2, int(3 * scale))
     dot_r = max(3, int(5 * scale))
 
@@ -134,48 +145,74 @@ def _draw_poi_marker(img: Image.Image, cx: int, cy: int, scale: float = 1.0) -> 
 
     # The tip of the pin is at (cx, cy), circle center is above
     circle_cy = cy - pin_h
-    
+
     # Draw the pin shape: triangle + circle
     # White border (draw slightly larger shapes first)
     bw = border_w
     # Border triangle
-    draw.polygon([
-        (cx - base_r - bw, circle_cy),
-        (cx + base_r + bw, circle_cy),
-        (cx, cy + bw),
-    ], fill=(255, 255, 255, 230))
+    draw.polygon(
+        [
+            (cx - base_r - bw, circle_cy),
+            (cx + base_r + bw, circle_cy),
+            (cx, cy + bw),
+        ],
+        fill=(255, 255, 255, 230),
+    )
     # Border circle
-    draw.ellipse([
-        cx - base_r - bw, circle_cy - base_r - bw,
-        cx + base_r + bw, circle_cy + base_r + bw,
-    ], fill=(255, 255, 255, 230))
-    
+    draw.ellipse(
+        [
+            cx - base_r - bw,
+            circle_cy - base_r - bw,
+            cx + base_r + bw,
+            circle_cy + base_r + bw,
+        ],
+        fill=(255, 255, 255, 230),
+    )
+
     # Red fill triangle
-    draw.polygon([
-        (cx - base_r + 1, circle_cy),
-        (cx + base_r - 1, circle_cy),
-        (cx, cy - 1),
-    ], fill=(*POI_COLOR, 240))
+    draw.polygon(
+        [
+            (cx - base_r + 1, circle_cy),
+            (cx + base_r - 1, circle_cy),
+            (cx, cy - 1),
+        ],
+        fill=(*POI_COLOR, 240),
+    )
     # Red fill circle
-    draw.ellipse([
-        cx - base_r, circle_cy - base_r,
-        cx + base_r, circle_cy + base_r,
-    ], fill=(*POI_COLOR, 240))
-    
+    draw.ellipse(
+        [
+            cx - base_r,
+            circle_cy - base_r,
+            cx + base_r,
+            circle_cy + base_r,
+        ],
+        fill=(*POI_COLOR, 240),
+    )
+
     # White inner dot
-    draw.ellipse([
-        cx - dot_r, circle_cy - dot_r,
-        cx + dot_r, circle_cy + dot_r,
-    ], fill=(*POI_DOT, 255))
+    draw.ellipse(
+        [
+            cx - dot_r,
+            circle_cy - dot_r,
+            cx + dot_r,
+            circle_cy + dot_r,
+        ],
+        fill=(*POI_DOT, 255),
+    )
 
     # Drop shadow (subtle)
     shadow = Image.new("RGBA", img.size, (0, 0, 0, 0))
     sdraw = ImageDraw.Draw(shadow)
     shadow_off = max(2, int(3 * scale))
-    sdraw.ellipse([
-        cx - base_r, cy - shadow_off,
-        cx + base_r, cy + shadow_off,
-    ], fill=(0, 0, 0, 50))
+    sdraw.ellipse(
+        [
+            cx - base_r,
+            cy - shadow_off,
+            cx + base_r,
+            cy + shadow_off,
+        ],
+        fill=(0, 0, 0, 50),
+    )
 
     # Composite: original → shadow → marker
     result = img.convert("RGBA")
@@ -188,15 +225,18 @@ def _draw_poi_marker(img: Image.Image, cx: int, cy: int, scale: float = 1.0) -> 
 # MapGenerator
 # ---------------------------------------------------------------------------
 
+
 class MapGenerator:
     """Generates map images from PDOK services."""
 
     def __init__(self, timeout: int = 15):
         self.timeout = timeout
         self.session = requests.Session()
-        self.session.headers.update({
-            "User-Agent": "3BM-ReportGenerator/1.0",
-        })
+        self.session.headers.update(
+            {
+                "User-Agent": "3BM-ReportGenerator/1.0",
+            }
+        )
 
     # --- Geocoding ---
 
@@ -237,7 +277,7 @@ class MapGenerator:
 
     def lookup_cadastral(self, lat: float, lon: float) -> dict[str, Any] | None:
         """Reverse-geocode to find the cadastral parcel at given coordinates.
-        
+
         Returns dict with:
           - identificatie: e.g. "LDN03-H-8575"
           - gemeentecode: e.g. "LDN03"
@@ -251,7 +291,8 @@ class MapGenerator:
             resp = self.session.get(
                 PDOK_REVERSE_URL,
                 params={
-                    "lat": lat, "lon": lon,
+                    "lat": lat,
+                    "lon": lon,
                     "type": "perceel",
                     "rows": 1,
                     "fl": "*",
@@ -284,7 +325,8 @@ class MapGenerator:
     def fetch_wmts_image(
         self,
         service_key: str,
-        lat: float, lon: float,
+        lat: float,
+        lon: float,
         zoom: int = DEFAULT_ZOOM,
         width_px: int = DEFAULT_WIDTH_PX,
         height_px: int = DEFAULT_HEIGHT_PX,
@@ -374,7 +416,8 @@ class MapGenerator:
     def fetch_map_image(
         self,
         service_key: str,
-        lat: float, lon: float,
+        lat: float,
+        lon: float,
         zoom: int = DEFAULT_ZOOM,
         width_px: int = DEFAULT_WIDTH_PX,
         height_px: int = DEFAULT_HEIGHT_PX,
@@ -419,16 +462,20 @@ class MapGenerator:
             return []
 
         return self.generate_maps_from_coords(
-            geo["lat"], geo["lon"],
-            layers=layers, zoom=zoom,
-            width_px=width_px, height_px=height_px,
+            geo["lat"],
+            geo["lon"],
+            layers=layers,
+            zoom=zoom,
+            width_px=width_px,
+            height_px=height_px,
             location_name=geo.get("display_name", address),
             show_poi=show_poi,
         )
 
     def generate_maps_from_coords(
         self,
-        lat: float, lon: float,
+        lat: float,
+        lon: float,
         layers: list[str] | None = None,
         zoom: int = DEFAULT_ZOOM,
         width_px: int = DEFAULT_WIDTH_PX,
@@ -449,7 +496,12 @@ class MapGenerator:
                 continue
 
             img = self.fetch_map_image(
-                layer_key, lat, lon, zoom, width_px, height_px,
+                layer_key,
+                lat,
+                lon,
+                zoom,
+                width_px,
+                height_px,
                 show_poi=show_poi,
             )
             if not img:
@@ -463,14 +515,16 @@ class MapGenerator:
             if location_name:
                 caption = f"{caption} — {location_name}"
 
-            results.append({
-                "image": img,
-                "caption": caption,
-                "path": Path(tmp.name),
-                "layer": layer_key,
-                "lat": lat,
-                "lon": lon,
-                "zoom": zoom,
-            })
+            results.append(
+                {
+                    "image": img,
+                    "caption": caption,
+                    "path": Path(tmp.name),
+                    "layer": layer_key,
+                    "lat": lat,
+                    "lon": lon,
+                    "zoom": zoom,
+                }
+            )
 
         return results

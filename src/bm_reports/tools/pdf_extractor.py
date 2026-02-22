@@ -163,16 +163,18 @@ def extract_pdf(
         # Afbeeldingen
         images = _extract_images(page)
 
-        pages.append(RawPageData(
-            page_number=page_num,
-            width_pt=pw,
-            height_pt=ph,
-            texts=texts,
-            rects=rects,
-            images=images,
-            paths=paths,
-            page_image_path=page_image_path,
-        ))
+        pages.append(
+            RawPageData(
+                page_number=page_num,
+                width_pt=pw,
+                height_pt=ph,
+                texts=texts,
+                rects=rects,
+                images=images,
+                paths=paths,
+                page_image_path=page_image_path,
+            )
+        )
 
     doc.close()
     return pages
@@ -199,16 +201,18 @@ def _extract_texts(page) -> list[TextElement]:
                 b = color_int & 0xFF
                 color_hex = f"#{r:02X}{g:02X}{b:02X}"
 
-                texts.append(TextElement(
-                    text=text,
-                    x=bbox[0],
-                    y_top=bbox[1],
-                    x2=bbox[2],
-                    y_bottom=bbox[3],
-                    font=span.get("font", ""),
-                    size=round(span.get("size", 0), 1),
-                    color_hex=color_hex,
-                ))
+                texts.append(
+                    TextElement(
+                        text=text,
+                        x=bbox[0],
+                        y_top=bbox[1],
+                        x2=bbox[2],
+                        y_bottom=bbox[3],
+                        font=span.get("font", ""),
+                        size=round(span.get("size", 0), 1),
+                        color_hex=color_hex,
+                    )
+                )
 
     return texts
 
@@ -245,25 +249,25 @@ def _extract_rects(page, page_width: float, page_height: float) -> list[RectElem
         corner_radius = _detect_corner_radius(items)
 
         # Filter pagina-vullende witte rects
-        is_page_filling = (
-            abs(w) > 0.9 * page_width and abs(h) > 0.9 * page_height
-        )
+        is_page_filling = abs(w) > 0.9 * page_width and abs(h) > 0.9 * page_height
         if is_page_filling:
             # Skip tenzij niet-witte kleur
             if fill_hex is None or fill_hex.upper() in ("#FFFFFF", "#FEFEFE", "#FDFDFD"):
                 continue
 
-        rects.append(RectElement(
-            x=x,
-            y=y,
-            width=abs(w),
-            height=abs(h),
-            fill_hex=fill_hex,
-            stroke_hex=stroke_hex,
-            stroke_width=stroke_width,
-            element_type=element_type,
-            corner_radius=corner_radius,
-        ))
+        rects.append(
+            RectElement(
+                x=x,
+                y=y,
+                width=abs(w),
+                height=abs(h),
+                fill_hex=fill_hex,
+                stroke_hex=stroke_hex,
+                stroke_width=stroke_width,
+                element_type=element_type,
+                corner_radius=corner_radius,
+            )
+        )
 
     return rects
 
@@ -349,18 +353,20 @@ def _extract_paths(page) -> list[PathElement]:
 
         path_type = "bezier" if has_curves else "polygon"
 
-        paths.append(PathElement(
-            path_type=path_type,
-            points=[(round(p[0], 1), round(p[1], 1)) for p in deduped],
-            fill_hex=_color_to_hex(fill),
-            stroke_hex=_color_to_hex(stroke),
-            stroke_width=drawing.get("width", 0),
-            is_closed=drawing.get("closePath", False),
-            bbox_x=min(xs),
-            bbox_y=min(ys),
-            bbox_width=max(xs) - min(xs),
-            bbox_height=max(ys) - min(ys),
-        ))
+        paths.append(
+            PathElement(
+                path_type=path_type,
+                points=[(round(p[0], 1), round(p[1], 1)) for p in deduped],
+                fill_hex=_color_to_hex(fill),
+                stroke_hex=_color_to_hex(stroke),
+                stroke_width=drawing.get("width", 0),
+                is_closed=drawing.get("closePath", False),
+                bbox_x=min(xs),
+                bbox_y=min(ys),
+                bbox_width=max(xs) - min(xs),
+                bbox_height=max(ys) - min(ys),
+            )
+        )
 
     return paths
 
@@ -375,13 +381,15 @@ def _extract_images(page) -> list[ImageElement]:
             img_rects = page.get_image_rects(xref)
             if img_rects:
                 r = img_rects[0]
-                images.append(ImageElement(
-                    x=r.x0,
-                    y=r.y0,
-                    width=r.width,
-                    height=r.height,
-                    xref=xref,
-                ))
+                images.append(
+                    ImageElement(
+                        x=r.x0,
+                        y=r.y0,
+                        width=r.width,
+                        height=r.height,
+                        xref=xref,
+                    )
+                )
         except Exception:
             # Sommige images hebben geen positie-info
             pass

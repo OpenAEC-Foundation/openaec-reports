@@ -5,14 +5,15 @@ from __future__ import annotations
 from pathlib import Path
 
 from reportlab.lib.utils import ImageReader
-from reportlab.platypus import Flowable, Image, Paragraph, Table, TableStyle
+from reportlab.platypus import Image, Paragraph, Table, TableStyle
 from svglib.svglib import svg2rlg
 
+from bm_reports.components.base import BMFlowable
 from bm_reports.core.document import MM_TO_PT
 from bm_reports.core.styles import BM_STYLES
 
 
-class ImageBlock(Flowable):
+class ImageBlock(BMFlowable):
     """Afbeelding flowable met auto-scaling en caption.
 
     Ondersteunt PNG, JPG, en SVG (via svglib).
@@ -51,16 +52,28 @@ class ImageBlock(Flowable):
         if suffix not in self.SUPPORTED_FORMATS:
             raise ValueError(f"Niet-ondersteund formaat: {suffix}")
 
+        self._natural_size: tuple[float, float] | None = None
+
     def _get_natural_size(self) -> tuple[float, float]:
-        """Bepaal natuurlijke afmetingen in points (1 px = 1 pt bij 72 DPI)."""
+        """Bepaal natuurlijke afmetingen in points (1 px = 1 pt bij 72 DPI).
+
+        Resultaat wordt gecached na eerste aanroep.
+        """
+        if self._natural_size is not None:
+            return self._natural_size
+
         if self.path.suffix.lower() == ".svg":
             drawing = svg2rlg(str(self.path))
             if drawing:
-                return float(drawing.width), float(drawing.height)
-            return 100.0, 100.0
-        reader = ImageReader(str(self.path))
-        w_px, h_px = reader.getSize()
-        return float(w_px), float(h_px)
+                self._natural_size = (float(drawing.width), float(drawing.height))
+            else:
+                self._natural_size = (100.0, 100.0)
+        else:
+            reader = ImageReader(str(self.path))
+            w_px, h_px = reader.getSize()
+            self._natural_size = (float(w_px), float(h_px))
+
+        return self._natural_size
 
     def _load_image(self, target_w: float, target_h: float):
         """Laad afbeelding als ReportLab object met opgegeven afmetingen.
@@ -134,14 +147,4 @@ class ImageBlock(Flowable):
         table.setStyle(TableStyle(style_cmds))
         return table
 
-    def wrap(self, available_width, available_height):
-        self._content = self._build_content(available_width)
-        w, h = self._content.wrap(available_width, available_height)
-        self.width = w
-        self.height = h
-        return (self.width, self.height)
-
-    def draw(self):
-        """Render de afbeelding met optioneel bijschrift."""
-        if hasattr(self, "_content"):
-            self._content.drawOn(self.canv, 0, 0)
+    # wrap() en draw() worden geërfd van BMFlowable

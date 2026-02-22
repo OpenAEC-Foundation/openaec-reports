@@ -3,14 +3,22 @@
 from __future__ import annotations
 
 from reportlab.lib.colors import HexColor
-from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.platypus import Flowable, Paragraph, Table, TableStyle
+from reportlab.platypus import Paragraph, Table, TableStyle
 
-from bm_reports.core.styles import BM_COLORS, BM_FONTS, BM_STYLES
+from bm_reports.components.base import BMFlowable
+from bm_reports.core.styles import (
+    BLOCK_PADDING,
+    BM_COLORS,
+    BM_FONTS,
+    block_style_heading,
+    block_style_mono,
+    block_style_reference,
+    block_style_result,
+)
 
 
-class CalculationBlock(Flowable):
+class CalculationBlock(BMFlowable):
     """Berekeningsblok flowable.
 
     Toont een berekening in standaard engineering notatie:
@@ -57,52 +65,21 @@ class CalculationBlock(Flowable):
         self.unit = unit
         self.reference = reference
 
-    def _build_block(self, available_width: float) -> Table:
+    def _build_content(self, available_width: float) -> Table:
         """Bouw intern Table object met alle berekeningsonderdelen."""
-        pad = 6  # horizontal padding
+        pad = BLOCK_PADDING
         inner_w = available_width - 2 * pad
 
-        # Lokale paragraph styles
-        s_title = ParagraphStyle(
-            "_calc_title",
-            parent=BM_STYLES["Normal"],
-            fontName=BM_FONTS.heading,
-            fontSize=BM_FONTS.body_size,
-            leading=BM_FONTS.body_size * 1.3,
-            textColor=HexColor(BM_COLORS.primary),
-            spaceAfter=0,
-        )
-        s_ref = ParagraphStyle(
-            "_calc_ref",
-            parent=BM_STYLES["Normal"],
-            fontSize=BM_FONTS.caption_size,
-            leading=BM_FONTS.caption_size * 1.3,
-            textColor=HexColor(BM_COLORS.text_light),
-            alignment=TA_RIGHT,
-            spaceAfter=0,
-        )
-        s_formula = ParagraphStyle(
-            "_calc_formula",
-            parent=BM_STYLES["Normal"],
-            fontName=BM_FONTS.mono,
-            fontSize=BM_FONTS.body_size,
-            leading=BM_FONTS.body_size * 1.4,
-            spaceAfter=0,
-        )
+        # Paragraph styles (gedeelde factories uit styles.py)
+        s_title = block_style_heading(BM_COLORS.primary)
+        s_ref = block_style_reference()
+        s_formula = block_style_mono()
         s_sub = ParagraphStyle(
             "_calc_sub",
             parent=s_formula,
             textColor=HexColor(BM_COLORS.text_light),
         )
-        s_result = ParagraphStyle(
-            "_calc_result",
-            parent=BM_STYLES["Normal"],
-            fontName=BM_FONTS.heading,
-            fontSize=BM_FONTS.body_size + 1,
-            leading=(BM_FONTS.body_size + 1) * 1.3,
-            textColor=HexColor(BM_COLORS.primary),
-            spaceAfter=0,
-        )
+        s_result = block_style_result(BM_COLORS.primary)
 
         rows = []
 
@@ -114,13 +91,17 @@ class CalculationBlock(Flowable):
                 [[title_para, ref_para]],
                 colWidths=[inner_w * 0.6, inner_w * 0.4],
             )
-            header.setStyle(TableStyle([
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-                ("TOPPADDING", (0, 0), (-1, -1), 0),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-            ]))
+            header.setStyle(
+                TableStyle(
+                    [
+                        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                        ("TOPPADDING", (0, 0), (-1, -1), 0),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+                    ]
+                )
+            )
         else:
             header = title_para
         rows.append([header])
@@ -162,22 +143,11 @@ class CalculationBlock(Flowable):
         # Scheidingslijn boven resultaat
         if self.result and n > 1:
             cmds.append(
-                ("LINEABOVE", (0, result_idx), (-1, result_idx),
-                 0.5, HexColor(BM_COLORS.rule))
+                ("LINEABOVE", (0, result_idx), (-1, result_idx), 0.5, HexColor(BM_COLORS.rule))
             )
             cmds.append(("TOPPADDING", (0, result_idx), (-1, result_idx), 4))
 
         table.setStyle(TableStyle(cmds))
         return table
 
-    def wrap(self, available_width, available_height):
-        self._block = self._build_block(available_width)
-        w, h = self._block.wrap(available_width, available_height)
-        self.width = w
-        self.height = h
-        return (self.width, self.height)
-
-    def draw(self):
-        """Render het berekeningsblok."""
-        if hasattr(self, "_block"):
-            self._block.drawOn(self.canv, 0, 0)
+    # wrap() en draw() worden geërfd van BMFlowable

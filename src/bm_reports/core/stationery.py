@@ -21,8 +21,11 @@ class StationeryRenderer:
         self._cache: dict[str, Any] = {}
 
     def draw(
-        self, canvas, source_path: str | Path | None,
-        page_w: float, page_h: float,
+        self,
+        canvas,
+        source_path: str | Path | None,
+        page_w: float,
+        page_h: float,
     ) -> bool:
         """Teken stationery achtergrond op het canvas.
 
@@ -95,10 +98,15 @@ class StationeryRenderer:
         """Render PNG/JPG als full-page achtergrond."""
         try:
             canvas.drawImage(
-                str(img_path), 0, 0, page_w, page_h,
-                preserveAspectRatio=False, mask='auto',
+                str(img_path),
+                0,
+                0,
+                page_w,
+                page_h,
+                preserveAspectRatio=False,
+                mask="auto",
             )
             return True
-        except Exception as e:
-            logger.error(f"Stationery image fout: {e}")
+        except (OSError, ValueError) as e:
+            logger.error("Stationery image fout: %s", e)
             return False

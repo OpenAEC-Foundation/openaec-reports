@@ -11,10 +11,10 @@ const inputClass =
 const labelClass = 'text-xs font-medium text-gray-500 mb-1';
 
 const ALL_LAYERS: { value: MapLayer; label: string; desc: string }[] = [
-  { value: 'brt', label: 'Topografie', desc: 'Standaard kaart' },
-  { value: 'brt_grijs', label: 'Topo grijs', desc: 'Grijze variant' },
-  { value: 'luchtfoto', label: 'Luchtfoto', desc: 'Meest recente' },
-  { value: 'kadastraal', label: 'Kadastraal', desc: 'Perceel grenzen' },
+  { value: 'percelen', label: 'Percelen', desc: 'Kadastrale grenzen + straatnamen' },
+  { value: 'bebouwing', label: 'Bebouwing', desc: 'BAG panden' },
+  { value: 'luchtfoto', label: 'Luchtfoto', desc: 'Meest recente luchtfoto' },
+  { value: 'bestemmingsplan', label: 'Bestemmingsplan', desc: 'Bestemmingsplan (placeholder)' },
 ];
 
 const ZOOM_LABELS: Record<number, string> = {
@@ -41,7 +41,7 @@ interface GeoResult {
 export function MapEditor({ block, onChange }: MapEditorProps) {
   const [address, setAddress] = useState(block.address ?? '');
   const [zoom, setZoom] = useState(block.zoom ?? 16);
-  const [layers, setLayers] = useState<MapLayer[]>(block.layers ?? ['brt']);
+  const [layers, setLayers] = useState<MapLayer[]>(block.layers ?? ['percelen']);
   const [caption, setCaption] = useState(block.caption ?? '');
   const [widthMm, setWidthMm] = useState(block.width_mm ?? 170);
 
@@ -120,7 +120,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
       cadastral: undefined,
     });
 
-    updatePreview(result.lat, result.lon, zoom, layers[0] ?? 'brt');
+    updatePreview(result.lat, result.lon, zoom, layers[0] ?? 'percelen');
   }
 
   function handleAddressBlur() {
@@ -152,7 +152,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
           setResolvedName(doc.weergavenaam ?? q);
           setResolvedCoords({ lat, lon });
           onChange({ center: { lat, lon } });
-          updatePreview(lat, lon, zoom, layers[0] ?? 'brt');
+          updatePreview(lat, lon, zoom, layers[0] ?? 'percelen');
         }
       }
     } catch {
@@ -226,53 +226,37 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
 
   // --- Map preview ---
   function updatePreview(lat: number, lon: number, z: number, layer: string) {
-    const wmtsLayers: Record<string, string> = {
-      brt: 'standaard',
-      brt_grijs: 'grijs',
-    };
-
-    const wmtsLayer = wmtsLayers[layer];
-    if (wmtsLayer) {
-      const latRad = (lat * Math.PI) / 180;
-      const pz = Math.max(z - 1, 10);
-      const pn = Math.pow(2, pz);
-      const px = Math.floor(((lon + 180) / 360) * pn);
-      const py = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * pn);
-      setPreviewUrl(
-        `https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/${wmtsLayer}/EPSG:3857/${pz}/${px}/${py}.png`
-      );
+    // For luchtfoto, use WMS; for all other schema layers use BRT standaard WMTS as preview
+    if (layer === 'luchtfoto') {
+      const metersPerPx = (156543.03 * Math.cos((lat * Math.PI) / 180)) / Math.pow(2, z);
+      const halfW = 200 * metersPerPx;
+      const halfH = 133 * metersPerPx;
+      const dlat = halfH / 111320.0;
+      const dlon = halfW / (111320.0 * Math.cos((lat * Math.PI) / 180));
+      const bbox = `${lat - dlat},${lon - dlon},${lat + dlat},${lon + dlon}`;
+      const params = new URLSearchParams({
+        SERVICE: 'WMS', VERSION: '1.3.0', REQUEST: 'GetMap',
+        LAYERS: 'Actueel_orthoHR', CRS: 'EPSG:4326', BBOX: bbox,
+        WIDTH: '400', HEIGHT: '266', FORMAT: 'image/png', STYLES: '',
+      });
+      setPreviewUrl(`https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0?${params.toString()}`);
       return;
     }
 
-    const wmsServices: Record<string, { url: string; layers: string }> = {
-      luchtfoto: { url: 'https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0', layers: 'Actueel_orthoHR' },
-      kadastraal: { url: 'https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0', layers: 'Kadastralekaart' },
-    };
-
-    const svc = wmsServices[layer];
-    if (!svc) {
-      setPreviewUrl(null);
-      return;
-    }
-
-    const metersPerPx = (156543.03 * Math.cos((lat * Math.PI) / 180)) / Math.pow(2, z);
-    const halfW = 200 * metersPerPx;
-    const halfH = 133 * metersPerPx;
-    const dlat = halfH / 111320.0;
-    const dlon = halfW / (111320.0 * Math.cos((lat * Math.PI) / 180));
-    const bbox = `${lat - dlat},${lon - dlon},${lat + dlat},${lon + dlon}`;
-
-    const params = new URLSearchParams({
-      SERVICE: 'WMS', VERSION: '1.3.0', REQUEST: 'GetMap',
-      LAYERS: svc.layers, CRS: 'EPSG:4326', BBOX: bbox,
-      WIDTH: '400', HEIGHT: '266', FORMAT: 'image/png', STYLES: '',
-    });
-    setPreviewUrl(`${svc.url}?${params.toString()}`);
+    // Default: BRT standaard WMTS tile as preview for percelen/bebouwing/bestemmingsplan
+    const latRad = (lat * Math.PI) / 180;
+    const pz = Math.max(z - 1, 10);
+    const pn = Math.pow(2, pz);
+    const px = Math.floor(((lon + 180) / 360) * pn);
+    const py = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * pn);
+    setPreviewUrl(
+      `https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/${pz}/${px}/${py}.png`
+    );
   }
 
   useEffect(() => {
     if (resolvedCoords) {
-      updatePreview(resolvedCoords.lat, resolvedCoords.lon, zoom, layers[0] ?? 'brt');
+      updatePreview(resolvedCoords.lat, resolvedCoords.lon, zoom, layers[0] ?? 'percelen');
     }
   }, [zoom, layers, resolvedCoords]);
 
@@ -588,7 +572,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
           setCadastralError('');
           setLinkedPerceel(null);
           onChange({ center: { lat, lon }, cadastral: undefined });
-          updatePreview(lat, lon, zoom, layers[0] ?? 'brt');
+          updatePreview(lat, lon, zoom, layers[0] ?? 'percelen');
         }}
       />
     </div>

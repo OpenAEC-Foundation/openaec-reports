@@ -8,6 +8,12 @@ from bm_reports.core.engine import Report
 from bm_reports.core.renderer_v2 import ReportGeneratorV2
 
 __all__ = [
-    "A4", "A3", "BrandConfig", "BrandLoader", "Document",
-    "Report", "ReportGeneratorV2", "__version__",
+    "A4",
+    "A3",
+    "BrandConfig",
+    "BrandLoader",
+    "Document",
+    "Report",
+    "ReportGeneratorV2",
+    "__version__",
 ]

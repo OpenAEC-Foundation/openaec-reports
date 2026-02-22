@@ -13,13 +13,17 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Flowable, Paragraph, Table, TableStyle
 
 from bm_reports.core.document import MM_TO_PT
-from bm_reports.core.styles import BM_COLORS, BM_FONTS, BM_STYLES
+from bm_reports.core.styles import BLOCK_PADDING, BM_COLORS, BM_FONTS, BM_STYLES
 from bm_reports.data.kadaster import KadasterClient
 
 logger = logging.getLogger(__name__)
 
 # Maximum cache leeftijd in seconden (24 uur)
 _CACHE_MAX_AGE = 24 * 60 * 60
+# Maximum aantal gecachte kaartbestanden (LRU: oudste worden verwijderd)
+_CACHE_MAX_FILES = 200
+# DPI voor kaartafbeeldingen (pixels per inch)
+_MAP_DPI = 150
 
 # Module-level styles (voorkom naam-conflicten bij multi-pass builds)
 _STYLE_MAP_SCALE = ParagraphStyle(
@@ -109,9 +113,9 @@ class KadasterMap(Flowable):
 
         self._client = KadasterClient(cache_dir=self._cache_dir)
 
-        # Bereken pixel dimensies (150 DPI equivalent)
-        self._width_px = max(int(self.width_mm * 150 / 25.4), 100)
-        self._height_px = max(int(self.height_mm * 150 / 25.4), 100)
+        # Bereken pixel dimensies
+        self._width_px = max(int(self.width_mm * _MAP_DPI / 25.4), 100)
+        self._height_px = max(int(self.height_mm * _MAP_DPI / 25.4), 100)
 
         # Layer images worden gevuld tijdens wrap()
         self._layer_paths: list[Path] = []
@@ -186,12 +190,24 @@ class KadasterMap(Flowable):
                 )
                 cache_path.write_bytes(image_data)
                 paths.append(cache_path)
-            except Exception as e:
-                logger.warning(
-                    "Kon kaartlaag '%s' niet ophalen van PDOK: %s", layer_name, e
-                )
+                self._evict_old_cache()
+            except (OSError, ValueError) as e:
+                logger.warning("Kon kaartlaag '%s' niet ophalen van PDOK: %s", layer_name, e)
 
         return paths
+
+    def _evict_old_cache(self) -> None:
+        """Verwijder oudste cache bestanden als het maximum bereikt is."""
+        try:
+            cache_files = sorted(
+                self._cache_dir.glob("map_*.png"),
+                key=lambda p: p.stat().st_mtime,
+            )
+            while len(cache_files) > _CACHE_MAX_FILES:
+                oldest = cache_files.pop(0)
+                oldest.unlink(missing_ok=True)
+        except OSError:
+            pass
 
     def _build_content(self, available_width: float) -> Table:
         """Bouw intern Table object met kaart en optioneel caption/schaalbalk.
@@ -199,7 +215,7 @@ class KadasterMap(Flowable):
         Args:
             available_width: Beschikbare breedte in points.
         """
-        pad = 6
+        pad = BLOCK_PADDING
         target_w = min(self.width_mm * MM_TO_PT, available_width - 2 * pad)
         target_h = self.height_mm * MM_TO_PT
 
@@ -273,30 +289,38 @@ class KadasterMap(Flowable):
         para = Paragraph(text, _STYLE_MAP_PLACEHOLDER)
 
         inner = Table([[para]], colWidths=[width_pt - 12])
-        inner.setStyle(TableStyle([
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("BACKGROUND", (0, 0), (-1, -1), HexColor("#F0F0F0")),
-            ("LEFTPADDING", (0, 0), (-1, -1), 6),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-            ("TOPPADDING", (0, 0), (-1, -1), 6),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-            ("BOX", (0, 0), (-1, -1), 0.5, HexColor(BM_COLORS.rule)),
-        ]))
+        inner.setStyle(
+            TableStyle(
+                [
+                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                    ("BACKGROUND", (0, 0), (-1, -1), HexColor(BM_COLORS.background_alt)),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                    ("TOPPADDING", (0, 0), (-1, -1), 6),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                    ("BOX", (0, 0), (-1, -1), 0.5, HexColor(BM_COLORS.rule)),
+                ]
+            )
+        )
 
         # Wrapper tabel met vaste hoogte
         wrapper = Table([[inner]], colWidths=[width_pt], rowHeights=[height_pt])
-        wrapper.setStyle(TableStyle([
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("TOPPADDING", (0, 0), (-1, -1), 0),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-            ("LEFTPADDING", (0, 0), (-1, -1), 0),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-        ]))
+        wrapper.setStyle(
+            TableStyle(
+                [
+                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                    ("TOPPADDING", (0, 0), (-1, -1), 0),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                ]
+            )
+        )
         return wrapper
 
-    def wrap(self, available_width, available_height):
+    def wrap(self, available_width: float, available_height: float) -> tuple[float, float]:
         """Bereken afmetingen en haal kaartdata op."""
         # Fetch layers als dat nog niet gebeurd is
         if not self._layer_paths and not self._fetch_failed:
@@ -304,7 +328,7 @@ class KadasterMap(Flowable):
                 self._layer_paths = self._fetch_layers()
                 if not self._layer_paths:
                     self._fetch_failed = True
-            except Exception as e:
+            except (OSError, ValueError) as e:
                 logger.warning("Fout bij ophalen kaartlagen: %s", e)
                 self._fetch_failed = True
 
@@ -328,7 +352,7 @@ class KadasterMap(Flowable):
 
         # Teken extra lagen als overlay op de kaartafbeelding
         if len(self._layer_paths) > 1:
-            pad = 6  # moet overeenkomen met _build_content pad
+            pad = BLOCK_PADDING
             target_w = min(self.width_mm * MM_TO_PT, self.width - 2 * pad)
             target_h = self.height_mm * MM_TO_PT
 
@@ -346,5 +370,5 @@ class KadasterMap(Flowable):
                         preserveAspectRatio=True,
                         mask="auto",
                     )
-                except Exception as e:
+                except (OSError, ValueError) as e:
                     logger.warning("Kon overlay laag niet tekenen: %s", e)

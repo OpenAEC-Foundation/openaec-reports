@@ -71,9 +71,7 @@ def classify_pages(pages: list[RawPageData]) -> list[ClassifiedPage]:
             conf = 0.95
         elif has_rect or has_contact:
             conf = 0.85
-        results[idx] = ClassifiedPage(
-            page=p, page_type=PageType.BACKCOVER, confidence=conf
-        )
+        results[idx] = ClassifiedPage(page=p, page_type=PageType.BACKCOVER, confidence=conf)
 
     # 3. Appendix dividers
     for i, p in enumerate(pages):
@@ -89,9 +87,7 @@ def classify_pages(pages: list[RawPageData]) -> list[ClassifiedPage]:
         if i in results:
             continue
         if _is_colofon(pages[i]):
-            results[i] = ClassifiedPage(
-                page=pages[i], page_type=PageType.COLOFON, confidence=0.85
-            )
+            results[i] = ClassifiedPage(page=pages[i], page_type=PageType.COLOFON, confidence=0.85)
             break  # max 1 colofon
 
     # 5. TOC (zoek in eerste 6 pagina's)
@@ -99,9 +95,7 @@ def classify_pages(pages: list[RawPageData]) -> list[ClassifiedPage]:
         if i in results:
             continue
         if _is_toc(pages[i]):
-            results[i] = ClassifiedPage(
-                page=pages[i], page_type=PageType.TOC, confidence=0.85
-            )
+            results[i] = ClassifiedPage(page=pages[i], page_type=PageType.TOC, confidence=0.85)
             break
 
     # 6. Rest → CONTENT
@@ -110,16 +104,12 @@ def classify_pages(pages: list[RawPageData]) -> list[ClassifiedPage]:
         if i in results:
             classified.append(results[i])
         else:
-            classified.append(ClassifiedPage(
-                page=p, page_type=PageType.CONTENT, confidence=0.70
-            ))
+            classified.append(ClassifiedPage(page=p, page_type=PageType.CONTENT, confidence=0.70))
 
     return classified
 
 
-def _has_large_colored_rect(
-    page: RawPageData, min_area_frac: float = 0.40
-) -> bool:
+def _has_large_colored_rect(page: RawPageData, min_area_frac: float = 0.40) -> bool:
     """Check of pagina een groot gekleurd vlak heeft."""
     page_area = page.width_pt * page.height_pt
     for r in page.rects:
@@ -153,9 +143,7 @@ def _is_appendix_divider(page: RawPageData) -> bool:
     has_large_font = any(t.size > 30 for t in page.texts)
 
     combined = " ".join(t.text for t in page.texts).lower()
-    has_keyword = any(
-        w in combined for w in ("bijlage", "appendix", "annex", "bijlagen")
-    )
+    has_keyword = any(w in combined for w in ("bijlage", "appendix", "annex", "bijlagen"))
 
     return has_large_rect and few_texts and (has_large_font or has_keyword)
 
@@ -164,9 +152,7 @@ def _is_colofon(page: RawPageData) -> bool:
     """Check of pagina een colofon is."""
     # Tel horizontale lijnen
     h_lines = sum(
-        1
-        for r in page.rects
-        if r.element_type == "line" and r.width > 50 and r.height < 5
+        1 for r in page.rects if r.element_type == "line" and r.width > 50 and r.height < 5
     )
     if h_lines < 4:
         return False

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
 
 from reportlab.lib.colors import HexColor
 from reportlab.lib.styles import ParagraphStyle
@@ -32,7 +31,7 @@ class TOCBuilder:
     """
 
     def __init__(self):
-        self._entries: list[dict[str, Any]] = []
+        self._entry_count: int = 0
         self._toc = TableOfContents()
         self._configure_styles()
 
@@ -85,8 +84,8 @@ class TOCBuilder:
             level: Heading level (0 = H1, 1 = H2, 2 = H3).
         """
         # ReportLab TOC entry format
-        key = f"toc-{len(self._entries)}"
-        self._entries.append({"title": title, "level": level, "key": key})
+        key = f"toc-{self._entry_count}"
+        self._entry_count += 1
 
         # Bookmark voor TOC linking
         canvas.bookmarkPage(key)

@@ -3,8 +3,8 @@ brand:
   slug: "3bm-cooperatie"
 
 colors:
-  primary: "#401246"
-  secondary: "#38BDAB"
+  primary: "#40124A"
+  secondary: "#38BDA0"
   text: "#45243D"
   text_accent: "#56B49B"
   accent: "#2ECC71"
@@ -110,14 +110,14 @@ pages:
     badges:
       - label: "MEEDENKEN"
         bg_color: "#f0c385"
-        text_color: "#401246"
+        text_color: "#40124A"
         x_ref: 297.64
         y_ref: 298.82
         w_ref: 112.05
         h_ref: 33.97
       - label: "PRAKTISCH"
         bg_color: "#37bcab"
-        text_color: "#401246"
+        text_color: "#40124A"
         x_ref: 426.53
         y_ref: 298.82
         w_ref: 112.05
@@ -181,21 +181,21 @@ pages:
     # Header zone
     report_type_font: "GothamBold"
     report_type_size: 22.0
-    report_type_color: "#401246"
+    report_type_color: "#40124A"
     report_type_x_pt: 70.9
     report_type_y_pt: 57.3
     subtitle_font: "GothamBook"
     subtitle_size: 14.0
-    subtitle_color: "#38BDAB"
+    subtitle_color: "#38BDA0"
     subtitle_x_pt: 70.9
     subtitle_y_pt: 86.8
     # Label kolom
     label_x_pt: 103
     value_x_pt: 229
     # Kleuren
-    first_labels_color: "#401246"
-    other_labels_color: "#38BDAB"
-    value_color: "#401246"
+    first_labels_color: "#40124A"
+    other_labels_color: "#38BDA0"
+    value_color: "#40124A"
     # Fonts
     label_font: "GothamBold"
     label_size: 10.0
@@ -205,16 +205,16 @@ pages:
     line_x1_pt: 102
     line_x2_pt: 420
     line_stroke_pt: 0.25
-    line_color: "#401146"
+    line_color: "#40124A"
     # Footer (turquoise blok + logo, alleen op colofon)
     footer_rect: [0, 771, 282, 842]
-    footer_rect_color: "#38BDAB"
+    footer_rect_color: "#38BDA0"
     # Paginanummer op colofon
     page_num_x_pt: 534
     page_num_y_pt: 796.3
     page_num_font: "GothamBook"
     page_num_size: 9.5
-    page_num_color: "#38BDAB"
+    page_num_color: "#38BDA0"
     # Veld volgorde met y_pt posities
     fields:
       - {label: "Project", type: "project", y_pt: 320.8}
@@ -260,11 +260,11 @@ pages:
     bg_color: "#37BCAB"
     # Paurs blok linksonder
     purple_rect: [0, 771, 282, 842]
-    purple_color: "#401246"
+    purple_color: "#40124A"
     # Bijlage nummer
     number_font: "GothamBold"
     number_size: 41.4
-    number_color: "#401246"
+    number_color: "#40124A"
     number_x_pt: 103
     number_y_pt: 193.9
     # Titel regels
@@ -278,7 +278,7 @@ pages:
     tagline: "Projecten die inspireren"
     tagline_font: "GothamBold"
     tagline_size: 17.9
-    tagline_color: "#401246"
+    tagline_color: "#40124A"
     tagline_x_pt: 330.5
     tagline_y_pt: 785.1
 

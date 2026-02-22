@@ -45,7 +45,9 @@ def main():
     # Analyze brand command
     ab_parser = subparsers.add_parser("analyze-brand", help="Analyseer brand uit referentie-PDF")
     ab_parser.add_argument("pdf", help="Pad naar referentie-PDF")
-    ab_parser.add_argument("--output-dir", "-o", default="./brand_analysis", help="Output directory")
+    ab_parser.add_argument(
+        "--output-dir", "-o", default="./brand_analysis", help="Output directory"
+    )
     ab_parser.add_argument("--brand-name", default="Brand", help="Brand weergavenaam")
     ab_parser.add_argument("--brand-slug", default="brand", help="Brand slug")
     ab_parser.add_argument("--dpi", type=int, default=150, help="DPI voor pagina renders")
@@ -57,20 +59,18 @@ def main():
     bb_parser.add_argument("--briefpapier", "-b", help="Pad naar briefpapier PDF")
     bb_parser.add_argument("--logos", "-l", help="Pad naar logo directory")
     bb_parser.add_argument("--fonts", help="Pad naar fonts directory")
-    bb_parser.add_argument("--base-brand", help="Pad naar bestaande brand directory (voor varianten)")
+    bb_parser.add_argument(
+        "--base-brand", help="Pad naar bestaande brand directory (voor varianten)"
+    )
     bb_parser.add_argument("--name", required=True, help="Brand weergavenaam")
     bb_parser.add_argument("--slug", required=True, help="Brand slug (machine-leesbaar)")
     bb_parser.add_argument("--output", "-o", required=True, help="Output directory")
     bb_parser.add_argument("--dpi", type=int, default=150, help="DPI voor pagina renders")
 
     # Extract layout command
-    el_parser = subparsers.add_parser(
-        "extract-layout", help="Extraheer layout uit referentie-PDF"
-    )
+    el_parser = subparsers.add_parser("extract-layout", help="Extraheer layout uit referentie-PDF")
     el_parser.add_argument("pdf", help="Pad naar referentie-PDF")
-    el_parser.add_argument(
-        "--output", "-o", default="./extracted", help="Output directory"
-    )
+    el_parser.add_argument("--output", "-o", default="./extracted", help="Output directory")
     el_parser.add_argument("--dpi", type=int, default=150, help="DPI voor renders")
 
     # Visual diff command
@@ -110,8 +110,8 @@ def main():
 
 def _cmd_generate(args):
     """Genereer rapport vanuit CLI."""
+    from bm_reports.core.document import A3, A4
     from bm_reports.core.engine import Report
-    from bm_reports.core.document import A4, A3
 
     fmt = A4 if args.format == "A4" else A3
 
@@ -156,11 +156,11 @@ def _cmd_validate(args):
 def _cmd_analyze_brand(args):
     """Analyseer brand uit referentie-PDF."""
     from bm_reports.tools import (
-        extract_pdf,
-        classify_pages,
         analyze_brand,
-        generate_brand_yaml,
+        classify_pages,
+        extract_pdf,
         generate_analysis_report,
+        generate_brand_yaml,
     )
 
     pdf_path = Path(args.pdf)
@@ -253,9 +253,9 @@ def _cmd_build_brand(args):
 
 def _cmd_extract_layout(args):
     """Extraheer volledige layout uit een referentie-PDF."""
-    from bm_reports.tools.pdf_extractor import extract_pdf
-    from bm_reports.tools.page_classifier import classify_pages
     from bm_reports.tools.layout_extractor import extract_page_layouts
+    from bm_reports.tools.page_classifier import classify_pages
+    from bm_reports.tools.pdf_extractor import extract_pdf
 
     pdf_path = Path(args.pdf)
     output_dir = Path(args.output)

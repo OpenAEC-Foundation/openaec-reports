@@ -148,6 +148,8 @@ Het bestand `schemas/report.schema.json` definieert het volledige datamodel voor
 | `map` | KadasterMap | ✅ | ✅ Werkend (PDOK WMS) |
 | `spacer` | Spacer (ReportLab) | ✅ | ✅ Triviaal |
 | `page_break` | PageBreak (ReportLab) | ✅ | ✅ Triviaal |
+| `bullet_list` | renderer_v2 bullet list | ✅ | ✅ Werkend |
+| `heading_2` | renderer_v2 subkop | ✅ | ✅ Werkend |
 | `raw_flowable` | ReportLab Flowable | ✅ | ✅ Library-only |
 
 ### from_json() / from_dict() — COMPLEET

@@ -11,7 +11,7 @@ import uuid
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-from fastapi import FastAPI, HTTPException, Request, UploadFile, File
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -25,6 +25,9 @@ from bm_reports.core.template_loader import TemplateLoader
 from bm_reports.core.tenant import TenantConfig
 
 logger = logging.getLogger(__name__)
+
+# Default brand naam als er geen brand in de request data zit
+_DEFAULT_BRAND = "3bm_cooperatie"
 
 
 def _find_schema_path() -> Path | None:
@@ -46,12 +49,17 @@ SCHEMA_PATH = _find_schema_path()
 # Tenant configuratie — leest BM_TENANT_DIR environment variable
 tenant_config = TenantConfig()
 
-STATIONERY_DIR = tenant_config.stationery_dir or Path(os.environ.get(
-    "BM_STATIONERY_DIR",
-    str(Path(__file__).parent / "assets" / "stationery" / "3bm_cooperatie"),
-))
-UPLOAD_DIR = Path(os.environ.get("BM_UPLOAD_DIR", str(Path(__file__).parent.parent.parent / "uploads")))
+_default_stationery = str(Path(__file__).parent / "assets" / "stationery" / "3bm_cooperatie")
+STATIONERY_DIR = tenant_config.stationery_dir or Path(
+    os.environ.get("BM_STATIONERY_DIR", _default_stationery)
+)
+_default_uploads = str(Path(__file__).parent.parent.parent / "uploads")
+UPLOAD_DIR = Path(os.environ.get("BM_UPLOAD_DIR", _default_uploads))
 ASSETS_DIR = Path(__file__).parent / "assets"
+
+# Gecachte loader instances (hergebruik i.p.v. per-request constructie)
+_template_loader = TemplateLoader(templates_dirs=tenant_config.templates_dirs)
+_brand_loader = BrandLoader(tenant_config=tenant_config)
 
 app = FastAPI(
     title="3BM Report Generator API",
@@ -63,14 +71,20 @@ app = FastAPI(
 # CORS
 # ============================================================
 
+_DEFAULT_CORS_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5173",
+    "https://report.3bm.co.nl",
+]
+_cors_env = os.environ.get("CORS_ORIGINS", "")
+_cors_origins = (
+    [o.strip() for o in _cors_env.split(",") if o.strip()] if _cors_env else _DEFAULT_CORS_ORIGINS
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5173",
-        "https://report.3bm.co.nl",
-    ],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -80,6 +94,48 @@ app.add_middleware(
 # ============================================================
 # Helpers
 # ============================================================
+
+
+def _generate_and_respond(
+    build_fn: callable,
+    data: dict,
+) -> FileResponse:
+    """Genereer PDF en retourneer als FileResponse met cleanup.
+
+    Args:
+        build_fn: Callable die een output_path ontvangt en de PDF genereert.
+        data: Report data dict (voor bestandsnaam).
+
+    Returns:
+        FileResponse met de gegenereerde PDF.
+    """
+    output_path: Path | None = None
+    try:
+        with NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+            output_path = Path(tmp.name)
+
+        build_fn(output_path)
+
+        filename = _safe_filename(
+            data.get("project_number", ""),
+            data.get("project", ""),
+        )
+
+        return FileResponse(
+            path=str(output_path),
+            media_type="application/pdf",
+            filename=filename,
+            background=BackgroundTask(lambda: output_path.unlink(missing_ok=True)),
+        )
+    except HTTPException:
+        if output_path and output_path.exists():
+            output_path.unlink(missing_ok=True)
+        raise
+    except Exception:
+        if output_path and output_path.exists():
+            output_path.unlink(missing_ok=True)
+        raise
+
 
 def _safe_filename(*parts: str, extension: str = ".pdf") -> str:
     """Maak een veilige bestandsnaam van project info.
@@ -100,6 +156,7 @@ def _safe_filename(*parts: str, extension: str = ".pdf") -> str:
 # ============================================================
 # Exception handlers
 # ============================================================
+
 
 @app.exception_handler(FileNotFoundError)
 async def file_not_found_handler(request: Request, exc: FileNotFoundError):
@@ -133,6 +190,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 # Endpoints
 # ============================================================
 
+
 @app.get("/api/health")
 async def health():
     """Health check endpoint.
@@ -150,8 +208,7 @@ async def list_templates():
     Returns:
         Dict met lijst van templates (naam + type).
     """
-    loader = TemplateLoader(templates_dirs=tenant_config.templates_dirs)
-    return {"templates": loader.list_templates()}
+    return {"templates": _template_loader.list_templates()}
 
 
 @app.get("/api/templates/{name}/scaffold")
@@ -166,8 +223,7 @@ async def get_template_scaffold(name: str):
     Returns:
         Dict conform report.schema.json met defaults uit het template.
     """
-    loader = TemplateLoader(templates_dirs=tenant_config.templates_dirs)
-    scaffold = loader.to_scaffold(name)
+    scaffold = _template_loader.to_scaffold(name)
     return scaffold
 
 
@@ -178,8 +234,7 @@ async def list_brands():
     Returns:
         Dict met lijst van brands (naam + slug).
     """
-    loader = BrandLoader(tenant_config=tenant_config)
-    return {"brands": loader.list_brands()}
+    return {"brands": _brand_loader.list_brands()}
 
 
 @app.post("/api/validate")
@@ -231,35 +286,13 @@ async def generate_report(request: Request):
     if not data.get("template"):
         raise HTTPException(status_code=422, detail="Veld 'template' is verplicht")
 
-    output_path: Path | None = None
-    try:
-        brand = data.get("brand", "3bm_cooperatie")
-        report = Report.from_dict(data, brand=brand)
+    brand = data.get("brand", _DEFAULT_BRAND)
+    report = Report.from_dict(data, brand=brand)
 
-        with NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
-            output_path = Path(tmp.name)
-
+    def build(output_path: Path) -> None:
         report.build(output_path)
 
-        filename = _safe_filename(
-            data.get("project_number", ""),
-            data.get("project", ""),
-        )
-
-        return FileResponse(
-            path=str(output_path),
-            media_type="application/pdf",
-            filename=filename,
-            background=BackgroundTask(lambda: output_path.unlink(missing_ok=True)),
-        )
-    except HTTPException:
-        if output_path and output_path.exists():
-            output_path.unlink(missing_ok=True)
-        raise
-    except Exception:
-        if output_path and output_path.exists():
-            output_path.unlink(missing_ok=True)
-        raise
+    return _generate_and_respond(build, data)
 
 
 # ============================================================
@@ -282,45 +315,23 @@ async def generate_report_v2(request: Request):
     if not data.get("project"):
         raise HTTPException(status_code=422, detail="Veld 'project' is verplicht")
 
-    output_path: Path | None = None
-    try:
-        brand = data.get("brand", "3bm_cooperatie")
-        stationery_dir = STATIONERY_DIR
+    brand = data.get("brand", _DEFAULT_BRAND)
+    stationery_dir = STATIONERY_DIR
 
-        # Check tenant stationery eerst, dan brand-specifiek in package
-        if tenant_config.stationery_dir and tenant_config.stationery_dir.exists():
-            stationery_dir = tenant_config.stationery_dir
-        else:
-            brand_stationery = ASSETS_DIR / "stationery" / brand
-            if brand_stationery.exists():
-                stationery_dir = brand_stationery
+    # Check tenant stationery eerst, dan brand-specifiek in package
+    if tenant_config.stationery_dir and tenant_config.stationery_dir.exists():
+        stationery_dir = tenant_config.stationery_dir
+    else:
+        brand_stationery = ASSETS_DIR / "stationery" / brand
+        if brand_stationery.exists():
+            stationery_dir = brand_stationery
 
-        generator = ReportGeneratorV2(brand=brand)
+    generator = ReportGeneratorV2(brand=brand)
 
-        with NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
-            output_path = Path(tmp.name)
-
+    def build(output_path: Path) -> None:
         generator.generate(data, stationery_dir, output_path)
 
-        filename = _safe_filename(
-            data.get("project_number", ""),
-            data.get("project", ""),
-        )
-
-        return FileResponse(
-            path=str(output_path),
-            media_type="application/pdf",
-            filename=filename,
-            background=BackgroundTask(lambda: output_path.unlink(missing_ok=True)),
-        )
-    except HTTPException:
-        if output_path and output_path.exists():
-            output_path.unlink(missing_ok=True)
-        raise
-    except Exception:
-        if output_path and output_path.exists():
-            output_path.unlink(missing_ok=True)
-        raise
+    return _generate_and_respond(build, data)
 
 
 @app.post("/api/upload")
@@ -373,7 +384,9 @@ async def list_stationery():
     # Tenant stationery
     tenant_stat = tenant_config.stationery_dir
     if tenant_stat and tenant_stat.exists():
-        _scan_stationery_dir(tenant_stat, tenant_stat.name if tenant_stat.name != "stationery" else "tenant")
+        _scan_stationery_dir(
+            tenant_stat, tenant_stat.name if tenant_stat.name != "stationery" else "tenant"
+        )
 
     # Package stationery (als aanvulling)
     stationery_base = ASSETS_DIR / "stationery"

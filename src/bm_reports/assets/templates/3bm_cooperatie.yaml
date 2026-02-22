@@ -13,10 +13,10 @@ template:
   brand: "3bm_cooperatie"
 
 colors:
-  primary: "#401146"          # Donkerpaars (CMYK 0.76/1/0.36/0.43)
-  secondary: "#38bdab"        # Turquoise
+  primary: "#40124A"          # Donkerpaars (3BM huisstijl)
+  secondary: "#38BDA0"        # Turquoise (3BM huisstijl)
   text_dark: "#45243d"        # Donkerpaars tekst (content pages)
-  text_purple: "#401246"      # Paars tekst
+  text_purple: "#40124A"      # Paars tekst
   badge_gold: "#f0c385"       # Badge MEEDENKEN
   badge_turquoise: "#37bcab"  # Badge PRAKTISCH
   badge_coral: "#e1574b"      # Badge BETROUWBAAR

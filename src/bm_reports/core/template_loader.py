@@ -37,9 +37,14 @@ class TemplateConfig:
     report_type: str = ""
     format: str = "A4"
     orientation: str = "portrait"
-    margins: dict[str, float] = field(default_factory=lambda: {
-        "top": 25.0, "bottom": 20.0, "left": 20.0, "right": 15.0,
-    })
+    margins: dict[str, float] = field(
+        default_factory=lambda: {
+            "top": 25.0,
+            "bottom": 20.0,
+            "left": 20.0,
+            "right": 15.0,
+        }
+    )
     header: dict[str, Any] = field(default_factory=dict)
     footer: dict[str, Any] = field(default_factory=dict)
     cover: dict[str, Any] = field(default_factory=dict)
@@ -95,9 +100,7 @@ class TemplateLoader:
         """
         path = self._resolve_path(name)
         if not path.exists():
-            raise FileNotFoundError(
-                f"Template '{name}' niet gevonden in {self._templates_dirs}"
-            )
+            raise FileNotFoundError(f"Template '{name}' niet gevonden in {self._templates_dirs}")
 
         with path.open("r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
@@ -110,9 +113,15 @@ class TemplateLoader:
             report_type=data.get("report_type", ""),
             format=data.get("format", "A4"),
             orientation=data.get("orientation", "portrait"),
-            margins=data.get("margins", {
-                "top": 25.0, "bottom": 20.0, "left": 20.0, "right": 15.0,
-            }),
+            margins=data.get(
+                "margins",
+                {
+                    "top": 25.0,
+                    "bottom": 20.0,
+                    "left": 20.0,
+                    "right": 15.0,
+                },
+            ),
             header=data.get("header", {}),
             footer=data.get("footer", {}),
             cover=data.get("cover", {}),
@@ -144,15 +153,19 @@ class TemplateLoader:
                 try:
                     with path.open("r", encoding="utf-8") as f:
                         data = yaml.safe_load(f)
-                    templates.append({
-                        "name": path.stem,
-                        "report_type": data.get("report_type", "") if data else "",
-                    })
+                    templates.append(
+                        {
+                            "name": path.stem,
+                            "report_type": data.get("report_type", "") if data else "",
+                        }
+                    )
                 except yaml.YAMLError:
-                    templates.append({
-                        "name": path.stem,
-                        "report_type": "(ongeldig YAML)",
-                    })
+                    templates.append(
+                        {
+                            "name": path.stem,
+                            "report_type": "(ongeldig YAML)",
+                        }
+                    )
 
         return templates
 

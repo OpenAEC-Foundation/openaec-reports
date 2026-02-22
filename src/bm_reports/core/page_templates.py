@@ -18,6 +18,7 @@ from bm_reports.core.special_pages import (
     draw_cover_page,
 )
 from bm_reports.core.stationery import StationeryRenderer
+from bm_reports.core.styles import BM_COLORS, BM_FONTS
 
 # Assets directory voor afbeeldingen in brand elementen
 ASSETS_DIR = Path(__file__).parent.parent / "assets"
@@ -64,7 +65,10 @@ def create_page_templates(
 
     # Cover: volledig pagina frame
     cover_frame = Frame(
-        ml, mb, page_w - ml - mr, page_h - mt - mb,
+        ml,
+        mb,
+        page_w - ml - mr,
+        page_h - mt - mb,
         id="cover_frame",
     )
     cover_template = PageTemplate(
@@ -75,7 +79,10 @@ def create_page_templates(
 
     # Colofon: volledig pagina frame
     colofon_frame = Frame(
-        ml, mb, page_w - ml - mr, page_h - mt - mb,
+        ml,
+        mb,
+        page_w - ml - mr,
+        page_h - mt - mb,
         id="colofon_frame",
     )
     colofon_template = PageTemplate(
@@ -112,7 +119,10 @@ def create_page_templates(
 
     # Bijlage divider: volledig pagina frame
     appendix_frame = Frame(
-        ml, mb, page_w - ml - mr, page_h - mt - mb,
+        ml,
+        mb,
+        page_w - ml - mr,
+        page_h - mt - mb,
         id="appendix_frame",
     )
     appendix_template = PageTemplate(
@@ -123,7 +133,10 @@ def create_page_templates(
 
     # Achterblad: volledig pagina frame
     backcover_frame = Frame(
-        ml, mb, page_w - ml - mr, page_h - mt - mb,
+        ml,
+        mb,
+        page_w - ml - mr,
+        page_h - mt - mb,
         id="backcover_frame",
     )
     backcover_template = PageTemplate(
@@ -132,14 +145,21 @@ def create_page_templates(
         onPage=lambda c, d: _on_page_backcover(c, d, config, brand, stationery),
     )
 
-    return [cover_template, colofon_template, content_template, appendix_template, backcover_template]
+    return [
+        cover_template,
+        colofon_template,
+        content_template,
+        appendix_template,
+        backcover_template,
+    ]
 
 
 # ============================================================
 # Stationery-first page callbacks
 # ============================================================
 
-def _on_page_cover(canvas, doc, config, brand, stationery, cover_image):
+
+def _on_page_cover(canvas, doc, config, brand, stationery, cover_image) -> None:
     """Cover: stationery-first, fallback naar programmatisch."""
     pw = config.effective_width_pt
     ph = config.effective_height_pt
@@ -151,7 +171,7 @@ def _on_page_cover(canvas, doc, config, brand, stationery, cover_image):
         draw_cover_page(canvas, doc, config, brand, cover_image)
 
 
-def _on_page_colofon(canvas, doc, config, brand, stationery, colofon_data):
+def _on_page_colofon(canvas, doc, config, brand, stationery, colofon_data) -> None:
     """Colofon: stationery-first, fallback naar programmatisch."""
     pw = config.effective_width_pt
     ph = config.effective_height_pt
@@ -163,7 +183,7 @@ def _on_page_colofon(canvas, doc, config, brand, stationery, colofon_data):
         draw_colofon_page(canvas, doc, config, brand, colofon_data)
 
 
-def _on_page_content(canvas, doc, config, brand, renderer, stationery):
+def _on_page_content(canvas, doc, config, brand, renderer, stationery) -> None:
     """Content: stationery achtergrond (optioneel) + header/footer."""
     pw = config.effective_width_pt
     ph = config.effective_height_pt
@@ -176,7 +196,7 @@ def _on_page_content(canvas, doc, config, brand, renderer, stationery):
     renderer.draw_page(canvas, doc, config)
 
 
-def _on_page_appendix(canvas, doc, config, brand, stationery):
+def _on_page_appendix(canvas, doc, config, brand, stationery) -> None:
     """Appendix divider: stationery-first, fallback naar programmatisch."""
     pw = config.effective_width_pt
     ph = config.effective_height_pt
@@ -188,7 +208,7 @@ def _on_page_appendix(canvas, doc, config, brand, stationery):
         draw_appendix_divider_page(canvas, doc, config, brand)
 
 
-def _on_page_backcover(canvas, doc, config, brand, stationery):
+def _on_page_backcover(canvas, doc, config, brand, stationery) -> None:
     """Backcover: stationery-first, fallback naar programmatisch."""
     pw = config.effective_width_pt
     ph = config.effective_height_pt
@@ -204,7 +224,8 @@ def _on_page_backcover(canvas, doc, config, brand, stationery):
 # Text zone rendering
 # ============================================================
 
-def _draw_text_zones(canvas, text_zones, config, brand, pw, ph):
+
+def _draw_text_zones(canvas, text_zones, config, brand, pw, ph) -> None:
     """Teken dynamische tekst in text zones op de stationery.
 
     Text zones zijn gedefinieerd met y_pt in top-down coördinaten.
@@ -220,7 +241,7 @@ def _draw_text_zones(canvas, text_zones, config, brand, pw, ph):
         font_ref = zone.get("font", "$fonts.body")
         if font_ref.startswith("$fonts."):
             font_key = font_ref.replace("$fonts.", "")
-            font_name = brand.fonts.get(font_key, "GothamBook")
+            font_name = brand.fonts.get(font_key, BM_FONTS.body)
         else:
             font_name = font_ref
         font_name = get_font_name(font_name)
@@ -229,7 +250,7 @@ def _draw_text_zones(canvas, text_zones, config, brand, pw, ph):
         color_ref = zone.get("color", "$colors.text")
         if color_ref.startswith("$colors."):
             color_key = color_ref.replace("$colors.", "")
-            color_hex = brand.colors.get(color_key, "#45243D")
+            color_hex = brand.colors.get(color_key, BM_COLORS.text)
         else:
             color_hex = color_ref
 
@@ -261,7 +282,7 @@ def _draw_text_zones(canvas, text_zones, config, brand, pw, ph):
         canvas.restoreState()
 
 
-def _resolve_binding(bind, config, brand):
+def _resolve_binding(bind, config, brand) -> str:
     """Resolve data binding naar tekst waarde."""
     bindings = {
         "project": config.project,

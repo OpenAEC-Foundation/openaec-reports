@@ -14,8 +14,8 @@ except ImportError:
     fitz = None
 
 try:
-    from PIL import Image
     import numpy as np
+    from PIL import Image
 except ImportError:
     Image = None
     np = None
@@ -112,11 +112,13 @@ def compare_pdfs(
             diff_path = str(output_dir / f"diff_page_{idx + 1:03d}.png")
             diff_img.save(diff_path)
 
-        results.append(PageDiff(
-            page_number=idx + 1,
-            similarity_pct=round(similarity, 1),
-            diff_image_path=diff_path,
-        ))
+        results.append(
+            PageDiff(
+                page_number=idx + 1,
+                similarity_pct=round(similarity, 1),
+                diff_image_path=diff_path,
+            )
+        )
 
     gen_doc.close()
     ref_doc.close()

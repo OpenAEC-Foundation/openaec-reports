@@ -86,8 +86,8 @@ class TestStyles:
     def test_bm_colors(self):
         from bm_reports.core.styles import BM_COLORS
 
-        assert BM_COLORS.primary == "#401246"
-        assert BM_COLORS.secondary == "#38BDAB"
+        assert BM_COLORS.primary == "#40124A"
+        assert BM_COLORS.secondary == "#38BDA0"
         assert BM_COLORS.accent == "#2ECC71"
         assert BM_COLORS.warning == "#E74C3C"
 

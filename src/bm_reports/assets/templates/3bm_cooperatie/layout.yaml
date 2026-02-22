@@ -29,7 +29,7 @@ page_number:
   y_td: 793.5
   font: GothamBook
   size: 9.5
-  color: "#401246"
+  color: "#40124A"
 
 # --- TOC specifiek ---
 toc:
@@ -39,7 +39,7 @@ toc:
     y_td: 74.9
     font: GothamBook
     size: 18.0
-    color: "#401246"
+    color: "#40124A"
   
   start_y_td: 127.2    # eerste entry positie
   
@@ -61,5 +61,5 @@ toc:
   section:
     font: GothamBook
     size: 9.5
-    color: "#401246"     # donkerpaars
+    color: "#40124A"     # donkerpaars
     line_height: 17.3    # afstand tussen sub-entries

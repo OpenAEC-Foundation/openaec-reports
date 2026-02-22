@@ -14,6 +14,7 @@ Architecture:
     Bijlage:    PyMuPDF insert_text on bijlagen.pdf stationery
     Achterblad: Static PDF insert
 """
+
 from __future__ import annotations
 
 import base64
@@ -113,12 +114,8 @@ class FontManager:
         self.font_dir = font_dir or FONT_DIR
         self._rl_registered = False
         # PyMuPDF font objects for accurate text measurement
-        self.gotham_book = fitz.Font(
-            fontfile=str(self.font_dir / "Gotham-Book.ttf")
-        )
-        self.gotham_bold = fitz.Font(
-            fontfile=str(self.font_dir / "Gotham-Bold.ttf")
-        )
+        self.gotham_book = fitz.Font(fontfile=str(self.font_dir / "Gotham-Book.ttf"))
+        self.gotham_bold = fitz.Font(fontfile=str(self.font_dir / "Gotham-Bold.ttf"))
 
     def register_reportlab(self) -> None:
         """Register Gotham fonts with ReportLab (once)."""
@@ -129,7 +126,7 @@ class FontManager:
             if path.exists():
                 try:
                     pdfmetrics.registerFont(TTFont(name, str(path)))
-                except Exception:
+                except (OSError, ValueError):
                     logger.warning("Could not register font: %s", name)
         self._rl_registered = True
 
@@ -180,7 +177,7 @@ class FontManager:
                 continue
 
             # Token too wide — split on underscores/hyphens first
-            sub_parts = re.split(r'(?<=[_\-/.])', token)  # keep delimiter at end of part
+            sub_parts = re.split(r"(?<=[_\-/.])", token)  # keep delimiter at end of part
             for sp in sub_parts:
                 if not sp:
                     continue
@@ -229,7 +226,7 @@ def _resolve_image(src) -> Path | None:
             tmp.write(raw)
             tmp.close()
             return Path(tmp.name)
-        except Exception as e:
+        except (ValueError, OSError) as e:
             logger.warning("Base64 decode failed: %s", e)
             return None
 
@@ -301,8 +298,7 @@ class CoverGenerator:
             from reportlab.lib.utils import ImageReader
 
             img = ImageReader(str(stationery_png))
-            c.drawImage(img, 0, 0, width=w, height=h,
-                        mask="auto", preserveAspectRatio=False)
+            c.drawImage(img, 0, 0, width=w, height=h, mask="auto", preserveAspectRatio=False)
 
         # Layer 3: Dynamic text
         fields = self.tpl.get("dynamic_fields", {})
@@ -353,8 +349,10 @@ class ColofonGenerator:
         report_type = data.get("report_type", "")
         if report_type:
             page.insert_text(
-                (title_cfg.get("x", 70.9),
-                 title_cfg.get("y_td", 57.3) + title_cfg.get("size", 22) * 0.8),
+                (
+                    title_cfg.get("x", 70.9),
+                    title_cfg.get("y_td", 57.3) + title_cfg.get("size", 22) * 0.8,
+                ),
                 report_type,
                 fontname="GothamBold",
                 fontsize=title_cfg.get("size", 22),
@@ -366,8 +364,7 @@ class ColofonGenerator:
         project_name = data.get("project", "")
         if project_name:
             page.insert_text(
-                (sub_cfg.get("x", 70.9),
-                 sub_cfg.get("y_td", 86.8) + sub_cfg.get("size", 14) * 0.8),
+                (sub_cfg.get("x", 70.9), sub_cfg.get("y_td", 86.8) + sub_cfg.get("size", 14) * 0.8),
                 project_name,
                 fontname="GothamBook",
                 fontsize=sub_cfg.get("size", 14),
@@ -415,7 +412,9 @@ class ColofonGenerator:
             "opdrachtgever_contact": colofon.get("opdrachtgever_contact", ""),
             "opdrachtgever_naam": colofon.get("opdrachtgever_naam", data.get("client", "")),
             "opdrachtgever_adres": colofon.get("opdrachtgever_adres", ""),
-            "adviseur_bedrijf": colofon.get("adviseur_bedrijf", data.get("author", "3BM Coöperatie")),
+            "adviseur_bedrijf": colofon.get(
+                "adviseur_bedrijf", data.get("author", "3BM Coöperatie")
+            ),
             "adviseur_naam": colofon.get("adviseur_naam", ""),
             "normen": colofon.get("normen", ""),
             "documentgegevens": colofon.get("documentgegevens", ""),
@@ -518,8 +517,13 @@ class ContentRenderer:
         self.current_page_nr += 1
 
     def _text(
-        self, x: float, y_td: float, text: str,
-        fontname: str, size: float, color_hex: str,
+        self,
+        x: float,
+        y_td: float,
+        text: str,
+        fontname: str,
+        size: float,
+        color_hex: str,
     ) -> None:
         """Insert text at position (x, y_td) using top-down coordinates."""
         self.page.insert_text(
@@ -562,27 +566,57 @@ class ContentRenderer:
             if level == 1:
                 self.y += lv1.get("spacing_before", 17.0)
                 self._check_overflow(20)
-                self._text(lv1.get("number_x", 90.0), self.y, number,
-                           lv1.get("font", "GothamBook"), lv1.get("size", 12.0),
-                           lv1.get("color", "#56B49B"))
-                self._text(lv1.get("title_x", 160.9), self.y, title,
-                           lv1.get("font", "GothamBook"), lv1.get("size", 12.0),
-                           lv1.get("color", "#56B49B"))
-                self._text(lv1.get("page_x", 515.4), self.y, str(pg),
-                           lv1.get("font", "GothamBook"), lv1.get("size", 12.0),
-                           lv1.get("color", "#56B49B"))
+                self._text(
+                    lv1.get("number_x", 90.0),
+                    self.y,
+                    number,
+                    lv1.get("font", "GothamBook"),
+                    lv1.get("size", 12.0),
+                    lv1.get("color", "#56B49B"),
+                )
+                self._text(
+                    lv1.get("title_x", 160.9),
+                    self.y,
+                    title,
+                    lv1.get("font", "GothamBook"),
+                    lv1.get("size", 12.0),
+                    lv1.get("color", "#56B49B"),
+                )
+                self._text(
+                    lv1.get("page_x", 515.4),
+                    self.y,
+                    str(pg),
+                    lv1.get("font", "GothamBook"),
+                    lv1.get("size", 12.0),
+                    lv1.get("color", "#56B49B"),
+                )
                 self.y += lv1.get("spacing_after", 20.0)
             else:
                 self._check_overflow(17.3)
-                self._text(lv2.get("number_x", 90.0), self.y, number,
-                           lv2.get("font", "GothamBook"), lv2.get("size", 9.5),
-                           lv2.get("color", "#401246"))
-                self._text(lv2.get("title_x", 160.9), self.y, title,
-                           lv2.get("font", "GothamBook"), lv2.get("size", 9.5),
-                           lv2.get("color", "#401246"))
-                self._text(lv2.get("page_x", 515.4), self.y, str(pg),
-                           lv2.get("font", "GothamBook"), lv2.get("size", 9.5),
-                           lv2.get("color", "#401246"))
+                self._text(
+                    lv2.get("number_x", 90.0),
+                    self.y,
+                    number,
+                    lv2.get("font", "GothamBook"),
+                    lv2.get("size", 9.5),
+                    lv2.get("color", "#401246"),
+                )
+                self._text(
+                    lv2.get("title_x", 160.9),
+                    self.y,
+                    title,
+                    lv2.get("font", "GothamBook"),
+                    lv2.get("size", 9.5),
+                    lv2.get("color", "#401246"),
+                )
+                self._text(
+                    lv2.get("page_x", 515.4),
+                    self.y,
+                    str(pg),
+                    lv2.get("font", "GothamBook"),
+                    lv2.get("size", 9.5),
+                    lv2.get("color", "#401246"),
+                )
                 self.y += lv2.get("spacing_after", 17.3)
 
         self._add_page_number()
@@ -638,8 +672,9 @@ class ContentRenderer:
                 color=_hex_to_rgb(marker["color"]),
             )
             for line in lines:
-                self._text(text_s["x"], self.y, line,
-                           text_s["font"], text_s["size"], text_s["color"])
+                self._text(
+                    text_s["x"], self.y, line, text_s["font"], text_s["size"], text_s["color"]
+                )
                 self.y += text_s["line_height"]
             self.y += sb.get("spacing_between", 10.1)
 
@@ -754,7 +789,8 @@ class ContentRenderer:
                 self.page.draw_line(
                     fitz.Point(cx, self.y),
                     fitz.Point(cx, self.y + header_h),
-                    color=line_color_hdr, width=0.5,
+                    color=line_color_hdr,
+                    width=0.5,
                 )
 
         render_header()
@@ -804,14 +840,16 @@ class ContentRenderer:
                 self.page.draw_line(
                     fitz.Point(cx, self.y),
                     fitz.Point(cx, self.y + row_h),
-                    color=grid_color, width=0.3,
+                    color=grid_color,
+                    width=0.3,
                 )
 
             # Bottom border
             self.page.draw_line(
                 fitz.Point(x, self.y + row_h),
                 fitz.Point(x + max_w, self.y + row_h),
-                color=grid_color, width=0.3,
+                color=grid_color,
+                width=0.3,
             )
 
             self.y += row_h
@@ -820,7 +858,8 @@ class ContentRenderer:
         self.page.draw_line(
             fitz.Point(x, self.y),
             fitz.Point(x + max_w, self.y),
-            color=grid_color, width=0.5,
+            color=grid_color,
+            width=0.5,
         )
 
         self.y += s.get("spacing_after", 20.0)
@@ -842,8 +881,9 @@ class ContentRenderer:
         if not img_path:
             # Placeholder text
             self.y += 12
-            self._text(x, self.y, f"[Image: {src or 'niet gevonden'}]",
-                       "GothamBook", 9.5, "#FF0000")
+            self._text(
+                x, self.y, f"[Image: {src or 'niet gevonden'}]", "GothamBook", 9.5, "#FF0000"
+            )
             self.y += 16
             return
 
@@ -854,10 +894,11 @@ class ContentRenderer:
         # Get image aspect ratio
         try:
             from PIL import Image as PILImage
+
             with PILImage.open(img_path) as im:
                 iw, ih = im.size
             aspect = ih / iw
-        except Exception:
+        except (ImportError, OSError, ZeroDivisionError):
             aspect = 0.75  # fallback 4:3
 
         target_h = target_w * aspect
@@ -872,7 +913,7 @@ class ContentRenderer:
         rect = fitz.Rect(x, self.y, x + target_w, self.y + target_h)
         try:
             self.page.insert_image(rect, filename=str(img_path))
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.warning("Image insert failed: %s", e)
             self._text(x, self.y, f"[Image error: {e}]", "GothamBook", 9.5, "#FF0000")
 
@@ -927,10 +968,16 @@ class ContentRenderer:
 
         # Normalize layer names
         layer_map = {
-            "topografie": "brt", "topo": "brt", "standaard": "brt",
+            "topografie": "brt",
+            "topo": "brt",
+            "standaard": "brt",
             "grijs": "brt_grijs",
-            "luchtfoto": "luchtfoto", "satellite": "luchtfoto", "aerial": "luchtfoto",
-            "kadastraal": "kadastraal", "kadaster": "kadastraal", "cadastral": "kadastraal",
+            "luchtfoto": "luchtfoto",
+            "satellite": "luchtfoto",
+            "aerial": "luchtfoto",
+            "kadastraal": "kadastraal",
+            "kadaster": "kadastraal",
+            "cadastral": "kadastraal",
         }
         normalized_layers = [layer_map.get(l.lower(), l.lower()) for l in layers]
 
@@ -951,28 +998,47 @@ class ContentRenderer:
 
             if address:
                 maps = gen.generate_maps(
-                    address, layers=normalized_layers,
-                    zoom=zoom, width_px=px_w, height_px=px_h,
+                    address,
+                    layers=normalized_layers,
+                    zoom=zoom,
+                    width_px=px_w,
+                    height_px=px_h,
                     show_poi=True,
                 )
             elif lat is not None and lon is not None:
                 maps = gen.generate_maps_from_coords(
-                    lat, lon, layers=normalized_layers,
-                    zoom=zoom, width_px=px_w, height_px=px_h,
+                    lat,
+                    lon,
+                    layers=normalized_layers,
+                    zoom=zoom,
+                    width_px=px_w,
+                    height_px=px_h,
                     show_poi=True,
                 )
             else:
                 self.y += 12
-                self._text(x, self.y, "[Kaart: geen adres of coördinaten opgegeven]",
-                           "GothamBook", 9.5, "#FF0000")
+                self._text(
+                    x,
+                    self.y,
+                    "[Kaart: geen adres of coördinaten opgegeven]",
+                    "GothamBook",
+                    9.5,
+                    "#FF0000",
+                )
                 self.y += 20
                 return
 
             if not maps:
                 self.y += 12
                 loc_str = address or f"{lat}, {lon}"
-                self._text(x, self.y, f"[Kaart kon niet worden opgehaald voor: {loc_str}]",
-                           "GothamBook", 9.5, "#FF0000")
+                self._text(
+                    x,
+                    self.y,
+                    f"[Kaart kon niet worden opgehaald voor: {loc_str}]",
+                    "GothamBook",
+                    9.5,
+                    "#FF0000",
+                )
                 self.y += 20
                 return
 
@@ -988,10 +1054,9 @@ class ContentRenderer:
                 rect = fitz.Rect(x, self.y, x + target_w, self.y + target_h)
                 try:
                     self.page.insert_image(rect, filename=str(img_path))
-                except Exception as e:
+                except (OSError, ValueError, RuntimeError) as e:
                     logger.warning("Map image insert failed: %s", e)
-                    self._text(x, self.y + 10, f"[Kaart fout: {e}]",
-                               "GothamBook", 9.5, "#FF0000")
+                    self._text(x, self.y + 10, f"[Kaart fout: {e}]", "GothamBook", 9.5, "#FF0000")
                 self.y += target_h + 4
 
                 if map_caption:
@@ -1002,7 +1067,7 @@ class ContentRenderer:
 
                 try:
                     img_path.unlink(missing_ok=True)
-                except Exception:
+                except OSError:
                     pass
 
             # Render cadastral info below all maps
@@ -1012,10 +1077,16 @@ class ContentRenderer:
         except ImportError:
             logger.warning("Map generator dependencies not available")
             self.y += 12
-            self._text(x, self.y, "[Kaartmodule niet beschikbaar — PIL/requests ontbreekt]",
-                       "GothamBook", 9.5, "#FF0000")
+            self._text(
+                x,
+                self.y,
+                "[Kaartmodule niet beschikbaar — PIL/requests ontbreekt]",
+                "GothamBook",
+                9.5,
+                "#FF0000",
+            )
             self.y += 20
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.error("Map generation failed: %s", e)
             self.y += 12
             self._text(x, self.y, f"[Kaart fout: {e}]", "GothamBook", 9.5, "#FF0000")
@@ -1023,7 +1094,7 @@ class ContentRenderer:
 
     def _render_cadastral_info(self, x: float, max_w: float, cadastral: dict) -> None:
         """Render cadastral parcel information below map images.
-        
+
         Renders a styled info box with:
         - Kadastraal perceel: GEM-SECTIE-NUMMER
         - Gemeente: naam (code)
@@ -1058,8 +1129,9 @@ class ContentRenderer:
         y_line = self.y + 4
 
         # Perceel identification (bold)
-        self._text(inner_x, y_line, f"Kadastraal perceel:  {identificatie}",
-                   "GothamBold", 8.5, "#401246")
+        self._text(
+            inner_x, y_line, f"Kadastraal perceel:  {identificatie}", "GothamBold", 8.5, "#401246"
+        )
         y_line += 14
 
         # Gemeente
@@ -1259,9 +1331,12 @@ class ContentRenderer:
         bijl_cfg = self.tpl.bijlage.get("dynamic_fields", {})
         nr_cfg = bijl_cfg.get("nummer", {})
         self._text(
-            nr_cfg.get("x", 103.0), nr_cfg.get("y_td", 193.9),
-            nummer, nr_cfg.get("font", "GothamBold"),
-            nr_cfg.get("size", 41.4), nr_cfg.get("color", "#401246"),
+            nr_cfg.get("x", 103.0),
+            nr_cfg.get("y_td", 193.9),
+            nummer,
+            nr_cfg.get("font", "GothamBold"),
+            nr_cfg.get("size", 41.4),
+            nr_cfg.get("color", "#401246"),
         )
 
         # Title (fixed 20pt, multiline)
@@ -1271,9 +1346,12 @@ class ContentRenderer:
         for i, line in enumerate(titel.split("\n")):
             y_td = ti_cfg.get("y_td", 262.2) + i * line_height
             self._text(
-                ti_cfg.get("x", 136.1), y_td, line,
+                ti_cfg.get("x", 136.1),
+                y_td,
+                line,
                 ti_cfg.get("font", "GothamBook"),
-                fontsize, ti_cfg.get("color", "#FFFFFF"),
+                fontsize,
+                ti_cfg.get("color", "#FFFFFF"),
             )
         # No page number on divider, but increment counter
         self.current_page_nr += 1
@@ -1439,12 +1517,14 @@ class ReportGeneratorV2:
             # Sub-sections
             for block in section.get("content", []):
                 if block.get("type") == "heading_2":
-                    entries.append((
-                        2,
-                        block.get("number", ""),
-                        block.get("title", ""),
-                        page_est,
-                    ))
+                    entries.append(
+                        (
+                            2,
+                            block.get("number", ""),
+                            block.get("title", ""),
+                            page_est,
+                        )
+                    )
 
         return entries
 

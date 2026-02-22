@@ -25,13 +25,13 @@ dynamic_fields:
     y_td: 57.3
     font: GothamBold
     size: 22.0
-    color: "#401246"
+    color: "#40124A"
   subtitel:
     x: 70.9
     y_td: 86.8
     font: GothamBook
     size: 14.0
-    color: "#38BDAB"
+    color: "#38BDA0"
 
 table:
   value_x: 229.1
@@ -67,4 +67,4 @@ page_number:
   y_td: 796.3
   font: GothamBold
   size: 8.0
-  color: "#38BDAB"
+  color: "#38BDA0"

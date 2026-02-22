@@ -5,8 +5,8 @@ Alle coördinaten worden proportioneel geschaald ten opzichte van A4
 referentie-afmetingen, zodat A3 (en andere formaten) automatisch werken.
 
 Huisstijl referentie:
-    - Donkerpaars: #401246
-    - Turquoise:   #38BDAB
+    - Donkerpaars: #40124A
+    - Turquoise:   #38BDA0
     - Tekst:       #45243D
 """
 
@@ -21,6 +21,7 @@ from reportlab.lib.colors import HexColor, white
 from bm_reports.core.brand import BrandConfig
 from bm_reports.core.document import DocumentConfig
 from bm_reports.core.fonts import get_font_name
+from bm_reports.core.styles import BM_COLORS
 
 logger = logging.getLogger(__name__)
 
@@ -41,20 +42,6 @@ _REF_H = 841.89  # A4 height in points
 _COLOR_WHITE = white
 
 
-def _brand_primary(brand: BrandConfig) -> HexColor:
-    """Primary kleur uit brand config."""
-    return HexColor(brand.colors.get("primary", "#401246"))
-
-
-def _brand_secondary(brand: BrandConfig) -> HexColor:
-    """Secondary kleur uit brand config."""
-    return HexColor(brand.colors.get("secondary", "#38BDAB"))
-
-
-def _brand_text(brand: BrandConfig) -> HexColor:
-    """Text kleur uit brand config."""
-    return HexColor(brand.colors.get("text", "#45243D"))
-
 # ============================================================
 # Default waarden — backward compatibility als brand YAML geen
 # pages.cover of pages.backcover sectie heeft.
@@ -69,9 +56,9 @@ _DEFAULT_CLIP_POLYGON: list[list[float]] = [
     [386.850, 519.656],
     [538.583, 674.565],
     [538.583, 723.175],
-    [ 56.693, 723.171],
-    [ 56.693, 192.680],
-    [ 56.697, 159.816],
+    [56.693, 723.171],
+    [56.693, 192.680],
+    [56.697, 159.816],
 ]
 
 # Default foto rect (x, y, w, h in A4 reference)
@@ -79,29 +66,61 @@ _DEFAULT_PHOTO_RECT: list[float] = [55.636, 161.648, 484.002, 560.753]
 
 # Default badge definities (cover page)
 _DEFAULT_BADGES: list[dict[str, Any]] = [
-    {"label": "MEEDENKEN",   "bg_color": "#f0c385", "text_color": "#401246",
-     "x_ref": 297.64, "y_ref": 298.82, "w_ref": 112.05, "h_ref": 33.97},
-    {"label": "PRAKTISCH",   "bg_color": "#37bcab", "text_color": "#401246",
-     "x_ref": 426.53, "y_ref": 298.82, "w_ref": 112.05, "h_ref": 33.97},
-    {"label": "BETROUWBAAR", "bg_color": "#e1574b", "text_color": "#FFFFFF",
-     "x_ref": 341.76, "y_ref": 253.04, "w_ref": 134.70, "h_ref": 33.97},
+    {
+        "label": "MEEDENKEN",
+        "bg_color": "#f0c385",
+        "text_color": BM_COLORS.primary,
+        "x_ref": 297.64,
+        "y_ref": 298.82,
+        "w_ref": 112.05,
+        "h_ref": 33.97,
+    },
+    {
+        "label": "PRAKTISCH",
+        "bg_color": BM_COLORS.secondary,
+        "text_color": BM_COLORS.primary,
+        "x_ref": 426.53,
+        "y_ref": 298.82,
+        "w_ref": 112.05,
+        "h_ref": 33.97,
+    },
+    {
+        "label": "BETROUWBAAR",
+        "bg_color": "#e1574b",
+        "text_color": "#FFFFFF",
+        "x_ref": 341.76,
+        "y_ref": 253.04,
+        "w_ref": 134.70,
+        "h_ref": 33.97,
+    },
 ]
 
 # Default backcover polygonen (A4 reference coords, PDF y-up)
 _DEFAULT_WHITE_POLYGON: list[list[float]] = [
-    [0, 0], [0, 698], [268, 842], [432, 842],
-    [432, 698], [595, 555], [595, 320], [436, 320],
-    [595, 178], [595, 0],
+    [0, 0],
+    [0, 698],
+    [268, 842],
+    [432, 842],
+    [432, 698],
+    [595, 555],
+    [595, 320],
+    [436, 320],
+    [595, 178],
+    [595, 0],
 ]
 
 _DEFAULT_PURPLE_TRIANGLE: list[list[float]] = [
-    [0, 842], [0, 539], [170, 688], [170, 842],
+    [0, 842],
+    [0, 539],
+    [170, 688],
+    [170, 842],
 ]
 
 
 # ============================================================
 # Proportional scaling utilities
 # ============================================================
+
 
 def _sx(val: float, page_w: float) -> float:
     """Scale horizontal value from A4 reference to actual page width."""
@@ -126,6 +145,7 @@ def _sf(size: float, page_h: float) -> float:
 # ============================================================
 # Helper functions
 # ============================================================
+
 
 def _brand_color(brand: BrandConfig, key: str, fallback: str) -> HexColor:
     """Haal een kleur op uit het brand config of gebruik fallback.
@@ -237,7 +257,7 @@ def _draw_logo(
 
         return True
 
-    except Exception:
+    except (OSError, ValueError):
         logger.exception("Fout bij tekenen logo: %s", logo_path)
         return False
 
@@ -260,6 +280,7 @@ def _resolve_logo_path(brand: BrandConfig, logo_key: str, fallback_name: str) ->
 # ============================================================
 # Cover page
 # ============================================================
+
 
 def draw_cover_page(
     canvas,
@@ -293,8 +314,8 @@ def draw_cover_page(
     ph = config.effective_height_pt
     spec = brand.pages.get("cover", {})
 
-    color_primary = _brand_color(brand, "primary", "#40124A")
-    color_secondary = _brand_color(brand, "secondary", "#38BDA0")
+    color_primary = _brand_color(brand, "primary", BM_COLORS.primary)
+    color_secondary = _brand_color(brand, "secondary", BM_COLORS.secondary)
 
     heading_font = _resolve_font(brand, "heading")
     body_font = _resolve_font(brand, "body")
@@ -320,7 +341,8 @@ def draw_cover_page(
     logo_x, logo_y = _sxy(
         spec.get("logo_x_ref", 62),
         spec.get("logo_y_ref", 775),
-        pw, ph,
+        pw,
+        ph,
     )
     logo_w = _sx(spec.get("logo_w_ref", 100), pw)
     _draw_logo(canvas, logo_path, logo_x, logo_y, width=logo_w)
@@ -407,12 +429,14 @@ def _draw_clipped_photo(
     try:
         canvas.drawImage(
             str(path),
-            _sx(photo[0], page_w), _sy(photo[1], page_h),
-            _sx(photo[2], page_w), _sy(photo[3], page_h),
-            mask='auto',
+            _sx(photo[0], page_w),
+            _sy(photo[1], page_h),
+            _sx(photo[2], page_w),
+            _sy(photo[3], page_h),
+            mask="auto",
             preserveAspectRatio=True,
         )
-    except Exception:
+    except (OSError, ValueError):
         logger.exception("Fout bij tekenen cover afbeelding: %s", path)
 
     canvas.restoreState()
@@ -468,6 +492,7 @@ def _draw_badges(
 # Colofon page
 # ============================================================
 
+
 def draw_colofon_page(
     canvas,
     doc,
@@ -504,7 +529,7 @@ def draw_colofon_page(
     # ---- Rapport type titel + subtitel bovenaan ----
     rt_font = get_font_name(spec.get("report_type_font", "GothamBold"))
     rt_size = spec.get("report_type_size", 22.0)
-    rt_color = HexColor(spec.get("report_type_color", "#401246"))
+    rt_color = HexColor(spec.get("report_type_color", BM_COLORS.primary))
     rt_x = spec.get("report_type_x_pt", 70.9)
     rt_y = spec.get("report_type_y_pt", 57.3)
 
@@ -516,7 +541,7 @@ def draw_colofon_page(
 
     sub_font = get_font_name(spec.get("subtitle_font", "GothamBook"))
     sub_size = spec.get("subtitle_size", 14.0)
-    sub_color = HexColor(spec.get("subtitle_color", "#38BDAB"))
+    sub_color = HexColor(spec.get("subtitle_color", BM_COLORS.secondary))
     sub_x = spec.get("subtitle_x_pt", 70.9)
     sub_y = spec.get("subtitle_y_pt", 86.8)
 
@@ -546,13 +571,13 @@ def draw_colofon_page(
     # ---- Posities en stijlen uit spec ----
     label_x = spec.get("label_x_pt", 103)
     value_x = spec.get("value_x_pt", 229)
-    first_color = HexColor(spec.get("first_labels_color", "#401246"))
-    other_color = HexColor(spec.get("other_labels_color", "#38BDAB"))
-    value_color = HexColor(spec.get("value_color", "#401246"))
+    first_color = HexColor(spec.get("first_labels_color", BM_COLORS.primary))
+    other_color = HexColor(spec.get("other_labels_color", BM_COLORS.secondary))
+    value_color = HexColor(spec.get("value_color", BM_COLORS.primary))
     line_x1 = spec.get("line_x1_pt", 102)
     line_x2 = spec.get("line_x2_pt", 420)
     line_stroke = spec.get("line_stroke_pt", 0.25)
-    line_color = HexColor(spec.get("line_color", "#401146"))
+    line_color = HexColor(spec.get("line_color", BM_COLORS.primary))
 
     label_font = get_font_name(spec.get("label_font", "GothamBold"))
     label_size = spec.get("label_size", 10.0)
@@ -603,7 +628,7 @@ def draw_colofon_page(
 
     # ---- Footer: turquoise blok + logo + paginanummer ----
     rect_spec = spec.get("footer_rect", [0, 771, 282, 842])
-    rect_color = HexColor(spec.get("footer_rect_color", "#38BDAB"))
+    rect_color = HexColor(spec.get("footer_rect_color", BM_COLORS.secondary))
     # rect_spec = [x, y_top_topdown, width, y_bottom_topdown]
     rx = rect_spec[0]
     ry_bottom = ph - rect_spec[3]  # y_bottom in top-down → y in bottom-up
@@ -622,7 +647,7 @@ def draw_colofon_page(
     pn_y = spec.get("page_num_y_pt", 796.3)
     pn_font = get_font_name(spec.get("page_num_font", "GothamBook"))
     pn_size = spec.get("page_num_size", 9.5)
-    pn_color = HexColor(spec.get("page_num_color", "#38BDAB"))
+    pn_color = HexColor(spec.get("page_num_color", BM_COLORS.secondary))
     page_num = canvas.getPageNumber()
     canvas.setFont(pn_font, pn_size)
     canvas.setFillColor(pn_color)
@@ -683,7 +708,7 @@ def _draw_revision_table(
 
     # Data rijen
     canvas.setFont(body_font, cell_size)
-    canvas.setFillColor(HexColor("#45243D"))
+    canvas.setFillColor(HexColor(BM_COLORS.text))
     for rev in revisions:
         col_x = left_x
         cells = [
@@ -697,64 +722,17 @@ def _draw_revision_table(
             col_x += col_widths[i]
 
         y -= row_h
-        canvas.setStrokeColor(HexColor("#E0D0E8"))
+        canvas.setStrokeColor(HexColor(BM_COLORS.separator))
         canvas.setLineWidth(0.2)
         canvas.line(left_x, y + row_h * 0.3, right_x, y + row_h * 0.3)
 
     return y
 
 
-def _build_colofon_rows(
-    config: DocumentConfig,
-    data: dict[str, Any],
-) -> list[tuple[str, str]]:
-    """Bouw een lijst van (label, waarde) tuples voor de colofon tabel.
-
-    Args:
-        config: Document configuratie.
-        data: Extra colofon data dict.
-
-    Returns:
-        Lijst van (label, waarde) tuples.
-    """
-    rows: list[tuple[str, str]] = []
-
-    if config.project:
-        rows.append(("Project", config.project))
-    if config.project_number:
-        rows.append(("Projectnummer", config.project_number))
-    if config.client:
-        rows.append(("In opdracht van", config.client))
-    if config.author:
-        rows.append(("Adviseur", config.author))
-    if config.report_type:
-        rows.append(("Type rapport", config.report_type))
-
-    # Extra velden uit colofon_data (skip gestructureerde velden)
-    _skip = {"subtitle", "cover_image", "enabled", "revision_history",
-             "disclaimer", "extra_fields"}
-    for key, value in data.items():
-        if key not in _skip and value:
-            label = key.replace("_", " ").capitalize()
-            rows.append((label, str(value)))
-
-    # Extra velden: dict formaat (frontend) of list-of-dicts (legacy)
-    extra_fields = data.get("extra_fields", {})
-    if isinstance(extra_fields, dict):
-        for label, value in extra_fields.items():
-            if label and value:
-                rows.append((label, str(value)))
-    elif isinstance(extra_fields, list):
-        for ef in extra_fields:
-            if isinstance(ef, dict) and ef.get("label") and ef.get("value"):
-                rows.append((ef["label"], str(ef["value"])))
-
-    return rows
-
-
 # ============================================================
 # Appendix divider page
 # ============================================================
+
 
 def draw_appendix_divider_page(
     canvas,
@@ -788,13 +766,13 @@ def draw_appendix_divider_page(
     spec = brand.pages.get("appendix_divider", {})
 
     # Turquoise achtergrond
-    bg_color = HexColor(spec.get("bg_color", "#37BCAB"))
+    bg_color = HexColor(spec.get("bg_color", BM_COLORS.secondary))
     canvas.setFillColor(bg_color)
     canvas.rect(0, 0, pw, ph, fill=1, stroke=0)
 
     # Paars blok linksonder
     purple_rect = spec.get("purple_rect", [0, 771, 282, 842])
-    purple_color = HexColor(spec.get("purple_color", "#401246"))
+    purple_color = HexColor(spec.get("purple_color", BM_COLORS.primary))
     prx = purple_rect[0]
     pry = ph - purple_rect[3]
     prw = purple_rect[2]
@@ -805,7 +783,7 @@ def draw_appendix_divider_page(
     # Bijlage nummer
     num_font = get_font_name(spec.get("number_font", "GothamBold"))
     num_size = spec.get("number_size", 41.4)
-    num_color = HexColor(spec.get("number_color", "#401246"))
+    num_color = HexColor(spec.get("number_color", BM_COLORS.primary))
     num_x = spec.get("number_x_pt", 103)
     num_y = ph - spec.get("number_y_pt", 193.9)
 
@@ -830,7 +808,7 @@ def draw_appendix_divider_page(
     tagline = spec.get("tagline", "Projecten die inspireren")
     tag_font = get_font_name(spec.get("tagline_font", "GothamBold"))
     tag_size = spec.get("tagline_size", 17.9)
-    tag_color = HexColor(spec.get("tagline_color", "#401246"))
+    tag_color = HexColor(spec.get("tagline_color", BM_COLORS.primary))
     tag_x = spec.get("tagline_x_pt", 330.5)
     tag_y = ph - spec.get("tagline_y_pt", 785.1)
 
@@ -844,6 +822,7 @@ def draw_appendix_divider_page(
 # ============================================================
 # Backcover page
 # ============================================================
+
 
 def draw_backcover_page(
     canvas,
@@ -875,8 +854,8 @@ def draw_backcover_page(
     ph = config.effective_height_pt
     spec = brand.pages.get("backcover", {})
 
-    color_primary = _brand_color(brand, "primary", "#40124A")
-    color_secondary = _brand_color(brand, "secondary", "#38BDA0")
+    color_primary = _brand_color(brand, "primary", BM_COLORS.primary)
+    color_secondary = _brand_color(brand, "secondary", BM_COLORS.secondary)
 
     heading_font = _resolve_font(brand, "heading")
     body_font = _resolve_font(brand, "body")
@@ -918,7 +897,8 @@ def draw_backcover_page(
     logo_x, logo_y = _sxy(
         spec.get("logo_x_ref", 268),
         spec.get("logo_y_ref", 337),
-        pw, ph,
+        pw,
+        ph,
     )
     _draw_logo(canvas, logo_path, logo_x, logo_y, width=logo_w)
 
@@ -931,7 +911,8 @@ def draw_backcover_page(
     contact_x, contact_y = _sxy(
         spec.get("contact_x_ref", 268),
         spec.get("contact_y_ref", 185),
-        pw, ph,
+        pw,
+        ph,
     )
     line_h = _sf(spec.get("contact_line_h_ref", 20), ph)
 
@@ -942,14 +923,15 @@ def draw_backcover_page(
 
     detail_size = _sf(spec.get("contact_detail_size_ref", 9), ph)
     canvas.setFont(body_font, detail_size)
-    canvas.setFillColor(HexColor("#45243D"))
+    canvas.setFillColor(HexColor(BM_COLORS.text))
     if contact_address:
         canvas.drawString(contact_x, contact_y - line_h, contact_address)
 
     ontdek_prefix = spec.get("ontdek_prefix", "Ontdek ons  \u2192  ")
     canvas.setFillColor(color_secondary)
     canvas.drawString(
-        contact_x, contact_y - 2 * line_h,
+        contact_x,
+        contact_y - 2 * line_h,
         f"{ontdek_prefix}{contact_website}",
     )
 

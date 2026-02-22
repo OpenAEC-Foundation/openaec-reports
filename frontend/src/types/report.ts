@@ -10,7 +10,7 @@ export type Orientation = 'portrait' | 'landscape';
 export type Status = 'CONCEPT' | 'DEFINITIEF' | 'REVISIE';
 export type TableStyle = 'default' | 'minimal' | 'striped';
 export type ImageAlignment = 'left' | 'center' | 'right';
-export type MapLayer = 'brt' | 'brt_grijs' | 'luchtfoto' | 'kadastraal';
+export type MapLayer = 'percelen' | 'bebouwing' | 'bestemmingsplan' | 'luchtfoto';
 export type CheckResult = 'VOLDOET' | 'VOLDOET NIET';
 export type ImageMediaType = 'image/png' | 'image/jpeg' | 'image/svg+xml';
 
@@ -164,6 +164,7 @@ export interface BulletListBlock {
   items: string[];
 }
 
+/** Subkop (H2) — wordt ook gebruikt als sectie-delimiter in bijlagen. */
 export interface Heading2Block {
   type: 'heading_2';
   number: string;    // bijv. "2.1"

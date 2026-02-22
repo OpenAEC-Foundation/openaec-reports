@@ -112,6 +112,7 @@ class BrandBuilder:
             print("  [7/9] Extraheer per-pagina layouts...")
             try:
                 from bm_reports.tools.layout_extractor import extract_page_layouts
+
                 page_layouts = extract_page_layouts(classified)
                 for pt, lay in page_layouts.items():
                     print(
@@ -127,7 +128,9 @@ class BrandBuilder:
         # --- Stap 8: Genereer brand.yaml + rapport ---
         print("  [8/9] Genereer brand.yaml...")
         yaml_str = generate_brand_yaml(
-            analysis, self.brand_name, self.brand_slug,
+            analysis,
+            self.brand_name,
+            self.brand_slug,
             page_layouts=page_layouts,
         )
         (self.output_dir / "brand.yaml").write_text(yaml_str, encoding="utf-8")
@@ -153,14 +156,18 @@ class BrandBuilder:
             elif cp.page_type == PageType.APPENDIX_DIVIDER:
                 strip_zones = self._detect_appendix_strip_zones(cp.page)
                 path = extractor.extract_stripped_page(
-                    page_idx, stationery_dir / "appendix_divider.pdf", strip_zones,
+                    page_idx,
+                    stationery_dir / "appendix_divider.pdf",
+                    strip_zones,
                 )
                 print(f"         Appendix divider: pagina {cp.page.page_number} → {path.name}")
 
             elif cp.page_type == PageType.COVER:
                 strip_zones = self._detect_cover_strip_zones(cp.page)
                 path = extractor.extract_stripped_page(
-                    page_idx, stationery_dir / "cover.pdf", strip_zones,
+                    page_idx,
+                    stationery_dir / "cover.pdf",
+                    strip_zones,
                 )
                 print(f"         Cover: pagina {cp.page.page_number} → {path.name}")
 
@@ -206,10 +213,14 @@ class BrandBuilder:
 
                 # Patroon: "R123 G45 B67" of "123 / 45 / 67"
                 rgb_match = re.match(
-                    r'R?\s*(\d{1,3})\s*[/\s]+G?\s*(\d{1,3})\s*[/\s]+B?\s*(\d{1,3})', text
+                    r"R?\s*(\d{1,3})\s*[/\s]+G?\s*(\d{1,3})\s*[/\s]+B?\s*(\d{1,3})", text
                 )
                 if rgb_match:
-                    r, g, b = int(rgb_match.group(1)), int(rgb_match.group(2)), int(rgb_match.group(3))
+                    r, g, b = (
+                        int(rgb_match.group(1)),
+                        int(rgb_match.group(2)),
+                        int(rgb_match.group(3)),
+                    )
                     if 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255:
                         hex_color = f"#{r:02X}{g:02X}{b:02X}"
                         label = self._find_color_label(t, page_data.texts)
@@ -217,7 +228,7 @@ class BrandBuilder:
                             colors[label] = hex_color
 
                 # Patroon: "#401246" (direct hex)
-                hex_match = re.match(r'#([0-9A-Fa-f]{6})', text)
+                hex_match = re.match(r"#([0-9A-Fa-f]{6})", text)
                 if hex_match:
                     hex_color = f"#{hex_match.group(1).upper()}"
                     label = self._find_color_label(t, page_data.texts)
@@ -231,8 +242,7 @@ class BrandBuilder:
         for t in all_texts:
             if t is color_text:
                 continue
-            if (abs(t.x - color_text.x) < 50 and
-                0 < (color_text.y_top - t.y_bottom) < 50):
+            if abs(t.x - color_text.x) < 50 and 0 < (color_text.y_top - t.y_bottom) < 50:
                 label = t.text.strip().lower().replace(" ", "_")
                 if label and not any(c.isdigit() for c in label):
                     return label

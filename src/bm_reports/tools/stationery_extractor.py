@@ -49,7 +49,9 @@ class StationeryExtractor:
         return output_path
 
     def extract_stripped_page(
-        self, page_num: int, output_path: Path,
+        self,
+        page_num: int,
+        output_path: Path,
         strip_zones: list[tuple[float, float, float, float]],
     ) -> Path:
         """Extraheer pagina met tekst in opgegeven zones verwijderd (wit).
@@ -71,7 +73,7 @@ class StationeryExtractor:
         doc.close()
 
         page = new_doc[0]
-        for (x0, y0, x1, y1) in strip_zones:
+        for x0, y0, x1, y1 in strip_zones:
             rect = fitz.Rect(x0, y0, x1, y1)
             # Vind tekst in zone en redact
             text_dict = page.get_text("dict", clip=rect)

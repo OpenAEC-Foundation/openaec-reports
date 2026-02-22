@@ -31,11 +31,11 @@ dynamic_fields:
     y_bl: 120.5
     font: GothamBold
     size: 28.9
-    color: "#401246"
+    color: "#40124A"
 
   project_naam:
     x: 55.0
     y_bl: 78.6
     font: GothamBook
     size: 17.8
-    color: "#38BDAB"
+    color: "#38BDA0"

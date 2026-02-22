@@ -290,7 +290,7 @@ class TestRealTenantIntegration:
         loader = BrandLoader(tenant_config=config)
         brand = loader.load()
         assert brand.slug == "3bm-cooperatie"
-        assert brand.colors.get("primary") == "#401246"
+        assert brand.colors.get("primary") == "#40124A"
 
     def test_brand_list_real_tenant(self):
         """BrandLoader list_brands met echte tenant → tenant + default."""

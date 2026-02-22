@@ -1,6 +1,6 @@
 # Backend Status — bm-reports
 
-> Laatst bijgewerkt: 2026-02-21
+> Laatst bijgewerkt: 2026-02-22
 
 ## Deployment
 
@@ -65,12 +65,14 @@ src/bm_reports/
 | **core/brand_renderer.py** | ✅ Compleet | ✅ test_brand.py | 71% |
 | **core/page_templates.py** | ✅ Compleet | ✅ test_page_templates_integration.py | 89% |
 | **core/stationery.py** | ✅ Compleet | ✅ test_stationery.py | 89% |
-| **core/special_pages.py** | ✅ Compleet | ✅ test_special_pages.py (56 tests) | 80% |
+| **core/special_pages.py** | ✅ Compleet | ✅ test_special_pages.py (49 tests) | 80% |
 | **core/block_registry.py** | ✅ Compleet | ✅ test_block_registry.py | 90% |
 | **core/template_loader.py** | ✅ Compleet | ✅ test_templates.py + test_template_scaffold.py | 94% |
 | **core/toc.py** | ✅ Compleet | ✅ via integratietests | 100% |
 | **core/fonts.py** | ✅ Compleet | — | 66% |
 | **core/renderer_v2.py** | ✅ Compleet | ✅ test_renderer_v2.py (52 tests) | — |
+| **core/tenant.py** | ✅ Compleet | ✅ test_tenant.py (23 tests) | — |
+| **components/base.py** | ✅ Compleet | — (via subclass tests) | — |
 | **components/calculation.py** | ✅ Compleet | ✅ test_engine.py | 100% |
 | **components/check_block.py** | ✅ Compleet | ✅ test_block_registry.py | 100% |
 | **components/table_block.py** | ✅ Compleet | ✅ test_block_registry.py | 97% |
@@ -91,31 +93,45 @@ src/bm_reports/
 
 ```
 tests/
-├── test_api.py                    ✅ 18 tests
-├── test_block_registry.py         ✅ 23 tests
-├── test_brand.py                  ✅ 31 tests
-├── test_brand_analyzer.py         ✅ 24 tests
-├── test_brand_builder.py          ✅  8 tests
-├── test_cli.py                    ✅ 14 tests
-├── test_core.py                   ✅ 14 tests
-├── test_data_adapters.py          ✅ 13 tests
-├── test_engine.py                 ✅ 12 tests
-├── test_from_json.py              ✅ 13 tests
-├── test_image_block.py            ✅ 20 tests
-├── test_json_adapter.py           ✅ 14 tests
-├── test_landscape.py              ✅ 10 tests
-├── test_logo_prep.py              ✅ 22 tests
-├── test_map_block.py              ✅ 19 tests
+├── test_api.py                     ✅ 26 tests
+├── test_api_v2.py                  ✅  8 tests
+├── test_block_registry.py          ✅ 34 tests
+├── test_brand.py                   ✅ 42 tests
+├── test_brand_analyzer.py          ✅ 39 tests
+├── test_brand_builder.py           ✅  9 tests
+├── test_cli.py                     ✅ 17 tests
+├── test_core.py                    ✅ 19 tests
+├── test_data_adapters.py           ✅ 13 tests
+├── test_engine.py                  ✅ 15 tests
+├── test_from_json.py               ✅ 19 tests
+├── test_image_block.py             ✅ 20 tests
+├── test_json_adapter.py            ✅ 14 tests
+├── test_landscape.py               ✅ 12 tests
+├── test_layout_extractor.py        ✅ 50 tests
+├── test_logo_prep.py               ✅ 31 tests
+├── test_map_block.py               ✅ 24 tests
 ├── test_page_templates_integration ✅ 18 tests
-├── test_special_pages.py          ✅ 56 tests
-├── test_stationery.py             ✅ 14 tests
-├── test_stationery_extractor.py   ✅  8 tests
-├── test_styles.py                 ✅  7 tests
-├── test_template_scaffold.py      ✅ 16 tests
-└── test_templates.py              ✅ 10 tests
+├── test_renderer_v2.py             ✅ 53 tests
+├── test_special_pages.py           ✅ 49 tests
+├── test_stationery.py              ✅ 14 tests
+├── test_stationery_extractor.py    ✅  9 tests
+├── test_styles.py                  ✅  7 tests
+├── test_template_scaffold.py       ✅ 21 tests
+├── test_templates.py               ✅ 12 tests
+└── test_tenant.py                  ✅ 30 tests
 ```
 
-**Totaal:** 577 tests (575 pass, 2 fail: pdfrw niet geïnstalleerd) | **Coverage:** 75%
+**Totaal:** 603+ tests | **Coverage:** ~75%
+
+## Recente Features
+
+- **Cadastral lookup:** POI marker op kaartcentrum + kadastrale perceelinfo in PDF via BAG/BRK API
+- **BRT WMTS tiles:** Frontend map preview via BRT standaard tilestitching (WMS endpoint niet beschikbaar)
+- **Multi-tenant:** `TenantConfig` met `BM_TENANT_DIR` env var, fallback-chain tenant → package defaults
+- **Schema-aligned block types:** `bullet_list` en `heading_2` toegevoegd aan JSON schema (backend + frontend)
+- **Code quality audit:** 7 fasen — schema fixes, PEP8, DRY refactoring, caching, type hints, config, dead code cleanup
+- **BMFlowable base class:** Gedeelde `wrap()`/`draw()` voor 4 componenten
+- **Shared style factories:** `block_style_heading()`, `_reference()`, `_body()`, `_mono()`, `_result()` in `styles.py`
 
 ## API Endpoints
 
@@ -134,7 +150,7 @@ tests/
 ```toml
 # Core
 reportlab>=4.0, svglib, PyYAML, Pillow, requests
-fastapi, uvicorn, python-multipart, jsonschema, pymupdf, pydantic
+fastapi, uvicorn, python-multipart, jsonschema, pymupdf
 
 # Optional
 owslib   # kadaster (PDOK WMS)

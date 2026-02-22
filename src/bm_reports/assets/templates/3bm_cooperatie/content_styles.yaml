@@ -17,7 +17,7 @@
 
 # --- Kleuren ---
 colors:
-  purple: "#401246"
+  purple: "#40124A"
   teal: "#56B49B"
   white: "#FFFFFF"
   red: "#FF0000"
@@ -41,12 +41,12 @@ blocks:
       x: 90.0
       font: GothamBook
       size: 18.0
-      color: "#401246"
+      color: "#40124A"
     title:
       x: 108.0
       font: GothamBook
       size: 18.0
-      color: "#401246"
+      color: "#40124A"
     spacing_before: 0.0       # staat altijd bovenaan of na grote gap
     spacing_after: 33.9       # gap naar eerste content (126.8 - 74.9 - 18)
 
@@ -70,7 +70,7 @@ blocks:
     x: 125.4
     font: GothamBook
     size: 9.5
-    color: "#401246"
+    color: "#40124A"
     line_height: 12.3         # regelafstand (562.9 - 550.6)
     max_width: 393.0          # rechterrand ~518pt (uit font meting)
     spacing_before: 12.0
@@ -82,13 +82,13 @@ blocks:
       x: 125.4
       font: SymbolMT
       size: 9.5
-      color: "#401246"
+      color: "#40124A"
       character: "\u0007"      # bullet symbol in SymbolMT
     text:
       x: 143.4
       font: GothamBook
       size: 9.5
-      color: "#401246"
+      color: "#40124A"
       line_height: 12.0       # regelafstand binnen bullet
       max_width: 387.0        # rechterrand ~530pt (uit font meting)
     spacing_between: 10.1     # afstand tussen bullets (204.6 - 194.5)
@@ -106,7 +106,7 @@ blocks:
     body:
       font: GothamBook
       size: 9.0
-      color: "#401246"
+      color: "#40124A"
       line_height: 20.8       # rijhoogte (493.8 - 473.0)
       alternating_bg: null     # geen zebra-striping in BBL
     x: 125.4
@@ -118,7 +118,7 @@ blocks:
   superscript:
     font: GothamBook
     size: 6.0
-    color: "#401246"
+    color: "#40124A"
     y_offset: -4.0            # naar boven verschoven
 
 # =============================================================
@@ -129,4 +129,4 @@ page_number:
   y_td: 793.5
   font: GothamBook
   size: 9.5
-  color: "#401246"
+  color: "#40124A"

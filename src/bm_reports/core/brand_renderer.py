@@ -10,6 +10,7 @@ from reportlab.lib.colors import HexColor
 
 from bm_reports.core.brand import BrandConfig, ElementConfig, ZoneConfig
 from bm_reports.core.document import MM_TO_PT, DocumentConfig
+from bm_reports.core.styles import BM_COLORS
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,10 @@ class BrandRenderer:
         self.draw_footer(canvas, config, variables)
 
     def draw_header(
-        self, canvas, config: DocumentConfig, variables: dict[str, str],
+        self,
+        canvas,
+        config: DocumentConfig,
+        variables: dict[str, str],
     ) -> None:
         """Teken header elementen. Skipt als height=0."""
         zone = self._brand.header
@@ -62,7 +66,10 @@ class BrandRenderer:
         self._draw_zone(canvas, zone, zone_origin_y, variables)
 
     def draw_footer(
-        self, canvas, config: DocumentConfig, variables: dict[str, str],
+        self,
+        canvas,
+        config: DocumentConfig,
+        variables: dict[str, str],
     ) -> None:
         """Teken footer elementen. Skipt als height=0."""
         zone = self._brand.footer
@@ -103,7 +110,7 @@ class BrandRenderer:
                     self._draw_image(canvas, elem, zone_origin_y)
                 else:
                     logger.warning("Onbekend element type: %s", elem.type)
-            except Exception:
+            except (ValueError, OSError, KeyError):
                 logger.exception("Fout bij tekenen van %s element", elem.type)
 
         canvas.restoreState()
@@ -140,7 +147,7 @@ class BrandRenderer:
         # Resolve font en kleur
         font = self._resolve_font(elem.font) if elem.font else "Helvetica"
         size = elem.size if elem.size > 0 else 9.0
-        color = self._resolve_color(elem.color) if elem.color else "#000000"
+        color = self._resolve_color(elem.color) if elem.color else BM_COLORS.text
 
         canvas.setFont(font, size)
         canvas.setFillColor(HexColor(color))
@@ -161,7 +168,7 @@ class BrandRenderer:
         y = zone_y + elem.y * MM_TO_PT
         x2 = x1 + elem.width * MM_TO_PT
 
-        color = self._resolve_color(elem.color) if elem.color else "#000000"
+        color = self._resolve_color(elem.color) if elem.color else BM_COLORS.text
         canvas.setStrokeColor(HexColor(color))
         canvas.setLineWidth(elem.stroke_width)
         canvas.line(x1, y, x2, y)
@@ -194,7 +201,12 @@ class BrandRenderer:
             canvas.drawImage(str(image_path), **kwargs)
 
     def _draw_svg(
-        self, canvas, path: Path, x: float, y: float, elem: ElementConfig,
+        self,
+        canvas,
+        path: Path,
+        x: float,
+        y: float,
+        elem: ElementConfig,
     ) -> None:
         """Teken een SVG afbeelding via svglib conversie."""
         try:
@@ -224,7 +236,7 @@ class BrandRenderer:
             renderPDF.draw(drawing, canvas, x, y)
         except ImportError:
             logger.warning("svglib niet geïnstalleerd, SVG overgeslagen: %s", path)
-        except Exception:
+        except (ValueError, OSError):
             logger.exception("Fout bij SVG rendering: %s", path)
 
     def _resolve_color(self, ref: str) -> str:
@@ -238,7 +250,7 @@ class BrandRenderer:
         """
         if ref.startswith("$"):
             key = ref[1:]
-            return self._brand.colors.get(key, "#000000")
+            return self._brand.colors.get(key, BM_COLORS.text)
         return ref
 
     def _resolve_font(self, ref: str) -> str:
@@ -271,7 +283,9 @@ class BrandRenderer:
         return result
 
     def _build_variables(
-        self, config: DocumentConfig, page_num: int,
+        self,
+        config: DocumentConfig,
+        page_num: int,
     ) -> dict[str, str]:
         """Bouw variabelen dict op basis van document config.
 

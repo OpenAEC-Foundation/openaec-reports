@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 # Image source resolution
 # ============================================================
 
+
 def resolve_image_source(
     src: str | dict[str, Any],
     base_dir: Path | None = None,
@@ -46,8 +47,10 @@ def resolve_image_source(
         filename = src.get("filename", f"image{ext}")
 
         raw = base64.b64decode(data_b64)
-        tmp = Path(tempfile.mktemp(suffix=ext, prefix=f"bm_{filename}_"))
-        tmp.write_bytes(raw)
+        tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=ext, prefix=f"bm_{filename}_")
+        tmp = Path(tmp_file.name)
+        tmp_file.write(raw)
+        tmp_file.close()
         return tmp
 
     # String pad
@@ -61,7 +64,8 @@ def resolve_image_source(
 # Factory functies per block type
 # ============================================================
 
-def create_paragraph(data: dict[str, Any], *, styles=None, **_kwargs) -> Flowable:
+
+def create_paragraph(data: dict[str, Any], *, styles=None) -> Flowable:
     """Maak een Paragraph flowable."""
     ss = styles or BM_STYLES
     style_name = data.get("style", "Normal")
@@ -69,7 +73,7 @@ def create_paragraph(data: dict[str, Any], *, styles=None, **_kwargs) -> Flowabl
     return Paragraph(data["text"], style)
 
 
-def create_calculation(data: dict[str, Any], **_kwargs) -> Flowable:
+def create_calculation(data: dict[str, Any]) -> Flowable:
     """Maak een CalculationBlock flowable."""
     from bm_reports.components.calculation import CalculationBlock
 
@@ -83,7 +87,7 @@ def create_calculation(data: dict[str, Any], **_kwargs) -> Flowable:
     )
 
 
-def create_check(data: dict[str, Any], **_kwargs) -> Flowable:
+def create_check(data: dict[str, Any]) -> Flowable:
     """Maak een CheckBlock flowable.
 
     Vertaalt schema-velden naar component parameters:
@@ -103,7 +107,7 @@ def create_check(data: dict[str, Any], **_kwargs) -> Flowable:
     )
 
 
-def create_table(data: dict[str, Any], **_kwargs) -> Flowable:
+def create_table(data: dict[str, Any]) -> Flowable:
     """Maak een TableBlock flowable.
 
     Vertaalt schema-velden naar component parameters:
@@ -128,7 +132,6 @@ def create_image(
     data: dict[str, Any],
     *,
     base_dir: Path | None = None,
-    **_kwargs,
 ) -> Flowable:
     """Maak een ImageBlock flowable.
 
@@ -161,7 +164,7 @@ def create_image(
         )
 
 
-def create_map(data: dict[str, Any], **_kwargs) -> Flowable:
+def create_map(data: dict[str, Any]) -> Flowable:
     """Maak een KadasterMap flowable.
 
     Vertaalt schema-velden naar component parameters:
@@ -182,18 +185,18 @@ def create_map(data: dict[str, Any], **_kwargs) -> Flowable:
     )
 
 
-def create_spacer(data: dict[str, Any], **_kwargs) -> Flowable:
+def create_spacer(data: dict[str, Any]) -> Flowable:
     """Maak een Spacer flowable."""
     height_mm = data.get("height_mm", 5)
     return Spacer(1, height_mm * MM_TO_PT)
 
 
-def create_page_break(data: dict[str, Any], **_kwargs) -> Flowable:
+def create_page_break(data: dict[str, Any]) -> Flowable:
     """Maak een PageBreak flowable."""
     return PageBreak()
 
 
-def create_raw_flowable(data: dict[str, Any], **_kwargs) -> Flowable:
+def create_raw_flowable(data: dict[str, Any]) -> Flowable:
     """Maak een dynamische Flowable via class naam (library-only).
 
     Ondersteunt alleen classes uit reportlab.platypus.

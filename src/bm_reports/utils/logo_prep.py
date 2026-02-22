@@ -62,10 +62,7 @@ def prepare_logos(
     if source.is_file():
         files = [source]
     else:
-        files = sorted(
-            f for f in source.rglob("*")
-            if f.suffix.lower() in SUPPORTED_EXTENSIONS
-        )
+        files = sorted(f for f in source.rglob("*") if f.suffix.lower() in SUPPORTED_EXTENSIONS)
 
     if not files:
         msg = f"Geen ondersteunde bestanden gevonden in: {source}"
@@ -90,7 +87,10 @@ def prepare_logos(
             copy_svg(file_path, out_path)
         else:
             process_raster(
-                file_path, out_path, max_size=max_size, tolerance=tolerance,
+                file_path,
+                out_path,
+                max_size=max_size,
+                tolerance=tolerance,
             )
 
         results.append(out_path)

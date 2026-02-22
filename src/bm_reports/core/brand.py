@@ -112,22 +112,24 @@ def _parse_elements(raw_elements: list[dict] | None) -> list[ElementConfig]:
         return []
     elements = []
     for elem_data in raw_elements:
-        elements.append(ElementConfig(
-            type=elem_data.get("type", ""),
-            x=float(elem_data.get("x", 0)),
-            y=float(elem_data.get("y", 0)),
-            width=float(elem_data.get("width", 0)),
-            height=float(elem_data.get("height", 0)),
-            fill=str(elem_data.get("fill", "")),
-            color=str(elem_data.get("color", "")),
-            stroke=str(elem_data.get("stroke", "")),
-            stroke_width=float(elem_data.get("stroke_width", 0.5)),
-            content=str(elem_data.get("content", "")),
-            src=str(elem_data.get("src", "")),
-            font=str(elem_data.get("font", "")),
-            size=float(elem_data.get("size", 0)),
-            align=str(elem_data.get("align", "left")),
-        ))
+        elements.append(
+            ElementConfig(
+                type=elem_data.get("type", ""),
+                x=float(elem_data.get("x", 0)),
+                y=float(elem_data.get("y", 0)),
+                width=float(elem_data.get("width", 0)),
+                height=float(elem_data.get("height", 0)),
+                fill=str(elem_data.get("fill", "")),
+                color=str(elem_data.get("color", "")),
+                stroke=str(elem_data.get("stroke", "")),
+                stroke_width=float(elem_data.get("stroke_width", 0.5)),
+                content=str(elem_data.get("content", "")),
+                src=str(elem_data.get("src", "")),
+                font=str(elem_data.get("font", "")),
+                size=float(elem_data.get("size", 0)),
+                align=str(elem_data.get("align", "left")),
+            )
+        )
     return elements
 
 
@@ -201,7 +203,7 @@ class BrandLoader:
                             path = tenant_brand
                         else:
                             path = self._resolve_path(name)
-                    except Exception:
+                    except (yaml.YAMLError, OSError):
                         path = self._resolve_path(name)
                 else:
                     path = self._resolve_path(name)
@@ -209,9 +211,7 @@ class BrandLoader:
                 path = self._resolve_path(name)
 
         if not path.exists():
-            raise FileNotFoundError(
-                f"Brand '{name}' niet gevonden in {self.brands_dir}"
-            )
+            raise FileNotFoundError(f"Brand '{name}' niet gevonden in {self.brands_dir}")
 
         with path.open("r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
@@ -275,10 +275,12 @@ class BrandLoader:
                         data = yaml.safe_load(f)
                     brand_info = data.get("brand", {}) if data else {}
                     slug = brand_info.get("slug", tenant_brand.stem)
-                    brands.append({
-                        "name": brand_info.get("name", tenant_brand.stem),
-                        "slug": slug,
-                    })
+                    brands.append(
+                        {
+                            "name": brand_info.get("name", tenant_brand.stem),
+                            "slug": slug,
+                        }
+                    )
                     seen_slugs.add(slug)
                 except yaml.YAMLError:
                     pass
@@ -294,10 +296,12 @@ class BrandLoader:
                     if slug in seen_slugs:
                         continue
                     seen_slugs.add(slug)
-                    brands.append({
-                        "name": brand_info.get("name", path.stem),
-                        "slug": slug,
-                    })
+                    brands.append(
+                        {
+                            "name": brand_info.get("name", path.stem),
+                            "slug": slug,
+                        }
+                    )
                 except yaml.YAMLError:
                     slug = path.stem
                     if slug not in seen_slugs:

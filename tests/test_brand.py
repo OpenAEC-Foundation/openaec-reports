@@ -137,7 +137,7 @@ class TestBrandLoader:
 
         assert brand.name == "3BM Coöperatie"
         assert brand.slug == "3bm-cooperatie"
-        assert brand.colors["secondary"] == "#38BDAB"
+        assert brand.colors["secondary"] == "#38BDA0"
         assert brand.colors["text_accent"] == "#56B49B"
         assert brand.header.height == 0
         assert brand.footer.height == 17  # was 25
@@ -379,7 +379,7 @@ class TestBrandRenderer:
 
     def test_resolve_color_unknown_ref(self):
         renderer = self._make_renderer()
-        assert renderer._resolve_color("$nonexistent") == "#000000"
+        assert renderer._resolve_color("$nonexistent") == "#45243D"  # BM_COLORS.text
 
     def test_resolve_font_dollar_ref(self):
         renderer = self._make_renderer()

@@ -120,6 +120,17 @@
       "description": "Colofon / documentinformatie pagina",
       "properties": {
         "enabled": { "type": "boolean", "default": true },
+        "opdrachtgever_naam": { "type": "string", "description": "Naam opdrachtgever" },
+        "opdrachtgever_contact": { "type": "string", "description": "Contactpersoon opdrachtgever" },
+        "opdrachtgever_adres": { "type": "string", "description": "Adres opdrachtgever" },
+        "adviseur_bedrijf": { "type": "string", "description": "Adviesbureau naam" },
+        "adviseur_naam": { "type": "string", "description": "Naam adviseur" },
+        "normen": { "type": "string", "description": "Toegepaste normen" },
+        "documentgegevens": { "type": "string", "description": "Documentgegevens tekst" },
+        "datum": { "type": "string", "description": "Colofon datum (kan afwijken van rapport datum)" },
+        "fase": { "type": "string", "description": "Projectfase" },
+        "status_colofon": { "type": "string", "description": "Status op colofon (kan afwijken van rapport status)" },
+        "kenmerk": { "type": "string", "description": "Documentkenmerk" },
         "extra_fields": {
           "type": "object",
           "additionalProperties": { "type": "string" }
@@ -186,6 +197,8 @@
         { "$ref": "#/$defs/block_map" },
         { "$ref": "#/$defs/block_spacer" },
         { "$ref": "#/$defs/block_page_break" },
+        { "$ref": "#/$defs/block_bullet_list" },
+        { "$ref": "#/$defs/block_heading_2" },
         { "$ref": "#/$defs/block_raw_flowable" }
       ]
     },
@@ -339,6 +352,30 @@
       "required": ["type"],
       "properties": {
         "type": { "const": "page_break" }
+      }
+    },
+
+    "block_bullet_list": {
+      "type": "object",
+      "required": ["type", "items"],
+      "properties": {
+        "type": { "const": "bullet_list" },
+        "items": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Lijst van opsommingspunten"
+        }
+      }
+    },
+
+    "block_heading_2": {
+      "type": "object",
+      "required": ["type", "title"],
+      "description": "Subkop (H2) — wordt ook gebruikt als sectie-delimiter in bijlagen",
+      "properties": {
+        "type": { "const": "heading_2" },
+        "number": { "type": "string", "description": "Nummer (bijv. '1.1')" },
+        "title": { "type": "string", "description": "Titel van de subkop" }
       }
     },
 

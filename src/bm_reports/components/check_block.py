@@ -5,12 +5,25 @@ from __future__ import annotations
 from reportlab.lib.colors import HexColor
 from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.platypus import Flowable, Paragraph, Table, TableStyle
+from reportlab.platypus import Paragraph, Table, TableStyle
 
-from bm_reports.core.styles import BM_COLORS, BM_FONTS, BM_STYLES
+from bm_reports.components.base import BMFlowable
+from bm_reports.core.styles import (
+    BLOCK_PADDING,
+    BM_COLORS,
+    BM_FONTS,
+    BM_STYLES,
+    block_style_body,
+    block_style_heading,
+    block_style_reference,
+    block_style_result,
+)
+
+# Hoogte van de unity check balk in points
+_UC_BAR_HEIGHT = 8
 
 
-class CheckBlock(Flowable):
+class CheckBlock(BMFlowable):
     """Toetsingsblok flowable — visuele weergave van een toetsresultaat.
 
     Toont:
@@ -78,7 +91,6 @@ class CheckBlock(Flowable):
 
     def _build_uc_bar(self, bar_width: float) -> Table:
         """Bouw een visuele UC balk (proportioneel gevuld)."""
-        bar_h = 8
         color = HexColor(self.result_color)
         bg = HexColor(BM_COLORS.background_alt)
 
@@ -93,7 +105,7 @@ class CheckBlock(Flowable):
             widths.append(empty_w)
             data_row.append("")
 
-        bar = Table([data_row], colWidths=widths, rowHeights=[bar_h])
+        bar = Table([data_row], colWidths=widths, rowHeights=[_UC_BAR_HEIGHT])
         cmds = [
             ("BACKGROUND", (0, 0), (0, 0), color),
             ("TOPPADDING", (0, 0), (-1, -1), 0),
@@ -108,38 +120,16 @@ class CheckBlock(Flowable):
         bar.setStyle(TableStyle(cmds))
         return bar
 
-    def _build_block(self, available_width: float) -> Table:
+    def _build_content(self, available_width: float) -> Table:
         """Bouw intern Table object met alle toetsingsonderdelen."""
-        pad = 6
+        pad = BLOCK_PADDING
         inner_w = available_width - 2 * pad
         color = HexColor(self.result_color)
 
-        # Lokale paragraph styles
-        s_desc = ParagraphStyle(
-            "_chk_desc",
-            parent=BM_STYLES["Normal"],
-            fontName=BM_FONTS.heading,
-            fontSize=BM_FONTS.body_size,
-            leading=BM_FONTS.body_size * 1.3,
-            textColor=HexColor(BM_COLORS.text),
-            spaceAfter=0,
-        )
-        s_ref = ParagraphStyle(
-            "_chk_ref",
-            parent=BM_STYLES["Normal"],
-            fontSize=BM_FONTS.caption_size,
-            leading=BM_FONTS.caption_size * 1.3,
-            textColor=HexColor(BM_COLORS.text_light),
-            alignment=TA_RIGHT,
-            spaceAfter=0,
-        )
-        s_detail = ParagraphStyle(
-            "_chk_detail",
-            parent=BM_STYLES["Normal"],
-            fontSize=BM_FONTS.body_size,
-            leading=BM_FONTS.body_size * 1.4,
-            spaceAfter=0,
-        )
+        # Paragraph styles (gedeelde factories uit styles.py)
+        s_desc = block_style_heading(BM_COLORS.text)
+        s_ref = block_style_reference()
+        s_detail = block_style_body()
         s_uc_text = ParagraphStyle(
             "_chk_uc",
             parent=BM_STYLES["Normal"],
@@ -149,16 +139,8 @@ class CheckBlock(Flowable):
             textColor=HexColor(BM_COLORS.text),
             spaceAfter=0,
         )
-        s_result = ParagraphStyle(
-            "_chk_result",
-            parent=BM_STYLES["Normal"],
-            fontName=BM_FONTS.heading,
-            fontSize=BM_FONTS.body_size + 1,
-            leading=(BM_FONTS.body_size + 1) * 1.3,
-            textColor=color,
-            alignment=TA_RIGHT,
-            spaceAfter=0,
-        )
+        s_result = block_style_result(self.result_color)
+        s_result.alignment = TA_RIGHT
 
         rows = []
 
@@ -170,13 +152,17 @@ class CheckBlock(Flowable):
                 [[desc_para, ref_para]],
                 colWidths=[inner_w * 0.6, inner_w * 0.4],
             )
-            header.setStyle(TableStyle([
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-                ("TOPPADDING", (0, 0), (-1, -1), 0),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-            ]))
+            header.setStyle(
+                TableStyle(
+                    [
+                        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                        ("TOPPADDING", (0, 0), (-1, -1), 0),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+                    ]
+                )
+            )
         else:
             header = desc_para
         rows.append([header])
@@ -199,14 +185,18 @@ class CheckBlock(Flowable):
                 [[bar, Paragraph(uc_text, s_uc_text)]],
                 colWidths=[bar_width + 4, inner_w - bar_width - 4],
             )
-            uc_row.setStyle(TableStyle([
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-                ("TOPPADDING", (0, 0), (-1, -1), 0),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-                ("LEFTPADDING", (1, 0), (1, 0), 6),
-            ]))
+            uc_row.setStyle(
+                TableStyle(
+                    [
+                        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                        ("TOPPADDING", (0, 0), (-1, -1), 0),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+                        ("LEFTPADDING", (1, 0), (1, 0), 6),
+                    ]
+                )
+            )
             rows.append([uc_row])
 
         # Row 3: resultaat
@@ -233,14 +223,4 @@ class CheckBlock(Flowable):
         table.setStyle(TableStyle(cmds))
         return table
 
-    def wrap(self, available_width, available_height):
-        self._block = self._build_block(available_width)
-        w, h = self._block.wrap(available_width, available_height)
-        self.width = w
-        self.height = h
-        return (self.width, self.height)
-
-    def draw(self):
-        """Render het toetsingsblok."""
-        if hasattr(self, "_block"):
-            self._block.drawOn(self.canv, 0, 0)
+    # wrap() en draw() worden geërfd van BMFlowable

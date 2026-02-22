@@ -210,9 +210,7 @@ def generate_analysis_report(analysis: BrandAnalysis) -> str:
     lines.append(f"# Brand Analyse — {analysis.source_pdf}")
     lines.append("")
     lines.append(f"**Pagina's:** {analysis.page_count}")
-    lines.append(
-        f"**Formaat:** {analysis.page_size_mm[0]} x {analysis.page_size_mm[1]} mm"
-    )
+    lines.append(f"**Formaat:** {analysis.page_size_mm[0]} x {analysis.page_size_mm[1]} mm")
     lines.append("")
 
     # Pagina-classificatie
@@ -221,9 +219,7 @@ def generate_analysis_report(analysis: BrandAnalysis) -> str:
     lines.append("| Pagina | Type | Confidence |")
     lines.append("|--------|------|------------|")
     for cp in analysis.classified_pages:
-        lines.append(
-            f"| {cp.page.page_number} | {cp.page_type.value} | {cp.confidence:.2f} |"
-        )
+        lines.append(f"| {cp.page.page_number} | {cp.page_type.value} | {cp.confidence:.2f} |")
     lines.append("")
 
     # Kleuren

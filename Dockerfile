@@ -17,11 +17,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml README.md ./
-RUN pip install --no-cache-dir hatchling && \
-    pip install --no-cache-dir reportlab>=4.0 svglib>=0.9 PyYAML>=6.0 \
-    Pillow>=10.0 requests>=2.31 fastapi>=0.115.0 "uvicorn[standard]>=0.30.0" \
-    python-multipart>=0.0.9 jsonschema>=4.20.0 pymupdf>=1.24 pydantic>=2.0
-
 COPY src/ ./src/
 COPY schemas/ ./schemas/
 COPY tenants/ ./tenants/

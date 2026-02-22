@@ -53,7 +53,7 @@ class BMDocTemplate(BaseDocTemplate):
         title = flowable.getPlainText()
 
         # Registreer bij ReportLab's TOC mechanisme (voedt TableOfContents)
-        self.notify('TOCEntry', (level, title, self.page))
+        self.notify("TOCEntry", (level, title, self.page))
 
         # Registreer bookmarks voor PDF navigatie
         self.toc_builder.notify(self.canv, title, level)
@@ -175,12 +175,14 @@ class Report:
             level: Heading level (1-3) voor TOC hiërarchie.
             page_break_before: Forceer nieuwe pagina voor deze sectie.
         """
-        self._sections.append({
-            "title": title,
-            "content": content or [],
-            "level": level,
-            "page_break_before": page_break_before,
-        })
+        self._sections.append(
+            {
+                "title": title,
+                "content": content or [],
+                "level": level,
+                "page_break_before": page_break_before,
+            }
+        )
         return self
 
     def _append_block(self, block) -> None:
@@ -337,11 +339,13 @@ class Report:
         """
         if number is None:
             number = len(self._appendices) + 1
-        self._appendices.append({
-            "title": title,
-            "number": number,
-            "content": content or [],
-        })
+        self._appendices.append(
+            {
+                "title": title,
+                "number": number,
+                "content": content or [],
+            }
+        )
         return self
 
     def add_backcover(self, **kwargs) -> Report:
@@ -404,12 +408,21 @@ class Report:
                 def _make_callback(n, t):
                     def callback(canvas, doc_inner):
                         draw_appendix_divider_page(
-                            canvas, doc_inner, config, self._brand, n, t,
+                            canvas,
+                            doc_inner,
+                            config,
+                            self._brand,
+                            n,
+                            t,
                         )
+
                     return callback
 
                 frame = Frame(
-                    ml, mb, page_w - ml - mr, page_h - mt - mb,
+                    ml,
+                    mb,
+                    page_w - ml - mr,
+                    page_h - mt - mb,
                     id=f"appendix_frame_{num}",
                 )
                 template = PageTemplate(
@@ -483,9 +496,11 @@ class Report:
 
         # Bijlagen
         for appendix in self._appendices:
-            elements.append(NextPageTemplate(
-                f"appendix_{appendix['number']}",
-            ))
+            elements.append(
+                NextPageTemplate(
+                    f"appendix_{appendix['number']}",
+                )
+            )
             elements.append(PageBreak())
             elements.append(Spacer(1, 1))
 
@@ -604,7 +619,9 @@ class Report:
             content_blocks = []
             for block_data in section_data.get("content", []):
                 flowable = create_block(
-                    block_data, base_dir=base_dir, styles=report._styles,
+                    block_data,
+                    base_dir=base_dir,
+                    styles=report._styles,
                 )
                 content_blocks.append(flowable)
 
@@ -620,7 +637,9 @@ class Report:
             appendix_content = []
             for block_data in appendix_data.get("content", []):
                 flowable = create_block(
-                    block_data, base_dir=base_dir, styles=report._styles,
+                    block_data,
+                    base_dir=base_dir,
+                    styles=report._styles,
                 )
                 appendix_content.append(flowable)
             report.add_appendix(

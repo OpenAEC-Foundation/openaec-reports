@@ -4,14 +4,15 @@ from __future__ import annotations
 
 from typing import Any
 
-from reportlab.platypus import Flowable, Table, TableStyle
 from reportlab.lib.colors import HexColor
+from reportlab.platypus import Table, TableStyle
 
+from bm_reports.components.base import BMFlowable
 from bm_reports.core.document import MM_TO_PT
 from bm_reports.core.styles import BM_COLORS, BM_FONTS
 
 
-class TableBlock(Flowable):
+class TableBlock(BMFlowable):
     """Gestileerde tabel flowable in 3BM huisstijl.
 
     Args:
@@ -37,7 +38,7 @@ class TableBlock(Flowable):
         self.col_widths_mm = col_widths_mm
         self.zebra = zebra
 
-    def _build_table(self, available_width: float) -> Table:
+    def _build_content(self, available_width: float) -> Table:
         """Bouw ReportLab Table met styling."""
         data = [self.headers] + self.rows
 
@@ -75,12 +76,4 @@ class TableBlock(Flowable):
         table.setStyle(TableStyle(style_commands))
         return table
 
-    def wrap(self, available_width, available_height):
-        table = self._build_table(available_width)
-        self._table = table
-        return table.wrap(available_width, available_height)
-
-    def draw(self):
-        """Render de tabel."""
-        if hasattr(self, "_table"):
-            self._table.drawOn(self.canv, 0, 0)
+    # wrap() en draw() worden geërfd van BMFlowable

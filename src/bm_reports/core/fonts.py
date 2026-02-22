@@ -130,7 +130,7 @@ def register_fonts(fonts_dir: Path | None = None) -> dict[str, str]:
                 _registered[font_name] = True
                 result[font_name] = font_name
                 logger.info("Font geregistreerd: %s (%s)", font_name, font_path.name)
-            except Exception:
+            except (OSError, ValueError):
                 logger.exception("Fout bij registreren van font %s: %s", font_name, font_path)
                 _registered[font_name] = False
                 result[font_name] = _FALLBACK_FONTS[font_name]
@@ -138,8 +138,7 @@ def register_fonts(fonts_dir: Path | None = None) -> dict[str, str]:
             _registered[font_name] = False
             result[font_name] = _FALLBACK_FONTS[font_name]
             logger.debug(
-                "Font niet gevonden: %s — fallback naar %s. "
-                "Plaats het font in: %s",
+                "Font niet gevonden: %s — fallback naar %s. Plaats het font in: %s",
                 font_name,
                 _FALLBACK_FONTS[font_name],
                 search_dir,

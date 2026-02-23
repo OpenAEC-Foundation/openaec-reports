@@ -86,7 +86,7 @@ class TemplateSet:
         if not path.exists():
             logger.warning("Template not found: %s", path)
             return {}
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
 
     @property
@@ -979,7 +979,7 @@ class ContentRenderer:
             "kadaster": "kadastraal",
             "cadastral": "kadastraal",
         }
-        normalized_layers = [layer_map.get(l.lower(), l.lower()) for l in layers]
+        normalized_layers = [layer_map.get(layer.lower(), layer.lower()) for layer in layers]
 
         # Calculate image dimensions in points
         target_w = (width_mm * 2.8346) if width_mm else max_w
@@ -1559,7 +1559,7 @@ class ReportGeneratorV2:
         Returns:
             Path to generated PDF.
         """
-        with open(json_path, "r", encoding="utf-8") as f:
+        with open(json_path, encoding="utf-8") as f:
             data = json.load(f)
         gen = cls(brand=brand)
         return gen.generate(data, Path(stationery_dir), Path(output_path))

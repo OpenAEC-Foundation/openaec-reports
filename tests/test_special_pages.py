@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, call, patch
-
-import pytest
+from unittest.mock import MagicMock
 
 from bm_reports import A4, Report
 from bm_reports.core.brand import BrandConfig, BrandLoader
@@ -75,7 +73,7 @@ class TestResolveLogoPath:
 
 
 class TestDrawCoverPage:
-    def test_calls_saveState_and_restoreState(self):
+    def test_calls_save_state_and_restore_state(self):
         canvas = _make_canvas()
         config = _make_config()
         brand = _make_brand()
@@ -150,7 +148,7 @@ class TestDrawCoverPage:
 
 
 class TestDrawColofonPage:
-    def test_calls_saveState_and_restoreState(self):
+    def test_calls_save_state_and_restore_state(self):
         canvas = _make_canvas()
         config = _make_config()
         brand = _make_brand()
@@ -240,7 +238,7 @@ class TestDrawColofonPage:
 
 
 class TestDrawBackcoverPage:
-    def test_calls_saveState_and_restoreState(self):
+    def test_calls_save_state_and_restore_state(self):
         canvas = _make_canvas()
         config = _make_config()
         brand = _make_brand()
@@ -288,7 +286,7 @@ class TestDrawBackcoverPage:
 
 
 class TestDrawAppendixDividerPage:
-    def test_calls_saveState_and_restoreState(self):
+    def test_calls_save_state_and_restore_state(self):
         canvas = _make_canvas()
         config = _make_config()
         brand = _make_brand()

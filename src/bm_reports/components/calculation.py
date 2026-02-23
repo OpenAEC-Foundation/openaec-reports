@@ -10,7 +10,6 @@ from bm_reports.components.base import BMFlowable
 from bm_reports.core.styles import (
     BLOCK_PADDING,
     BM_COLORS,
-    BM_FONTS,
     block_style_heading,
     block_style_mono,
     block_style_reference,

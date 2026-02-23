@@ -3,15 +3,10 @@
 from __future__ import annotations
 
 import struct
-import tempfile
 import zlib
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-from reportlab.platypus import Flowable
-
-from bm_reports.components.map_block import KadasterMap, _CACHE_MAX_AGE
+from bm_reports.components.map_block import KadasterMap
 
 
 def _make_white_png(width: int = 1, height: int = 1) -> bytes:
@@ -203,7 +198,7 @@ class TestFetchLayers:
             cache_dir=tmp_path / "cache",
         )
         with patch.object(m._client, "get_map", return_value=png_bytes) as mock_get:
-            paths1 = m._fetch_layers()
+            m._fetch_layers()
             # Reset _layer_paths om opnieuw fetch te simuleren
             m._layer_paths = []
             paths2 = m._fetch_layers()
@@ -397,10 +392,10 @@ class TestIntegration:
         # Mock KadasterClient.get_map op class niveau
         with patch(
             "bm_reports.components.map_block.KadasterClient"
-        ) as MockClient:
+        ) as mock_client:
             mock_instance = MagicMock()
             mock_instance.get_map.return_value = png_bytes
-            MockClient.return_value = mock_instance
+            mock_client.return_value = mock_instance
 
             report = Report.from_dict(data)
             output = tmp_path / "map_test.pdf"
@@ -438,10 +433,10 @@ class TestIntegration:
         # Mock KadasterClient om ConnectionError te gooien
         with patch(
             "bm_reports.components.map_block.KadasterClient"
-        ) as MockClient:
+        ) as mock_client:
             mock_instance = MagicMock()
             mock_instance.get_map.side_effect = ConnectionError("No network")
-            MockClient.return_value = mock_instance
+            mock_client.return_value = mock_instance
 
             report = Report.from_dict(data)
             output = tmp_path / "map_fallback_test.pdf"

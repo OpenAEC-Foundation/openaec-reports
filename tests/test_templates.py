@@ -1,9 +1,9 @@
 """Tests voor template loader."""
 
-import pytest
-from pathlib import Path
 
-from bm_reports.core.template_loader import TemplateLoader, TemplateConfig, TEMPLATES_DIR
+import pytest
+
+from bm_reports.core.template_loader import TEMPLATES_DIR, TemplateConfig, TemplateLoader
 
 
 class TestTemplateLoader:

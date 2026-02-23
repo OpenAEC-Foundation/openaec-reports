@@ -2,8 +2,6 @@
 
 from unittest.mock import MagicMock
 
-import pytest
-
 from bm_reports.core.brand import BrandConfig, BrandLoader
 from bm_reports.core.document import A4, DocumentConfig
 from bm_reports.core.page_templates import (

@@ -8,9 +8,15 @@ import pytest
 
 fitz = pytest.importorskip("fitz", reason="pymupdf niet geinstalleerd")
 
-from bm_reports.core.renderer_v2 import (
-    ReportGeneratorV2, TemplateSet, FontManager, ContentRenderer,
-    CoverGenerator, ColofonGenerator, _hex_to_rgb, _strip_html, _resolve_image,
+from bm_reports.core.renderer_v2 import (  # noqa: E402
+    ColofonGenerator,
+    ContentRenderer,
+    FontManager,
+    ReportGeneratorV2,
+    TemplateSet,
+    _hex_to_rgb,
+    _resolve_image,
+    _strip_html,
 )
 
 BASE = Path(__file__).parent.parent
@@ -50,7 +56,8 @@ class TestStripHtml:
         assert _strip_html("<p>Tekst in paragraaf</p>") == "Tekst in paragraaf"
 
     def test_strips_bold_italic(self):
-        assert _strip_html("<p>Dit is <strong>vet</strong> en <em>schuin</em></p>") == "Dit is vet en schuin"
+        html = "<p>Dit is <strong>vet</strong> en <em>schuin</em></p>"
+        assert _strip_html(html) == "Dit is vet en schuin"
 
     def test_strips_nested_html(self):
         assert _strip_html("<p><span class=\"x\">Hello</span></p>") == "Hello"
@@ -214,14 +221,22 @@ class TestContentRendererBlocks:
     def test_paragraph_style_heading1(self, renderer, tmp_path):
         """Paragraph with style=Heading1 dispatches to heading_1."""
         y_before = renderer.y
-        renderer._render_block({"type": "paragraph", "text": "Hoofdstuk", "style": "Heading1", "number": "1"})
+        block = {
+            "type": "paragraph", "text": "Hoofdstuk",
+            "style": "Heading1", "number": "1",
+        }
+        renderer._render_block(block)
         assert renderer.y > y_before
         renderer.save(tmp_path / "para_h1.pdf")
 
     def test_paragraph_style_heading2(self, renderer, tmp_path):
         """Paragraph with style=Heading2 dispatches to heading_2."""
         y_before = renderer.y
-        renderer._render_block({"type": "paragraph", "text": "Paragraaf", "style": "Heading2", "number": "1.1"})
+        block = {
+            "type": "paragraph", "text": "Paragraaf",
+            "style": "Heading2", "number": "1.1",
+        }
+        renderer._render_block(block)
         assert renderer.y > y_before
         renderer.save(tmp_path / "para_h2.pdf")
 
@@ -357,7 +372,10 @@ class TestContentRendererBlocks:
         renderer._render_block({"type": "paragraph", "text": "Test"})
         renderer._render_block({"type": "spacer", "height_mm": 5})
         renderer._render_block({"type": "calculation", "title": "T", "result": "1"})
-        renderer._render_block({"type": "check", "description": "T", "unity_check": 0.5, "result": "VOLDOET"})
+        renderer._render_block({
+            "type": "check", "description": "T",
+            "unity_check": 0.5, "result": "VOLDOET",
+        })
         renderer.save(tmp_path / "dispatch.pdf")
 
     def test_unknown_block_type(self, renderer, tmp_path):

@@ -15,7 +15,6 @@ from bm_reports.utils.logo_prep import (
     slugify,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -50,7 +49,10 @@ def _save_rgba(path: Path, color: tuple[int, int, int, int] = (255, 0, 0, 128),
     _make_rgba_image(size[0], size[1], color).save(path)
 
 
-SAMPLE_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50"><circle cx="25" cy="25" r="20"/></svg>'
+SAMPLE_SVG = (
+    '<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50">'
+    '<circle cx="25" cy="25" r="20"/></svg>'
+)
 
 
 # ===========================================================================

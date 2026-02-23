@@ -95,7 +95,7 @@ class RevitAdapter:
         return path
 
     @classmethod
-    def from_json(cls, json_path: str | Path) -> "RevitAdapter":
+    def from_json(cls, json_path: str | Path) -> RevitAdapter:
         """Maak adapter instantie vanuit eerder geëxporteerde JSON.
 
         Args:

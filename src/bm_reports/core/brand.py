@@ -5,8 +5,12 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import yaml
+
+if TYPE_CHECKING:
+    from bm_reports.core.tenant import TenantConfig
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +167,7 @@ class BrandLoader:
     def __init__(
         self,
         brands_dir: Path | None = None,
-        tenant_config: "TenantConfig | None" = None,
+        tenant_config: TenantConfig | None = None,
     ):
         self._tenant_config = tenant_config
         self.brands_dir = brands_dir or BRANDS_DIR

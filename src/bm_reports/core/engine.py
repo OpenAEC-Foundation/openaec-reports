@@ -17,7 +17,7 @@ from bm_reports.core.block_registry import create_block
 from bm_reports.core.brand import BrandConfig, BrandLoader
 from bm_reports.core.document import A3, A4, Document, DocumentConfig, PageFormat
 from bm_reports.core.page_templates import create_page_templates
-from bm_reports.core.styles import BM_STYLES, create_stylesheet
+from bm_reports.core.styles import create_stylesheet
 from bm_reports.core.toc import TOC_HEADING_STYLES, TOCBuilder
 
 

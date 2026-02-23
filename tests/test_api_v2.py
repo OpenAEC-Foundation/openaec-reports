@@ -10,9 +10,9 @@ import pytest
 fitz = pytest.importorskip("fitz", reason="pymupdf niet geinstalleerd")
 httpx = pytest.importorskip("httpx", reason="httpx niet geinstalleerd")
 
-from fastapi.testclient import TestClient
+from fastapi.testclient import TestClient  # noqa: E402
 
-from bm_reports.api import app
+from bm_reports.api import app  # noqa: E402
 
 BASE = Path(__file__).parent.parent
 JSON_PATH = BASE / "tests" / "test_data" / "sample_report.json"

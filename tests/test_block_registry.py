@@ -13,11 +13,9 @@ from bm_reports.components.check_block import CheckBlock
 from bm_reports.components.map_block import KadasterMap
 from bm_reports.components.table_block import TableBlock
 from bm_reports.core.block_registry import (
-    BLOCK_REGISTRY,
     create_block,
     resolve_image_source,
 )
-
 
 # ============================================================
 # TestCreateBlock — dispatch via create_block()

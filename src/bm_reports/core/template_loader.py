@@ -188,7 +188,7 @@ class TemplateLoader:
         config = self.load(name)
         today = date.today().isoformat()
 
-        _DEFAULT_DISCLAIMER = (
+        default_disclaimer = (
             "Dit rapport is opgesteld door 3BM Bouwkunde en is uitsluitend "
             "bedoeld voor de opdrachtgever. Verspreiding aan derden is niet "
             "toegestaan zonder schriftelijke toestemming."
@@ -199,7 +199,7 @@ class TemplateLoader:
         colofon_enabled = colofon_raw.get("enabled", True) if colofon_raw else False
         disclaimer = colofon_raw.get("disclaimer", "").strip() if colofon_raw else ""
         if not disclaimer:
-            disclaimer = _DEFAULT_DISCLAIMER
+            disclaimer = default_disclaimer
 
         colofon: dict[str, Any] = {
             "enabled": colofon_enabled,

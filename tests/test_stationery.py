@@ -1,9 +1,6 @@
 """Tests voor StationeryRenderer — achtergrond PDF/PNG op canvas."""
 
-from pathlib import Path
 from unittest.mock import MagicMock
-
-import pytest
 
 from bm_reports.core.stationery import StationeryRenderer
 
@@ -104,7 +101,7 @@ class TestDrawImage:
 
 
 class TestDrawPdf:
-    def test_draw_pdf_calls_doForm(self, tmp_path):
+    def test_draw_pdf_calls_do_form(self, tmp_path):
         """PDF achtergrond wordt gerendered via pdfrw → doForm."""
         from reportlab.pdfgen import canvas as rl_canvas
 

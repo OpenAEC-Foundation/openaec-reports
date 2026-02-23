@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-
 from reportlab.lib.colors import HexColor
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus.tableofcontents import TableOfContents

@@ -177,16 +177,16 @@ def _resolve_font(brand: BrandConfig, role: str) -> str:
     Returns:
         Geregistreerde font naam bruikbaar in ReportLab.
     """
-    _GOTHAM = {"heading": "GothamBold", "body": "GothamBook", "medium": "GothamMedium"}
-    _HELVETICA = {"heading": "Helvetica-Bold", "body": "Helvetica", "medium": "Helvetica"}
+    gotham_fonts = {"heading": "GothamBold", "body": "GothamBook", "medium": "GothamMedium"}
+    helvetica_fonts = {"heading": "Helvetica-Bold", "body": "Helvetica", "medium": "Helvetica"}
 
-    gotham_name = _GOTHAM.get(role)
+    gotham_name = gotham_fonts.get(role)
     if gotham_name:
         effective = get_font_name(gotham_name)
         if effective.startswith("Gotham"):
             return effective
 
-    return brand.fonts.get(role, _HELVETICA.get(role, "Helvetica"))
+    return brand.fonts.get(role, helvetica_fonts.get(role, "Helvetica"))
 
 
 def _draw_logo(
@@ -520,7 +520,6 @@ def draw_colofon_page(
     """
     canvas.saveState()
 
-    pw = config.effective_width_pt
     ph = config.effective_height_pt
 
     spec = brand.pages.get("colofon", {})
@@ -585,13 +584,13 @@ def draw_colofon_page(
     value_size = spec.get("value_size", 10.0)
 
     # ---- Default velden als er geen spec.fields is ----
-    _DEFAULT_FIELDS = [
+    default_fields = [
         {"label": "Project", "type": "project", "y_pt": 320.8},
         {"label": "In opdracht van", "type": "client", "y_pt": 368.8},
         {"type": "line", "y_pt": 517},
         {"label": "Adviseur", "type": "author", "y_pt": 488.8},
     ]
-    fields = spec.get("fields", _DEFAULT_FIELDS)
+    fields = spec.get("fields", default_fields)
 
     first_n_purple = 2
     field_index = 0

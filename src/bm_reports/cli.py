@@ -119,10 +119,7 @@ def main():
 
 def _cmd_generate(args):
     """Genereer rapport vanuit CLI."""
-    from bm_reports.core.document import A3, A4
     from bm_reports.core.engine import Report
-
-    fmt = A4 if args.format == "A4" else A3
 
     print(f"Genereer rapport: {args.output}")
     print(f"  Template: {args.template}")

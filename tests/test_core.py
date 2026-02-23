@@ -2,7 +2,7 @@
 
 import pytest
 
-from bm_reports.core.document import A4, A3, PageFormat, Margins, DocumentConfig, Document, MM_TO_PT
+from bm_reports.core.document import A3, A4, MM_TO_PT, Document, DocumentConfig, Margins
 
 
 class TestPageFormat:
@@ -92,15 +92,17 @@ class TestStyles:
         assert BM_COLORS.warning == "#E74C3C"
 
     def test_bm_colors_as_hex(self):
-        from bm_reports.core.styles import BM_COLORS
         from reportlab.lib.colors import Color
+
+        from bm_reports.core.styles import BM_COLORS
 
         color = BM_COLORS.as_hex("primary")
         assert isinstance(color, Color)
 
     def test_bm_colors_hex_shortcut(self):
-        from bm_reports.core.styles import BM_COLORS
         from reportlab.lib.colors import Color
+
+        from bm_reports.core.styles import BM_COLORS
 
         color = BM_COLORS.hex("primary")
         assert isinstance(color, Color)
@@ -121,7 +123,7 @@ class TestSmokeImports:
     """Smoke tests: controleer dat imports werken na architectuur opschoning."""
 
     def test_import_bm_reports(self):
-        from bm_reports import Report, A4, A3, Document
+        from bm_reports import A3, A4, Document, Report
 
         assert Report is not None
         assert A4 is not None
@@ -140,12 +142,12 @@ class TestSmokeImports:
     def test_components_exports(self):
         try:
             from bm_reports.components import (
-                TitleBlock,
-                ImageBlock,
-                TableBlock,
                 CalculationBlock,
-                CheckBlock,
-                KadasterMap,
+                CheckBlock,  # noqa: F401
+                ImageBlock,  # noqa: F401
+                KadasterMap,  # noqa: F401
+                TableBlock,  # noqa: F401
+                TitleBlock,
             )
         except ImportError:
             pytest.skip("Optional dependency (svglib) not installed")

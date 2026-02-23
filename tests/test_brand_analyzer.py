@@ -1,4 +1,4 @@
-"""Tests voor brand analyzer pipeline (PDF extractie → classificatie → patroon detectie → config)."""
+"""Tests voor brand analyzer pipeline (PDF → classificatie → config)."""
 
 from __future__ import annotations
 
@@ -301,8 +301,13 @@ class TestCLI:
     """Tests voor CLI command."""
 
     def test_cli_analyze_brand_creates_files(self, tmp_path):
-        from bm_reports.tools import extract_pdf, classify_pages, analyze_brand
-        from bm_reports.tools import generate_brand_yaml, generate_analysis_report
+        from bm_reports.tools import (
+            analyze_brand,
+            classify_pages,
+            extract_pdf,
+            generate_analysis_report,
+            generate_brand_yaml,
+        )
 
         pages = extract_pdf(REFERENCE_PDF)
         classified = classify_pages(pages)

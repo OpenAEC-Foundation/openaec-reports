@@ -6,7 +6,7 @@ import logging
 from dataclasses import dataclass, field
 
 from .page_classifier import ClassifiedPage, PageType
-from .pdf_extractor import ImageElement, PathElement, RawPageData, RectElement, TextElement
+from .pdf_extractor import ImageElement, RawPageData, TextElement
 
 logger = logging.getLogger(__name__)
 

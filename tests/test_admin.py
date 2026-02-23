@@ -451,3 +451,123 @@ class TestUserDBExtensions:
         """delete() voor niet-bestaande user → False."""
         db = get_user_db()
         assert db.delete("nonexistent_id_12345") is False
+
+
+# ============================================================
+# Asset beheer (stationery, logos, fonts)
+# ============================================================
+
+
+class TestAssetManagement:
+    """Tests voor asset CRUD endpoints."""
+
+    def test_list_assets_empty(self, admin_client):
+        """Lege asset lijst voor onbekende tenant."""
+        r = admin_client.get(
+            "/api/admin/tenants/nonexistent/assets/stationery"
+        )
+        assert r.status_code == 200
+        assert r.json()["assets"] == []
+
+    def test_invalid_category_rejected(self, admin_client):
+        """Ongeldige asset categorie → 400."""
+        r = admin_client.get(
+            "/api/admin/tenants/test_tenant/assets/secrets"
+        )
+        assert r.status_code == 400
+
+    def test_upload_and_delete_stationery(self, admin_client):
+        """Upload + delete cycle voor stationery PDF."""
+        tenant = "test_tenant_assets"
+        pdf_content = b"%PDF-1.4 fake pdf content"
+
+        # Upload
+        r = admin_client.post(
+            f"/api/admin/tenants/{tenant}/assets/stationery",
+            files={
+                "file": (
+                    "standaard.pdf",
+                    pdf_content,
+                    "application/pdf",
+                )
+            },
+        )
+        assert r.status_code == 200
+        assert r.json()["filename"] == "standaard.pdf"
+
+        # Lijst moet het bevatten
+        r2 = admin_client.get(
+            f"/api/admin/tenants/{tenant}/assets/stationery"
+        )
+        filenames = [a["filename"] for a in r2.json()["assets"]]
+        assert "standaard.pdf" in filenames
+
+        # Delete
+        r3 = admin_client.delete(
+            f"/api/admin/tenants/{tenant}/assets/stationery/standaard.pdf"
+        )
+        assert r3.status_code == 200
+
+    def test_upload_logo_svg(self, admin_client):
+        """Upload SVG logo."""
+        tenant = "test_tenant_assets"
+        svg_content = b'<svg xmlns="http://www.w3.org/2000/svg"><rect/></svg>'
+
+        r = admin_client.post(
+            f"/api/admin/tenants/{tenant}/assets/logos",
+            files={"file": ("logo.svg", svg_content, "image/svg+xml")},
+        )
+        assert r.status_code == 200
+        assert r.json()["filename"] == "logo.svg"
+
+        # Cleanup
+        admin_client.delete(
+            f"/api/admin/tenants/{tenant}/assets/logos/logo.svg"
+        )
+
+    def test_upload_font(self, admin_client):
+        """Upload TTF font."""
+        tenant = "test_tenant_assets"
+        ttf_content = b"\x00\x01\x00\x00 fake ttf"
+
+        r = admin_client.post(
+            f"/api/admin/tenants/{tenant}/assets/fonts",
+            files={"file": ("Test.ttf", ttf_content, "font/ttf")},
+        )
+        assert r.status_code == 200
+        assert r.json()["filename"] == "Test.ttf"
+
+        # Cleanup
+        admin_client.delete(
+            f"/api/admin/tenants/{tenant}/assets/fonts/Test.ttf"
+        )
+
+    def test_upload_wrong_extension_rejected(self, admin_client):
+        """Upload .exe naar stationery → 400."""
+        r = admin_client.post(
+            "/api/admin/tenants/test_tenant/assets/stationery",
+            files={"file": ("hack.exe", b"bad", "application/octet-stream")},
+        )
+        assert r.status_code == 400
+
+    def test_upload_wrong_extension_for_category(self, admin_client):
+        """Upload .pdf naar fonts → 400."""
+        r = admin_client.post(
+            "/api/admin/tenants/test_tenant/assets/fonts",
+            files={"file": ("font.pdf", b"data", "application/pdf")},
+        )
+        assert r.status_code == 400
+
+    def test_delete_nonexistent_asset(self, admin_client):
+        """Verwijder niet-bestaand asset → 404."""
+        r = admin_client.delete(
+            "/api/admin/tenants/test_tenant/assets/stationery/nope.pdf"
+        )
+        assert r.status_code == 404
+
+    def test_path_traversal_in_asset_filename(self, admin_client):
+        """Path traversal in bestandsnaam → 400."""
+        r = admin_client.delete(
+            "/api/admin/tenants/test_tenant/assets/stationery/..secret.pdf"
+        )
+        assert r.status_code == 400

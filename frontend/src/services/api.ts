@@ -88,8 +88,16 @@ export interface TenantInfo {
   name: string;
   has_brand: boolean;
   template_count: number;
-  has_stationery: boolean;
-  has_fonts: boolean;
+  stationery_count: number;
+  logo_count: number;
+  font_count: number;
+}
+
+export type AssetCategory = "stationery" | "logos" | "fonts";
+
+export interface TenantAsset {
+  filename: string;
+  size: number;
 }
 
 export interface TenantTemplate {
@@ -183,6 +191,36 @@ export const adminApi = {
     }
     return res.json();
   },
+
+  // Assets (stationery, logos, fonts)
+  listAssets: (tenant: string, category: AssetCategory) =>
+    apiFetch<{ assets: TenantAsset[] }>(
+      `/api/admin/tenants/${encodeURIComponent(tenant)}/assets/${category}`
+    ).then((r) => r.assets),
+
+  uploadAsset: async (
+    tenant: string,
+    category: AssetCategory,
+    file: File
+  ): Promise<{ filename: string; size: number }> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(
+      `${API_BASE}/api/admin/tenants/${encodeURIComponent(tenant)}/assets/${category}`,
+      { method: "POST", credentials: "include", body: formData }
+    );
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw { status: res.status, detail: body.detail ?? "Upload mislukt" } as ApiError;
+    }
+    return res.json();
+  },
+
+  deleteAsset: (tenant: string, category: AssetCategory, filename: string) =>
+    apiFetch<{ detail: string }>(
+      `/api/admin/tenants/${encodeURIComponent(tenant)}/assets/${category}/${encodeURIComponent(filename)}`,
+      { method: "DELETE" }
+    ),
 };
 
 // ---------- Report API ----------

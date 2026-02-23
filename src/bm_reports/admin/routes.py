@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 import re
 from pathlib import Path
-from typing import Optional
 
 import yaml
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, status
@@ -49,11 +48,11 @@ class CreateUserRequest(BaseModel):
 class UpdateUserRequest(BaseModel):
     """Request model voor het updaten van een user."""
 
-    email: Optional[str] = None
-    display_name: Optional[str] = None
-    role: Optional[str] = None
-    tenant: Optional[str] = None
-    is_active: Optional[bool] = None
+    email: str | None = None
+    display_name: str | None = None
+    role: str | None = None
+    tenant: str | None = None
+    is_active: bool | None = None
 
 
 class ResetPasswordRequest(BaseModel):

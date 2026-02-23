@@ -8,7 +8,6 @@ import uuid
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +116,7 @@ class UserDB:
             hashed_password=row["hashed_password"],
         )
 
-    def get_by_username(self, username: str) -> Optional[User]:
+    def get_by_username(self, username: str) -> User | None:
         """Zoek een user op basis van username.
 
         Args:
@@ -132,7 +131,7 @@ class UserDB:
             ).fetchone()
             return self._row_to_user(row) if row else None
 
-    def get_by_id(self, user_id: str) -> Optional[User]:
+    def get_by_id(self, user_id: str) -> User | None:
         """Zoek een user op basis van ID.
 
         Args:
@@ -205,7 +204,7 @@ class UserDB:
             ).fetchall()
             return [self._row_to_user(row) for row in rows]
 
-    def update(self, user_id: str, **fields: str | bool) -> Optional[User]:
+    def update(self, user_id: str, **fields: str | bool) -> User | None:
         """Update een user met dynamische velden.
 
         Alleen whitelisted velden worden geaccepteerd.

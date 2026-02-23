@@ -4,6 +4,8 @@ import {
   type AdminUser,
   type TenantInfo,
   type TenantTemplate,
+  type TenantAsset,
+  type AssetCategory,
   type BrandData,
   type CreateUserPayload,
   type UpdateUserPayload,
@@ -46,6 +48,24 @@ interface AdminStore {
   brandLoading: boolean;
   loadBrand: (tenant: string) => Promise<void>;
   uploadBrand: (tenant: string, file: File) => Promise<boolean>;
+
+  // Assets (stationery, logos, fonts)
+  stationeryFiles: TenantAsset[];
+  logoFiles: TenantAsset[];
+  fontFiles: TenantAsset[];
+  assetsLoading: boolean;
+  loadAssets: (tenant: string, category: AssetCategory) => Promise<void>;
+  loadAllAssets: (tenant: string) => Promise<void>;
+  uploadAsset: (
+    tenant: string,
+    category: AssetCategory,
+    file: File
+  ) => Promise<boolean>;
+  deleteAsset: (
+    tenant: string,
+    category: AssetCategory,
+    filename: string
+  ) => Promise<boolean>;
 
   // General
   error: string | null;
@@ -202,6 +222,72 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
     try {
       await adminApi.uploadBrand(tenant, file);
       await get().loadBrand(tenant);
+      return true;
+    } catch (e) {
+      set({ error: extractError(e) });
+      return false;
+    }
+  },
+
+  // Assets
+  stationeryFiles: [],
+  logoFiles: [],
+  fontFiles: [],
+  assetsLoading: false,
+
+  loadAssets: async (tenant, category) => {
+    try {
+      const assets = await adminApi.listAssets(tenant, category);
+      const key =
+        category === "stationery"
+          ? "stationeryFiles"
+          : category === "logos"
+            ? "logoFiles"
+            : "fontFiles";
+      set({ [key]: assets });
+    } catch (e) {
+      set({ error: extractError(e) });
+    }
+  },
+
+  loadAllAssets: async (tenant) => {
+    set({ assetsLoading: true });
+    try {
+      const [stationery, logos, fonts] = await Promise.all([
+        adminApi.listAssets(tenant, "stationery"),
+        adminApi.listAssets(tenant, "logos"),
+        adminApi.listAssets(tenant, "fonts"),
+      ]);
+      set({
+        stationeryFiles: stationery,
+        logoFiles: logos,
+        fontFiles: fonts,
+        assetsLoading: false,
+      });
+    } catch (e) {
+      set({ assetsLoading: false, error: extractError(e) });
+    }
+  },
+
+  uploadAsset: async (tenant, category, file) => {
+    try {
+      await adminApi.uploadAsset(tenant, category, file);
+      await get().loadAssets(tenant, category);
+      // Refresh tenants to update counts
+      await get().loadTenants();
+      return true;
+    } catch (e) {
+      set({ error: extractError(e) });
+      return false;
+    }
+  },
+
+  deleteAsset: async (tenant, category, filename) => {
+    try {
+      await adminApi.deleteAsset(tenant, category, filename);
+      await get().loadAssets(tenant, category);
+      // Refresh tenants to update counts
+      await get().loadTenants();
       return true;
     } catch (e) {
       set({ error: extractError(e) });

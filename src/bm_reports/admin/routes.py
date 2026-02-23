@@ -20,6 +20,16 @@ logger = logging.getLogger(__name__)
 # Maximum upload grootte voor YAML bestanden (1 MB)
 MAX_YAML_SIZE_BYTES = 1_048_576
 
+# Maximum upload grootte voor asset bestanden — PDF, PNG, SVG, TTF, OTF (10 MB)
+MAX_ASSET_SIZE_BYTES = 10_485_760
+
+# Toegestane extensies per asset categorie
+ALLOWED_EXTENSIONS: dict[str, set[str]] = {
+    "stationery": {".pdf", ".png"},
+    "logos": {".svg", ".png"},
+    "fonts": {".ttf", ".otf"},
+}
+
 
 def _resolve_tenants_base() -> Path:
     """Bepaal de basis directory voor tenants.
@@ -321,15 +331,46 @@ async def list_tenants():
                 if templates_dir.exists()
                 else 0
             )
-            has_stationery = (entry / "stationery").exists()
-            has_fonts = (entry / "fonts").exists()
+            stationery_dir = entry / "stationery"
+            stationery_count = (
+                len([
+                    f for f in stationery_dir.iterdir()
+                    if f.is_file()
+                    and f.suffix.lower() in ALLOWED_EXTENSIONS["stationery"]
+                ])
+                if stationery_dir.exists()
+                else 0
+            )
+
+            logos_dir = entry / "logos"
+            logo_count = (
+                len([
+                    f for f in logos_dir.iterdir()
+                    if f.is_file()
+                    and f.suffix.lower() in ALLOWED_EXTENSIONS["logos"]
+                ])
+                if logos_dir.exists()
+                else 0
+            )
+
+            fonts_dir = entry / "fonts"
+            font_count = (
+                len([
+                    f for f in fonts_dir.iterdir()
+                    if f.is_file()
+                    and f.suffix.lower() in ALLOWED_EXTENSIONS["fonts"]
+                ])
+                if fonts_dir.exists()
+                else 0
+            )
 
             tenants.append({
                 "name": entry.name,
                 "has_brand": has_brand,
                 "template_count": template_count,
-                "has_stationery": has_stationery,
-                "has_fonts": has_fonts,
+                "stationery_count": stationery_count,
+                "logo_count": logo_count,
+                "font_count": font_count,
             })
 
     return {"tenants": tenants}
@@ -509,3 +550,137 @@ async def upload_tenant_brand(tenant: str, file: UploadFile):
 
     logger.info("Brand geupload: %s/brand.yaml", tenant)
     return {"detail": f"Brand configuratie voor '{tenant}' geupload"}
+
+
+# ============================================================
+# Generiek asset beheer (stationery, logos, fonts)
+# ============================================================
+
+
+def _validate_asset_category(category: str) -> set[str]:
+    """Valideer en retourneer toegestane extensies voor een asset categorie.
+
+    Args:
+        category: Asset categorie ("stationery", "logos", "fonts").
+
+    Returns:
+        Set van toegestane extensies.
+
+    Raises:
+        HTTPException: 400 bij ongeldige categorie.
+    """
+    allowed = ALLOWED_EXTENSIONS.get(category)
+    if allowed is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Ongeldige asset categorie: {category}",
+        )
+    return allowed
+
+
+@admin_router.get("/tenants/{tenant}/assets/{category}")
+async def list_tenant_assets(tenant: str, category: str):
+    """Lijst bestanden in een asset categorie voor een tenant.
+
+    Args:
+        tenant: Tenant naam.
+        category: Asset categorie ("stationery", "logos", "fonts").
+
+    Returns:
+        Dict met lijst van asset bestanden.
+    """
+    _validate_path_segment(tenant, "tenant")
+    allowed_exts = _validate_asset_category(category)
+
+    asset_dir = _get_tenants_base() / tenant / category
+    assets: list[dict[str, str | int]] = []
+
+    if asset_dir.exists() and asset_dir.is_dir():
+        for f in sorted(asset_dir.iterdir()):
+            if f.is_file() and f.suffix.lower() in allowed_exts:
+                assets.append({
+                    "filename": f.name,
+                    "size": f.stat().st_size,
+                })
+
+    return {"assets": assets}
+
+
+@admin_router.post("/tenants/{tenant}/assets/{category}")
+async def upload_tenant_asset(tenant: str, category: str, file: UploadFile):
+    """Upload een asset bestand voor een tenant.
+
+    Args:
+        tenant: Tenant naam.
+        category: Asset categorie ("stationery", "logos", "fonts").
+        file: Het bestand (multipart upload).
+
+    Returns:
+        Bevestigingsbericht met bestandsinformatie.
+    """
+    _validate_path_segment(tenant, "tenant")
+    allowed_exts = _validate_asset_category(category)
+
+    filename = file.filename or "asset"
+    _validate_path_segment(filename, "bestandsnaam")
+
+    # Controleer extensie
+    ext = Path(filename).suffix.lower()
+    if ext not in allowed_exts:
+        allowed_str = ", ".join(sorted(allowed_exts))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Alleen {allowed_str} bestanden zijn toegestaan "
+            f"voor {category}",
+        )
+
+    content = await file.read()
+    if len(content) > MAX_ASSET_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Bestand te groot "
+            f"(max {MAX_ASSET_SIZE_BYTES // (1024 * 1024)} MB)",
+        )
+
+    asset_dir = _get_tenants_base() / tenant / category
+    asset_dir.mkdir(parents=True, exist_ok=True)
+
+    dest = asset_dir / filename
+    dest.write_bytes(content)
+
+    logger.info("Asset geupload: %s/%s/%s", tenant, category, filename)
+    return {
+        "detail": f"Bestand '{filename}' geupload naar {category}",
+        "filename": filename,
+        "size": len(content),
+    }
+
+
+@admin_router.delete("/tenants/{tenant}/assets/{category}/{filename}")
+async def delete_tenant_asset(
+    tenant: str, category: str, filename: str
+):
+    """Verwijder een asset bestand.
+
+    Args:
+        tenant: Tenant naam.
+        category: Asset categorie ("stationery", "logos", "fonts").
+        filename: Bestandsnaam.
+
+    Returns:
+        Bevestigingsbericht.
+    """
+    _validate_path_segment(tenant, "tenant")
+    _validate_asset_category(category)
+    _validate_path_segment(filename, "bestandsnaam")
+
+    filepath = _get_tenants_base() / tenant / category / filename
+    if not filepath.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Bestand '{filename}' niet gevonden in {category}",
+        )
+
+    filepath.unlink()
+    logger.info("Asset verwijderd: %s/%s/%s", tenant, category, filename)
+    return {"detail": f"Bestand '{filename}' verwijderd uit {category}"}

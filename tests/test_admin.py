@@ -6,10 +6,10 @@ import uuid
 
 import pytest
 from fastapi.testclient import TestClient
+from tests.conftest import TEST_USERNAME
 
 from bm_reports.api import app
 from bm_reports.auth.dependencies import get_user_db
-from tests.conftest import TEST_PASSWORD, TEST_USERNAME
 
 
 @pytest.fixture()
@@ -380,7 +380,7 @@ class TestUserDBExtensions:
         """list_by_tenant retourneert alleen users van die tenant."""
         db = get_user_db()
         unique = uuid.uuid4().hex[:8]
-        from bm_reports.auth.models import User, UserRole
+        from bm_reports.auth.models import User
         from bm_reports.auth.security import hash_password
 
         tenant_name = f"tenant_{unique}"

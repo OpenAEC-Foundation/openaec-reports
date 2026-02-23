@@ -7,7 +7,7 @@ import pytest
 # Skip als pymupdf niet geïnstalleerd
 fitz = pytest.importorskip("fitz", reason="pymupdf niet geïnstalleerd")
 
-from bm_reports.tools.stationery_extractor import StationeryExtractor
+from bm_reports.tools.stationery_extractor import StationeryExtractor  # noqa: E402
 
 
 @pytest.fixture

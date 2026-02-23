@@ -8,18 +8,26 @@ import pytest
 
 fitz = pytest.importorskip("fitz", reason="pymupdf niet geinstalleerd")
 
-from bm_reports.tools.pdf_extractor import (
-    PathElement, RawPageData, TextElement, RectElement, ImageElement,
-    extract_pdf, _extract_paths, _detect_corner_radius, _color_to_hex,
+from bm_reports.tools.config_generator import generate_brand_yaml, generate_pages_yaml  # noqa: E402
+from bm_reports.tools.layout_extractor import (  # noqa: E402
+    _classify_image_role,
+    _detect_badges,
+    _find_clip_polygon,
+    _find_photo_rect,
+    _guess_text_role,
+    _is_dynamic_text,
+    extract_page_layouts,
 )
-from bm_reports.tools.page_classifier import PageType, ClassifiedPage, classify_pages
-from bm_reports.tools.layout_extractor import (
-    extract_page_layouts, PageLayout, TextZone, StaticElement, BadgeSpec,
-    _classify_image_role, _is_dynamic_text, _guess_text_role,
-    _detect_badges, _find_clip_polygon, _find_photo_rect,
+from bm_reports.tools.page_classifier import ClassifiedPage, PageType, classify_pages  # noqa: E402
+from bm_reports.tools.pdf_extractor import (  # noqa: E402
+    ImageElement,
+    PathElement,
+    RawPageData,
+    RectElement,
+    TextElement,
+    _detect_corner_radius,
+    extract_pdf,
 )
-from bm_reports.tools.config_generator import generate_pages_yaml, generate_brand_yaml
-
 
 # ============================================================
 # Fixtures
@@ -433,7 +441,7 @@ class TestGeneratePagesYaml:
 
 class TestVisualDiff:
     def test_import(self):
-        from bm_reports.tools.visual_diff import PageDiff, compare_pdfs, print_diff_report
+        from bm_reports.tools.visual_diff import PageDiff
         assert PageDiff is not None
 
     def test_page_diff_dataclass(self):
@@ -451,8 +459,8 @@ class TestVisualDiff:
     def test_compare_identical_pdfs(self, sample_pdf, tmp_path):
         """Vergelijking van een PDF met zichzelf geeft ~100% match."""
         try:
-            from PIL import Image
-            import numpy as np
+            import numpy as np  # noqa: F401
+            from PIL import Image  # noqa: F401
         except ImportError:
             pytest.skip("Pillow/numpy niet geinstalleerd")
 
@@ -465,8 +473,8 @@ class TestVisualDiff:
     def test_compare_specific_pages(self, sample_pdf, tmp_path):
         """Vergelijk alleen specifieke pagina's."""
         try:
-            from PIL import Image
-            import numpy as np
+            import numpy as np  # noqa: F401
+            from PIL import Image  # noqa: F401
         except ImportError:
             pytest.skip("Pillow/numpy niet geinstalleerd")
 
@@ -498,19 +506,19 @@ class TestVisualDiff:
 class TestCLIExtractLayout:
     def test_extract_layout_parseable(self):
         """extract-layout subcommand is geregistreerd in argparse."""
-        import argparse
-        from bm_reports.cli import main
         # Test dat parser het commando herkent
-        import sys
         from unittest.mock import patch
+
+        from bm_reports.cli import main
         with pytest.raises(SystemExit):
             with patch("sys.argv", ["bm-report", "extract-layout", "--help"]):
                 main()
 
     def test_visual_diff_parseable(self):
         """visual-diff subcommand is geregistreerd in argparse."""
-        from bm_reports.cli import main
         from unittest.mock import patch
+
+        from bm_reports.cli import main
         with pytest.raises(SystemExit):
             with patch("sys.argv", ["bm-report", "visual-diff", "--help"]):
                 main()

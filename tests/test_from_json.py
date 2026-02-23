@@ -4,11 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
 from reportlab.platypus import Flowable
 
 from bm_reports import Report
-
 
 EXAMPLE_JSON = Path(__file__).parent.parent / "schemas" / "example_structural.json"
 

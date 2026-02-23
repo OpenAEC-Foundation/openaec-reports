@@ -7,7 +7,7 @@ import yaml
 
 fitz = pytest.importorskip("fitz", reason="pymupdf niet geïnstalleerd")
 
-from bm_reports.tools.brand_builder import BrandBuilder
+from bm_reports.tools.brand_builder import BrandBuilder  # noqa: E402
 
 
 @pytest.fixture

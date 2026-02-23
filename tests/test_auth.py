@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
+from tests.conftest import TEST_PASSWORD, TEST_USERNAME
 
 from bm_reports.api import app
-from tests.conftest import TEST_PASSWORD, TEST_USERNAME
 
 
 @pytest.fixture()

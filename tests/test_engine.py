@@ -2,9 +2,7 @@
 
 from pathlib import Path
 
-import pytest
-
-from bm_reports import Report, A4
+from bm_reports import A4, Report
 from bm_reports.components import CalculationBlock, CheckBlock, ImageBlock, TableBlock
 
 
@@ -22,7 +20,7 @@ class TestBuildPipeline:
         report.add_section("Uitgangspunten", content=["Dit is een testsectie."])
 
         output = tmp_path / "test.pdf"
-        result = report.build(output)
+        report.build(output)
 
         assert output.exists()
         assert output.stat().st_size > 0

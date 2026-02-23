@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import pytest
-import yaml
 
-from bm_reports.core.tenant import TenantConfig, _PACKAGE_ASSETS
-from bm_reports.core.template_loader import TemplateLoader
 from bm_reports.core.brand import BrandLoader
+from bm_reports.core.template_loader import TemplateLoader
+from bm_reports.core.tenant import _PACKAGE_ASSETS, TenantConfig
 
 PROJECT_ROOT = Path(__file__).parent.parent
 TENANT_DIR = PROJECT_ROOT / "tenants" / "default"

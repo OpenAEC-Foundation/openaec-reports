@@ -73,11 +73,11 @@
 
 ---
 
-## 🔴 D1 — Monorepo Deploy op VPS
+## 🟡 D1 — Monorepo Deploy op VPS
 
-**Status:** Monorepo merge klaar, deploy pending
+**Status:** Code gepusht, server deploy pending
 
-- [ ] `git push` naar GitHub
+- [x] `git push` naar GitHub
 - [ ] Op server: `git pull` + `docker compose build --no-cache bm-reports-api`
 - [ ] `docker compose up -d bm-reports-api`
 - [ ] Verifiëren: https://report.3bm.co.nl/ laadt frontend (via StaticFiles)
@@ -88,11 +88,11 @@
 
 ---
 
-## 🔴 D3 — CI/CD Pipeline
+## ✅ D3 — CI/CD Pipeline
 
-- [ ] GitHub Actions workflow: build + push Docker image (multi-stage)
-- [ ] Auto-deploy op VPS bij push naar main
-- [ ] Frontend + backend in één pipeline
+- [x] GitHub Actions workflow: build + push Docker image (multi-stage)
+- [x] Lint (ruff) + test (pytest) in CI pipeline
+- [x] Frontend + backend in één pipeline (multi-stage Dockerfile)
 
 ---
 
@@ -173,3 +173,4 @@
 | **Brand kleur unificatie (#40124A, #38BDA0) in 15+ bestanden** | **Week 8** |
 | **bullet_list + heading_2 block types in JSON schema** | **Week 8** |
 | **Fase 8: Hardcoded data eliminatie (BM_COLORS, constanten, type hints)** | **Week 8** |
+| **D3: CI/CD Pipeline (GitHub Actions: lint, test, Docker build+push GHCR)** | **Week 8** |

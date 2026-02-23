@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 from pathlib import Path
 
@@ -19,8 +20,27 @@ logger = logging.getLogger(__name__)
 # Maximum upload grootte voor YAML bestanden (1 MB)
 MAX_YAML_SIZE_BYTES = 1_048_576
 
-# Basis directory voor tenants (relatief aan project root)
-_TENANTS_BASE = Path(__file__).parent.parent.parent.parent / "tenants"
+
+def _resolve_tenants_base() -> Path:
+    """Bepaal de basis directory voor tenants.
+
+    Volgorde:
+    1. BM_TENANTS_DIR environment variable (expliciet pad naar tenants/)
+    2. Parent van BM_TENANT_DIR (als die gezet is, bijv. /app/tenants/3bm → /app/tenants)
+    3. Relatief aan source tree (development fallback)
+
+    Returns:
+        Path naar de tenants directory.
+    """
+    tenants_dir = os.environ.get("BM_TENANTS_DIR")
+    if tenants_dir:
+        return Path(tenants_dir)
+
+    tenant_dir = os.environ.get("BM_TENANT_DIR")
+    if tenant_dir:
+        return Path(tenant_dir).parent
+
+    return Path(__file__).parent.parent.parent.parent / "tenants"
 
 admin_router = APIRouter(
     prefix="/api/admin",
@@ -95,7 +115,7 @@ def _get_tenants_base() -> Path:
     Returns:
         Path naar de tenants directory.
     """
-    return _TENANTS_BASE
+    return _resolve_tenants_base()
 
 
 # ============================================================

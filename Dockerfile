@@ -25,7 +25,7 @@ RUN pip install --no-cache-dir .
 # Frontend dist van stage 1
 COPY --from=frontend-build /app/frontend/dist /app/static
 
-RUN mkdir -p /app/uploads
+RUN mkdir -p /app/uploads /app/data
 
 EXPOSE 8000
 

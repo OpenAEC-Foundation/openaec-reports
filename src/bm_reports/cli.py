@@ -73,6 +73,13 @@ def main():
     el_parser.add_argument("--output", "-o", default="./extracted", help="Output directory")
     el_parser.add_argument("--dpi", type=int, default=150, help="DPI voor renders")
 
+    # Create user command
+    cu_parser = subparsers.add_parser("create-user", help="Maak een gebruiker aan")
+    cu_parser.add_argument(
+        "--admin", action="store_true", default=False, help="Maak een admin gebruiker"
+    )
+    cu_parser.add_argument("--db", default=None, help="Pad naar auth database")
+
     # Visual diff command
     vd_parser = subparsers.add_parser(
         "visual-diff", help="Vergelijk gegenereerde PDF met referentie"
@@ -104,6 +111,8 @@ def main():
         _cmd_build_brand(args)
     elif args.command == "extract-layout":
         _cmd_extract_layout(args)
+    elif args.command == "create-user":
+        _cmd_create_user(args)
     elif args.command == "visual-diff":
         _cmd_visual_diff(args)
 
@@ -212,6 +221,15 @@ def _cmd_analyze_brand(args):
     if analysis.styles:
         for name, style in analysis.styles.items():
             print(f"  {name}: {style.get('font', '?')} {style.get('size', '?')}pt")
+
+
+def _cmd_create_user(args):
+    """Maak een nieuwe gebruiker aan via interactieve prompts."""
+    from bm_reports.auth.models import UserRole
+    from bm_reports.auth.seed import create_user_interactive
+
+    role = UserRole.admin if args.admin else UserRole.user
+    create_user_interactive(db_path=args.db, role=role)
 
 
 def _cmd_serve(args):

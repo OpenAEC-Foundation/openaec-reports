@@ -11,13 +11,17 @@ import uuid
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.background import BackgroundTask
 
 from bm_reports import __version__
+from bm_reports.auth.dependencies import get_current_user, init_user_db
+from bm_reports.auth.models import UserDB
+from bm_reports.auth.routes import auth_router
+from bm_reports.auth.security import is_default_secret
 from bm_reports.core.brand import BrandLoader
 from bm_reports.core.engine import Report
 from bm_reports.core.renderer_v2 import ReportGeneratorV2
@@ -89,6 +93,25 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ============================================================
+# Auth setup
+# ============================================================
+
+_user_db = UserDB()
+init_user_db(_user_db)
+
+if is_default_secret():
+    logger.warning(
+        "BM_JWT_SECRET staat op de default waarde! "
+        "Stel een veilige secret in via de BM_JWT_SECRET environment variable."
+    )
+
+# Auth routes (login/logout zijn zelf open, /me checkt intern)
+app.include_router(auth_router)
+
+# Protected router — alle business endpoints vereisen authenticatie
+_protected = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 # ============================================================
@@ -201,7 +224,7 @@ async def health():
     return {"status": "ok", "version": __version__}
 
 
-@app.get("/api/templates")
+@_protected.get("/api/templates")
 async def list_templates():
     """Lijst beschikbare rapport templates.
 
@@ -211,7 +234,7 @@ async def list_templates():
     return {"templates": _template_loader.list_templates()}
 
 
-@app.get("/api/templates/{name}/scaffold")
+@_protected.get("/api/templates/{name}/scaffold")
 async def get_template_scaffold(name: str):
     """Retourneer een leeg JSON scaffold voor een template.
 
@@ -227,7 +250,7 @@ async def get_template_scaffold(name: str):
     return scaffold
 
 
-@app.get("/api/brands")
+@_protected.get("/api/brands")
 async def list_brands():
     """Lijst beschikbare brand configuraties.
 
@@ -237,7 +260,7 @@ async def list_brands():
     return {"brands": _brand_loader.list_brands()}
 
 
-@app.post("/api/validate")
+@_protected.post("/api/validate")
 async def validate_report(request: Request):
     """Valideer JSON data tegen report.schema.json.
 
@@ -269,7 +292,7 @@ async def validate_report(request: Request):
     return {"valid": len(errors) == 0, "errors": errors}
 
 
-@app.post("/api/generate")
+@_protected.post("/api/generate")
 async def generate_report(request: Request):
     """Genereer PDF rapport uit JSON data.
 
@@ -300,7 +323,7 @@ async def generate_report(request: Request):
 # ============================================================
 
 
-@app.post("/api/generate/v2")
+@_protected.post("/api/generate/v2")
 async def generate_report_v2(request: Request):
     """Genereer PDF rapport via renderer_v2 (pixel-perfect huisstijl).
 
@@ -334,7 +357,7 @@ async def generate_report_v2(request: Request):
     return _generate_and_respond(build, data)
 
 
-@app.post("/api/upload")
+@_protected.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
     """Upload een afbeelding voor gebruik in rapporten.
 
@@ -358,7 +381,7 @@ async def upload_file(file: UploadFile = File(...)):
     }
 
 
-@app.get("/api/stationery")
+@_protected.get("/api/stationery")
 async def list_stationery():
     """Retourneer beschikbare brands en hun stationery status.
 
@@ -398,6 +421,9 @@ async def list_stationery():
 
     return {"brands": brands}
 
+
+# Protected router mounten op de app
+app.include_router(_protected)
 
 # ============================================================
 # Static frontend (moet ONDERAAN staan, na alle API routes)

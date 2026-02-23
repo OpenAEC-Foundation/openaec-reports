@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useReportStore } from '@/stores/reportStore';
 import { useApiStore } from '@/stores/apiStore';
+import { useAuthStore } from '@/stores/authStore';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import brand from '@/config/brand';
 import { Sidebar } from './Sidebar';
@@ -29,6 +30,9 @@ export function AppShell() {
   const canRedo = useReportStore((s) => s.canRedo);
   const undo = useReportStore((s) => s.undo);
   const redo = useReportStore((s) => s.redo);
+
+  const authUser = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
 
   const connected = useApiStore((s) => s.connected);
   const isValidating = useApiStore((s) => s.isValidating);
@@ -340,6 +344,21 @@ export function AppShell() {
             >
               Download PDF
             </button>
+          )}
+
+          {/* User + Logout */}
+          {authUser && (
+            <div className="flex items-center gap-2 border-l border-white/10 pl-3 ml-1">
+              <span className="text-xs text-white/50">
+                {authUser.display_name || authUser.username}
+              </span>
+              <button
+                onClick={logout}
+                className="rounded-md px-2 py-1.5 text-xs text-white/40 hover:text-white/70 hover:bg-white/10 transition-colors"
+              >
+                Uitloggen
+              </button>
+            </div>
           )}
         </div>
       </header>

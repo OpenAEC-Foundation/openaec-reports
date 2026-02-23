@@ -46,11 +46,12 @@ openaec-reports/
 src/bm_reports/
 ├── core/           # Engine, document, styles, brand, stationery, page templates
 ├── components/     # Calculation, check, table, image, map, spacer
+├── auth/           # JWT authenticatie, user model, SQLite user store
 ├── tools/          # Brand analyzer, stationery extractor, brand builder
 ├── utils/          # Logo prep, fonts
 ├── assets/         # Templates (YAML), brands (YAML), logos, fonts, graphics
 ├── api.py          # FastAPI endpoints + StaticFiles mount (SPA serving)
-├── cli.py          # CLI: analyze-brand, build-brand, serve
+├── cli.py          # CLI: analyze-brand, build-brand, serve, create-user
 └── schemas/        # JSON Schema + example
 ```
 
@@ -78,6 +79,7 @@ src/bm_reports/
 | **components/table_block.py** | ✅ Compleet | ✅ test_block_registry.py | 97% |
 | **components/image_block.py** | ✅ Compleet | ✅ test_image_block.py (20 tests) | 79% |
 | **components/map_block.py** | ✅ Compleet | ✅ test_map_block.py | 96% |
+| **auth/** | ✅ Compleet | ✅ test_auth.py (15 tests) | — |
 | **api.py** | ✅ Compleet | ✅ test_api.py | 88% |
 | **cli.py** | ✅ Compleet | ✅ test_cli.py (14 tests) | 61% |
 | **data/json_adapter.py** | ✅ Compleet | ✅ test_json_adapter.py (14 tests) | 88% |
@@ -93,6 +95,7 @@ src/bm_reports/
 
 ```
 tests/
+├── test_auth.py                    ✅ 15 tests
 ├── test_api.py                     ✅ 26 tests
 ├── test_api_v2.py                  ✅  8 tests
 ├── test_block_registry.py          ✅ 34 tests
@@ -121,7 +124,7 @@ tests/
 └── test_tenant.py                  ✅ 30 tests
 ```
 
-**Totaal:** 603+ tests | **Coverage:** ~75%
+**Totaal:** 618+ tests | **Coverage:** ~75%
 
 ## Recente Features
 

@@ -38,6 +38,11 @@ test_output/
 Thumbs.db
 desktop.ini
 
+# Auth database
+data/auth.db
+data/auth.db-wal
+data/auth.db-shm
+
 # Output
 output/
 *.pdf

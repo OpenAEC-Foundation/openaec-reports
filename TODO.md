@@ -133,7 +133,7 @@
 - [ ] Frontend brand setup wizard (roept B5 tools aan)
 - [ ] Multi-tenant brand management
 - [ ] PDF caching op basis van JSON hash
-- [ ] User authentication (API keys of OAuth)
+- [x] User authentication (JWT via httpOnly cookies, SQLite user store)
 - [ ] Rate limiting per tenant
 
 ---

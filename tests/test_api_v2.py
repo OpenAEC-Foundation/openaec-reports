@@ -24,12 +24,13 @@ SKIP_NO_STATIONERY = pytest.mark.skipif(
 )
 
 
-@pytest.fixture
+@pytest.fixture()
 def client():
+    """Ongeauthenticeerde client (alleen voor health check)."""
     return TestClient(app)
 
 
-@pytest.fixture
+@pytest.fixture()
 def sample_data():
     if JSON_PATH.exists():
         return json.loads(JSON_PATH.read_text(encoding="utf-8"))
@@ -51,15 +52,15 @@ class TestHealthEndpoint:
 
 
 class TestStationeryEndpoint:
-    def test_stationery_returns_brands(self, client):
-        r = client.get("/api/stationery")
+    def test_stationery_returns_brands(self, authenticated_client):
+        r = authenticated_client.get("/api/stationery")
         assert r.status_code == 200
         data = r.json()
         assert "brands" in data
 
     @SKIP_NO_STATIONERY
-    def test_default_complete(self, client):
-        r = client.get("/api/stationery")
+    def test_default_complete(self, authenticated_client):
+        r = authenticated_client.get("/api/stationery")
         data = r.json()
         brands = data["brands"]
         assert "default" in brands
@@ -73,20 +74,22 @@ class TestStationeryEndpoint:
 
 @SKIP_NO_STATIONERY
 class TestGenerateV2:
-    def test_generate_v2_returns_pdf(self, client, sample_data):
+    def test_generate_v2_returns_pdf(self, authenticated_client, sample_data):
         if not sample_data:
             pytest.skip("sample_report.json niet aanwezig")
 
-        r = client.post("/api/generate/v2", json=sample_data)
+        r = authenticated_client.post("/api/generate/v2", json=sample_data)
         assert r.status_code == 200
         assert r.headers["content-type"] == "application/pdf"
         assert len(r.content) > 5000
 
-    def test_generate_v2_missing_project(self, client):
-        r = client.post("/api/generate/v2", json={"template": "default"})
+    def test_generate_v2_missing_project(self, authenticated_client):
+        r = authenticated_client.post(
+            "/api/generate/v2", json={"template": "default"}
+        )
         assert r.status_code == 422
 
-    def test_generate_v2_minimal(self, client):
+    def test_generate_v2_minimal(self, authenticated_client):
         """Minimaal rapport: alleen project naam."""
         data = {
             "template": "default",
@@ -104,7 +107,7 @@ class TestGenerateV2:
             ],
             "backcover": {"enabled": True},
         }
-        r = client.post("/api/generate/v2", json=data)
+        r = authenticated_client.post("/api/generate/v2", json=data)
         assert r.status_code == 200
         assert len(r.content) > 1000
 
@@ -115,7 +118,7 @@ class TestGenerateV2:
 
 
 class TestUploadEndpoint:
-    def test_upload_image(self, client, tmp_path):
+    def test_upload_image(self, authenticated_client, tmp_path):
         # Create a minimal PNG (1x1 pixel)
         import struct
         import zlib
@@ -134,7 +137,7 @@ class TestUploadEndpoint:
             return signature + ihdr + idat + iend
 
         png_data = create_png()
-        r = client.post(
+        r = authenticated_client.post(
             "/api/upload",
             files={"file": ("test.png", png_data, "image/png")},
         )
@@ -154,8 +157,8 @@ class TestUploadEndpoint:
 
 
 class TestOldGenerateEndpoint:
-    def test_old_generate_still_exists(self, client):
+    def test_old_generate_still_exists(self, authenticated_client):
         """Het oude /api/generate endpoint is nog steeds aanwezig."""
-        r = client.post("/api/generate", json={"project": "Test"})
+        r = authenticated_client.post("/api/generate", json={"project": "Test"})
         # 422 want 'template' is verplicht, maar endpoint is er wel
         assert r.status_code == 422

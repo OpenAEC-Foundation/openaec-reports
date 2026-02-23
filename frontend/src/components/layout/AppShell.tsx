@@ -8,9 +8,10 @@ import { Sidebar } from './Sidebar';
 import { MainPanel } from './MainPanel';
 import { ValidationBanner } from './ValidationBanner';
 import { ShortcutHelp } from './ShortcutHelp';
+import { AdminPanel } from '@/components/admin/AdminPanel';
 import type { ViewMode } from '@/stores/reportStore';
 
-const VIEW_MODE_TABS: { mode: ViewMode; label: string }[] = [
+const EDITOR_TABS: { mode: ViewMode; label: string }[] = [
   { mode: 'editor', label: 'Editor' },
   { mode: 'split', label: 'Split' },
   { mode: 'json', label: 'JSON' },
@@ -233,7 +234,7 @@ export function AppShell() {
           </div>
 
           <div className="flex rounded-lg bg-white/10 p-0.5">
-            {VIEW_MODE_TABS.map((tab) => (
+            {EDITOR_TABS.map((tab) => (
               <button
                 key={tab.mode}
                 onClick={() => setViewMode(tab.mode)}
@@ -246,6 +247,18 @@ export function AppShell() {
                 {tab.label}
               </button>
             ))}
+            {authUser?.role === 'admin' && (
+              <button
+                onClick={() => setViewMode('admin')}
+                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ml-1 border-l border-white/10 pl-2 ${
+                  viewMode === 'admin'
+                    ? 'bg-white/15 text-white'
+                    : 'text-white/50 hover:text-white/80'
+                }`}
+              >
+                Admin
+              </button>
+            )}
           </div>
 
           {isDirty ? (
@@ -389,12 +402,18 @@ export function AppShell() {
       )}
 
       {/* Main content */}
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
-        <ErrorBoundary context="MainPanel" fallback={<AppCrashFallback />}>
-          <MainPanel />
-        </ErrorBoundary>
-      </div>
+      {viewMode === 'admin' ? (
+        <div className="flex-1 overflow-auto">
+          <AdminPanel />
+        </div>
+      ) : (
+        <div className="flex flex-1 overflow-hidden">
+          <Sidebar />
+          <ErrorBoundary context="MainPanel" fallback={<AppCrashFallback />}>
+            <MainPanel />
+          </ErrorBoundary>
+        </div>
+      )}
 
       {/* Shortcut help dialog */}
       <ShortcutHelp open={showShortcuts} onClose={() => setShowShortcuts(false)} />

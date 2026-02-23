@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from fastapi import HTTPException, Request, status
 
-from bm_reports.auth.models import User, UserDB
+from bm_reports.auth.models import User, UserDB, UserRole
 from bm_reports.auth.security import COOKIE_NAME, decode_access_token
 
 # Module-level DB instance (wordt gezet bij app startup)
@@ -75,4 +75,27 @@ async def get_current_user(request: Request) -> User:
             detail="Gebruiker niet gevonden of inactief",
         )
 
+    return user
+
+
+async def require_admin(request: Request) -> User:
+    """Vereis dat de huidige user een admin is.
+
+    Roept get_current_user() aan en controleert de rol.
+
+    Args:
+        request: FastAPI Request object.
+
+    Returns:
+        De geauthenticeerde admin User.
+
+    Raises:
+        HTTPException: 401 als niet ingelogd, 403 als geen admin.
+    """
+    user = await get_current_user(request)
+    if user.role != UserRole.admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin rechten vereist",
+        )
     return user

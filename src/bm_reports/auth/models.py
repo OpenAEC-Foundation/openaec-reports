@@ -188,3 +188,84 @@ class UserDB:
         with self._get_connection() as conn:
             rows = conn.execute("SELECT * FROM users ORDER BY username").fetchall()
             return [self._row_to_user(row) for row in rows]
+
+    def list_by_tenant(self, tenant: str) -> list[User]:
+        """Lijst alle users voor een specifieke tenant.
+
+        Args:
+            tenant: De tenant identifier.
+
+        Returns:
+            Lijst van User objecten voor de tenant.
+        """
+        with self._get_connection() as conn:
+            rows = conn.execute(
+                "SELECT * FROM users WHERE tenant = ? ORDER BY username",
+                (tenant,),
+            ).fetchall()
+            return [self._row_to_user(row) for row in rows]
+
+    def update(self, user_id: str, **fields: str | bool) -> Optional[User]:
+        """Update een user met dynamische velden.
+
+        Alleen whitelisted velden worden geaccepteerd.
+
+        Args:
+            user_id: De user UUID.
+            **fields: Velden om te updaten (email, display_name, role, tenant,
+                is_active, hashed_password).
+
+        Returns:
+            De geupdate User of None als niet gevonden.
+
+        Raises:
+            ValueError: Als een niet-toegestaan veld wordt meegegeven.
+        """
+        allowed = {
+            "email", "display_name", "role", "tenant",
+            "is_active", "hashed_password",
+        }
+        invalid = set(fields.keys()) - allowed
+        if invalid:
+            raise ValueError(f"Niet-toegestane velden: {invalid}")
+        if not fields:
+            return self.get_by_id(user_id)
+
+        set_clauses = []
+        values: list = []
+        for key, value in fields.items():
+            set_clauses.append(f"{key} = ?")
+            if key == "is_active":
+                values.append(int(value))
+            else:
+                values.append(value)
+
+        set_clauses.append("updated_at = datetime('now')")
+        values.append(user_id)
+
+        sql = f"UPDATE users SET {', '.join(set_clauses)} WHERE id = ?"
+        with self._get_connection() as conn:
+            cursor = conn.execute(sql, values)
+            conn.commit()
+            if cursor.rowcount == 0:
+                return None
+
+        logger.info("User %s geupdate: %s", user_id, list(fields.keys()))
+        return self.get_by_id(user_id)
+
+    def delete(self, user_id: str) -> bool:
+        """Verwijder een user.
+
+        Args:
+            user_id: De user UUID.
+
+        Returns:
+            True als de user verwijderd is, False als niet gevonden.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+            conn.commit()
+            deleted = cursor.rowcount > 0
+        if deleted:
+            logger.info("User %s verwijderd", user_id)
+        return deleted

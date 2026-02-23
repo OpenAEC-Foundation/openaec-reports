@@ -18,6 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.background import BackgroundTask
 
 from bm_reports import __version__
+from bm_reports.admin.routes import admin_router
 from bm_reports.auth.dependencies import get_current_user, init_user_db
 from bm_reports.auth.models import UserDB
 from bm_reports.auth.routes import auth_router
@@ -109,6 +110,9 @@ if is_default_secret():
 
 # Auth routes (login/logout zijn zelf open, /me checkt intern)
 app.include_router(auth_router)
+
+# Admin routes (require_admin dependency op de router zelf)
+app.include_router(admin_router)
 
 # Protected router — alle business endpoints vereisen authenticatie
 _protected = APIRouter(dependencies=[Depends(get_current_user)])

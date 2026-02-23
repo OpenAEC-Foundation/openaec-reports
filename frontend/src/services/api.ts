@@ -55,6 +55,138 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   return res.json();
 }
 
+// ---------- Admin types ----------
+
+export interface AdminUser {
+  id: string;
+  username: string;
+  email: string;
+  display_name: string;
+  role: string;
+  tenant: string;
+  is_active: boolean;
+}
+
+export interface CreateUserPayload {
+  username: string;
+  email?: string;
+  display_name?: string;
+  password: string;
+  role?: string;
+  tenant?: string;
+}
+
+export interface UpdateUserPayload {
+  email?: string;
+  display_name?: string;
+  role?: string;
+  tenant?: string;
+  is_active?: boolean;
+}
+
+export interface TenantInfo {
+  name: string;
+  has_brand: boolean;
+  template_count: number;
+  has_stationery: boolean;
+  has_fonts: boolean;
+}
+
+export interface TenantTemplate {
+  filename: string;
+  size: number;
+}
+
+export interface BrandData {
+  exists: boolean;
+  parsed: Record<string, unknown> | null;
+  raw: string;
+}
+
+// ---------- Admin API ----------
+
+export const adminApi = {
+  // Users
+  listUsers: () =>
+    apiFetch<{ users: AdminUser[] }>("/api/admin/users").then((r) => r.users),
+
+  createUser: (payload: CreateUserPayload) =>
+    apiFetch<{ user: AdminUser }>("/api/admin/users", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }).then((r) => r.user),
+
+  getUser: (id: string) =>
+    apiFetch<{ user: AdminUser }>(`/api/admin/users/${id}`).then((r) => r.user),
+
+  updateUser: (id: string, payload: UpdateUserPayload) =>
+    apiFetch<{ user: AdminUser }>(`/api/admin/users/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }).then((r) => r.user),
+
+  resetPassword: (id: string, newPassword: string) =>
+    apiFetch<{ detail: string }>(`/api/admin/users/${id}/reset-password`, {
+      method: "POST",
+      body: JSON.stringify({ new_password: newPassword }),
+    }),
+
+  deleteUser: (id: string) =>
+    apiFetch<{ detail: string }>(`/api/admin/users/${id}`, {
+      method: "DELETE",
+    }),
+
+  // Tenants
+  listTenants: () =>
+    apiFetch<{ tenants: TenantInfo[] }>("/api/admin/tenants").then((r) => r.tenants),
+
+  // Templates
+  listTemplates: (tenant: string) =>
+    apiFetch<{ templates: TenantTemplate[] }>(
+      `/api/admin/tenants/${encodeURIComponent(tenant)}/templates`
+    ).then((r) => r.templates),
+
+  uploadTemplate: async (tenant: string, file: File): Promise<{ filename: string; size: number }> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(
+      `${API_BASE}/api/admin/tenants/${encodeURIComponent(tenant)}/templates`,
+      { method: "POST", credentials: "include", body: formData }
+    );
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw { status: res.status, detail: body.detail ?? "Upload mislukt" } as ApiError;
+    }
+    return res.json();
+  },
+
+  deleteTemplate: (tenant: string, filename: string) =>
+    apiFetch<{ detail: string }>(
+      `/api/admin/tenants/${encodeURIComponent(tenant)}/templates/${encodeURIComponent(filename)}`,
+      { method: "DELETE" }
+    ),
+
+  // Brand
+  getBrand: (tenant: string) =>
+    apiFetch<BrandData>(`/api/admin/tenants/${encodeURIComponent(tenant)}/brand`),
+
+  uploadBrand: async (tenant: string, file: File): Promise<{ detail: string }> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(
+      `${API_BASE}/api/admin/tenants/${encodeURIComponent(tenant)}/brand`,
+      { method: "POST", credentials: "include", body: formData }
+    );
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw { status: res.status, detail: body.detail ?? "Upload mislukt" } as ApiError;
+    }
+    return res.json();
+  },
+};
+
+// ---------- Report API ----------
+
 export const api = {
   health: () => apiFetch<HealthResponse>('/api/health'),
 

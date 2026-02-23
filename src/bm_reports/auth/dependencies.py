@@ -37,11 +37,38 @@ def get_user_db() -> UserDB:
     return _user_db
 
 
-async def get_current_user(request: Request) -> User:
-    """Haal de huidige user op uit de httpOnly cookie.
+def _extract_token(request: Request) -> str | None:
+    """Extraheer JWT token uit cookie of Authorization header.
 
-    Leest het JWT token uit de cookie, decodeert het, en zoekt
-    de user op in de database.
+    Volgorde:
+    1. httpOnly cookie (browser / frontend)
+    2. Authorization: Bearer <token> header (pyRevit / scripts / API clients)
+
+    Args:
+        request: FastAPI Request object.
+
+    Returns:
+        JWT token string of None als niet aanwezig.
+    """
+    # Cookie eerst (frontend)
+    token = request.cookies.get(COOKIE_NAME)
+    if token:
+        return token
+
+    # Fallback: Authorization header (pyRevit / scripts)
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        return auth_header[7:].strip()
+
+    return None
+
+
+async def get_current_user(request: Request) -> User:
+    """Haal de huidige user op uit cookie of Bearer token.
+
+    Ondersteunt twee authenticatie-methoden:
+    1. httpOnly cookie (browser / frontend)
+    2. Authorization: Bearer <token> header (pyRevit / scripts)
 
     Args:
         request: FastAPI Request object.
@@ -50,10 +77,10 @@ async def get_current_user(request: Request) -> User:
         De geauthenticeerde User.
 
     Raises:
-        HTTPException: 401 als de cookie ontbreekt, verlopen is, of de user
+        HTTPException: 401 als geen token aanwezig, verlopen, of de user
             niet bestaat/inactief is.
     """
-    token = request.cookies.get(COOKIE_NAME)
+    token = _extract_token(request)
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -19,7 +19,7 @@ class TestLogin:
     """Tests voor POST /api/auth/login."""
 
     def test_login_success(self, client, _ensure_test_users):
-        """Correcte credentials → 200 + cookie + user data."""
+        """Correcte credentials → 200 + cookie + user data + token."""
         r = client.post(
             "/api/auth/login",
             json={"username": TEST_USERNAME, "password": TEST_PASSWORD},
@@ -32,6 +32,10 @@ class TestLogin:
 
         # Cookie moet gezet zijn
         assert "bm_access_token" in r.cookies
+
+        # Token moet in response body staan (voor pyRevit / scripts)
+        assert "token" in data
+        assert len(data["token"]) > 0
 
     def test_login_wrong_password(self, client, _ensure_test_users):
         """Fout wachtwoord → 401."""
@@ -128,4 +132,55 @@ class TestProtectedEndpoints:
     def test_stationery_requires_auth(self, client):
         """GET /api/stationery zonder auth → 401."""
         r = client.get("/api/stationery")
+        assert r.status_code == 401
+
+
+class TestBearerToken:
+    """Tests voor Bearer token authenticatie (pyRevit / scripts)."""
+
+    def test_bearer_token_from_login(self, client, _ensure_test_users):
+        """Login → token uit body → gebruik als Bearer header."""
+        # Login en haal token op
+        r = client.post(
+            "/api/auth/login",
+            json={"username": TEST_USERNAME, "password": TEST_PASSWORD},
+        )
+        token = r.json()["token"]
+
+        # Nieuw request zonder cookies, met Bearer token
+        bare_client = TestClient(app)
+        r2 = bare_client.get(
+            "/api/auth/me",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert r2.status_code == 200
+        assert r2.json()["user"]["username"] == TEST_USERNAME
+
+    def test_bearer_token_on_protected_endpoint(self, client, _ensure_test_users):
+        """Bearer token werkt op business endpoints."""
+        r = client.post(
+            "/api/auth/login",
+            json={"username": TEST_USERNAME, "password": TEST_PASSWORD},
+        )
+        token = r.json()["token"]
+
+        bare_client = TestClient(app)
+        r2 = bare_client.get(
+            "/api/templates",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert r2.status_code == 200
+        assert "templates" in r2.json()
+
+    def test_invalid_bearer_token_returns_401(self, client):
+        """Ongeldig Bearer token → 401."""
+        r = client.get(
+            "/api/auth/me",
+            headers={"Authorization": "Bearer ongeldig.token.hier"},
+        )
+        assert r.status_code == 401
+
+    def test_no_auth_returns_401(self, client):
+        """Geen cookie en geen Bearer → 401."""
+        r = client.get("/api/auth/me")
         assert r.status_code == 401

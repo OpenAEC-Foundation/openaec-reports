@@ -64,7 +64,7 @@ async def login(request: Request):
         role=user.role.value,
     )
 
-    response = JSONResponse(content={"user": user.to_dict()})
+    response = JSONResponse(content={"user": user.to_dict(), "token": token})
     response.set_cookie(
         key=COOKIE_NAME,
         value=token,

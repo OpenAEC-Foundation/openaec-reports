@@ -1,6 +1,6 @@
 # Backend Status — bm-reports
 
-> Laatst bijgewerkt: 2026-02-22
+> Laatst bijgewerkt: 2026-02-24
 
 ## Deployment
 
@@ -46,7 +46,8 @@ openaec-reports/
 src/bm_reports/
 ├── core/           # Engine, document, styles, brand, stationery, page templates
 ├── components/     # Calculation, check, table, image, map, spacer
-├── auth/           # JWT authenticatie, user model, SQLite user store
+├── auth/           # JWT + API Key authenticatie, user model, SQLite store
+├── admin/          # Admin API: user CRUD, tenant/brand/asset/API key beheer
 ├── tools/          # Brand analyzer, stationery extractor, brand builder
 ├── utils/          # Logo prep, fonts
 ├── assets/         # Templates (YAML), brands (YAML), logos, fonts, graphics
@@ -79,7 +80,8 @@ src/bm_reports/
 | **components/table_block.py** | ✅ Compleet | ✅ test_block_registry.py | 97% |
 | **components/image_block.py** | ✅ Compleet | ✅ test_image_block.py (20 tests) | 79% |
 | **components/map_block.py** | ✅ Compleet | ✅ test_map_block.py | 96% |
-| **auth/** | ✅ Compleet | ✅ test_auth.py (15 tests) | — |
+| **auth/** | ✅ Compleet | ✅ test_auth.py (19) + test_api_keys.py (36) | — |
+| **admin/** | ✅ Compleet | ✅ test_admin.py (41 tests) | — |
 | **api.py** | ✅ Compleet | ✅ test_api.py | 88% |
 | **cli.py** | ✅ Compleet | ✅ test_cli.py (14 tests) | 61% |
 | **data/json_adapter.py** | ✅ Compleet | ✅ test_json_adapter.py (14 tests) | 88% |
@@ -95,7 +97,9 @@ src/bm_reports/
 
 ```
 tests/
-├── test_auth.py                    ✅ 15 tests
+├── test_api_keys.py                ✅ 36 tests
+├── test_admin.py                   ✅ 41 tests
+├── test_auth.py                    ✅ 19 tests
 ├── test_api.py                     ✅ 26 tests
 ├── test_api_v2.py                  ✅  8 tests
 ├── test_block_registry.py          ✅ 34 tests
@@ -124,10 +128,14 @@ tests/
 └── test_tenant.py                  ✅ 30 tests
 ```
 
-**Totaal:** 618+ tests | **Coverage:** ~75%
+**Totaal:** 701 tests | **Coverage:** ~75%
 
 ## Recente Features
 
+- **API Key authenticatie:** X-API-Key header voor machine-to-machine integratie (pyRevit, MCP, CI/CD). SHA-256 hashing, expiry, soft/hard delete
+- **Bearer token auth:** Authorization: Bearer header support naast httpOnly cookies
+- **Admin panel:** User CRUD, tenant/template/brand/asset beheer, API key management
+- **Asset upload:** Stationery (.pdf/.png), logos (.svg/.png), fonts (.ttf/.otf) per tenant
 - **Cadastral lookup:** POI marker op kaartcentrum + kadastrale perceelinfo in PDF via BAG/BRK API
 - **BRT WMTS tiles:** Frontend map preview via BRT standaard tilestitching (WMS endpoint niet beschikbaar)
 - **Multi-tenant:** `TenantConfig` met `BM_TENANT_DIR` env var, fallback-chain tenant → package defaults
@@ -138,15 +146,26 @@ tests/
 
 ## API Endpoints
 
-| Endpoint | Method | Status | Productie |
-|----------|--------|--------|-----------|
-| `/api/health` | GET | ✅ | ✅ Live |
-| `/api/templates` | GET | ✅ | ✅ Live |
-| `/api/brands` | GET | ✅ | ✅ Live |
-| `/api/templates/{name}/scaffold` | GET | ✅ | ✅ Live |
-| `/api/validate` | POST | ✅ | ✅ Live |
-| `/api/generate/v2` | POST | ✅ | ✅ Live |
-| `/api/upload` | POST | ✅ | ✅ Live |
+| Endpoint | Method | Status | Auth |
+|----------|--------|--------|------|
+| `/api/health` | GET | ✅ | Open |
+| `/api/auth/login` | POST | ✅ | Open |
+| `/api/auth/logout` | POST | ✅ | Open |
+| `/api/auth/me` | GET | ✅ | User |
+| `/api/templates` | GET | ✅ | User |
+| `/api/brands` | GET | ✅ | User |
+| `/api/templates/{name}/scaffold` | GET | ✅ | User |
+| `/api/validate` | POST | ✅ | User |
+| `/api/generate` | POST | ✅ | User |
+| `/api/generate/v2` | POST | ✅ | User |
+| `/api/upload` | POST | ✅ | User |
+| `/api/stationery` | GET | ✅ | User |
+| `/api/admin/users` | CRUD | ✅ | Admin |
+| `/api/admin/tenants` | GET | ✅ | Admin |
+| `/api/admin/tenants/{t}/templates` | CRUD | ✅ | Admin |
+| `/api/admin/tenants/{t}/brand` | GET/POST | ✅ | Admin |
+| `/api/admin/tenants/{t}/assets/{c}` | CRUD | ✅ | Admin |
+| `/api/admin/api-keys` | CRUD | ✅ | Admin |
 
 ## Dependencies
 

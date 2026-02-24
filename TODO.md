@@ -1,7 +1,7 @@
 # TODO — bm-reports
 
 > Prioriteit: 🔴 Hoog | 🟡 Middel | 🟢 Laag
-> Laatst bijgewerkt: 2026-02-23
+> Laatst bijgewerkt: 2026-02-24
 
 ---
 
@@ -134,6 +134,9 @@
 - [ ] Multi-tenant brand management
 - [ ] PDF caching op basis van JSON hash
 - [x] User authentication (JWT via httpOnly cookies, SQLite user store)
+- [x] API Key authenticatie (X-API-Key header, SHA-256, expiry, admin CRUD)
+- [x] Bearer token authenticatie (Authorization header voor scripts/pyRevit)
+- [x] Admin panel (user CRUD, tenant/template/brand/asset beheer)
 - [ ] Rate limiting per tenant
 
 ---
@@ -174,3 +177,5 @@
 | **bullet_list + heading_2 block types in JSON schema** | **Week 8** |
 | **Fase 8: Hardcoded data eliminatie (BM_COLORS, constanten, type hints)** | **Week 8** |
 | **D3: CI/CD Pipeline (GitHub Actions: lint, test, Docker build+push GHCR)** | **Week 8** |
+| **Auth: Bearer token + API Key authenticatie** | **Week 9** |
+| **Admin panel: user CRUD, tenant/asset beheer, API key management** | **Week 9** |

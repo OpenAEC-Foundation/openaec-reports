@@ -78,7 +78,19 @@ def main():
     cu_parser.add_argument(
         "--admin", action="store_true", default=False, help="Maak een admin gebruiker"
     )
+    cu_parser.add_argument("--username", "-u", default=None, help="Username (non-interactive)")
+    cu_parser.add_argument("--password", "-p", default=None, help="Wachtwoord (non-interactive)")
+    cu_parser.add_argument("--email", default="", help="Email adres")
+    cu_parser.add_argument("--display-name", default=None, help="Weergavenaam")
+    cu_parser.add_argument("--tenant", default="", help="Tenant naam")
     cu_parser.add_argument("--db", default=None, help="Pad naar auth database")
+
+    # Create API key command
+    ak_parser = subparsers.add_parser("create-api-key", help="Maak een API key aan")
+    ak_parser.add_argument("--username", "-u", required=True, help="Username van de key-eigenaar")
+    ak_parser.add_argument("--name", "-n", required=True, help="Beschrijving van de key")
+    ak_parser.add_argument("--expires", default=None, help="Verloopdatum (ISO format)")
+    ak_parser.add_argument("--db", default=None, help="Pad naar auth database")
 
     # Visual diff command
     vd_parser = subparsers.add_parser(
@@ -113,6 +125,8 @@ def main():
         _cmd_extract_layout(args)
     elif args.command == "create-user":
         _cmd_create_user(args)
+    elif args.command == "create-api-key":
+        _cmd_create_api_key(args)
     elif args.command == "visual-diff":
         _cmd_visual_diff(args)
 
@@ -221,12 +235,61 @@ def _cmd_analyze_brand(args):
 
 
 def _cmd_create_user(args):
-    """Maak een nieuwe gebruiker aan via interactieve prompts."""
-    from bm_reports.auth.models import UserRole
-    from bm_reports.auth.seed import create_user_interactive
+    """Maak een nieuwe gebruiker aan (interactief of non-interactive)."""
+    from bm_reports.auth.models import User, UserDB, UserRole
+    from bm_reports.auth.security import hash_password
 
     role = UserRole.admin if args.admin else UserRole.user
-    create_user_interactive(db_path=args.db, role=role)
+
+    # Non-interactive als --username en --password beide gezet zijn
+    if args.username and args.password:
+        db = UserDB(args.db)
+        existing = db.get_by_username(args.username)
+        if existing:
+            print(f"Gebruiker '{args.username}' bestaat al (id={existing.id})")
+            return
+
+        user = User(
+            username=args.username,
+            email=args.email,
+            display_name=args.display_name or args.username,
+            role=role,
+            tenant=args.tenant,
+            hashed_password=hash_password(args.password),
+        )
+        db.create(user)
+        print(f"Gebruiker aangemaakt: {user.username} (rol={role.value}, id={user.id})")
+    else:
+        from bm_reports.auth.seed import create_user_interactive
+
+        create_user_interactive(db_path=args.db, role=role)
+
+
+def _cmd_create_api_key(args):
+    """Maak een API key aan voor een bestaande user."""
+    from bm_reports.auth.api_keys import ApiKeyDB
+    from bm_reports.auth.models import UserDB
+
+    db = UserDB(args.db)
+    api_db = ApiKeyDB(args.db)
+
+    user = db.get_by_username(args.username)
+    if not user:
+        print(f"Fout: gebruiker '{args.username}' niet gevonden")
+        raise SystemExit(1)
+
+    api_key, plaintext = api_db.create(
+        name=args.name,
+        user_id=user.id,
+        expires_at=args.expires,
+    )
+
+    print(f"API key aangemaakt voor {user.username}:")
+    print(f"  Naam:   {api_key.name}")
+    print(f"  Prefix: {api_key.key_prefix}")
+    print(f"  Key:    {plaintext}")
+    print()
+    print("Bewaar deze key! Hij wordt maar 1x getoond.")
 
 
 def _cmd_serve(args):

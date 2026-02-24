@@ -141,6 +141,19 @@
 
 ---
 
+## 🟡 Housekeeping (uit Lessons Learned audit 2026-02-24)
+
+- [ ] **pytest cache cleanup:** 28+ `pytest-cache-files-*` directories verwijderen
+- [ ] `pytest-cache-files-*` toevoegen aan `.gitignore`
+- [ ] Overweeg `--basetemp=/tmp/pytest-bm` in `pyproject.toml` om cache te centraliseren
+- [ ] `lessons_learned.md` aanmaken op basis van template (zie `../lessons_learned_template.md`)
+- [ ] Vastleggen: "Schema-first" als architectuurregel heeft veel rework voorkomen — opnemen in lessons learned
+- [ ] Vastleggen: Fase 8 (hardcoded eliminatie) had vermeden kunnen worden door vanaf dag 1 constanten te definiëren
+- [ ] Vastleggen: Multi-tenant fallback-chain patroon documenteren als herbruikbaar pattern voor andere projecten
+- [ ] D1 (VPS deploy) afronden — handmatig deployen is foutgevoelig en niet herhaalbaar
+
+---
+
 ## Afgerond ✅
 
 | Item | Wanneer |

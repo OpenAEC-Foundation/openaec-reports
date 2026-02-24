@@ -7,10 +7,10 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 from fastapi.testclient import TestClient
-from tests.conftest import TEST_ADMIN_PASSWORD, TEST_ADMIN_USERNAME, TEST_PASSWORD, TEST_USERNAME
+from tests.conftest import TEST_ADMIN_USERNAME, TEST_USERNAME
 
 from bm_reports.api import app
-from bm_reports.auth.api_keys import ApiKeyDB, generate_api_key, hash_api_key
+from bm_reports.auth.api_keys import generate_api_key, hash_api_key
 from bm_reports.auth.dependencies import get_api_key_db, get_user_db
 from bm_reports.auth.models import User, UserRole
 from bm_reports.auth.security import hash_password

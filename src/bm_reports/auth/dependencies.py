@@ -1,14 +1,26 @@
-"""FastAPI dependencies voor authenticatie."""
+"""FastAPI dependencies voor authenticatie.
+
+Ondersteunt drie authenticatie-methoden (in volgorde van prioriteit):
+1. X-API-Key header — statische key voor machine-to-machine (pyRevit, MCP, scripts)
+2. httpOnly cookie — browser / frontend sessies
+3. Authorization: Bearer <token> — JWT voor scripts die login() gebruiken
+"""
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import HTTPException, Request, status
 
+from bm_reports.auth.api_keys import ApiKeyDB
 from bm_reports.auth.models import User, UserDB, UserRole
 from bm_reports.auth.security import COOKIE_NAME, decode_access_token
 
-# Module-level DB instance (wordt gezet bij app startup)
+logger = logging.getLogger(__name__)
+
+# Module-level DB instances (worden gezet bij app startup)
 _user_db: UserDB | None = None
+_api_key_db: ApiKeyDB | None = None
 
 
 def init_user_db(db: UserDB) -> None:
@@ -23,6 +35,18 @@ def init_user_db(db: UserDB) -> None:
     _user_db = db
 
 
+def init_api_key_db(db: ApiKeyDB) -> None:
+    """Stel de module-level ApiKeyDB instance in.
+
+    Wordt eenmalig aangeroepen bij app startup.
+
+    Args:
+        db: ApiKeyDB instance.
+    """
+    global _api_key_db  # noqa: PLW0603
+    _api_key_db = db
+
+
 def get_user_db() -> UserDB:
     """Haal de actieve UserDB op.
 
@@ -35,6 +59,20 @@ def get_user_db() -> UserDB:
     if _user_db is None:
         raise RuntimeError("UserDB niet geinitialiseerd — roep init_user_db() aan")
     return _user_db
+
+
+def get_api_key_db() -> ApiKeyDB:
+    """Haal de actieve ApiKeyDB op.
+
+    Returns:
+        De ApiKeyDB instance.
+
+    Raises:
+        RuntimeError: Als init_api_key_db() niet is aangeroepen.
+    """
+    if _api_key_db is None:
+        raise RuntimeError("ApiKeyDB niet geinitialiseerd — roep init_api_key_db() aan")
+    return _api_key_db
 
 
 def _extract_token(request: Request) -> str | None:
@@ -63,12 +101,53 @@ def _extract_token(request: Request) -> str | None:
     return None
 
 
-async def get_current_user(request: Request) -> User:
-    """Haal de huidige user op uit cookie of Bearer token.
+def _authenticate_via_api_key(request: Request) -> User | None:
+    """Probeer authenticatie via X-API-Key header.
 
-    Ondersteunt twee authenticatie-methoden:
-    1. httpOnly cookie (browser / frontend)
-    2. Authorization: Bearer <token> header (pyRevit / scripts)
+    Zoekt de key op in de database, valideert actief/verlopen,
+    en retourneert de gekoppelde user.
+
+    Args:
+        request: FastAPI Request object.
+
+    Returns:
+        User of None als geen API key aanwezig of ongeldig.
+    """
+    api_key_value = request.headers.get("X-API-Key", "").strip()
+    if not api_key_value:
+        return None
+
+    if _api_key_db is None:
+        logger.warning("API key ontvangen maar ApiKeyDB niet geinitialiseerd")
+        return None
+
+    api_key = _api_key_db.get_by_key(api_key_value)
+    if api_key is None:
+        logger.debug("Ongeldige of verlopen API key: %s...", api_key_value[:12])
+        return None
+
+    # Haal de gekoppelde user op
+    db = get_user_db()
+    user = db.get_by_id(api_key.user_id)
+    if user is None or not user.is_active:
+        logger.warning(
+            "API key %s verwijst naar inactieve user %s",
+            api_key.key_prefix,
+            api_key.user_id,
+        )
+        return None
+
+    logger.debug("Auth via API key: %s → user %s", api_key.key_prefix, user.username)
+    return user
+
+
+async def get_current_user(request: Request) -> User:
+    """Haal de huidige user op via API key, cookie, of Bearer token.
+
+    Authenticatie volgorde:
+    1. X-API-Key header (machine-to-machine)
+    2. httpOnly cookie (browser / frontend)
+    3. Authorization: Bearer <token> header (pyRevit login-flow)
 
     Args:
         request: FastAPI Request object.
@@ -77,9 +156,14 @@ async def get_current_user(request: Request) -> User:
         De geauthenticeerde User.
 
     Raises:
-        HTTPException: 401 als geen token aanwezig, verlopen, of de user
-            niet bestaat/inactief is.
+        HTTPException: 401 als geen geldige authenticatie aanwezig.
     """
+    # Methode 1: API Key
+    user = _authenticate_via_api_key(request)
+    if user is not None:
+        return user
+
+    # Methode 2 + 3: JWT (cookie of Bearer header)
     token = _extract_token(request)
     if not token:
         raise HTTPException(

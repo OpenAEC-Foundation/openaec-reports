@@ -19,7 +19,8 @@ from starlette.background import BackgroundTask
 
 from bm_reports import __version__
 from bm_reports.admin.routes import admin_router
-from bm_reports.auth.dependencies import get_current_user, init_user_db
+from bm_reports.auth.api_keys import ApiKeyDB
+from bm_reports.auth.dependencies import get_current_user, init_api_key_db, init_user_db
 from bm_reports.auth.models import UserDB
 from bm_reports.auth.routes import auth_router
 from bm_reports.auth.security import is_default_secret
@@ -101,6 +102,9 @@ app.add_middleware(
 
 _user_db = UserDB()
 init_user_db(_user_db)
+
+_api_key_db = ApiKeyDB()
+init_api_key_db(_api_key_db)
 
 if is_default_secret():
     logger.warning(

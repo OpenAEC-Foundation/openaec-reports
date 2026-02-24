@@ -11,7 +11,7 @@ import yaml
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, status
 from pydantic import BaseModel, Field
 
-from bm_reports.auth.dependencies import get_user_db, require_admin
+from bm_reports.auth.dependencies import get_api_key_db, get_user_db, require_admin
 from bm_reports.auth.models import User, UserRole
 from bm_reports.auth.security import hash_password
 
@@ -89,6 +89,14 @@ class ResetPasswordRequest(BaseModel):
     """Request model voor wachtwoord reset."""
 
     new_password: str = Field(..., min_length=6)
+
+
+class CreateApiKeyRequest(BaseModel):
+    """Request model voor het aanmaken van een API key."""
+
+    name: str = Field(..., min_length=1, max_length=100)
+    user_id: str = Field(...)
+    expires_at: str | None = Field(default=None)
 
 
 # ============================================================
@@ -684,3 +692,94 @@ async def delete_tenant_asset(
     filepath.unlink()
     logger.info("Asset verwijderd: %s/%s/%s", tenant, category, filename)
     return {"detail": f"Bestand '{filename}' verwijderd uit {category}"}
+
+
+# ============================================================
+# API Keys
+# ============================================================
+
+
+@admin_router.get("/api-keys")
+async def list_api_keys():
+    """Lijst alle API keys.
+
+    Returns:
+        Dict met lijst van API key metadata (zonder hashes).
+    """
+    db = get_api_key_db()
+    keys = db.list_all()
+    return {"api_keys": [k.to_dict() for k in keys]}
+
+
+@admin_router.post("/api-keys", status_code=status.HTTP_201_CREATED)
+async def create_api_key(payload: CreateApiKeyRequest):
+    """Maak een nieuwe API key aan.
+
+    De plaintext key wordt eenmalig geretourneerd — bewaar deze goed!
+
+    Args:
+        payload: Naam, user_id, en optionele verloopdatum.
+
+    Returns:
+        API key metadata + de plaintext key (eenmalig).
+    """
+    # Controleer dat de user bestaat
+    user_db = get_user_db()
+    user = user_db.get_by_id(payload.user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Gebruiker niet gevonden",
+        )
+
+    db = get_api_key_db()
+    api_key, plaintext = db.create(
+        name=payload.name,
+        user_id=payload.user_id,
+        expires_at=payload.expires_at,
+    )
+
+    return {
+        "api_key": api_key.to_dict(),
+        "plaintext_key": plaintext,
+    }
+
+
+@admin_router.post("/api-keys/{key_id}/revoke")
+async def revoke_api_key(key_id: str):
+    """Deactiveer een API key (soft delete).
+
+    Args:
+        key_id: ID van de API key.
+
+    Returns:
+        Bevestigingsbericht.
+    """
+    db = get_api_key_db()
+    revoked = db.revoke(key_id)
+    if not revoked:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="API key niet gevonden",
+        )
+    return {"detail": "API key ingetrokken"}
+
+
+@admin_router.delete("/api-keys/{key_id}")
+async def delete_api_key(key_id: str):
+    """Verwijder een API key permanent.
+
+    Args:
+        key_id: ID van de API key.
+
+    Returns:
+        Bevestigingsbericht.
+    """
+    db = get_api_key_db()
+    deleted = db.delete(key_id)
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="API key niet gevonden",
+        )
+    return {"detail": "API key verwijderd"}

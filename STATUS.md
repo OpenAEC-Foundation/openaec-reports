@@ -144,6 +144,7 @@ tests/
 - **BMFlowable base class:** Gedeelde `wrap()`/`draw()` voor 4 componenten
 - **Shared style factories:** `block_style_heading()`, `_reference()`, `_body()`, `_mono()`, `_result()` in `styles.py`
 - **Font embedding fix:** Inter fonts embedded als subset via `fitz.TextWriter` in `renderer_v2.py` — PDF's nu leesbaar zonder lokaal geïnstalleerde fonts
+- **Tenant management:** Tenants tab in admin panel — overzicht met asset counts, nieuwe tenant aanmaken (POST), verwijderen (DELETE), directe navigatie naar Brand tab
 
 ## API Endpoints
 
@@ -162,7 +163,8 @@ tests/
 | `/api/upload` | POST | ✅ | User |
 | `/api/stationery` | GET | ✅ | User |
 | `/api/admin/users` | CRUD | ✅ | Admin |
-| `/api/admin/tenants` | GET | ✅ | Admin |
+| `/api/admin/tenants` | GET/POST | ✅ | Admin |
+| `/api/admin/tenants/{t}` | DELETE | ✅ | Admin |
 | `/api/admin/tenants/{t}/templates` | CRUD | ✅ | Admin |
 | `/api/admin/tenants/{t}/brand` | GET/POST | ✅ | Admin |
 | `/api/admin/tenants/{t}/assets/{c}` | CRUD | ✅ | Admin |

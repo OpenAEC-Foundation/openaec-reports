@@ -131,7 +131,7 @@
 
 ### SaaS / Deployment
 - [ ] Frontend brand setup wizard (roept B5 tools aan)
-- [ ] Multi-tenant brand management
+- [x] Multi-tenant brand management (Tenants tab: overzicht, aanmaken, verwijderen)
 - [ ] PDF caching op basis van JSON hash
 - [x] User authentication (JWT via httpOnly cookies, SQLite user store)
 - [x] API Key authenticatie (X-API-Key header, SHA-256, expiry, admin CRUD)
@@ -194,3 +194,4 @@
 | **Admin panel: user CRUD, tenant/asset beheer, API key management** | **Week 9** |
 | **Font embedding fix: Inter subset via TextWriter (renderer_v2.py)** | **Week 9** |
 | **Git repo hersteld na Synology Drive sync (.git exclusie)** | **Week 9** |
+| **Tenant management: admin panel Tenants tab (create/delete + overzicht)** | **Week 9** |

@@ -93,6 +93,11 @@ export interface TenantInfo {
   font_count: number;
 }
 
+export interface CreateTenantPayload {
+  name: string;
+  display_name?: string;
+}
+
 export type AssetCategory = "stationery" | "logos" | "fonts";
 
 export interface TenantAsset {
@@ -147,6 +152,17 @@ export const adminApi = {
   // Tenants
   listTenants: () =>
     apiFetch<{ tenants: TenantInfo[] }>("/api/admin/tenants").then((r) => r.tenants),
+
+  createTenant: (payload: CreateTenantPayload) =>
+    apiFetch<{ tenant: TenantInfo }>("/api/admin/tenants", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }).then((r) => r.tenant),
+
+  deleteTenant: (name: string) =>
+    apiFetch<{ detail: string }>(`/api/admin/tenants/${encodeURIComponent(name)}`, {
+      method: "DELETE",
+    }),
 
   // Templates
   listTemplates: (tenant: string) =>

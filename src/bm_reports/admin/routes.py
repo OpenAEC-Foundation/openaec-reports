@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import re
+import shutil
 from pathlib import Path
 
 import yaml
@@ -89,6 +90,13 @@ class ResetPasswordRequest(BaseModel):
     """Request model voor wachtwoord reset."""
 
     new_password: str = Field(..., min_length=6)
+
+
+class CreateTenantRequest(BaseModel):
+    """Request model voor het aanmaken van een tenant."""
+
+    name: str = Field(..., min_length=2, max_length=50, pattern=r"^[\w\-]+$")
+    display_name: str = Field(default="")
 
 
 class CreateApiKeyRequest(BaseModel):
@@ -382,6 +390,93 @@ async def list_tenants():
             })
 
     return {"tenants": tenants}
+
+
+@admin_router.post("/tenants", status_code=status.HTTP_201_CREATED)
+async def create_tenant(payload: CreateTenantRequest):
+    """Maak een nieuwe tenant directory structuur aan.
+
+    Args:
+        payload: Tenant naam (slug) en optioneel display_name.
+
+    Returns:
+        Tenant info dict.
+    """
+    _validate_path_segment(payload.name, "tenant naam")
+
+    tenants_base = _get_tenants_base()
+    tenant_dir = tenants_base / payload.name
+
+    if tenant_dir.exists():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Tenant '{payload.name}' bestaat al",
+        )
+
+    # Maak directory structuur aan
+    tenant_dir.mkdir(parents=True, exist_ok=True)
+    (tenant_dir / "templates").mkdir()
+    (tenant_dir / "stationery").mkdir()
+    (tenant_dir / "logos").mkdir()
+    (tenant_dir / "fonts").mkdir()
+
+    # Genereer starter brand.yaml
+    display = payload.display_name or payload.name
+    brand_config = {
+        "name": display,
+        "fonts": {
+            "heading": "Helvetica",
+            "body": "Helvetica",
+        },
+        "colors": {
+            "primary": "#333333",
+            "secondary": "#666666",
+            "text": "#000000",
+        },
+    }
+    brand_path = tenant_dir / "brand.yaml"
+    brand_path.write_text(
+        yaml.dump(brand_config, default_flow_style=False, allow_unicode=True),
+        encoding="utf-8",
+    )
+
+    logger.info("Tenant aangemaakt: %s", payload.name)
+    return {
+        "tenant": {
+            "name": payload.name,
+            "has_brand": True,
+            "template_count": 0,
+            "stationery_count": 0,
+            "logo_count": 0,
+            "font_count": 0,
+        }
+    }
+
+
+@admin_router.delete("/tenants/{tenant}")
+async def delete_tenant(tenant: str):
+    """Verwijder een volledige tenant directory.
+
+    Args:
+        tenant: Tenant naam.
+
+    Returns:
+        Bevestigingsbericht.
+    """
+    _validate_path_segment(tenant, "tenant")
+
+    tenants_base = _get_tenants_base()
+    tenant_dir = tenants_base / tenant
+
+    if not tenant_dir.exists() or not tenant_dir.is_dir():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Tenant '{tenant}' niet gevonden",
+        )
+
+    shutil.rmtree(tenant_dir)
+    logger.info("Tenant verwijderd: %s", tenant)
+    return {"detail": f"Tenant '{tenant}' verwijderd"}
 
 
 # ============================================================

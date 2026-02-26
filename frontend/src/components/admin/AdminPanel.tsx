@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import { useAdminStore } from "@/stores/adminStore";
+import { TenantManagement } from "./TenantManagement";
 import { UserManagement } from "./UserManagement";
 import { TemplateManagement } from "./TemplateManagement";
 import { BrandManagement } from "./BrandManagement";
 
 const TABS = [
+  { key: "tenants" as const, label: "Tenants" },
   { key: "users" as const, label: "Gebruikers" },
   { key: "templates" as const, label: "Templates" },
   { key: "brand" as const, label: "Brand" },
@@ -28,7 +30,7 @@ export function AdminPanel() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Beheer</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Gebruikers, templates en brand configuratie beheren
+          Tenants, gebruikers, templates en brand configuratie beheren
         </p>
       </div>
 
@@ -65,6 +67,7 @@ export function AdminPanel() {
       </div>
 
       {/* Active panel */}
+      {activeTab === "tenants" && <TenantManagement />}
       {activeTab === "users" && <UserManagement />}
       {activeTab === "templates" && <TemplateManagement />}
       {activeTab === "brand" && <BrandManagement />}

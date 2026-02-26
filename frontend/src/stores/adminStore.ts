@@ -9,10 +9,11 @@ import {
   type BrandData,
   type CreateUserPayload,
   type UpdateUserPayload,
+  type CreateTenantPayload,
   type ApiError,
 } from "@/services/api";
 
-type AdminTab = "users" | "templates" | "brand";
+type AdminTab = "tenants" | "users" | "templates" | "brand";
 
 interface AdminStore {
   // UI
@@ -34,6 +35,8 @@ interface AdminStore {
   tenantsLoading: boolean;
   selectedTenant: string | null;
   loadTenants: () => Promise<void>;
+  createTenant: (payload: CreateTenantPayload) => Promise<TenantInfo | null>;
+  deleteTenant: (name: string) => Promise<boolean>;
   selectTenant: (tenant: string | null) => void;
 
   // Templates
@@ -81,7 +84,7 @@ function extractError(e: unknown): string {
 
 export const useAdminStore = create<AdminStore>()((set, get) => ({
   // UI
-  activeTab: "users",
+  activeTab: "tenants",
   setActiveTab: (tab) => set({ activeTab: tab }),
 
   // Users
@@ -161,6 +164,32 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
       set({ tenants, tenantsLoading: false });
     } catch (e) {
       set({ tenantsLoading: false, error: extractError(e) });
+    }
+  },
+
+  createTenant: async (payload) => {
+    try {
+      const tenant = await adminApi.createTenant(payload);
+      set((s) => ({ tenants: [...s.tenants, tenant], error: null }));
+      return tenant;
+    } catch (e) {
+      set({ error: extractError(e) });
+      return null;
+    }
+  },
+
+  deleteTenant: async (name) => {
+    try {
+      await adminApi.deleteTenant(name);
+      set((s) => ({
+        tenants: s.tenants.filter((t) => t.name !== name),
+        selectedTenant: s.selectedTenant === name ? null : s.selectedTenant,
+        error: null,
+      }));
+      return true;
+    } catch (e) {
+      set({ error: extractError(e) });
+      return false;
     }
   },
 

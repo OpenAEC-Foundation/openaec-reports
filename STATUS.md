@@ -1,6 +1,6 @@
 # Backend Status — bm-reports
 
-> Laatst bijgewerkt: 2026-02-24
+> Laatst bijgewerkt: 2026-02-26
 
 ## Deployment
 
@@ -72,7 +72,7 @@ src/bm_reports/
 | **core/template_loader.py** | ✅ Compleet | ✅ test_templates.py + test_template_scaffold.py | 94% |
 | **core/toc.py** | ✅ Compleet | ✅ via integratietests | 100% |
 | **core/fonts.py** | ✅ Compleet | — | 66% |
-| **core/renderer_v2.py** | ✅ Compleet | ✅ test_renderer_v2.py (52 tests) | — |
+| **core/renderer_v2.py** | ✅ Compleet | ✅ test_renderer_v2.py (53 tests) | — |
 | **core/tenant.py** | ✅ Compleet | ✅ test_tenant.py (23 tests) | — |
 | **components/base.py** | ✅ Compleet | — (via subclass tests) | — |
 | **components/calculation.py** | ✅ Compleet | ✅ test_engine.py | 100% |
@@ -143,6 +143,7 @@ tests/
 - **Code quality audit:** 7 fasen — schema fixes, PEP8, DRY refactoring, caching, type hints, config, dead code cleanup
 - **BMFlowable base class:** Gedeelde `wrap()`/`draw()` voor 4 componenten
 - **Shared style factories:** `block_style_heading()`, `_reference()`, `_body()`, `_mono()`, `_result()` in `styles.py`
+- **Font embedding fix:** Gotham fonts embedded als subset via `fitz.TextWriter` in `renderer_v2.py` — PDF's nu leesbaar zonder lokaal geïnstalleerde fonts
 
 ## API Endpoints
 

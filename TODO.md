@@ -1,7 +1,7 @@
 # TODO — bm-reports
 
 > Prioriteit: 🔴 Hoog | 🟡 Middel | 🟢 Laag
-> Laatst bijgewerkt: 2026-02-24
+> Laatst bijgewerkt: 2026-02-26
 
 ---
 
@@ -192,3 +192,5 @@
 | **D3: CI/CD Pipeline (GitHub Actions: lint, test, Docker build+push GHCR)** | **Week 8** |
 | **Auth: Bearer token + API Key authenticatie** | **Week 9** |
 | **Admin panel: user CRUD, tenant/asset beheer, API key management** | **Week 9** |
+| **Font embedding fix: Gotham subset via TextWriter (renderer_v2.py)** | **Week 9** |
+| **Git repo hersteld na Synology Drive sync (.git exclusie)** | **Week 9** |

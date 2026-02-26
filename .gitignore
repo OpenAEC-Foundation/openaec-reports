@@ -58,6 +58,7 @@ frontend/dist/
 SESSION_STATUS.md
 .claude/
 CLAUDE.md
+.mcp.json
 
 # Development artifacts (prompts, analysis, archive)
 _archive/

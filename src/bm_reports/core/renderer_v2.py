@@ -137,6 +137,12 @@ class FontManager:
             if path.exists():
                 page.insert_font(fontname=name, fontfile=str(path))
 
+    def get_fitz_font(self, fontname: str) -> fitz.Font:
+        """Return fitz.Font object for given fontname string."""
+        if fontname in ("GothamBold",):
+            return self.gotham_bold
+        return self.gotham_book  # default fallback voor GothamBook, GothamMedium, etc.
+
     def measure(self, text: str, fontsize: float, bold: bool = False) -> float:
         """Measure text width using actual Gotham font metrics."""
         font = self.gotham_bold if bold else self.gotham_book
@@ -348,28 +354,28 @@ class ColofonGenerator:
         title_cfg = self.tpl.get("dynamic_fields", {}).get("titel", {})
         report_type = data.get("report_type", "")
         if report_type:
-            page.insert_text(
+            font_obj = self.fonts.get_fitz_font("GothamBold")
+            tw = fitz.TextWriter(page.rect)
+            tw.append(
                 (
                     title_cfg.get("x", 70.9),
                     title_cfg.get("y_td", 57.3) + title_cfg.get("size", 22) * 0.8,
                 ),
-                report_type,
-                fontname="GothamBold",
-                fontsize=title_cfg.get("size", 22),
-                color=purple,
+                report_type, font=font_obj, fontsize=title_cfg.get("size", 22),
             )
+            tw.write_text(page, color=purple)
 
         # Subtitle
         sub_cfg = self.tpl.get("dynamic_fields", {}).get("subtitel", {})
         project_name = data.get("project", "")
         if project_name:
-            page.insert_text(
+            font_obj = self.fonts.get_fitz_font("GothamBook")
+            tw = fitz.TextWriter(page.rect)
+            tw.append(
                 (sub_cfg.get("x", 70.9), sub_cfg.get("y_td", 86.8) + sub_cfg.get("size", 14) * 0.8),
-                project_name,
-                fontname="GothamBook",
-                fontsize=sub_cfg.get("size", 14),
-                color=teal,
+                project_name, font=font_obj, fontsize=sub_cfg.get("size", 14),
             )
+            tw.write_text(page, color=teal)
 
         # Table values — map JSON fields to colofon positions
         colofon_data = data.get("colofon", {})
@@ -380,24 +386,24 @@ class ColofonGenerator:
         for field_key, y_td in self._get_field_positions():
             text = field_map.get(field_key, "")
             if text:
+                font_obj = self.fonts.get_fitz_font("GothamBook")
                 for i, line in enumerate(text.split("\n")):
-                    page.insert_text(
+                    tw = fitz.TextWriter(page.rect)
+                    tw.append(
                         (value_x, y_td + i * 12.8 + value_size * 0.8),
-                        line,
-                        fontname="GothamBook",
-                        fontsize=value_size,
-                        color=purple,
+                        line, font=font_obj, fontsize=value_size,
                     )
+                    tw.write_text(page, color=purple)
 
         # Page number
         pn_cfg = self.tpl.get("page_number", {})
-        page.insert_text(
+        font_obj = self.fonts.get_fitz_font("GothamBold")
+        tw = fitz.TextWriter(page.rect)
+        tw.append(
             (pn_cfg.get("x", 534.0), pn_cfg.get("y_td", 796.3) + 8 * 0.8),
-            str(page_number),
-            fontname="GothamBold",
-            fontsize=8,
-            color=teal,
+            str(page_number), font=font_obj, fontsize=8,
         )
+        tw.write_text(page, color=teal)
 
         doc.save(str(output))
         doc.close()
@@ -507,12 +513,12 @@ class ContentRenderer:
         pn = self.tpl.page_number
         if not pn or not self.page:
             return
-        self.page.insert_text(
-            (pn["x"], pn["y_td"] + pn["size"] * 0.8),
+        self._text(
+            pn["x"], pn["y_td"],
             str(self.current_page_nr),
-            fontname=pn.get("font", "GothamBook"),
-            fontsize=pn["size"],
-            color=_hex_to_rgb(pn["color"]),
+            pn.get("font", "GothamBook"),
+            pn["size"],
+            pn["color"],
         )
         self.current_page_nr += 1
 
@@ -525,14 +531,13 @@ class ContentRenderer:
         size: float,
         color_hex: str,
     ) -> None:
-        """Insert text at position (x, y_td) using top-down coordinates."""
-        self.page.insert_text(
-            (x, y_td + size * 0.8),
-            text,
-            fontname=fontname,
-            fontsize=size,
-            color=_hex_to_rgb(color_hex),
-        )
+        """Insert text met embedded font subset via TextWriter."""
+        if not self.page or not text:
+            return
+        font_obj = self.fonts.get_fitz_font(fontname)
+        tw = fitz.TextWriter(self.page.rect)
+        tw.append((x, y_td + size * 0.8), text, font=font_obj, fontsize=size)
+        tw.write_text(self.page, color=_hex_to_rgb(color_hex))
 
     # --- TOC ---
 
@@ -664,12 +669,12 @@ class ContentRenderer:
             needed = len(lines) * text_s["line_height"] + sb.get("spacing_between", 10.1)
             self._check_overflow(needed)
             # Bullet marker
-            self.page.insert_text(
-                (marker["x"], self.y + marker["size"] * 0.8),
+            self._text(
+                marker["x"], self.y,
                 "\u2022",
-                fontname="GothamBook",
-                fontsize=marker["size"],
-                color=_hex_to_rgb(marker["color"]),
+                "GothamBook",
+                marker["size"],
+                marker["color"],
             )
             for line in lines:
                 self._text(
@@ -774,13 +779,13 @@ class ContentRenderer:
                 text_block_h = len(lines) * (h_fontsize * 1.35)
                 y_start = self.y + (header_h - text_block_h) / 2
                 for li, line in enumerate(lines):
-                    self.page.insert_text(
+                    font_obj = self.fonts.get_fitz_font(h_fontname)
+                    tw = fitz.TextWriter(self.page.rect)
+                    tw.append(
                         (cx + cell_pad, y_start + h_fontsize * 0.8 + li * (h_fontsize * 1.35)),
-                        line,
-                        fontname=h_fontname,
-                        fontsize=h_fontsize,
-                        color=h_color,
+                        line, font=font_obj, fontsize=h_fontsize,
                     )
+                    tw.write_text(self.page, color=h_color)
                 cx += w
             # Vertical grid lines in header
             cx = x
@@ -824,13 +829,13 @@ class ContentRenderer:
                 w = col_widths_pt[i] if i < len(col_widths_pt) else col_widths_pt[-1]
                 y_text = self.y + 3  # top padding
                 for li, line in enumerate(lines):
-                    self.page.insert_text(
+                    font_obj = self.fonts.get_fitz_font(b_fontname)
+                    tw = fitz.TextWriter(self.page.rect)
+                    tw.append(
                         (cx + cell_pad, y_text + b_fontsize * 0.8 + li * cell_line_h),
-                        line,
-                        fontname=b_fontname,
-                        fontsize=b_fontsize,
-                        color=b_color,
+                        line, font=font_obj, fontsize=b_fontsize,
                     )
+                    tw.write_text(self.page, color=b_color)
                 cx += w
 
             # Vertical grid lines between columns

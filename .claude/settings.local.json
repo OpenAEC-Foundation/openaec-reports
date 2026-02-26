@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(del \"X:\\\\10_3BM_bouwkunde\\\\50_Claude-Code-Projects\\\\Report_generator\\\\src\\\\bm_reports\\\\components\\\\header.py\")",
+      "Bash(python -m pytest:*)",
+      "Bash(python -c:*)",
+      "Bash(PYTHONPATH=src python:*)",
+      "Bash(python -m ruff check:*)",
+      "Bash(python:*)",
+      "Bash(set:*)",
+      "Bash(pip show:*)",
+      "Bash(pip install:*)",
+      "Bash(find:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(wc:*)",
+      "Bash(xargs:*)",
+      "Bash(start \"\" \"X:\\\\10_3BM_bouwkunde\\\\50_Claude-Code-Projects\\\\Report_generator\\\\output\\\\test_from_json.pdf\")",
+      "Bash(start \"\" \"X:\\\\10_3BM_bouwkunde\\\\50_Claude-Code-Projects\\\\Report_generator\\\\output\\\\component_showcase.pdf\")"
+    ]
+  }
+}

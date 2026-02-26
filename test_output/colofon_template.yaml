@@ -1,0 +1,159 @@
+# =============================================================
+# 3BM Cooperatie - Colofon Page Template
+# =============================================================
+#
+# Laag-volgorde:
+#   1. colofon.pdf (achtergrond met labels + logo + lijnen)
+#   2. Dynamische tekst (waarden + titels bovenaan)
+#
+# De colofon.pdf bevat al:
+#   - 3BM logo + tagline (rechtsboven)
+#   - Turquoise hoekblok (linksboven)
+#   - Labels: Project, In opdracht van, Adviseur, etc.
+#   - Scheidingslijnen
+#
+# Coordinaten: PDF-native (y=0 = onderkant pagina)
+# =============================================================
+
+page:
+  width: 595.3
+  height: 841.9
+  type: colofon
+
+background:
+  file: colofon.pdf
+
+text_fields:
+  # --- Bovenaan: rapport titel + projectnaam ---
+  rapport_type:
+    label: "Rapporttype"
+    example: "BBL-toetsingsrapportage"
+    x: 70.9
+    y: 784.6
+    font: GothamBold
+    size: 22.0
+    color: "#401246"
+    max_width: 400
+
+  project_naam_subtitle:
+    label: "Projectnaam (subtitel)"
+    example: "Transformatie Data center Spaarneplein Den Haag"
+    x: 70.9
+    y: 755.1
+    font: GothamBook
+    size: 14.0
+    color: "#38BDAB"
+    max_width: 400
+
+  # --- Tabel: waarden (rechterkolom, x=229.1) ---
+  project:
+    label: "Projectnummer + naam"
+    example: "2707 - Transformatie Data center Spaarneplein Den Haag"
+    x: 229.1
+    y: 520.8
+    font: GothamBook
+    size: 10.0
+    color: "#401246"
+    max_width: 190
+
+  opdrachtgever:
+    label: "Opdrachtgever (multiline)"
+    example: "Mounir Riffi MSc\nSping Real Estate\nLange Voorhout 46,\n2514 EG Den Haag"
+    x: 229.1
+    y: 472.8
+    font: GothamBook
+    size: 10.0
+    color: "#401246"
+    max_width: 190
+    line_height: 12.8       # afstand tussen regels
+
+  adviseur_bedrijf:
+    label: "Adviesbureau"
+    example: "3BM Cooperatie"
+    x: 229.1
+    y: 352.8
+    font: GothamBook
+    size: 10.0
+    color: "#401246"
+    max_width: 190
+
+  adviseur_naam:
+    label: "Contactpersoon"
+    example: "J. Kolthof (Jochem)"
+    x: 229.1
+    y: 340.8
+    font: GothamBook
+    size: 10.0
+    color: "#401246"
+    max_width: 190
+
+  normen:
+    label: "Toegepaste normen"
+    example: "BBL, NEN 2057, NEN 2580, NEN1087"
+    x: 229.1
+    y: 316.8
+    font: GothamBook
+    size: 10.0
+    color: "#401246"
+    max_width: 190
+
+  documentgegevens:
+    label: "Documentgegevens"
+    example: "BBL-toetsing, pg 1-19 (excl. Bijlagen)"
+    x: 229.1
+    y: 292.8
+    font: GothamBook
+    size: 10.0
+    color: "#401246"
+    max_width: 190
+
+  datum:
+    label: "Datum rapport"
+    example: "05-07-2025"
+    x: 229.1
+    y: 268.8
+    font: GothamBook
+    size: 10.0
+    color: "#401246"
+    max_width: 190
+
+  fase:
+    label: "Fase in bouwproces"
+    example: "Haalbaarheidsstudie"
+    x: 229.1
+    y: 244.8
+    font: GothamBook
+    size: 10.0
+    color: "#401246"
+    max_width: 190
+
+  status:
+    label: "Rapportstatus"
+    example: "concept"
+    x: 229.1
+    y: 220.8
+    font: GothamBook
+    size: 10.0
+    color: "#401246"
+    max_width: 190
+
+  kenmerk:
+    label: "Documentkenmerk"
+    example: "2707-BBL-01"
+    x: 229.1
+    y: 196.8
+    font: GothamBook
+    size: 10.0
+    color: "#401246"
+    max_width: 190
+
+  # --- Paginanummer ---
+  page_number:
+    label: "Paginanummer"
+    example: "2"
+    x: 534.0
+    y: 45.6
+    font: GothamBold
+    size: 8.0
+    color: "#38BDAB"
+    max_width: 30

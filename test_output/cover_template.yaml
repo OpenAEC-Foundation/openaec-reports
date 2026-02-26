@@ -1,0 +1,58 @@
+# =============================================================
+# 3BM Cooperatie - Cover Page Template
+# =============================================================
+# 
+# Laag-volgorde (onder naar boven):
+#   1. Witte pagina (A4)
+#   2. Projectfoto (vierkant, gevuld in foto_rect)
+#   3. Stationery overlay PNG (met alpha-gat voor foto)
+#   4. Dynamische tekst (titel, subtitel)
+#
+# Coordinaten: PDF-native (y=0 = onderkant pagina)
+# Eenheid: punten (1pt = 1/72 inch)
+# =============================================================
+
+page:
+  width: 595      # A4 portrait
+  height: 842
+  type: cover
+
+# --- Laag 1: Achtergrondafbeelding (projectfoto) ---
+photo:
+  x: 55.6
+  y: 161.7        # PDF-native: 842 - 119.5 - 560.8 = 161.7
+  width: 484.0
+  height: 560.8
+  fit: cover       # crop to fill (behoud aspect ratio)
+  
+# --- Laag 2: Stationery overlay (PNG met alpha) ---
+overlay:
+  file: stationery_cover.png
+  x: 0
+  y: 0
+  width: 595
+  height: 842
+
+# --- Laag 3: Dynamische tekstvelden ---
+text_fields:
+  rapport_type:
+    label: "Rapporttype"
+    example: "BBL-toetsingsrapportage"
+    x: 54.3
+    y: 120.5       # PDF-native: 842 - 721.5 = 120.5
+    font: GothamBold
+    size: 28.9
+    color: "#401246"
+    max_width: 490
+    align: left
+    
+  project_naam:
+    label: "Projectnaam"  
+    example: "Transformatie Data center Spaarneplein Den Haag"
+    x: 55.0
+    y: 78.6         # PDF-native: 842 - 763.4 = 78.6
+    font: GothamBook
+    size: 17.8
+    color: "#38BDAB"
+    max_width: 340
+    align: left

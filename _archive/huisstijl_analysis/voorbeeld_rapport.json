@@ -1,0 +1,231 @@
+{
+    "project": "Transformatie Data center Spaarneplein Den Haag",
+    "project_number": "2707",
+    "client": "Sping Real Estate",
+    "author": "J. Kolthof (Jochem)",
+    "report_type": "BBL-toetsingsrapportage",
+    "template": "building_code",
+    "brand": "3bm_cooperatie",
+    "format": "A4",
+    "orientation": "portrait",
+    "date": "2025-07-05",
+    "version": "1.0",
+    "status": "CONCEPT",
+
+    "cover": {
+        "subtitle": "Transformatie Data center Spaarneplein Den Haag"
+    },
+
+    "colofon": {
+        "enabled": true,
+        "contact_person": "Mounir Riffi MSc",
+        "company": "Sping Real Estate",
+        "address": "Lange Voorhout 46, 2514 EG Den Haag",
+        "norms": "BBL, NEN 2057, NEN 2580, NEN 1087",
+        "document_description": "BBL-toetsing, pg 1-19 (excl. Bijlagen)",
+        "phase": "Haalbaarheidsstudie",
+        "document_code": "2707-BBL-01"
+    },
+
+    "toc": {
+        "enabled": true,
+        "title": "Inhoud"
+    },
+
+    "sections": [
+        {
+            "title": "Bijbehorende tekeningen en bijlagen",
+            "level": 1,
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "<b>Toegepaste documenten:</b>",
+                    "style": "Heading2"
+                },
+                {
+                    "type": "paragraph",
+                    "text": "24.084 ONT-04 010325PM Datacenter Studie VO+, gedateerd d.d. 02 Maart 2025."
+                },
+                {
+                    "type": "paragraph",
+                    "text": "<b>Wetten, besluiten en regelingen:</b>",
+                    "style": "Heading2"
+                },
+                {
+                    "type": "paragraph",
+                    "text": "Besluit bouwwerken leefomgeving. Een bouwwerk mag geen gevaar opleveren voor gebruikers en omgeving. Daarom heeft de overheid in het Besluit bouwwerken leefomgeving (voorheen het Bouwbesluit) regels vastgelegd voor veiligheid, gezondheid, bruikbaarheid en duurzaamheid."
+                },
+                {
+                    "type": "paragraph",
+                    "text": "<b>NEN normen (1e Lijns)</b>",
+                    "style": "Heading2"
+                },
+                {
+                    "type": "paragraph",
+                    "text": "NEN 2057 (nieuwbouw) — Daglichtopeningen van gebouwen. NEN 2580:2007 — Oppervlakten en inhouden van gebouwen. NEN 1087 (nieuwbouw) — Ventilatie van gebouwen."
+                }
+            ]
+        },
+        {
+            "title": "Inleiding",
+            "level": 1,
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "In opdracht van Spring Real Estate is het project \"Transformatie Data center Spaarneplein Den Haag\" getoetst aan de voorschriften uit het bouwbesluit. In dit rapport worden de volgende onderdelen behandeld en de consequenties aangegeven:"
+                },
+                {
+                    "type": "paragraph",
+                    "text": "• Oppervlakten en Daglicht<br/>• Brandveiligheid<br/>• Parkeren"
+                },
+                {
+                    "type": "paragraph",
+                    "text": "Het project betreft 112 appartementen en een parkeergarage/bergingen van 1900m². Het plan is gelegen in Den Haag aan het Spaarneplein."
+                },
+                {
+                    "type": "table",
+                    "title": "",
+                    "headers": ["Verdieping", "Type", "BVO's"],
+                    "rows": [
+                        ["Kelder", "Parkeergarage", "1900 m²"],
+                        ["Begane grond", "Woningen", "1900 m²"],
+                        ["1e verdieping", "Woningen", "1900 m²"],
+                        ["2e verdieping", "Woningen", "1900 m²"],
+                        ["3e verdieping", "Woningen", "1900 m²"],
+                        ["4e verdieping", "Woningen", "1900 m²"],
+                        ["5e verdieping", "Woningen", "1900 m²"]
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Samenvatting",
+            "level": 1,
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "<b>Bruikbaarheid:</b>",
+                    "style": "Heading2"
+                },
+                {
+                    "type": "paragraph",
+                    "text": "• Woning type B is met het huidige ontwerp niet te realiseren in de oksel. Op andere plekken in het gebouw kan dit type wel worden gemaakt."
+                },
+                {
+                    "type": "paragraph",
+                    "text": "• De woningtype A en B zijn herontworpen naar een studio zodat elke ruimte voldoet aan de minimale eis van 0,5 m² daglicht."
+                },
+                {
+                    "type": "paragraph",
+                    "text": "• Het hoofdtrappenhuis is te smal; 1200mm is de minimale breedte voor het hoofdtrappenhuis."
+                },
+                {
+                    "type": "paragraph",
+                    "text": "<b>Ventilatie:</b>",
+                    "style": "Heading2"
+                },
+                {
+                    "type": "paragraph",
+                    "text": "Bij alle woningen wordt de ventilatie gerealiseerd met centraal gestuurd mechanische toe- en afvoer (gebalanceerde ventilatie). In de woningen wordt een WTW unit opgenomen en op het dak zal een LBK unit moeten komen."
+                },
+                {
+                    "type": "paragraph",
+                    "text": "<b>Brandveiligheid en vluchten:</b>",
+                    "style": "Heading2"
+                },
+                {
+                    "type": "paragraph",
+                    "text": "In het huidige ontwerp zijn de corridors te lang, de maximale vluchtlengte oningedeeld is 20m. In dit rapport is een voorstel gedaan voor een mogelijke indeling."
+                }
+            ]
+        },
+        {
+            "title": "Brandveiligheid",
+            "level": 1,
+            "page_break_before": true,
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "<b>Indeling in brandcompartimenten</b>",
+                    "style": "Heading2"
+                },
+                {
+                    "type": "paragraph",
+                    "text": "Het gebouw wordt ingedeeld in brandcompartimenten conform de eisen uit het Besluit bouwwerken leefomgeving. Elk brandcompartiment mag maximaal 500 m² zijn voor de woonfunctie."
+                },
+                {
+                    "type": "check",
+                    "description": "Maximale omvang brandcompartiment woonfunctie",
+                    "required_value": "≤ 500 m²",
+                    "calculated_value": "450 m²",
+                    "unity_check": 0.90,
+                    "reference": "BBL art. 4.204"
+                },
+                {
+                    "type": "paragraph",
+                    "text": "<b>WRD eisen</b>",
+                    "style": "Heading2"
+                },
+                {
+                    "type": "paragraph",
+                    "text": "De weerstand tegen branddoorslag en brandoverslag (WBDBO) moet ten minste 60 minuten bedragen tussen brandcompartimenten."
+                },
+                {
+                    "type": "check",
+                    "description": "WBDBO tussen brandcompartimenten",
+                    "required_value": "≥ 60 min",
+                    "calculated_value": "60 min",
+                    "unity_check": 1.0,
+                    "reference": "BBL art. 4.207"
+                }
+            ]
+        },
+        {
+            "title": "Veilig Vluchten",
+            "level": 1,
+            "page_break_before": true,
+            "content": [
+                {
+                    "type": "paragraph",
+                    "text": "<b>Vluchtroute</b>",
+                    "style": "Heading2"
+                },
+                {
+                    "type": "paragraph",
+                    "text": "Vanuit elke woonfunctie moet een vluchtroute aanwezig zijn naar het aansluitende terrein. De loopafstand tussen de uitgang van het subbrandcompartiment en het aansluitende terrein mag niet meer bedragen dan 30 meter."
+                },
+                {
+                    "type": "check",
+                    "description": "Loopafstand naar aansluitend terrein",
+                    "required_value": "≤ 30 m",
+                    "calculated_value": "28 m",
+                    "unity_check": 0.93,
+                    "reference": "BBL art. 4.213"
+                },
+                {
+                    "type": "paragraph",
+                    "text": "<b>Inrichting vluchtroutes</b>",
+                    "style": "Heading2"
+                },
+                {
+                    "type": "paragraph",
+                    "text": "De vrije breedte van een vluchtroute bedraagt ten minste 0,85 m bij een bezetting tot 225 personen. Het trappenhuis dient een breedte te hebben van minimaal 1,2 m."
+                },
+                {
+                    "type": "check",
+                    "description": "Breedte trappenhuis",
+                    "required_value": "≥ 1200 mm",
+                    "calculated_value": "1100 mm",
+                    "unity_check": 1.09,
+                    "limit": 1.0,
+                    "result": "VOLDOET NIET",
+                    "reference": "BBL art. 4.215"
+                }
+            ]
+        }
+    ],
+
+    "backcover": {
+        "enabled": true
+    }
+}

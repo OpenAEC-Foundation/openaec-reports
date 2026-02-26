@@ -1,0 +1,72 @@
+# =============================================================
+# 3BM Cooperatie - TOC Layout Rules
+# =============================================================
+# 
+# De TOC wordt dynamisch gegenereerd uit de rapport structuur.
+# Deze YAML definieert HOE entries worden gerenderd, niet WELKE.
+# =============================================================
+
+page:
+  type: toc
+  background: standaard.pdf
+
+title:
+  text: "Inhoud"
+  x: 90.0
+  y_td: 74.9
+  font: GothamBook
+  size: 18.0
+  color: "#401246"
+
+# Content area voor TOC entries
+content_area:
+  x_start: 90.0
+  y_td_start: 127.2      # eerste entry, onder titel
+  y_td_end: 780.0         # max voor paginanummer
+  overflow: new_page       # bij vol: nieuwe standaard.pdf pagina
+
+# Kolom layout (3-koloms: nummer | titel | pagina)
+columns:
+  number:
+    x: 90.0
+    width: 70.9            # tot title_x
+  title:
+    x: 160.9
+    width: 354.5           # tot page_x
+  page_number:
+    x: 515.4
+    align: left
+
+# Entry stijlen per niveau
+levels:
+  # Niveau 1: Hoofdstukken
+  1:
+    font: GothamBook
+    size: 12.0
+    color: "#56B49B"
+    line_height: 20.0      # regelhoogte
+    spacing_before: 17.0   # extra ruimte VOOR dit niveau (scheiding tussen hoofdstukken)
+
+  # Niveau 2: Paragrafen  
+  2:
+    font: GothamBook
+    size: 9.5
+    color: "#401246"
+    line_height: 17.3
+    spacing_before: 0.0    # direct onder vorige entry
+
+  # Niveau 3: Sub-paragrafen (indien nodig)
+  3:
+    font: GothamBook
+    size: 9.5
+    color: "#401246"
+    line_height: 17.3
+    spacing_before: 0.0
+    indent: 18.0           # extra inspringing t.o.v. title.x
+
+page_number:
+  x: 533.0
+  y_td: 793.5
+  font: GothamBook
+  size: 9.5
+  color: "#401246"

@@ -37,6 +37,7 @@ test_output/
 .DS_Store
 Thumbs.db
 desktop.ini
+nul
 
 # Auth database
 data/auth.db
@@ -65,3 +66,6 @@ DIAGNOSE_*.md
 PROMPT_*.md
 frontend/_archive/
 frontend/PROMPT_*.md
+
+# Ruff
+.ruff_cache/

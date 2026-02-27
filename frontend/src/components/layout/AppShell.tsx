@@ -9,7 +9,6 @@ import { MainPanel } from './MainPanel';
 import { ValidationBanner } from './ValidationBanner';
 import { ShortcutHelp } from './ShortcutHelp';
 import { AdminPanel } from '@/components/admin/AdminPanel';
-import { BrandWizard } from '@/components/brand-wizard';
 import type { ViewMode } from '@/stores/reportStore';
 
 const EDITOR_TABS: { mode: ViewMode; label: string }[] = [
@@ -249,28 +248,16 @@ export function AppShell() {
               </button>
             ))}
             {authUser?.role === 'admin' && (
-              <>
-                <button
-                  onClick={() => setViewMode('brand-wizard')}
-                  className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ml-1 border-l border-white/10 pl-2 ${
-                    viewMode === 'brand-wizard'
-                      ? 'bg-white/15 text-white'
-                      : 'text-white/50 hover:text-white/80'
-                  }`}
-                >
-                  Brand Wizard
-                </button>
-                <button
-                  onClick={() => setViewMode('admin')}
-                  className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                    viewMode === 'admin'
-                      ? 'bg-white/15 text-white'
-                      : 'text-white/50 hover:text-white/80'
-                  }`}
-                >
-                  Admin
-                </button>
-              </>
+              <button
+                onClick={() => setViewMode('admin')}
+                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ml-1 border-l border-white/10 pl-2 ${
+                  viewMode === 'admin'
+                    ? 'bg-white/15 text-white'
+                    : 'text-white/50 hover:text-white/80'
+                }`}
+              >
+                Admin
+              </button>
             )}
           </div>
 
@@ -418,10 +405,6 @@ export function AppShell() {
       {viewMode === 'admin' ? (
         <div className="flex-1 overflow-auto">
           <AdminPanel />
-        </div>
-      ) : viewMode === 'brand-wizard' ? (
-        <div className="flex-1 overflow-hidden">
-          <BrandWizard />
         </div>
       ) : (
         <div className="flex flex-1 overflow-hidden">

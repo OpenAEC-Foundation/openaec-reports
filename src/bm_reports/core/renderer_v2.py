@@ -42,6 +42,16 @@ ASSETS_DIR = Path(__file__).parent.parent / "assets"
 FONT_DIR = ASSETS_DIR / "fonts"
 TEMPLATES_DIR = ASSETS_DIR / "templates"
 
+# A4 page dimensions in points (1 pt = 1/72 inch)
+A4_PORTRAIT_WIDTH = 595.28
+A4_PORTRAIT_HEIGHT = 841.89
+A4_LANDSCAPE_WIDTH = 841.89
+A4_LANDSCAPE_HEIGHT = 595.28
+
+# Maximum y coordinate for content (bottom boundary)
+Y_MAX_PORTRAIT = 780.0
+Y_MAX_LANDSCAPE = 533.0
+
 
 def _hex_to_rgb(h: str) -> tuple[float, float, float]:
     """Convert hex color string to (r, g, b) tuple with 0-1 range."""
@@ -477,21 +487,40 @@ class ContentRenderer:
         self.page: fitz.Page | None = None
         self.y = 0.0
         self.page_count = 0
-        self.y_max = 780.0
+        self.y_max = Y_MAX_PORTRAIT
         self.current_page_nr = 3  # starts after cover (1) + colofon (2)
+        self._orientation: str = "portrait"
 
     # --- Low level ---
 
     def _new_page(self, template_key: str = "standaard") -> None:
-        """Insert a new page from stationery template."""
-        pdf_path = self.stationery.get(template_key)
+        """Insert a new page from stationery template.
+
+        Selecteert automatisch de juiste stationery en paginagrootte
+        op basis van de huidige oriëntatie (``_orientation``).
+
+        Args:
+            template_key: Stationery key (bijv. 'standaard', 'bijlagen').
+        """
+        # Kies stationery op basis van oriëntatie
+        if self._orientation == "landscape" and template_key == "standaard":
+            landscape_key = "content_landscape"
+            pdf_path = self.stationery.get(landscape_key)
+        else:
+            pdf_path = self.stationery.get(template_key)
+
         if pdf_path and pdf_path.exists():
             src = fitz.open(str(pdf_path))
             self.doc.insert_pdf(src)
             src.close()
+        elif self._orientation == "landscape":
+            self.doc.new_page(
+                width=A4_LANDSCAPE_WIDTH, height=A4_LANDSCAPE_HEIGHT
+            )
         else:
-            # Fallback: blank A4
-            self.doc.new_page(width=595.3, height=841.9)
+            self.doc.new_page(
+                width=A4_PORTRAIT_WIDTH, height=A4_PORTRAIT_HEIGHT
+            )
 
         self.page_count += 1
         self.page = self.doc[-1]
@@ -499,6 +528,12 @@ class ContentRenderer:
 
         margins = self.tpl.standaard.get("margins", {})
         self.y = margins.get("top", 74.9)
+
+        # Y-max instellen op basis van oriëntatie
+        if self._orientation == "landscape":
+            self.y_max = Y_MAX_LANDSCAPE
+        else:
+            self.y_max = Y_MAX_PORTRAIT
 
     def _check_overflow(self, needed: float) -> bool:
         """Check if content fits; if not, finalize page and start new one."""
@@ -1273,12 +1308,32 @@ class ContentRenderer:
     # --- Section rendering ---
 
     def render_section(self, section: dict) -> None:
-        """Render a single section (chapter) with its content blocks."""
+        """Render a single section (chapter) with its content blocks.
+
+        Ondersteunt per-sectie oriëntatie via ``section["orientation"]``.
+        Bij een oriëntatiewisseling wordt een nieuwe pagina gestart met
+        de juiste paginagrootte en stationery. Na de sectie wordt de
+        vorige oriëntatie hersteld.
+        """
         level = section.get("level", 1)
         title = section.get("title", "")
         number = section.get("number", "")
 
+        # Per-sectie orientation switch
+        section_orientation = section.get("orientation", self._orientation)
+        previous_orientation = self._orientation
+        orientation_changed = section_orientation != self._orientation
+
+        if orientation_changed:
+            # Finaliseer huidige pagina voor de wissel
+            if self.page is not None:
+                self._add_page_number()
+            self._orientation = section_orientation
+
         if section.get("page_break_before", False) or level == 1:
+            self._new_page()
+        elif orientation_changed:
+            # Forceer nieuwe pagina bij oriëntatiewissel
             self._new_page()
 
         if level == 1 and number:
@@ -1292,6 +1347,15 @@ class ContentRenderer:
         # Add page number if this was a top-level section start
         if level == 1:
             self._add_page_number()
+
+        # Herstel vorige oriëntatie na de sectie
+        if orientation_changed:
+            self._orientation = previous_orientation
+            self.y_max = (
+                Y_MAX_LANDSCAPE
+                if self._orientation == "landscape"
+                else Y_MAX_PORTRAIT
+            )
 
     def _render_block(self, block: dict) -> None:
         """Dispatch a content block to the appropriate renderer."""
@@ -1416,6 +1480,7 @@ class ReportGeneratorV2:
         stationery = {
             "colofon": stationery_dir / "colofon.pdf",
             "standaard": stationery_dir / "standaard.pdf",
+            "content_landscape": stationery_dir / "standaard_landscape.pdf",
             "bijlagen": stationery_dir / "bijlagen.pdf",
             "achterblad": stationery_dir / "achterblad.pdf",
         }

@@ -433,6 +433,11 @@ async def list_stationery():
 # Protected router mounten op de app
 app.include_router(_protected)
 
+# Brand onboarding API (eigen auth dependency)
+from bm_reports.brand_api import brand_router  # noqa: E402
+
+app.include_router(brand_router)
+
 # ============================================================
 # Static frontend (moet ONDERAAN staan, na alle API routes)
 # ============================================================

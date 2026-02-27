@@ -11,6 +11,11 @@
       "description": "Template naam (correspondeert met YAML in assets/templates/)",
       "examples": ["structural", "daylight", "building_code", "custom"]
     },
+    "tenant": {
+      "type": "string",
+      "description": "Tenant identifier. Bepaalt welke tenant-specifieke modules beschikbaar zijn.",
+      "examples": ["symitech", "3bm"]
+    },
     "format": {
       "type": "string",
       "enum": ["A4", "A3"],
@@ -176,6 +181,12 @@
           "description": "Inhoud van de sectie — lijst van content blocks",
           "items": { "$ref": "#/$defs/content_block" }
         },
+        "orientation": {
+          "type": "string",
+          "enum": ["portrait", "landscape"],
+          "default": "portrait",
+          "description": "Oriëntatie voor deze specifieke sectie. Overschrijft document orientation."
+        },
         "page_break_before": {
           "type": "boolean",
           "default": false,
@@ -199,7 +210,11 @@
         { "$ref": "#/$defs/block_page_break" },
         { "$ref": "#/$defs/block_bullet_list" },
         { "$ref": "#/$defs/block_heading_2" },
-        { "$ref": "#/$defs/block_raw_flowable" }
+        { "$ref": "#/$defs/block_raw_flowable" },
+        { "$ref": "#/$defs/block_bic_table" },
+        { "$ref": "#/$defs/block_cost_summary" },
+        { "$ref": "#/$defs/block_location_detail" },
+        { "$ref": "#/$defs/block_object_description" }
       ]
     },
 
@@ -387,6 +402,138 @@
         "type": { "const": "raw_flowable" },
         "class_name": { "type": "string" },
         "kwargs": { "type": "object", "additionalProperties": true }
+      }
+    },
+
+    "block_bic_table": {
+      "type": "object",
+      "required": ["type"],
+      "description": "BIC controle tabel — Symitech tenant module",
+      "properties": {
+        "type": { "const": "bic_table" },
+        "location_name": { "type": "string", "description": "Naam van de locatie" },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["title", "rows"],
+            "properties": {
+              "title": { "type": "string" },
+              "rows": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["label"],
+                  "properties": {
+                    "label": { "type": "string" },
+                    "ref_value": { "type": "string" },
+                    "actual_value": { "type": "string" },
+                    "is_currency": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": {
+          "type": "object",
+          "description": "Samenvattend overzicht",
+          "additionalProperties": true
+        }
+      }
+    },
+
+    "block_cost_summary": {
+      "type": "object",
+      "required": ["type"],
+      "description": "Kostenopgave tabel — Symitech tenant module",
+      "properties": {
+        "type": { "const": "cost_summary" },
+        "columns": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Kolomnamen"
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {},
+            "description": "Rij waarden"
+          }
+        },
+        "total": {
+          "type": "object",
+          "description": "Totaalregel",
+          "properties": {
+            "label": { "type": "string" },
+            "amount": { "type": ["string", "number"] }
+          }
+        }
+      }
+    },
+
+    "block_location_detail": {
+      "type": "object",
+      "required": ["type"],
+      "description": "Locatiegegevens blok — Symitech tenant module",
+      "properties": {
+        "type": { "const": "location_detail" },
+        "client": {
+          "type": "object",
+          "description": "Opdrachtgever informatie",
+          "properties": {
+            "name": { "type": "string" },
+            "contact": { "type": "string" },
+            "address": { "type": "string" },
+            "postal_code": { "type": "string" },
+            "city": { "type": "string" },
+            "phone": { "type": "string" },
+            "email": { "type": "string" }
+          }
+        },
+        "location": {
+          "type": "object",
+          "description": "Locatiegegevens",
+          "properties": {
+            "name": { "type": "string" },
+            "address": { "type": "string" },
+            "postal_code": { "type": "string" },
+            "city": { "type": "string" },
+            "cadastral": { "type": "string" }
+          }
+        },
+        "photo_path": {
+          "$ref": "#/$defs/image_source",
+          "description": "Locatiefoto"
+        }
+      }
+    },
+
+    "block_object_description": {
+      "type": "object",
+      "required": ["type"],
+      "description": "Objectbeschrijving blok — Symitech tenant module",
+      "properties": {
+        "type": { "const": "object_description" },
+        "object_name": { "type": "string", "description": "Naam van het object" },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label"],
+            "properties": {
+              "label": { "type": "string" },
+              "value": { "type": "string" }
+            }
+          },
+          "description": "Key-value velden"
+        },
+        "notes": { "type": "string", "description": "Aanvullende opmerkingen" },
+        "photo_path": {
+          "$ref": "#/$defs/image_source",
+          "description": "Objectfoto"
+        }
       }
     },
 

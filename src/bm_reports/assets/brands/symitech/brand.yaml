@@ -1,0 +1,155 @@
+# Symitech B.V. — Brand Configuration
+# ====================================
+
+brand:
+  name: "Symitech B.V."
+  slug: symitech
+  tenant: symitech
+  tagline: "Synergie in Milieutechniek"
+
+# --- Kleuren ---
+colors:
+  primary: '#006FAB'        # Blauw — sectie headers, hoofdkleur
+  secondary: '#94571E'      # Bruin — labels, accenten
+  text: '#000000'           # Zwart — body tekst
+  text_light: '#FFFFFF'     # Wit — tekst op donkere achtergrond
+  accent: '#0077C5'         # Licht blauw — tagline
+  line: '#006FAB'           # Lijnkleur (dubbele lijnen)
+
+# --- Fonts ---
+fonts:
+  heading: Arial-BoldMT
+  heading_fallback: Helvetica-Bold
+  body: ArialMT
+  body_fallback: Helvetica
+
+# --- Logo's ---
+logos:
+  main: logos/symitech_logo.png          # Gouden druppel + woordmerk
+  # Worden aangeleverd door Jochem
+
+# --- Stationery ---
+stationery:
+  cover:
+    source: stationery/cover.pdf
+  colofon:
+    source: stationery/colofon.pdf
+  content_portrait:
+    source: stationery/content_portrait.pdf
+  content_landscape:
+    source: stationery/content_landscape.pdf
+  backcover:
+    source: stationery/backcover.pdf
+
+# --- Tenant-specifieke modules ---
+tenant_modules:
+  - bic_table
+  - cost_summary
+  - location_detail
+  - object_description
+
+# --- Module styling ---
+module_config:
+  label_size: 10.0
+  value_size: 10.0
+  heading_size: 14.0
+  section_header_color: '#006FAB'
+  label_color: '#94571E'
+  value_color: '#000000'
+  line_color: '#006FAB'
+  line_width: 0.5
+  double_line_spacing: 2.7    # afstand tussen dubbele lijnen
+
+# --- Pagina layout referenties ---
+pages:
+  cover:
+    orientation: portrait
+    # Logo positie (gouden druppel + woordmerk, rechtsboven)
+    logo_x_ref: 436.2
+    logo_y_ref: 832.8
+    logo_w_ref: 143.3
+    # Tagline "SYNERGIE IN MILIEUTECHNIEK"
+    tagline_font: Arial-BoldMT
+    tagline_size_ref: 11.0
+    tagline_color: '#0077C5'
+    tagline_x_ref: 406.1
+    tagline_y_ref: 789.2
+    # Titel
+    title_font: Arial-BoldMT
+    title_size_ref: 16.0
+    title_color: '#006FAB'
+    title_x_ref: 150.6
+    title_y_ref: 763.3
+    # Subtitel (datum + documentnummer)
+    subtitle_font: Arial-BoldMT
+    subtitle_size_ref: 9.0
+    subtitle_color: '#FFFFFF'
+    subtitle_x_ref: 150.6
+    subtitle_y_ref: 745.1
+    # Type offerte
+    type_font: Arial-BoldMT
+    type_size_ref: 18.0
+    type_color: '#006FAB'
+    type_x_ref: 150.6
+    type_y_ref: 699.8
+    # Contact strip (onderin)
+    contact_font: Arial-BoldMT
+    contact_size_ref: 10.0
+    contact_color: '#FFFFFF'
+    contact_rows:
+      - y_ref: 52.4
+      - y_ref: 39.2
+      - y_ref: 26.0
+
+  colofon:
+    orientation: portrait
+    # Wordt gerenderd als location_detail module in content frame
+    # Hier alleen footer-specifieke posities
+    page_num_x_pt: 397.2
+    page_num_y_pt: 775.3
+    page_num_font: Arial-BoldMT
+    page_num_size: 12.0
+    page_num_color: '#FFFFFF'
+    footer_project_x_pt: 28.3
+    footer_project_y_pt: 771.0
+    footer_code_x_pt: 28.3
+    footer_code_y_pt: 794.0
+
+  content:
+    orientation: portrait
+    # Content frame grenzen (binnen de stationery)
+    content_top_pt: 90.0
+    content_bottom_pt: 750.0
+    content_left_pt: 49.8
+    content_right_pt: 545.5
+    # Footer posities (zelfde als colofon)
+    page_num_x_pt: 397.2
+    page_num_y_pt: 775.3
+    page_num_font: Arial-BoldMT
+    page_num_size: 12.0
+    page_num_color: '#FFFFFF'
+    footer_project_x_pt: 28.3
+    footer_project_y_pt: 771.0
+    footer_code_x_pt: 28.3
+    footer_code_y_pt: 794.0
+
+  content_landscape:
+    orientation: landscape
+    content_top_pt: 90.0
+    content_bottom_pt: 530.0
+    content_left_pt: 49.8
+    content_right_pt: 792.0
+    page_num_x_pt: 620.0
+    page_num_y_pt: 555.0
+    page_num_font: Arial-BoldMT
+    page_num_size: 12.0
+    page_num_color: '#FFFFFF'
+
+  backcover:
+    orientation: portrait
+    placeholder_text: 'Deze pagina is [met opzet] leeg gelaten – Niet verwijderen'
+    placeholder_font: ArialMT
+    placeholder_size: 10.0
+    placeholder_color: '#000000'
+    placeholder_x_pt: 49.8
+    placeholder_y_pt: 91.0

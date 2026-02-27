@@ -1,6 +1,6 @@
 # Backend Status — bm-reports
 
-> Laatst bijgewerkt: 2026-02-26
+> Laatst bijgewerkt: 2026-02-27
 
 ## Deployment
 
@@ -46,11 +46,14 @@ openaec-reports/
 src/bm_reports/
 ├── core/           # Engine, document, styles, brand, stationery, page templates
 ├── components/     # Calculation, check, table, image, map, spacer
+├── modules/        # ContentModule base + tenant-specifieke modules (ModuleRegistry)
+│   └── symitech/   # BIC table, cost summary, location detail, object description
 ├── auth/           # JWT + API Key authenticatie, user model, SQLite store
 ├── admin/          # Admin API: user CRUD, tenant/brand/asset/API key beheer
 ├── tools/          # Brand analyzer, stationery extractor, brand builder
 ├── utils/          # Logo prep, fonts
 ├── assets/         # Templates (YAML), brands (YAML), logos, fonts, graphics
+│   └── brands/symitech/  # Symitech brand.yaml, stationery, logos
 ├── api.py          # FastAPI endpoints + StaticFiles mount (SPA serving)
 ├── cli.py          # CLI: analyze-brand, build-brand, serve, create-user
 └── schemas/        # JSON Schema + example
@@ -87,6 +90,9 @@ src/bm_reports/
 | **data/json_adapter.py** | ✅ Compleet | ✅ test_json_adapter.py (14 tests) | 88% |
 | **data/kadaster.py** | ✅ Compleet | ✅ test_data_adapters.py | 100% |
 | **data/revit_adapter.py** | ⚠️ Stub | ✅ test_data_adapters.py | 87% |
+| **modules/base.py** | ✅ Compleet | ✅ test_modules_foundation.py | — |
+| **modules/__init__.py** | ✅ Compleet | ✅ test_modules_foundation.py | — |
+| **modules/symitech/** | ✅ Compleet | ✅ test_symitech_modules.py (32 tests) | — |
 | **tools/brand_analyzer** | ✅ Compleet | ✅ test_brand_analyzer.py | 93-99% |
 | **tools/stationery_extractor.py** | ✅ Compleet | ✅ test_stationery_extractor.py | 96% |
 | **tools/brand_builder.py** | ✅ Compleet | ✅ test_brand_builder.py | 68% |
@@ -125,10 +131,15 @@ tests/
 ├── test_styles.py                  ✅  7 tests
 ├── test_template_scaffold.py       ✅ 21 tests
 ├── test_templates.py               ✅ 12 tests
-└── test_tenant.py                  ✅ 30 tests
+├── test_tenant.py                  ✅ 30 tests
+├── test_modules_foundation.py     ✅ 22 tests
+├── test_symitech_modules.py       ✅ 32 tests
+├── test_symitech_brand.py         ✅ 16 tests
+├── test_symitech_integration.py   ✅ 14 tests
+└── test_symitech_templates.py     ✅ 21 tests
 ```
 
-**Totaal:** 701 tests | **Coverage:** ~75%
+**Totaal:** 824 tests | **Coverage:** ~75%
 
 ## Recente Features
 
@@ -145,6 +156,9 @@ tests/
 - **Shared style factories:** `block_style_heading()`, `_reference()`, `_body()`, `_mono()`, `_result()` in `styles.py`
 - **Font embedding fix:** Gotham fonts embedded als subset via `fitz.TextWriter` in `renderer_v2.py` — PDF's nu leesbaar zonder lokaal geïnstalleerde fonts
 - **Tenant management:** Tenants tab in admin panel — overzicht met asset counts, nieuwe tenant aanmaken (POST), verwijderen (DELETE), directe navigatie naar Brand tab
+- **ModuleRegistry:** Content module systeem met core/tenant scheiding. `register_core()` voor universele blocks, `register_tenant()` voor klantspecifiek
+- **Symitech tenant:** 4 modules (bic_table, cost_summary, location_detail, object_description), brand.yaml, 2 rapport templates
+- **create_block() tenant support:** Block registry fallback naar ModuleRegistry voor tenant-specifieke block types
 
 ## API Endpoints
 

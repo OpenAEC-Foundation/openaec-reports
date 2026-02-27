@@ -85,6 +85,8 @@ class BrandConfig:
     Attrs:
         name: Weergavenaam van het merk.
         slug: Machine-leesbare identifier.
+        tenant: Tenant identifier voor module registry lookup.
+        tagline: Merk tagline.
         colors: Kleurenpalet (naam → hex waarde).
         fonts: Font mapping (naam → font naam).
         header: Header zone configuratie.
@@ -92,11 +94,15 @@ class BrandConfig:
         logos: Logo mapping (naam → relatief pad).
         stationery: Achtergrond-templates per paginatype.
         modules: Module-specifieke styling (table, calculation, etc.).
+        tenant_modules: Beschikbare tenant-specifieke module types.
+        module_config: Configuratie voor tenant modules (kleuren, sizes).
         brand_dir: Directory van het YAML bestand (voor relatieve paden).
     """
 
     name: str = "Default"
     slug: str = "default"
+    tenant: str = ""
+    tagline: str = ""
     colors: dict[str, str] = field(default_factory=dict)
     fonts: dict[str, str] = field(default_factory=dict)
     header: ZoneConfig = field(default_factory=ZoneConfig)
@@ -107,6 +113,8 @@ class BrandConfig:
     pages: dict[str, dict] = field(default_factory=dict)
     stationery: dict[str, StationeryPageConfig] = field(default_factory=dict)
     modules: dict[str, dict] = field(default_factory=dict)
+    tenant_modules: list[str] = field(default_factory=list)
+    module_config: dict = field(default_factory=dict)
     brand_dir: Path | None = None
 
 
@@ -235,9 +243,20 @@ class BrandLoader:
                 content_frame=spec.get("content_frame"),
             )
 
+        # Modules: dict (styling config) of list (tenant module types)
+        raw_modules = data.get("modules", {})
+        if isinstance(raw_modules, list):
+            tenant_modules = raw_modules
+            modules_dict: dict[str, dict] = {}
+        else:
+            tenant_modules = data.get("tenant_modules", [])
+            modules_dict = raw_modules
+
         return BrandConfig(
             name=brand_info.get("name", name),
             slug=brand_info.get("slug", name),
+            tenant=brand_info.get("tenant", data.get("tenant", "")),
+            tagline=brand_info.get("tagline", data.get("tagline", "")),
             colors=data.get("colors", {}),
             fonts=data.get("fonts", {}),
             header=_parse_zone(data.get("header")),
@@ -247,7 +266,9 @@ class BrandLoader:
             styles=data.get("styles", {}),
             pages=data.get("pages", {}),
             stationery=stationery,
-            modules=data.get("modules", {}),
+            modules=modules_dict,
+            tenant_modules=tenant_modules,
+            module_config=data.get("module_config", {}),
             brand_dir=path.parent,
         )
 

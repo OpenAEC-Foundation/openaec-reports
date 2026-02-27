@@ -234,13 +234,18 @@ def create_block(
     *,
     base_dir: Path | None = None,
     styles=None,
+    tenant: str | None = None,
 ) -> Flowable:
     """Maak een content block flowable op basis van JSON data.
+
+    Zoekt eerst in de core BLOCK_REGISTRY, dan in de ModuleRegistry
+    voor tenant-specifieke block types.
 
     Args:
         data: Dict met minimaal een 'type' veld.
         base_dir: Basis directory voor relatieve paden (images).
         styles: Optionele stylesheet (StyleSheet1) voor paragraph styles.
+        tenant: Optionele tenant identifier voor tenant-specifieke modules.
 
     Returns:
         ReportLab Flowable object.
@@ -253,7 +258,12 @@ def create_block(
         raise ValueError("Content block mist 'type' veld")
 
     factory = BLOCK_REGISTRY.get(block_type)
+
+    # Fallback: zoek in ModuleRegistry voor tenant-specifieke modules
     if factory is None:
+        module_class = _resolve_tenant_module(block_type, tenant)
+        if module_class is not None:
+            return module_class(data)
         raise ValueError(f"Onbekend content block type: {block_type!r}")
 
     # Factories die base_dir ondersteunen
@@ -265,3 +275,24 @@ def create_block(
         return factory(data, styles=styles)
 
     return factory(data)
+
+
+def _resolve_tenant_module(
+    block_type: str,
+    tenant: str | None,
+) -> type | None:
+    """Zoek een module in de ModuleRegistry.
+
+    Args:
+        block_type: Het block type om op te zoeken.
+        tenant: Optionele tenant identifier.
+
+    Returns:
+        De module class, of None als niet gevonden.
+    """
+    try:
+        from bm_reports.modules import ModuleRegistry
+
+        return ModuleRegistry.get(block_type, tenant=tenant)
+    except (ImportError, KeyError):
+        return None

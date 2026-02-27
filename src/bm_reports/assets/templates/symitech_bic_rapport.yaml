@@ -1,0 +1,39 @@
+report_type: bic_rapport
+tenant: symitech
+format: A4
+orientation: portrait
+
+cover:
+  subtitle_hint: "BIC Rapport"
+colofon:
+  enabled: true
+toc:
+  enabled: false
+backcover:
+  enabled: true
+
+structure:
+  - cover
+  - colofon
+  - sections
+  - backcover
+
+# Sectie-presets: voorgeconfigureerde secties voor de frontend
+section_presets:
+  - title: "Locatie"
+    description: "Locatiegegevens en opdrachtgever"
+    default_blocks:
+      - type: location_detail
+  - title: "BIC Controles"
+    description: "Overzicht BIC controles per locatie"
+    default_blocks:
+      - type: bic_table
+  - title: "Kostenopgave"
+    description: "Kostenopgave (landscape)"
+    orientation: landscape
+    default_blocks:
+      - type: cost_summary
+  - title: "Objectbeschrijving"
+    description: "Beschrijving van objecten op locatie"
+    default_blocks:
+      - type: object_description

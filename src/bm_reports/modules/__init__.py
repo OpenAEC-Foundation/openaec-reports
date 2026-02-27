@@ -91,6 +91,22 @@ class ModuleRegistry:
         return modules
 
     @classmethod
+    def has(cls, name: str, tenant: str | None = None) -> bool:
+        """Check of een module geregistreerd is.
+
+        Args:
+            name: Module naam.
+            tenant: Optionele tenant identifier.
+
+        Returns:
+            True als de module gevonden is.
+        """
+        if tenant and tenant in cls._tenant_modules:
+            if name in cls._tenant_modules[tenant]:
+                return True
+        return name in cls._core_modules
+
+    @classmethod
     def reset(cls) -> None:
         """Reset de registry (voor tests)."""
         cls._core_modules.clear()

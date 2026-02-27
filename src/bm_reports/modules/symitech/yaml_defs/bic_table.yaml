@@ -1,0 +1,49 @@
+# Symitech BIC Table — YAML module definition
+# Equivalent of BicTableModule (bic_table.py)
+#
+# Kostenopgave tabel met "Conform opdracht" en "Werkelijke kosten" kolommen.
+# Toont secties met rijen, afgesloten met samenvatting en totaal.
+
+name: bic_table
+tenant: symitech
+
+style:
+  row_height: 16.0
+  section_header_height: 20.0
+  section_gap: 10.0
+  column_header_height: 18.0
+  location_header_height: 24.0
+  double_line_gap: 2.7
+  total_separator_height: 8.0
+  label_indent: 4.0
+  bottom_padding: 0.0
+
+elements:
+  - type: right_header
+    field: location_name
+
+  - type: column_headers
+    labels:
+      - text: "Conform opdracht"
+        x_frac: 0.50
+        align: left
+      - text: "Werkelijke kosten"
+        x_frac: 0.75
+        align: left
+
+  - type: sectioned_rows
+    data_key: sections
+    title_field: title
+    columns:
+      - { key: label, x_frac: 0.0, offset: 4, align: left, color: secondary }
+      - { key: ref_value, x_frac: 0.75, offset: -8, align: right, color: text }
+      - { key: actual_value, x_frac: 1.0, align: right, color: text }
+
+  - type: summary
+    data_key: summary
+    title_field: title
+    total_key: total
+    columns:
+      - { key: label, x_frac: 0.0, offset: 4, align: left, color: secondary }
+      - { key: ref_value, x_frac: 0.75, offset: -8, align: right, color: text }
+      - { key: actual_value, x_frac: 1.0, align: right, color: text }

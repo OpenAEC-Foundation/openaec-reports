@@ -1,0 +1,54 @@
+# Symitech Cost Summary — YAML module definition
+# Equivalent of CostSummaryModule (cost_summary.py)
+#
+# Samenvattende kostentabel met kolommen, rijen en totaal.
+# Waarden in Nederlands valutaformaat.
+
+name: cost_summary
+tenant: symitech
+
+style:
+  title_height: 28.0
+  column_header_height: 20.0
+  row_height: 16.0
+  double_line_gap: 2.7
+  total_separator_height: 8.0
+  total_row_height: 18.0
+  label_indent: 4.0
+  bottom_padding: 8.0
+
+elements:
+  - type: title
+    field: title
+    default: "Kostenopgave"
+    separator: double_line
+
+  - type: column_headers
+    line_below: true
+    labels:
+      - text: "Omschrijving"
+        x_frac: 0.0
+        offset: 4
+        align: left
+      - text: "Aantal"
+        x_frac: 0.60
+        align: right
+      - text: "Eenheidsprijs"
+        x_frac: 0.80
+        align: right
+      - text: "Totaal"
+        x_frac: 1.0
+        align: right
+
+  - type: data_rows
+    data_key: rows
+    columns:
+      - { key: description, x_frac: 0.0, offset: 4, align: left, color: text }
+      - { key: quantity, x_frac: 0.60, align: right, color: text }
+      - { key: unit_price, x_frac: 0.80, align: right, color: text, format: currency_nl }
+      - { key: total, x_frac: 1.0, align: right, color: text, format: currency_nl }
+
+  - type: total_row
+    data_key: total
+    label: "Totaal"
+    format: currency_nl

@@ -498,6 +498,9 @@ async def delete_tenant(tenant: str):
 async def list_tenant_templates(tenant: str):
     """Lijst template YAML bestanden voor een tenant.
 
+    Toont zowel tenant-specifieke templates (uit de tenant directory)
+    als package templates die bij de tenant horen (``tenant:`` veld matcht).
+
     Args:
         tenant: Tenant naam.
 
@@ -505,15 +508,38 @@ async def list_tenant_templates(tenant: str):
         Dict met lijst van template bestanden.
     """
     _validate_path_segment(tenant, "tenant")
-    templates_dir = _get_tenants_base() / tenant / "templates"
+    templates: list[dict] = []
+    seen: set[str] = set()
 
-    templates = []
+    # 1. Tenant-specifieke templates (overschrijven package)
+    templates_dir = _get_tenants_base() / tenant / "templates"
     if templates_dir.exists() and templates_dir.is_dir():
         for f in sorted(templates_dir.glob("*.yaml")):
+            seen.add(f.stem)
             templates.append({
                 "filename": f.name,
                 "size": f.stat().st_size,
+                "source": "tenant",
             })
+
+    # 2. Package templates die bij deze tenant horen
+    package_templates = Path(__file__).parent.parent / "assets" / "templates"
+    if package_templates.exists():
+        for f in sorted(package_templates.glob("*.yaml")):
+            if f.stem in seen:
+                continue
+            try:
+                with f.open("r", encoding="utf-8") as fh:
+                    data = yaml.safe_load(fh)
+                if data and data.get("tenant") == tenant:
+                    seen.add(f.stem)
+                    templates.append({
+                        "filename": f.name,
+                        "size": f.stat().st_size,
+                        "source": "package",
+                    })
+            except (yaml.YAMLError, OSError):
+                continue
 
     return {"templates": templates}
 

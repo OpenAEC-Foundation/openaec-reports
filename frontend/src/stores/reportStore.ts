@@ -25,7 +25,7 @@ export interface ValidationResult {
 
 // ---------- View mode ----------
 
-export type ViewMode = 'editor' | 'split' | 'json' | 'preview' | 'admin';
+export type ViewMode = 'editor' | 'split' | 'json' | 'preview' | 'admin' | 'brand-wizard';
 
 // ---------- Undo/redo constants ----------
 

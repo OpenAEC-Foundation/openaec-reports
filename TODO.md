@@ -1,7 +1,7 @@
 # TODO — bm-reports
 
 > Prioriteit: 🔴 Hoog | 🟡 Middel | 🟢 Laag
-> Laatst bijgewerkt: 2026-02-26
+> Laatst bijgewerkt: 2026-02-27
 
 ---
 
@@ -103,6 +103,24 @@
 
 ---
 
+## 🟡 S1 — Customer Tenant (resterend)
+
+**Status:** Core modules klaar, integratie klaar, stationery PDF's nog nodig
+
+- [x] ModuleRegistry + ContentModule base class
+- [x] 4 Customer modules (bic_table, cost_summary, location_detail, object_description)
+- [x] Customer brand.yaml + rapport templates (bic_rapport, sanering)
+- [x] create_block() tenant fallback naar ModuleRegistry
+- [x] Module registratie bij app startup (__init__.py)
+- [x] Integratie tests (14 tests)
+- [x] Volledige test suite groen (824 tests)
+- [ ] Customer stationery PDF's aanleveren (cover, colofon, content, backcover)
+- [ ] Customer logo aanleveren (customer_logo.png)
+- [ ] End-to-end test: JSON → Customer rapport met stationery → PDF
+- [ ] renderer_v2 integratie met tenant modules
+
+---
+
 ## 🟡 P1 — Stationery Extractie
 
 **Prompt:** `PROMPT_P1_STATIONERY_EXTRACTIE.md`
@@ -195,3 +213,4 @@
 | **Font embedding fix: Inter subset via TextWriter (renderer_v2.py)** | **Week 9** |
 | **Git repo hersteld na Synology Drive sync (.git exclusie)** | **Week 9** |
 | **Tenant management: admin panel Tenants tab (create/delete + overzicht)** | **Week 9** |
+| **Customer tenant: ModuleRegistry, 4 modules, brand, templates, integratie** | **Week 9** |

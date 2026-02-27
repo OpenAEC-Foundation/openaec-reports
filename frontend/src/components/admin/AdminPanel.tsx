@@ -4,12 +4,14 @@ import { TenantManagement } from "./TenantManagement";
 import { UserManagement } from "./UserManagement";
 import { TemplateManagement } from "./TemplateManagement";
 import { BrandManagement } from "./BrandManagement";
+import { BrandWizard } from "@/components/brand-wizard";
 
 const TABS = [
   { key: "tenants" as const, label: "Tenants" },
   { key: "users" as const, label: "Gebruikers" },
   { key: "templates" as const, label: "Templates" },
   { key: "brand" as const, label: "Brand" },
+  { key: "brand-wizard" as const, label: "Brand Wizard" },
 ];
 
 export function AdminPanel() {
@@ -71,6 +73,7 @@ export function AdminPanel() {
       {activeTab === "users" && <UserManagement />}
       {activeTab === "templates" && <TemplateManagement />}
       {activeTab === "brand" && <BrandManagement />}
+      {activeTab === "brand-wizard" && <BrandWizard />}
     </div>
   );
 }

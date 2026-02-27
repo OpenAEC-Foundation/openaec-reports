@@ -53,7 +53,9 @@ def _resolve_tenants_base() -> Path:
     Returns:
         Path naar de tenants directory.
     """
-    tenants_dir = os.environ.get("BM_TENANTS_DIR")
+    tenants_dir = os.environ.get("BM_TENANTS_DIR") or os.environ.get(
+        "BM_TENANTS_ROOT"
+    )
     if tenants_dir:
         return Path(tenants_dir)
 
@@ -335,6 +337,33 @@ async def delete_user(user_id: str, request: Request):
 # ============================================================
 
 
+def _count_package_templates_for_tenant(tenant: str) -> int:
+    """Tel package templates die bij een tenant horen.
+
+    Scant de ingebouwde templates directory voor YAML bestanden
+    met een ``tenant:`` veld dat matcht met de opgegeven tenant naam.
+
+    Args:
+        tenant: Tenant naam om op te filteren.
+
+    Returns:
+        Aantal matchende package templates.
+    """
+    package_dir = Path(__file__).parent.parent / "assets" / "templates"
+    if not package_dir.exists():
+        return 0
+    count = 0
+    for f in package_dir.glob("*.yaml"):
+        try:
+            with f.open("r", encoding="utf-8") as fh:
+                data = yaml.safe_load(fh)
+            if data and data.get("tenant") == tenant:
+                count += 1
+        except (yaml.YAMLError, OSError):
+            continue
+    return count
+
+
 @admin_router.get("/tenants")
 async def list_tenants():
     """Scan de tenants directory en retourneer een overzicht.
@@ -347,15 +376,19 @@ async def list_tenants():
 
     if tenants_base.exists() and tenants_base.is_dir():
         for entry in sorted(tenants_base.iterdir()):
-            if not entry.is_dir() or entry.name.startswith("."):
+            if not entry.is_dir() or entry.name.startswith((".", "test_")):
                 continue
 
             has_brand = (entry / "brand.yaml").exists()
             templates_dir = entry / "templates"
-            template_count = (
+            tenant_template_count = (
                 len(list(templates_dir.glob("*.yaml")))
                 if templates_dir.exists()
                 else 0
+            )
+            template_count = (
+                tenant_template_count
+                + _count_package_templates_for_tenant(entry.name)
             )
             stationery_dir = entry / "stationery"
             stationery_count = (

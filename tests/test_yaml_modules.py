@@ -38,12 +38,7 @@ from bm_reports.modules.symitech.object_description import ObjectDescriptionModu
 
 DEFAULT_WIDTH = 441.3
 YAML_DEFS_DIR = (
-    Path(__file__).parent.parent
-    / "src"
-    / "bm_reports"
-    / "modules"
-    / "symitech"
-    / "yaml_defs"
+    Path(__file__).parent.parent / "tenants" / "symitech" / "modules"
 )
 
 
@@ -626,7 +621,7 @@ class TestSymitechYamlRegistration:
         from bm_reports.modules.symitech import register_symitech_yaml_modules
 
         ModuleRegistry.reset()
-        register_symitech_yaml_modules()
+        register_symitech_yaml_modules(modules_dir=YAML_DEFS_DIR)
 
         # Alle 4 modules moeten beschikbaar zijn
         for name in ["bic_table", "cost_summary", "location_detail", "object_description"]:
@@ -639,7 +634,7 @@ class TestSymitechYamlRegistration:
         from bm_reports.modules.symitech import register_symitech_modules
 
         ModuleRegistry.reset()
-        register_symitech_modules()
+        register_symitech_modules(modules_dir=YAML_DEFS_DIR)
 
         # Python modules moeten de originele classes zijn
         assert ModuleRegistry.get("bic_table", tenant="symitech") is BicTableModule

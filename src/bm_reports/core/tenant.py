@@ -96,3 +96,12 @@ class TenantConfig:
                 return d
         pkg = _PACKAGE_ASSETS / "fonts"
         return pkg if pkg.exists() and any(pkg.iterdir()) else None
+
+    @property
+    def modules_dir(self) -> Path | None:
+        """Tenant YAML module definities directory."""
+        if self._tenant_dir:
+            d = self._tenant_dir / "modules"
+            if d.exists():
+                return d
+        return None

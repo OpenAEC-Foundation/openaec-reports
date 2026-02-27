@@ -614,6 +614,9 @@ class Report:
             report._toc_title = toc.get("title", "Inhoudsopgave")
             report._toc_max_depth = toc.get("max_depth", 3)
 
+        # Tenant identifier voor module registry lookup
+        tenant = report._brand.tenant or data.get("tenant")
+
         # Secties met content blocks
         for section_data in data.get("sections", []):
             content_blocks = []
@@ -622,6 +625,7 @@ class Report:
                     block_data,
                     base_dir=base_dir,
                     styles=report._styles,
+                    tenant=tenant,
                 )
                 content_blocks.append(flowable)
 
@@ -640,6 +644,7 @@ class Report:
                     block_data,
                     base_dir=base_dir,
                     styles=report._styles,
+                    tenant=tenant,
                 )
                 appendix_content.append(flowable)
             report.add_appendix(

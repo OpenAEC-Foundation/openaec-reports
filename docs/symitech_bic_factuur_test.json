@@ -1,0 +1,164 @@
+{
+  "template": "symitech_bic_factuur",
+  "tenant": "symitech",
+  "brand": "symitech",
+
+  "project": "BIC Monitoring Waterfront Haarlem",
+  "project_number": "412.03",
+  "client": "Gemeente Haarlem",
+  "author": "Symitech B.V.",
+  "date": "2026-02-27",
+  "version": "1.0",
+  "status": "CONCEPT",
+
+  "cover": {
+    "subtitle": "BIC Factuur"
+  },
+
+  "colofon": {
+    "enabled": false
+  },
+
+  "toc": {
+    "enabled": false
+  },
+
+  "backcover": {
+    "enabled": true
+  },
+
+  "sections": [
+    {
+      "title": "Locatie",
+      "content": [
+        {
+          "type": "location_detail",
+          "title": "Locatie",
+          "client": {
+            "section_title": "Opdrachtgever",
+            "name": "Gemeente Haarlem",
+            "address": "Grote Markt 2",
+            "city": "2011 RD Haarlem"
+          },
+          "location": {
+            "section_title": "Locatie van uitvoer",
+            "name": "Waterfront Noord",
+            "address": "Waarderpolder 15",
+            "city": "2031 BN Haarlem",
+            "code": "LOC-2026-042",
+            "provision": "Bodem- en grondwatermonitoring",
+            "object": "Peilbuis PB-03"
+          },
+          "photo_path": null
+        }
+      ]
+    },
+    {
+      "title": "BIC Controles",
+      "content": [
+        {
+          "type": "bic_table",
+          "location_name": "Waterfront Noord — Haarlem",
+          "sections": [
+            {
+              "title": "BIC Controles",
+              "rows": [
+                {"label": "Aantal BIC controles", "ref_value": "8", "actual_value": "9"},
+                {"label": "Uren per controle", "ref_value": "2,5", "actual_value": "2,0"},
+                {"label": "Kosten per uur", "ref_value": "€ 95,00", "actual_value": "€ 95,00"},
+                {"label": "Reiskosten", "ref_value": "€ 320,00", "actual_value": "€ 360,00"}
+              ]
+            },
+            {
+              "title": "Rapportage",
+              "rows": [
+                {"label": "Tussenrapportages", "ref_value": "2", "actual_value": "3"},
+                {"label": "Eindrapportage", "ref_value": "1", "actual_value": "1"}
+              ]
+            },
+            {
+              "title": "Reinigen tijdens BIC",
+              "rows": [
+                {"label": "Aantal reinigingen", "ref_value": "4", "actual_value": "5"},
+                {"label": "Kosten per reiniging", "ref_value": "€ 275,00", "actual_value": "€ 275,00"}
+              ]
+            }
+          ],
+          "summary": {
+            "title": "Overzicht samenvatting",
+            "rows": [
+              {"label": "BIC controles", "ref_value": "€ 2.220,00", "actual_value": "€ 2.070,00"},
+              {"label": "Rapportage", "ref_value": "€ 825,00", "actual_value": "€ 1.075,00"},
+              {"label": "Reinigingen", "ref_value": "€ 1.100,00", "actual_value": "€ 1.375,00"},
+              {"label": "Reiskosten", "ref_value": "€ 320,00", "actual_value": "€ 360,00"}
+            ],
+            "total": {
+              "label": "Totaal excl. BTW",
+              "ref_value": "€ 4.465,00",
+              "actual_value": "€ 4.880,00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Detail weergave",
+      "orientation": "landscape",
+      "content": [
+        {
+          "type": "table",
+          "title": "Detail weergave",
+          "headers": [
+            "BIC Controle nummer",
+            "Type",
+            "Datum",
+            "BIC controle",
+            "Int. inspectie",
+            "Reiniging",
+            "Additioneel"
+          ],
+          "rows": [
+            ["BIC-001", "Regulier", "18-01-2026", "Ja", "Ja", "Nee", ""],
+            ["BIC-002", "Regulier", "15-02-2026", "Ja", "Nee", "Ja", ""],
+            ["BIC-003", "Regulier", "15-03-2026", "Ja", "Ja", "Nee", ""],
+            ["BIC-004", "Regulier", "12-04-2026", "Ja", "Nee", "Ja", "Corrosie peilbuis geconstateerd"],
+            ["BIC-005", "Extra", "20-04-2026", "Ja", "Ja", "Ja", "Hercontrole corrosie"],
+            ["BIC-006", "Regulier", "17-05-2026", "Ja", "Nee", "Nee", ""],
+            ["BIC-007", "Regulier", "14-06-2026", "Ja", "Ja", "Ja", ""],
+            ["BIC-008", "Regulier", "12-07-2026", "Ja", "Nee", "Nee", ""],
+            ["BIC-009", "Regulier", "16-08-2026", "Ja", "Ja", "Ja", "Jaarlijks onderhoud"]
+          ],
+          "style": "default"
+        }
+      ]
+    },
+    {
+      "title": "Voorziening en objecten beschrijving",
+      "orientation": "landscape",
+      "content": [
+        {
+          "type": "table",
+          "title": "Voorziening en objecten beschrijving",
+          "headers": [
+            "Voorziening",
+            "Type",
+            "Status",
+            "Object",
+            "Type",
+            "Beschrijving",
+            "Gebouw",
+            "Ruimte"
+          ],
+          "rows": [
+            ["Grondwater", "Monitoring", "Actief", "PB-01", "Peilbuis", "50mm PVC, 15,0 m-mv", "Waterfront Noord", "Buitenterrein"],
+            ["Grondwater", "Monitoring", "Actief", "PB-02", "Peilbuis", "50mm PVC, 10,0 m-mv", "Waterfront Noord", "Buitenterrein"],
+            ["Grondwater", "Monitoring", "Actief", "PB-03", "Peilbuis", "63mm HDPE, 20,0 m-mv", "Waterfront Noord", "Buitenterrein"],
+            ["Bodem", "Sanering", "In uitvoering", "SAN-03", "Ontgraving", "Verontreinigde grond, 120 m³", "Waterfront Noord", "Kade West"],
+            ["Lucht", "Ventilatie", "Actief", "VENT-02", "Afzuiging", "Kruipruimte ventilatie", "Waterfront Noord", "Parkeergarage"]
+          ],
+          "style": "default"
+        }
+      ]
+    }
+  ]
+}

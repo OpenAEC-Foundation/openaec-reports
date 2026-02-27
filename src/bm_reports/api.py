@@ -349,8 +349,13 @@ async def generate_report_v2(request: Request):
     brand = data.get("brand", _DEFAULT_BRAND)
     stationery_dir = STATIONERY_DIR
 
-    # Check tenant stationery eerst, dan brand-specifiek in package
-    if tenant_config.stationery_dir and tenant_config.stationery_dir.exists():
+    # Resolve stationery: brand_dir/stationery → tenant → package
+    brand_config = _brand_loader.load(brand)
+    if brand_config.brand_dir:
+        brand_stat = brand_config.brand_dir / "stationery"
+        if brand_stat.exists():
+            stationery_dir = brand_stat
+    elif tenant_config.stationery_dir and tenant_config.stationery_dir.exists():
         stationery_dir = tenant_config.stationery_dir
     else:
         brand_stationery = ASSETS_DIR / "stationery" / brand

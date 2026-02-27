@@ -1,4 +1,11 @@
-"""Brand systeem — YAML-configureerbare merken met kleuren, fonts, header/footer."""
+"""Brand systeem — YAML-configureerbare merken met kleuren, fonts, header/footer.
+
+Multi-tenant brand resolution:
+    BrandLoader zoekt brands in volgorde:
+    1. Tenant brand.yaml (via TenantConfig)
+    2. Tenants root: ``<tenants_root>/<name>/brand.yaml``
+    3. Package brands: ``assets/brands/<name>.yaml``
+"""
 
 from __future__ import annotations
 
@@ -158,27 +165,42 @@ def _parse_zone(raw_zone: dict | None) -> ZoneConfig:
 class BrandLoader:
     """Laad en parseer YAML brand configuraties.
 
-    Volgt hetzelfde patroon als TemplateLoader: zoek in assets/brands/
-    of een custom directory. Ondersteunt TenantConfig voor multi-tenant.
+    Multi-tenant brand resolution zoekt in volgorde:
+    1. Tenant brand (via TenantConfig.brand_path, als slug matcht)
+    2. Tenants root: ``<tenants_root>/<name>/brand.yaml``
+    3. Package brands: ``assets/brands/<name>.yaml``
+
+    De tenants_root wordt automatisch gedetecteerd via:
+    - Expliciete ``tenants_root`` parameter
+    - ``TenantConfig.tenants_root``
+    - ``BM_TENANTS_ROOT`` environment variable
+    - Parent van ``BM_TENANT_DIR``
 
     Usage:
         loader = BrandLoader()
+        brand = loader.load("symitech")   # vindt tenants/symitech/brand.yaml
         brand = loader.load("3bm_cooperatie")
-        default = loader.load_default()
         available = loader.list_brands()
-
-        # Met TenantConfig:
-        from bm_reports.core.tenant import TenantConfig
-        loader = BrandLoader(tenant_config=TenantConfig("/data/tenants/3bm"))
     """
 
     def __init__(
         self,
         brands_dir: Path | None = None,
         tenant_config: TenantConfig | None = None,
+        tenants_root: Path | None = None,
     ):
         self._tenant_config = tenant_config
         self.brands_dir = brands_dir or BRANDS_DIR
+
+        # Tenants root: explicit → tenant_config → env var detectie
+        if tenants_root:
+            self._tenants_root = tenants_root
+        elif tenant_config and hasattr(tenant_config, "tenants_root"):
+            self._tenants_root = tenant_config.tenants_root
+        else:
+            from bm_reports.core.tenant import detect_tenants_root
+
+            self._tenants_root = detect_tenants_root()
 
     def load(self, name: str | None = None) -> BrandConfig:
         """Laad een brand configuratie op naam.
@@ -283,68 +305,92 @@ class BrandLoader:
     def list_brands(self) -> list[dict[str, str]]:
         """Lijst alle beschikbare brands.
 
-        Bij tenant_config: toont tenant brand + package brands (dedup op slug).
+        Scant in volgorde (dedup op slug):
+        1. Primaire tenant brand (via TenantConfig)
+        2. Alle tenants in tenants_root
+        3. Package brands in assets/brands/
 
         Returns:
             Lijst van dicts met 'name' en 'slug' per brand.
         """
-        brands = []
+        brands: list[dict[str, str]] = []
         seen_slugs: set[str] = set()
 
-        # Tenant brand eerst (als beschikbaar)
+        # 1. Primaire tenant brand (als beschikbaar)
         if self._tenant_config:
             tenant_brand = self._tenant_config.brand_path
             if tenant_brand.exists():
-                try:
-                    with tenant_brand.open("r", encoding="utf-8") as f:
-                        data = yaml.safe_load(f)
-                    brand_info = data.get("brand", {}) if data else {}
-                    slug = brand_info.get("slug", tenant_brand.stem)
-                    brands.append(
-                        {
-                            "name": brand_info.get("name", tenant_brand.stem),
-                            "slug": slug,
-                        }
-                    )
-                    seen_slugs.add(slug)
-                except yaml.YAMLError:
-                    pass
+                self._add_brand_from_file(
+                    tenant_brand, brands, seen_slugs,
+                )
 
-        # Package brands
+        # 2. Tenants root — scan alle tenant directories
+        if self._tenants_root and self._tenants_root.exists():
+            for tenant_dir in sorted(self._tenants_root.iterdir()):
+                brand_file = tenant_dir / "brand.yaml"
+                if not tenant_dir.is_dir() or not brand_file.exists():
+                    continue
+                # Skip test tenants
+                if tenant_dir.name.startswith("test_"):
+                    continue
+                self._add_brand_from_file(brand_file, brands, seen_slugs)
+
+        # 3. Package brands
         if self.brands_dir.exists():
             for path in sorted(self.brands_dir.glob("*.yaml")):
-                try:
-                    with path.open("r", encoding="utf-8") as f:
-                        data = yaml.safe_load(f)
-                    brand_info = data.get("brand", {}) if data else {}
-                    slug = brand_info.get("slug", path.stem)
-                    if slug in seen_slugs:
-                        continue
-                    seen_slugs.add(slug)
-                    brands.append(
-                        {
-                            "name": brand_info.get("name", path.stem),
-                            "slug": slug,
-                        }
-                    )
-                except yaml.YAMLError:
-                    slug = path.stem
-                    if slug not in seen_slugs:
-                        seen_slugs.add(slug)
-                        brands.append({"name": path.stem, "slug": slug})
+                self._add_brand_from_file(path, brands, seen_slugs)
 
         return brands
+
+    @staticmethod
+    def _add_brand_from_file(
+        path: Path,
+        brands: list[dict[str, str]],
+        seen_slugs: set[str],
+    ) -> None:
+        """Voeg brand info toe uit een YAML bestand (dedup op slug)."""
+        try:
+            with path.open("r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+            brand_info = data.get("brand", {}) if data else {}
+            slug = brand_info.get("slug", path.stem)
+            if slug in seen_slugs:
+                return
+            seen_slugs.add(slug)
+            brands.append(
+                {
+                    "name": brand_info.get("name", path.stem),
+                    "slug": slug,
+                }
+            )
+        except (yaml.YAMLError, OSError):
+            slug = path.stem
+            if slug not in seen_slugs:
+                seen_slugs.add(slug)
+                brands.append({"name": path.stem, "slug": slug})
 
     def _resolve_path(self, name: str) -> Path:
         """Resolve brand naam naar bestandspad.
 
-        Ondersteunt zowel single-file als directory layout:
-        - brands/3bm_cooperatie.yaml (legacy)
-        - brands/3bm-cooperatie/brand.yaml (v2 directory)
+        Zoekt in volgorde:
+        1. Tenants root: ``<tenants_root>/<name>/brand.yaml``
+        2. Package brands directory layout: ``brands/<name>/brand.yaml``
+        3. Package brands single file: ``brands/<name>.yaml``
+
+        Args:
+            name: Brand naam (slug) of bestandsnaam met .yaml extensie.
+
+        Returns:
+            Pad naar het brand YAML bestand.
         """
         if name.endswith(".yaml"):
             return self.brands_dir / name
-        # Probeer eerst directory layout
+        # Tenants root (multi-tenant)
+        if self._tenants_root:
+            tenant_brand = self._tenants_root / name / "brand.yaml"
+            if tenant_brand.exists():
+                return tenant_brand
+        # Package brands directory layout
         dir_path = self.brands_dir / name / "brand.yaml"
         if dir_path.exists():
             return dir_path

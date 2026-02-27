@@ -1,0 +1,180 @@
+brand:
+  name: "Symitech"
+  slug: "symitech"
+  tenant: "symitech"
+
+colors:
+  primary: "#006FAB"
+  secondary: "#94571E"
+  text: "#000000"
+  text_light: "#666666"
+  white: "#FFFFFF"
+  table_header_bg: "#006FAB"
+  table_header_text: "#FFFFFF"
+  table_footer_bg: "#94571E"
+  separator: "#CCCCCC"
+
+fonts:
+  heading: "Helvetica-Bold"
+  body: "Helvetica"
+  medium: "Helvetica-Bold"
+  italic: "Helvetica-Oblique"
+
+logos:
+  main: ""
+  white: ""
+
+contact:
+  name: "Symitech B.V."
+  address: ""
+  website: ""
+
+header:
+  height: 0
+  elements: []
+
+footer:
+  height: 17
+  elements:
+    - type: text
+      content: "{page}"
+      x: 188
+      y: 5
+      font: "$body"
+      size: 9.5
+      color: "$text"
+      align: right
+
+styles:
+  Normal:
+    fontName: "Helvetica"
+    fontSize: 9.5
+    leading: 12.0
+    textColor: "#000000"
+  Heading1:
+    fontName: "Helvetica-Bold"
+    fontSize: 18.0
+    leading: 23.4
+    textColor: "#006FAB"
+  Heading2:
+    fontName: "Helvetica-Bold"
+    fontSize: 13.0
+    leading: 16.9
+    textColor: "#94571E"
+  Heading3:
+    fontName: "Helvetica-Bold"
+    fontSize: 11.0
+    leading: 14.3
+    textColor: "#94571E"
+
+pages:
+  cover:
+    title_size_ref: 28.0
+    title_x_ref: 54
+    title_y_ref: 93
+    subtitle_size_ref: 17.0
+    subtitle_x_ref: 55
+    subtitle_y_ref: 63
+
+  backcover: {}
+
+  colofon:
+    report_type_font: "Helvetica-Bold"
+    report_type_size: 22.0
+    report_type_color: "#006FAB"
+    report_type_x_pt: 70.9
+    report_type_y_pt: 57.3
+    subtitle_font: "Helvetica"
+    subtitle_size: 14.0
+    subtitle_color: "#94571E"
+    subtitle_x_pt: 70.9
+    subtitle_y_pt: 86.8
+    label_x_pt: 103
+    value_x_pt: 229
+    first_labels_color: "#006FAB"
+    other_labels_color: "#94571E"
+    value_color: "#000000"
+    label_font: "Helvetica-Bold"
+    label_size: 10.0
+    value_font: "Helvetica"
+    value_size: 10.0
+    line_x1_pt: 102
+    line_x2_pt: 420
+    line_stroke_pt: 0.25
+    line_color: "#006FAB"
+    page_num_x_pt: 534
+    page_num_y_pt: 796.3
+    page_num_font: "Helvetica"
+    page_num_size: 9.5
+    page_num_color: "#006FAB"
+    fields:
+      - {label: "Project", type: "project", y_pt: 320.8}
+      - {label: "In opdracht van", type: "client", y_pt: 368.8}
+      - {type: "line", y_pt: 517}
+      - {label: "Adviseur", type: "author", y_pt: 488.8}
+      - {type: "line", y_pt: 542}
+      - {label: "Datum rapport", type: "date", y_pt: 572.8}
+      - {type: "line", y_pt: 590}
+      - {label: "Rapportstatus", type: "status", y_pt: 620.8}
+      - {type: "line", y_pt: 638}
+      - {label: "Documentkenmerk", type: "document_code", y_pt: 644.8}
+
+  toc:
+    title: "Inhoud"
+    title_font: "Helvetica-Bold"
+    title_size: 18.0
+    title_color: "#006FAB"
+    title_x_pt: 90
+    title_y_pt: 74.9
+    level1_font: "Helvetica-Bold"
+    level1_size: 12.0
+    level1_color: "#006FAB"
+    level2_font: "Helvetica"
+    level2_size: 9.5
+    level2_color: "#000000"
+    number_x_pt: 90
+    text_x_pt: 160.9
+    page_x_pt: 515.4
+    chapter_spacing_pt: 39
+    item_spacing_pt: 17
+
+stationery:
+  cover:
+    source: "stationery/cover_stationery.pdf"
+    text_zones: []
+  colofon:
+    source: "stationery/colofon_stationery.pdf"
+    header_footer: "colofon"
+    text_zones: []
+  content:
+    source: "stationery/content_portrait_stationery.pdf"
+    header_footer: "content"
+    content_frame:
+      x_pt: 90.0
+      y_pt: 38.9
+      width_pt: 451.6
+      height_pt: 746.0
+  content_landscape:
+    source: "stationery/content_landscape_stationery.pdf"
+    header_footer: "content"
+    content_frame:
+      x_pt: 56.7
+      y_pt: 38.9
+      width_pt: 728.5
+      height_pt: 517.5
+  toc:
+    source: "stationery/content_portrait_stationery.pdf"
+    header_footer: "content"
+  backcover:
+    source: "stationery/backcover_stationery.pdf"
+    header_footer: null
+    text_zones: []
+
+modules:
+  table:
+    header_bg: "#006FAB"
+    header_text_color: "#FFFFFF"
+    body_font: "Helvetica"
+    body_size: 9.0
+    footer_bg: "#94571E"
+    grid_color: "#CCCCCC"

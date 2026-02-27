@@ -51,6 +51,7 @@ Geen auth nodig.
 ```json
 {
   "templates": [
+    {"name": "symitech_bic_factuur", "type": "bic_factuur"},
     {"name": "symitech_bic_rapport", "type": "bic_rapport"},
     {"name": "symitech_sanering", "type": "sanering"}
   ]
@@ -259,9 +260,12 @@ De stationery achtergrond wisselt automatisch mee.
 
 ---
 
-## Voorbeeld: Compleet BIC Rapport
+## Voorbeelden
 
-Zie `docs/symitech_bic_example.json` voor een volledig voorbeeld.
+| Template | Voorbeeld JSON |
+|----------|---------------|
+| `symitech_bic_factuur` | `docs/symitech_bic_factuur_example.json` |
+| `symitech_bic_rapport` | `docs/symitech_bic_example.json` |
 
 ---
 

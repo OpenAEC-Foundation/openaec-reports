@@ -1,0 +1,42 @@
+# =============================================================
+# Symitech - Cover Page Template
+# =============================================================
+#
+# 3-lagen aanpak:
+#   1. Projectfoto (of placeholder)
+#   2. Stationery overlay PNG (alpha-gat voor foto)
+#   3. Dynamische tekst (rapport type + project naam)
+#
+# Coordinaten: PDF-native (y=0 = onderkant, y_bl = baseline)
+# Afgeleid van: tenants/symitech/brand.yaml pages.cover
+# =============================================================
+
+page:
+  width: 595.3
+  height: 841.9
+  type: cover
+
+photo:
+  x: 55.6
+  y: 161.7
+  width: 484.0
+  height: 560.8
+  fit: cover
+
+overlay:
+  file: null
+
+dynamic_fields:
+  rapport_type:
+    x: 54
+    y_bl: 93
+    font: Helvetica-Bold
+    size: 28.0
+    color: "#006FAB"
+
+  project_naam:
+    x: 55
+    y_bl: 63
+    font: Helvetica
+    size: 17.0
+    color: "#94571E"

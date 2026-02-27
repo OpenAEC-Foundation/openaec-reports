@@ -1,0 +1,31 @@
+# =============================================================
+# Symitech - Bijlage Divider Template
+# =============================================================
+#
+# Achtergrond: bijlagen.pdf (divider pagina)
+# Dynamisch: bijlage nummer + titel (multiline)
+# Afgeleid van: tenants/symitech/brand.yaml
+# =============================================================
+
+page:
+  type: bijlage_divider
+  width: 595.3
+  height: 841.9
+  background: bijlagen.pdf
+
+dynamic_fields:
+  nummer:
+    x: 103.0
+    y_td: 193.9
+    font: Helvetica-Bold
+    size: 41.4
+    color: "#006FAB"
+
+  titel:
+    x: 136.1
+    y_td: 262.2
+    font: Helvetica
+    size: 20.0
+    color: "#FFFFFF"
+    line_height: 32.0
+    multiline: true

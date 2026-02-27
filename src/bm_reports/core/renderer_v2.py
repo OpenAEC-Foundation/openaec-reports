@@ -357,14 +357,13 @@ class ColofonGenerator:
         page = doc[0]
         self.fonts.insert_into_page(page)
 
-        purple = _hex_to_rgb("#401246")
-        teal = _hex_to_rgb("#56B49B")
-
         # Title
         title_cfg = self.tpl.get("dynamic_fields", {}).get("titel", {})
         report_type = data.get("report_type", "")
         if report_type:
-            font_obj = self.fonts.get_fitz_font("GothamBold")
+            font_obj = self.fonts.get_fitz_font(
+                title_cfg.get("font", "Helvetica-Bold")
+            )
             tw = fitz.TextWriter(page.rect)
             tw.append(
                 (
@@ -373,47 +372,61 @@ class ColofonGenerator:
                 ),
                 report_type, font=font_obj, fontsize=title_cfg.get("size", 22),
             )
-            tw.write_text(page, color=purple)
+            tw.write_text(
+                page, color=_hex_to_rgb(title_cfg.get("color", "#40124A"))
+            )
 
         # Subtitle
         sub_cfg = self.tpl.get("dynamic_fields", {}).get("subtitel", {})
         project_name = data.get("project", "")
         if project_name:
-            font_obj = self.fonts.get_fitz_font("GothamBook")
+            font_obj = self.fonts.get_fitz_font(
+                sub_cfg.get("font", "Helvetica")
+            )
             tw = fitz.TextWriter(page.rect)
             tw.append(
                 (sub_cfg.get("x", 70.9), sub_cfg.get("y_td", 86.8) + sub_cfg.get("size", 14) * 0.8),
                 project_name, font=font_obj, fontsize=sub_cfg.get("size", 14),
             )
-            tw.write_text(page, color=teal)
+            tw.write_text(
+                page, color=_hex_to_rgb(sub_cfg.get("color", "#38BDA0"))
+            )
 
         # Table values — map JSON fields to colofon positions
         colofon_data = data.get("colofon", {})
         field_map = self._build_field_map(data, colofon_data)
-        value_x = self.tpl.get("table", {}).get("value_x", 229.1)
-        value_size = self.tpl.get("table", {}).get("value_size", 10)
+        table_cfg = self.tpl.get("table", {})
+        value_x = table_cfg.get("value_x", 229.1)
+        value_size = table_cfg.get("value_size", 10)
+        value_font = table_cfg.get("value_font", "Helvetica")
+        value_color = _hex_to_rgb(table_cfg.get("value_color", "#40124A"))
 
         for field_key, y_td in self._get_field_positions():
             text = field_map.get(field_key, "")
             if text:
-                font_obj = self.fonts.get_fitz_font("GothamBook")
+                font_obj = self.fonts.get_fitz_font(value_font)
                 for i, line in enumerate(text.split("\n")):
                     tw = fitz.TextWriter(page.rect)
                     tw.append(
                         (value_x, y_td + i * 12.8 + value_size * 0.8),
                         line, font=font_obj, fontsize=value_size,
                     )
-                    tw.write_text(page, color=purple)
+                    tw.write_text(page, color=value_color)
 
         # Page number
         pn_cfg = self.tpl.get("page_number", {})
-        font_obj = self.fonts.get_fitz_font("GothamBold")
+        pn_size = pn_cfg.get("size", 8)
+        font_obj = self.fonts.get_fitz_font(
+            pn_cfg.get("font", "Helvetica-Bold")
+        )
         tw = fitz.TextWriter(page.rect)
         tw.append(
-            (pn_cfg.get("x", 534.0), pn_cfg.get("y_td", 796.3) + 8 * 0.8),
-            str(page_number), font=font_obj, fontsize=8,
+            (pn_cfg.get("x", 534.0), pn_cfg.get("y_td", 796.3) + pn_size * 0.8),
+            str(page_number), font=font_obj, fontsize=pn_size,
         )
-        tw.write_text(page, color=teal)
+        tw.write_text(
+            page, color=_hex_to_rgb(pn_cfg.get("color", "#38BDA0"))
+        )
 
         doc.save(str(output))
         doc.close()
@@ -707,7 +720,7 @@ class ContentRenderer:
             self._text(
                 marker["x"], self.y,
                 "\u2022",
-                "GothamBook",
+                marker.get("font", "Helvetica"),
                 marker["size"],
                 marker["color"],
             )

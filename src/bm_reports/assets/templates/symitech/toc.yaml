@@ -1,0 +1,47 @@
+# =============================================================
+# Symitech - TOC Layout Rules
+# =============================================================
+# Afgeleid van: tenants/symitech/brand.yaml pages.toc
+# =============================================================
+
+page:
+  type: toc
+  background: standaard.pdf
+
+title:
+  text: "Inhoud"
+  x: 90.0
+  y_td: 74.9
+  font: Helvetica-Bold
+  size: 18.0
+  color: "#006FAB"
+
+entries_start_y: 127.2
+
+levels:
+  1:
+    font: Helvetica-Bold
+    size: 12.0
+    color: "#006FAB"
+    number_x: 90.0
+    title_x: 160.9
+    page_x: 515.4
+    spacing_before: 17.0
+    spacing_after: 20.0
+
+  2:
+    font: Helvetica
+    size: 9.5
+    color: "#000000"
+    number_x: 90.0
+    title_x: 160.9
+    page_x: 515.4
+    spacing_before: 0.0
+    spacing_after: 17.3
+
+page_number:
+  x: 533.0
+  y_td: 793.5
+  font: Helvetica
+  size: 9.5
+  color: "#006FAB"

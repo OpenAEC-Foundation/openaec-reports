@@ -1,0 +1,37 @@
+# =============================================================
+# Symitech - Standaard Content Page Template
+# =============================================================
+#
+# Achtergrond: standaard.pdf (header strip + footer)
+# Dynamisch: paginanummer + content area voor tekst/tabellen
+# Afgeleid van: tenants/symitech/brand.yaml stationery.content
+# =============================================================
+
+page:
+  type: standaard
+  width: 595.3
+  height: 841.9
+  background: standaard.pdf
+
+# --- Content marges (afgeleid uit brand.yaml content_frame) ---
+margins:
+  left: 90.0
+  right: 53.7           # 595.3 - (90.0 + 451.6)
+  top: 74.9
+  bottom: 57.0           # 841.9 - (38.9 + 746.0)
+
+# --- Content area (beschikbaar voor tekst/tabellen/afbeeldingen) ---
+content_area:
+  x: 90.0
+  y_td_start: 74.9
+  y_td_end: 784.9        # 38.9 + 746.0
+  width: 451.6
+  height: 710.0
+
+# --- Paginanummer ---
+page_number:
+  x: 533.0
+  y_td: 793.5
+  font: Helvetica
+  size: 9.5
+  color: "#006FAB"

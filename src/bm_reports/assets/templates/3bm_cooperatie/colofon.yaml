@@ -36,6 +36,8 @@ dynamic_fields:
 table:
   value_x: 229.1
   value_size: 10
+  value_font: GothamBook
+  value_color: "#40124A"
   rows:
     - key: project
       y_td: 321.1

@@ -1,0 +1,55 @@
+# =============================================================
+# Symitech - Colofon Page Template
+# =============================================================
+#
+# Coordinaten: y_td = top-down (afstand vanaf bovenkant pagina)
+# Afgeleid van: tenants/symitech/brand.yaml pages.colofon
+# =============================================================
+
+page:
+  width: 595.3
+  height: 841.9
+  type: colofon
+
+background:
+  file: colofon.pdf
+
+dynamic_fields:
+  titel:
+    x: 70.9
+    y_td: 57.3
+    font: Helvetica-Bold
+    size: 22.0
+    color: "#006FAB"
+  subtitel:
+    x: 70.9
+    y_td: 86.8
+    font: Helvetica
+    size: 14.0
+    color: "#94571E"
+
+table:
+  value_x: 229
+  value_size: 10
+  value_font: Helvetica
+  value_color: "#000000"
+  rows:
+    - key: project
+      y_td: 320.8
+    - key: opdrachtgever_naam
+      y_td: 368.8
+    - key: adviseur_bedrijf
+      y_td: 488.8
+    - key: datum
+      y_td: 572.8
+    - key: status
+      y_td: 620.8
+    - key: kenmerk
+      y_td: 644.8
+
+page_number:
+  x: 534.0
+  y_td: 796.3
+  font: Helvetica
+  size: 9.5
+  color: "#006FAB"

@@ -1,17 +1,27 @@
-"""Admin API endpoints — user CRUD, tenant/template/brand beheer."""
+"""Admin API endpoints — user CRUD, tenant/template/brand beheer, brand extractie."""
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 import re
 import shutil
+import tempfile
 from pathlib import Path
 
 import yaml
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, status
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
+from bm_reports.admin.brand_extraction import (
+    MAX_PDF_SIZE_BYTES,
+    generate_prompt_package,
+    get_reference_pages_yaml,
+    merge_brand_yaml,
+    run_extraction,
+)
 from bm_reports.auth.dependencies import get_api_key_db, get_user_db, require_admin
 from bm_reports.auth.models import User, UserRole
 from bm_reports.auth.security import hash_password
@@ -878,3 +888,311 @@ async def delete_api_key(key_id: str):
             detail="API key niet gevonden",
         )
     return {"detail": "API key verwijderd"}
+
+
+# ============================================================
+# Brand Extraction Wizard
+# ============================================================
+
+
+class BrandExtractRequest(BaseModel):
+    """Request model voor brand extractie start."""
+
+    brand_name: str = Field(..., min_length=1, max_length=100)
+    brand_slug: str = Field(default="")
+    dpi: int = Field(default=150, ge=72, le=300)
+
+
+class BrandMergeRequest(BaseModel):
+    """Request model voor het mergen van brand onderdelen."""
+
+    edited_extraction: dict = Field(...)
+    pages_yaml: str | None = Field(default=None)
+    brand_name: str = Field(..., min_length=1)
+    brand_slug: str = Field(default="")
+
+
+class PromptPackageRequest(BaseModel):
+    """Request model voor prompt package generatie."""
+
+    edited_extraction: dict = Field(...)
+
+
+@admin_router.post("/tenants/{tenant}/brand-extract")
+async def start_brand_extraction(
+    tenant: str,
+    pdf_file: UploadFile,
+    brand_name: str = "Brand",
+    brand_slug: str = "",
+    dpi: int = 150,
+    stamkaart: UploadFile | None = None,
+):
+    """Start de brand extraction pipeline.
+
+    Upload een referentie-PDF en ontvang gestructureerde extractie-data
+    met kleuren, fonts, styles, page classificaties en layouts.
+
+    Args:
+        tenant: Tenant naam.
+        pdf_file: Het referentie-rapport PDF bestand.
+        brand_name: Weergavenaam van het merk.
+        brand_slug: Machine-leesbare ID (default: tenant naam).
+        dpi: DPI voor pagina renders (72-300).
+        stamkaart: Optioneel stamkaart PDF bestand.
+
+    Returns:
+        Dict met extraction data, page images, en draft YAML.
+    """
+    _validate_path_segment(tenant, "tenant")
+
+    if not brand_slug:
+        brand_slug = tenant
+
+    # Valideer DPI
+    if dpi < 72 or dpi > 300:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="DPI moet tussen 72 en 300 liggen",
+        )
+
+    # Lees en valideer PDF
+    pdf_content = await pdf_file.read()
+    if len(pdf_content) > MAX_PDF_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"PDF te groot (max {MAX_PDF_SIZE_BYTES // (1024 * 1024)} MB)",
+        )
+
+    if not pdf_content[:5] == b"%PDF-":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Bestand is geen geldig PDF",
+        )
+
+    # Lees optionele stamkaart
+    stamkaart_content = None
+    if stamkaart:
+        stamkaart_content = await stamkaart.read()
+        if not stamkaart_content[:5] == b"%PDF-":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Stamkaart is geen geldig PDF",
+            )
+
+    tenants_base = _get_tenants_base()
+    tenant_dir = tenants_base / tenant
+
+    if not tenant_dir.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Tenant '{tenant}' niet gevonden",
+        )
+
+    # Schrijf PDF naar tijdelijk bestand en draai extractie
+    try:
+        with tempfile.NamedTemporaryFile(
+            suffix=".pdf", delete=False
+        ) as tmp_pdf:
+            tmp_pdf.write(pdf_content)
+            tmp_pdf_path = Path(tmp_pdf.name)
+
+        stamkaart_path = None
+        if stamkaart_content:
+            with tempfile.NamedTemporaryFile(
+                suffix=".pdf", delete=False
+            ) as tmp_stamkaart:
+                tmp_stamkaart.write(stamkaart_content)
+                stamkaart_path = Path(tmp_stamkaart.name)
+
+        # Draai extractie in threadpool (CPU-intensief)
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(
+            None,
+            lambda: run_extraction(
+                pdf_path=tmp_pdf_path,
+                tenant_dir=tenant_dir,
+                brand_name=brand_name,
+                brand_slug=brand_slug,
+                stamkaart_path=stamkaart_path,
+                dpi=dpi,
+            ),
+        )
+
+        logger.info(
+            "Brand extractie voltooid voor tenant '%s': %d pagina's",
+            tenant,
+            len(result["extraction"]["page_classifications"]),
+        )
+
+        return result
+
+    except ImportError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"PyMuPDF is niet beschikbaar: {exc}",
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
+    except Exception as exc:
+        logger.exception("Brand extractie gefaald voor tenant '%s'", tenant)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Extractie gefaald: {exc}",
+        )
+    finally:
+        # Cleanup tijdelijke bestanden
+        if tmp_pdf_path.exists():
+            tmp_pdf_path.unlink()
+        if stamkaart_path and stamkaart_path.exists():
+            stamkaart_path.unlink()
+
+
+@admin_router.get("/tenants/{tenant}/analysis/pages/{filename}")
+async def get_analysis_page_image(tenant: str, filename: str):
+    """Serveer een gerenderde pagina-afbeelding uit de analyse directory.
+
+    Args:
+        tenant: Tenant naam.
+        filename: Bestandsnaam (bijv. page_001.png).
+
+    Returns:
+        PNG afbeelding als FileResponse.
+    """
+    _validate_path_segment(tenant, "tenant")
+    _validate_path_segment(filename, "bestandsnaam")
+
+    if not filename.endswith(".png"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Alleen .png bestanden zijn toegestaan",
+        )
+
+    filepath = _get_tenants_base() / tenant / "analysis" / "pages" / filename
+
+    if not filepath.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Pagina '{filename}' niet gevonden",
+        )
+
+    return FileResponse(filepath, media_type="image/png")
+
+
+@admin_router.post("/tenants/{tenant}/brand-extract/prompt-package")
+async def create_prompt_package(tenant: str, payload: PromptPackageRequest):
+    """Genereer een prompt package voor Claude Desktop.
+
+    Combineert de (gecorrigeerde) extractie-data met instructies
+    en een referentie-template tot een copy-paste-ready markdown prompt.
+
+    Args:
+        tenant: Tenant naam.
+        payload: Gecorrigeerde extractie data.
+
+    Returns:
+        Dict met de prompt markdown string en pagina-afbeeldingen.
+    """
+    _validate_path_segment(tenant, "tenant")
+
+    tenants_base = _get_tenants_base()
+    tenant_dir = tenants_base / tenant
+
+    if not tenant_dir.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Tenant '{tenant}' niet gevonden",
+        )
+
+    # Zoek beschikbare pagina-afbeeldingen
+    pages_dir = tenant_dir / "analysis" / "pages"
+    page_image_map: dict[str, str] = {}
+
+    if pages_dir.exists():
+        # Bouw map uit page_classifications in de extractie data
+        for pc in payload.edited_extraction.get("page_classifications", []):
+            page_type = pc.get("type", "")
+            page_num = pc.get("page_number", 0)
+            filename = f"page_{page_num:03d}.png"
+            img_path = pages_dir / filename
+
+            if img_path.exists() and page_type not in page_image_map:
+                page_image_map[page_type] = filename
+
+    # Haal referentie pages YAML op
+    reference_yaml = get_reference_pages_yaml(tenants_base)
+
+    # Genereer brand naam/slug uit extractie data
+    brand_info = payload.edited_extraction.get("brand", {})
+    brand_name = brand_info.get("name", tenant)
+    brand_slug = brand_info.get("slug", tenant)
+
+    prompt = generate_prompt_package(
+        extraction=payload.edited_extraction,
+        page_image_map=page_image_map,
+        brand_name=brand_name,
+        brand_slug=brand_slug,
+        reference_pages_yaml=reference_yaml,
+    )
+
+    return {
+        "prompt": prompt,
+        "page_images": page_image_map,
+        "pages_dir": f"/api/admin/tenants/{tenant}/analysis/pages",
+    }
+
+
+@admin_router.post("/tenants/{tenant}/brand-merge")
+async def merge_brand(tenant: str, payload: BrandMergeRequest):
+    """Merge alle brand onderdelen tot een complete brand.yaml.
+
+    Combineert user-gecorrigeerde extractie data met het Claude Desktop
+    artifact (pages-sectie) tot een volledige brand configuratie.
+
+    Args:
+        tenant: Tenant naam.
+        payload: Gecorrigeerde data + pages YAML.
+
+    Returns:
+        Dict met de finale YAML string en bevestiging.
+    """
+    _validate_path_segment(tenant, "tenant")
+
+    tenants_base = _get_tenants_base()
+    tenant_dir = tenants_base / tenant
+
+    if not tenant_dir.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Tenant '{tenant}' niet gevonden",
+        )
+
+    brand_name = payload.brand_name
+    brand_slug = payload.brand_slug or tenant
+
+    try:
+        final_yaml = merge_brand_yaml(
+            edited_extraction=payload.edited_extraction,
+            pages_yaml_str=payload.pages_yaml,
+            brand_name=brand_name,
+            brand_slug=brand_slug,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        )
+
+    # Schrijf brand.yaml
+    brand_path = tenant_dir / "brand.yaml"
+    brand_path.write_text(final_yaml, encoding="utf-8")
+
+    logger.info("Brand YAML gemerged en opgeslagen: %s/brand.yaml", tenant)
+
+    return {
+        "detail": f"Brand configuratie voor '{tenant}' opgeslagen",
+        "yaml": final_yaml,
+        "path": str(brand_path),
+    }

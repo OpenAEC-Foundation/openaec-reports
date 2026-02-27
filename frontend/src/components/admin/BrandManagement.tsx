@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useAdminStore } from "@/stores/adminStore";
 import type { AssetCategory, TenantAsset } from "@/services/api";
+import { BrandExtractWizard } from "./BrandExtractWizard";
 
 const ASSET_ACCEPT: Record<AssetCategory, string> = {
   stationery: ".pdf,.png",
@@ -121,6 +122,8 @@ export function BrandManagement() {
   const fontFiles = useAdminStore((s) => s.fontFiles);
   const assetsLoading = useAdminStore((s) => s.assetsLoading);
   const loadAllAssets = useAdminStore((s) => s.loadAllAssets);
+  const extractionStep = useAdminStore((s) => s.extractionStep);
+  const setExtractionStep = useAdminStore((s) => s.setExtractionStep);
 
   const brandInputRef = useRef<HTMLInputElement>(null);
 
@@ -179,6 +182,20 @@ export function BrandManagement() {
         </div>
       ) : (
         <div className="space-y-6">
+          {/* Brand Extractie Wizard */}
+          {extractionStep > 0 ? (
+            <BrandExtractWizard tenant={selectedTenant} />
+          ) : (
+            <div className="flex justify-end">
+              <button
+                onClick={() => setExtractionStep(1)}
+                className="rounded-md border border-purple-300 bg-purple-50 px-3 py-1.5 text-xs font-medium text-purple-700 hover:bg-purple-100 transition-colors"
+              >
+                Brand extractie starten
+              </button>
+            </div>
+          )}
+
           {/* Brand YAML sectie */}
           <div className="rounded-lg border border-gray-200 bg-white p-4">
             <div className="flex items-center justify-between mb-3">

@@ -127,6 +127,22 @@ _protected = APIRouter(dependencies=[Depends(get_current_user)])
 # ============================================================
 
 
+def _resolve_brand_from_template(data: dict) -> str | None:
+    """Leid brand af uit het template's tenant veld.
+
+    Als de request geen ``brand`` bevat maar wel een ``template``, kijk dan
+    of het template een ``tenant`` veld heeft en gebruik dat als brand.
+    """
+    template_name = data.get("template")
+    if not template_name:
+        return None
+    try:
+        config = _template_loader.load(template_name)
+        return config.tenant if config.tenant else None
+    except (FileNotFoundError, Exception):
+        return None
+
+
 def _generate_and_respond(
     build_fn: callable,
     data: dict,
@@ -317,7 +333,7 @@ async def generate_report(request: Request):
     if not data.get("template"):
         raise HTTPException(status_code=422, detail="Veld 'template' is verplicht")
 
-    brand = data.get("brand", _DEFAULT_BRAND)
+    brand = data.get("brand") or _resolve_brand_from_template(data) or _DEFAULT_BRAND
     report = Report.from_dict(data, brand=brand)
 
     def build(output_path: Path) -> None:
@@ -346,7 +362,7 @@ async def generate_report_v2(request: Request):
     if not data.get("project"):
         raise HTTPException(status_code=422, detail="Veld 'project' is verplicht")
 
-    brand = data.get("brand", _DEFAULT_BRAND)
+    brand = data.get("brand") or _resolve_brand_from_template(data) or _DEFAULT_BRAND
     stationery_dir = STATIONERY_DIR
 
     # Resolve stationery: brand_dir/stationery → tenant → package

@@ -231,6 +231,7 @@ export interface Appendix {
 
 export interface ReportDefinition {
   template: string;
+  brand?: string;
   format?: Format;
   orientation?: Orientation;
   project: string;
@@ -275,6 +276,7 @@ export interface EditorAppendix {
 /** Volledige report state in de editor (met IDs op sections en blocks) */
 export interface EditorReport {
   template: string;
+  brand: string;
   format: Format;
   orientation: Orientation;
   project: string;

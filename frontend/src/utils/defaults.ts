@@ -22,6 +22,7 @@ import brand from '@/config/brand';
 export function createDefaultReport(): EditorReport {
   return {
     template: 'custom',
+    brand: '3bm_cooperatie',
     format: 'A4',
     orientation: 'portrait',
     project: '',

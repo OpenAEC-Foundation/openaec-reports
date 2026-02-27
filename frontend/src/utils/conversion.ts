@@ -81,6 +81,7 @@ export function toEditorReport(def: ReportDefinition): EditorReport {
   const defaults = createDefaultReport();
   return {
     template: def.template,
+    brand: def.brand ?? defaults.brand,
     format: def.format ?? defaults.format,
     orientation: def.orientation ?? defaults.orientation,
     project: def.project,
@@ -214,6 +215,7 @@ export function toReportDefinition(report: EditorReport): ReportDefinition {
     project: report.project,
   };
 
+  if (report.brand) def.brand = report.brand;
   if (report.format !== 'A4') def.format = report.format;
   if (report.orientation !== 'portrait') def.orientation = report.orientation;
   if (report.project_number) def.project_number = report.project_number;

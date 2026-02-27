@@ -35,6 +35,7 @@ class TemplateConfig:
 
     name: str = ""
     report_type: str = ""
+    tenant: str = ""
     format: str = "A4"
     orientation: str = "portrait"
     margins: dict[str, float] = field(
@@ -111,6 +112,7 @@ class TemplateLoader:
         return TemplateConfig(
             name=name,
             report_type=data.get("report_type", ""),
+            tenant=data.get("tenant", ""),
             format=data.get("format", "A4"),
             orientation=data.get("orientation", "portrait"),
             margins=data.get(
@@ -243,6 +245,7 @@ class TemplateLoader:
             "project_number": "",
             "client": "",
             "author": "3BM Bouwkunde",
+            "brand": config.tenant if config.tenant else "3bm_cooperatie",
             "date": today,
             "version": "1.0",
             "status": "CONCEPT",

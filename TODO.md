@@ -75,14 +75,14 @@
 
 ## 🟡 D1 — Monorepo Deploy op VPS
 
-**Status:** Code gepusht, server deploy pending
+**Status:** Deployed en getest, nog 2 cleanup items
 
 - [x] `git push` naar GitHub
-- [ ] Op server: `git pull` + `docker compose build --no-cache bm-reports-api`
-- [ ] `docker compose up -d bm-reports-api`
-- [ ] Verifiëren: https://report.open-aec.com/ laadt frontend (via StaticFiles)
-- [ ] Verifiëren: https://report.open-aec.com/api/health werkt
-- [ ] End-to-end test: template laden → rapport genereren → PDF download
+- [x] Op server: `git pull` + `docker compose build --no-cache bm-reports-api`
+- [x] `docker compose up -d bm-reports-api`
+- [x] Verifiëren: https://report.open-aec.com/ laadt frontend (via StaticFiles)
+- [x] Verifiëren: https://report.open-aec.com/api/health werkt
+- [x] End-to-end test: template laden → rapport genereren → PDF download
 - [ ] Caddyfile vereenvoudigen: enkele `reverse_proxy` naar API container
 - [ ] Verwijder `bm-reports-ui/dist` volume mount uit docker-compose.yml
 

@@ -7,6 +7,8 @@ import {
   type TenantAsset,
   type AssetCategory,
   type BrandData,
+  type BrandExtractionResult,
+  type BrandExtractionData,
   type CreateUserPayload,
   type UpdateUserPayload,
   type CreateTenantPayload,
@@ -69,6 +71,31 @@ interface AdminStore {
     category: AssetCategory,
     filename: string
   ) => Promise<boolean>;
+
+  // Brand Extraction Wizard
+  extractionStep: number; // 0=inactive, 1=upload, 2=review, 3=prompt, 4=finalize
+  extractionResult: BrandExtractionResult | null;
+  editedExtraction: BrandExtractionData | null;
+  promptPackage: string | null;
+  extractionLoading: boolean;
+  setExtractionStep: (step: number) => void;
+  startExtraction: (
+    tenant: string,
+    pdfFile: File,
+    brandName: string,
+    brandSlug?: string,
+    dpi?: number,
+    stamkaart?: File
+  ) => Promise<boolean>;
+  setEditedExtraction: (data: BrandExtractionData) => void;
+  generatePrompt: (tenant: string) => Promise<boolean>;
+  mergeBrand: (
+    tenant: string,
+    pagesYaml: string | null,
+    brandName: string,
+    brandSlug?: string
+  ) => Promise<boolean>;
+  resetExtraction: () => void;
 
   // General
   error: string | null;
@@ -323,6 +350,88 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
       return false;
     }
   },
+
+  // Brand Extraction Wizard
+  extractionStep: 0,
+  extractionResult: null,
+  editedExtraction: null,
+  promptPackage: null,
+  extractionLoading: false,
+
+  setExtractionStep: (step) => set({ extractionStep: step }),
+
+  startExtraction: async (tenant, pdfFile, brandName, brandSlug, dpi, stamkaart) => {
+    set({ extractionLoading: true, error: null });
+    try {
+      const result = await adminApi.startBrandExtraction(
+        tenant, pdfFile, brandName, brandSlug, dpi, stamkaart
+      );
+      set({
+        extractionResult: result,
+        editedExtraction: { ...result.extraction },
+        extractionLoading: false,
+        extractionStep: 2,
+      });
+      return true;
+    } catch (e) {
+      set({ extractionLoading: false, error: extractError(e) });
+      return false;
+    }
+  },
+
+  setEditedExtraction: (data) => set({ editedExtraction: data }),
+
+  generatePrompt: async (tenant) => {
+    const edited = get().editedExtraction;
+    if (!edited) return false;
+    set({ extractionLoading: true, error: null });
+    try {
+      const result = await adminApi.generatePromptPackage(tenant, edited as unknown as Record<string, unknown>);
+      set({
+        promptPackage: result.prompt,
+        extractionLoading: false,
+        extractionStep: 3,
+      });
+      return true;
+    } catch (e) {
+      set({ extractionLoading: false, error: extractError(e) });
+      return false;
+    }
+  },
+
+  mergeBrand: async (tenant, pagesYaml, brandName, brandSlug) => {
+    const edited = get().editedExtraction;
+    if (!edited) return false;
+    set({ extractionLoading: true, error: null });
+    try {
+      await adminApi.mergeBrand(
+        tenant, edited as unknown as Record<string, unknown>,
+        pagesYaml, brandName, brandSlug
+      );
+      // Herlaad brand data
+      await get().loadBrand(tenant);
+      set({
+        extractionLoading: false,
+        extractionStep: 0,
+        extractionResult: null,
+        editedExtraction: null,
+        promptPackage: null,
+      });
+      return true;
+    } catch (e) {
+      set({ extractionLoading: false, error: extractError(e) });
+      return false;
+    }
+  },
+
+  resetExtraction: () =>
+    set({
+      extractionStep: 0,
+      extractionResult: null,
+      editedExtraction: null,
+      promptPackage: null,
+      extractionLoading: false,
+    }),
 
   // General
   error: null,

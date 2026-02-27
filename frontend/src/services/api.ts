@@ -116,6 +116,44 @@ export interface BrandData {
   raw: string;
 }
 
+// ---------- Brand Extraction types ----------
+
+export interface BrandExtractionData {
+  brand: { name: string; slug: string };
+  colors: Record<string, string>;
+  fonts: Record<string, string>;
+  margins_mm: Record<string, number>;
+  header: { height: number; elements: Record<string, unknown>[] };
+  footer: { height: number; elements: Record<string, unknown>[] };
+  styles: Record<string, {
+    fontName: string;
+    fontSize: number;
+    leading: number;
+    textColor: string;
+  }>;
+  table_style: Record<string, string>;
+  page_classifications: { page_number: number; type: string; confidence: number }[];
+  page_layouts: Record<string, unknown>;
+}
+
+export interface BrandExtractionResult {
+  extraction: BrandExtractionData;
+  page_images: Record<string, string>;
+  draft_yaml: string;
+}
+
+export interface PromptPackageResult {
+  prompt: string;
+  page_images: Record<string, string>;
+  pages_dir: string;
+}
+
+export interface BrandMergeResult {
+  detail: string;
+  yaml: string;
+  path: string;
+}
+
 // ---------- Admin API ----------
 
 export const adminApi = {
@@ -236,6 +274,64 @@ export const adminApi = {
     apiFetch<{ detail: string }>(
       `/api/admin/tenants/${encodeURIComponent(tenant)}/assets/${category}/${encodeURIComponent(filename)}`,
       { method: "DELETE" }
+    ),
+
+  // Brand Extraction
+  startBrandExtraction: async (
+    tenant: string,
+    pdfFile: File,
+    brandName: string,
+    brandSlug?: string,
+    dpi?: number,
+    stamkaart?: File
+  ): Promise<BrandExtractionResult> => {
+    const formData = new FormData();
+    formData.append("pdf_file", pdfFile);
+    formData.append("brand_name", brandName);
+    if (brandSlug) formData.append("brand_slug", brandSlug);
+    if (dpi) formData.append("dpi", String(dpi));
+    if (stamkaart) formData.append("stamkaart", stamkaart);
+    const res = await fetch(
+      `${API_BASE}/api/admin/tenants/${encodeURIComponent(tenant)}/brand-extract`,
+      { method: "POST", credentials: "include", body: formData }
+    );
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw { status: res.status, detail: body.detail ?? "Extractie mislukt" } as ApiError;
+    }
+    return res.json();
+  },
+
+  getAnalysisPageUrl: (tenant: string, filename: string): string =>
+    `${API_BASE}/api/admin/tenants/${encodeURIComponent(tenant)}/analysis/pages/${encodeURIComponent(filename)}`,
+
+  generatePromptPackage: (tenant: string, editedExtraction: Record<string, unknown>) =>
+    apiFetch<PromptPackageResult>(
+      `/api/admin/tenants/${encodeURIComponent(tenant)}/brand-extract/prompt-package`,
+      {
+        method: "POST",
+        body: JSON.stringify({ edited_extraction: editedExtraction }),
+      }
+    ),
+
+  mergeBrand: (
+    tenant: string,
+    editedExtraction: Record<string, unknown>,
+    pagesYaml: string | null,
+    brandName: string,
+    brandSlug?: string
+  ) =>
+    apiFetch<BrandMergeResult>(
+      `/api/admin/tenants/${encodeURIComponent(tenant)}/brand-merge`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          edited_extraction: editedExtraction,
+          pages_yaml: pagesYaml,
+          brand_name: brandName,
+          brand_slug: brandSlug || tenant,
+        }),
+      }
     ),
 };
 

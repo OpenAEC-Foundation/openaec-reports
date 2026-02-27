@@ -27,6 +27,10 @@ COPY --from=frontend-build /app/frontend/dist /app/static
 
 RUN mkdir -p /app/uploads /app/data
 
+# Multi-tenant: alle tenant directories beschikbaar voor brand resolution
+ENV BM_TENANTS_ROOT=/app/tenants
+ENV BM_TENANT_DIR=/app/tenants/default
+
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \

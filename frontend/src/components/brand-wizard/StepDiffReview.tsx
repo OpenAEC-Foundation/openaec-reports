@@ -4,25 +4,65 @@ import { brandApi } from "@/api/brandApi";
 import { FieldOverlay } from "./FieldOverlay";
 
 // ---------- Field role options ----------
+// Gegroepeerd per context. Values matchen met suggest_role() in diff_engine.py
+// en de text_zone namen in brand.yaml pages sectie.
 
 const FIELD_ROLES = [
+  // -- Cover --
   { value: "title", label: "Titel" },
   { value: "subtitle", label: "Subtitel" },
+  { value: "report_type", label: "Rapporttype" },
+  { value: "tagline", label: "Tagline" },
+  { value: "cover_image", label: "Cover afbeelding" },
+
+  // -- Document --
+  { value: "project_name", label: "Projectnaam" },
+  { value: "project_number", label: "Projectnummer" },
+  { value: "document_number", label: "Documentnummer" },
+  { value: "kenmerk", label: "Kenmerk" },
   { value: "date", label: "Datum" },
-  { value: "client", label: "Opdrachtgever" },
-  { value: "project", label: "Project" },
-  { value: "location", label: "Locatie" },
-  { value: "author", label: "Auteur" },
   { value: "version", label: "Versie" },
+  { value: "status", label: "Status" },
+  { value: "fase", label: "Fase" },
+
+  // -- Personen --
+  { value: "client", label: "Opdrachtgever" },
+  { value: "client_contact", label: "Contactpersoon opdrachtgever" },
+  { value: "client_address", label: "Adres opdrachtgever" },
+  { value: "author", label: "Auteur" },
+  { value: "company_name", label: "Bedrijfsnaam" },
+
+  // -- Locatie --
+  { value: "location", label: "Locatie" },
+  { value: "location_code", label: "Locatiecode" },
+  { value: "location_address", label: "Locatie adres" },
+
+  // -- Pagina-elementen --
   { value: "page_number", label: "Paginanummer" },
   { value: "section_header", label: "Sectie header" },
+  { value: "footer_project", label: "Footer projectnaam" },
+  { value: "footer_code", label: "Footer projectcode" },
+  { value: "footer_text", label: "Footer tekst" },
+
+  // -- Content --
   { value: "label", label: "Label" },
   { value: "value", label: "Waarde" },
   { value: "contact", label: "Contactgegevens" },
+  { value: "phone", label: "Telefoon" },
+  { value: "email", label: "E-mail" },
+  { value: "website", label: "Website" },
+  { value: "address", label: "Adres" },
   { value: "photo", label: "Foto placeholder" },
+  { value: "disclaimer", label: "Disclaimer" },
+  { value: "overlay_text", label: "Overlay tekst" },
+
+  // -- Overig --
   { value: "custom", label: "Custom..." },
   { value: "ignore", label: "Negeren" },
 ] as const;
+
+/** Set van bekende role values voor snelle lookup. */
+const KNOWN_ROLE_VALUES: Set<string> = new Set(FIELD_ROLES.map((r) => r.value));
 
 type ViewType = "diff" | "ref" | "st";
 
@@ -232,6 +272,13 @@ export function StepDiffReview() {
                           className="w-full rounded border border-gray-200 px-2 py-1 text-xs focus:border-blue-300 focus:ring-1 focus:ring-blue-100 focus:outline-none"
                         >
                           <option value="">-- Selecteer rol --</option>
+                          {/* Toon suggested_role als die niet in de standaardlijst zit */}
+                          {field.suggested_role &&
+                            !KNOWN_ROLE_VALUES.has(field.suggested_role) && (
+                              <option value={field.suggested_role}>
+                                {field.suggested_role} (gesuggereerd)
+                              </option>
+                            )}
                           {FIELD_ROLES.map((r) => (
                             <option key={r.value} value={r.value}>
                               {r.label}

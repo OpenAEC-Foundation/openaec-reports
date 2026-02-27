@@ -1,0 +1,212 @@
+{
+  "template": "symitech_bic_rapport",
+  "tenant": "symitech",
+  "brand": "symitech",
+
+  "project": "BIC Monitoring Depot Noord",
+  "project_number": "SYM-2026-0142",
+  "client": "Gemeente Amsterdam",
+  "author": "Symitech B.V.",
+  "date": "2026-03-15",
+  "version": "1.0",
+  "status": "CONCEPT",
+
+  "cover": {
+    "subtitle": "BIC Rapport — Jaarlijkse monitoring"
+  },
+
+  "colofon": {
+    "enabled": true,
+    "opdrachtgever_naam": "Gemeente Amsterdam",
+    "opdrachtgever_contact": "Dhr. J. de Vries",
+    "opdrachtgever_adres": "Amstel 1, 1011 PN Amsterdam",
+    "adviseur_bedrijf": "Symitech B.V.",
+    "adviseur_naam": "Ing. P. Jansen",
+    "kenmerk": "SYM-2026-0142-R01",
+    "datum": "15 maart 2026",
+    "fase": "Monitoring",
+    "status_colofon": "CONCEPT"
+  },
+
+  "backcover": {
+    "enabled": true
+  },
+
+  "sections": [
+    {
+      "title": "Locatie",
+      "content": [
+        {
+          "type": "location_detail",
+          "title": "Locatie",
+          "client": {
+            "section_title": "Opdrachtgever",
+            "name": "Gemeente Amsterdam",
+            "address": "Amstel 1",
+            "city": "1011 PN Amsterdam"
+          },
+          "location": {
+            "section_title": "Locatie van uitvoer",
+            "name": "Depot Noord",
+            "address": "Industrieweg 10",
+            "city": "1013 AB Amsterdam",
+            "code": "LOC-2026-001",
+            "provision": "Grondwatermonitoring",
+            "object": "Peilbuis PB-01"
+          },
+          "photo_path": null
+        }
+      ]
+    },
+    {
+      "title": "BIC Controles",
+      "content": [
+        {
+          "type": "bic_table",
+          "location_name": "Depot Noord — Amsterdam",
+          "sections": [
+            {
+              "title": "BIC Controles",
+              "rows": [
+                {
+                  "label": "Aantal BIC controles",
+                  "ref_value": "12",
+                  "actual_value": "14"
+                },
+                {
+                  "label": "Uren per controle",
+                  "ref_value": "2,0",
+                  "actual_value": "1,5"
+                },
+                {
+                  "label": "Kosten per uur",
+                  "ref_value": "€ 85,00",
+                  "actual_value": "€ 85,00"
+                },
+                {
+                  "label": "Reiskosten",
+                  "ref_value": "€ 450,00",
+                  "actual_value": "€ 525,00"
+                }
+              ]
+            },
+            {
+              "title": "Rapportage",
+              "rows": [
+                {
+                  "label": "Tussenrapportages",
+                  "ref_value": "4",
+                  "actual_value": "4"
+                },
+                {
+                  "label": "Eindrapportage",
+                  "ref_value": "1",
+                  "actual_value": "1"
+                }
+              ]
+            }
+          ],
+          "summary": {
+            "title": "Overzicht samenvatting",
+            "rows": [
+              {
+                "label": "BIC controles",
+                "ref_value": "€ 3.400,00",
+                "actual_value": "€ 2.975,00"
+              },
+              {
+                "label": "Rapportage",
+                "ref_value": "€ 1.150,00",
+                "actual_value": "€ 1.150,00"
+              }
+            ],
+            "total": {
+              "label": "Totaal excl. BTW",
+              "ref_value": "€ 4.550,00",
+              "actual_value": "€ 4.125,00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Kostenopgave",
+      "orientation": "landscape",
+      "content": [
+        {
+          "type": "cost_summary",
+          "title": "Kostenopgave",
+          "columns": ["Omschrijving", "Aantal", "Eenheidsprijs", "Totaal"],
+          "rows": [
+            {
+              "description": "BIC controles (14x, 1,5 uur)",
+              "quantity": 14,
+              "unit_price": 127.50,
+              "total": 1785.00
+            },
+            {
+              "description": "Reiskosten",
+              "quantity": 14,
+              "unit_price": 37.50,
+              "total": 525.00
+            },
+            {
+              "description": "Laboratoriumanalyses",
+              "quantity": 14,
+              "unit_price": 47.50,
+              "total": 665.00
+            },
+            {
+              "description": "Tussenrapportages",
+              "quantity": 4,
+              "unit_price": 225.00,
+              "total": 900.00
+            },
+            {
+              "description": "Eindrapportage",
+              "quantity": 1,
+              "unit_price": 250.00,
+              "total": 250.00
+            }
+          ],
+          "total": 4125.00
+        }
+      ]
+    },
+    {
+      "title": "Objectbeschrijving",
+      "content": [
+        {
+          "type": "object_description",
+          "title": "Objectbeschrijving",
+          "object_name": "Peilbuis PB-01",
+          "fields": [
+            {"label": "Type", "value": "Grondwaterpeilbuis"},
+            {"label": "Diameter", "value": "50 mm"},
+            {"label": "Diepte", "value": "12,5 m-mv"},
+            {"label": "Filterdiepte", "value": "10,0 - 12,0 m-mv"},
+            {"label": "Materiaal", "value": "PVC"},
+            {"label": "Plaatsingsjaar", "value": "2019"}
+          ],
+          "notes": "Jaarlijkse controle conform BRL SIKB 2000. Peilbuis is in goede staat, geen beschadigingen waargenomen tijdens laatste inspectie.",
+          "photo_path": null
+        },
+        {
+          "type": "object_description",
+          "title": "Objectbeschrijving",
+          "object_name": "Peilbuis PB-02",
+          "fields": [
+            {"label": "Type", "value": "Grondwaterpeilbuis"},
+            {"label": "Diameter", "value": "50 mm"},
+            {"label": "Diepte", "value": "8,0 m-mv"},
+            {"label": "Filterdiepte", "value": "6,0 - 8,0 m-mv"},
+            {"label": "Materiaal", "value": "PVC"},
+            {"label": "Plaatsingsjaar", "value": "2020"}
+          ],
+          "notes": "Bovenzijde licht beschadigd. Aanbeveling: beschermkoker vervangen bij volgende controle.",
+          "photo_path": null
+        }
+      ]
+    }
+  ]
+}

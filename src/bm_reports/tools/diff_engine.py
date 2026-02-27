@@ -316,21 +316,43 @@ def suggest_role(
     if match:
         placeholder = match.group(1).lower()
         role_map = {
+            # Cover
             "title": "title",
             "titel": "title",
             "factuurkop": "title",
+            "subtitle": "subtitle",
+            "subtitel": "subtitle",
+            "ondertitel": "subtitle",
+            "rapporttype": "report_type",
+            "type": "report_type",
+            "tagline": "tagline",
+            # Document
             "datum": "date",
             "date": "date",
             "project": "project_name",
             "projectnaam": "project_name",
             "projectnummer": "project_number",
-            "klant": "client",
-            "opdrachtgever": "client",
-            "auteur": "author",
+            "documentnummer": "document_number",
+            "kenmerk": "kenmerk",
             "versie": "version",
             "status": "status",
+            "fase": "fase",
+            # Personen
+            "klant": "client",
+            "opdrachtgever": "client",
+            "contactpersoon": "client_contact",
+            "auteur": "author",
+            "adviseur": "author",
+            "bedrijf": "company_name",
+            "bedrijfsnaam": "company_name",
+            # Locatie
             "locatie": "location",
-            "documentnummer": "document_number",
+            "locatiecode": "location_code",
+            "adres": "address",
+            # Pagina-elementen
+            "paginanummer": "page_number",
+            "disclaimer": "disclaimer",
+            "footer": "footer_text",
         }
         for key, role in role_map.items():
             if key in placeholder:

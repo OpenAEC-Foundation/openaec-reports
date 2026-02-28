@@ -131,6 +131,15 @@ function renumberAppendices(appendices: EditorAppendix[]): EditorAppendix[] {
   return appendices.map((a, i) => ({ ...a, number: i + 1 }));
 }
 
+// ---------- Content check helper ----------
+
+export function reportHasContent(report: EditorReport): boolean {
+  const hasBlocks = report.sections.some(s => s.content.length > 0);
+  const hasAppendices = report.appendices.length > 0;
+  const hasMetadata = !!(report.project || report.client || report.project_number);
+  return hasBlocks || hasAppendices || hasMetadata;
+}
+
 // ---------- Store ----------
 
 export const useReportStore = create<ReportStore>()((set, get) => ({

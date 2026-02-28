@@ -98,6 +98,13 @@ class TestParseTableColumn:
         assert col.font == "body"
         assert col.size == 9.0
         assert col.color == "text"
+        assert col.header is None
+
+    def test_header_field(self) -> None:
+        """Column with explicit header display name."""
+        col = parse_table_column({"field": "ref_value", "header": "Conform opdracht"})
+        assert col.field == "ref_value"
+        assert col.header == "Conform opdracht"
 
     def test_missing_field_raises(self) -> None:
         with pytest.raises(KeyError):
@@ -149,6 +156,32 @@ class TestParseTableConfig:
         assert tc.max_y_mm == 260.0
         assert tc.show_header is False
         assert tc.columns == []
+        # New styling fields default to None
+        assert tc.header_bg is None
+        assert tc.body_font is None
+        assert tc.body_size is None
+        assert tc.body_color is None
+        assert tc.alt_row_bg is None
+        assert tc.grid_color is None
+
+    def test_styling_fields(self) -> None:
+        """TableConfig with all styling overrides."""
+        data = {
+            "data_bind": "items",
+            "header_bg": "#006FAB",
+            "body_font": "Helvetica",
+            "body_size": 9.0,
+            "body_color": "#333333",
+            "alt_row_bg": "#F5F5F5",
+            "grid_color": "#CCCCCC",
+        }
+        tc = parse_table_config(data)
+        assert tc.header_bg == "#006FAB"
+        assert tc.body_font == "Helvetica"
+        assert tc.body_size == 9.0
+        assert tc.body_color == "#333333"
+        assert tc.alt_row_bg == "#F5F5F5"
+        assert tc.grid_color == "#CCCCCC"
 
     def test_empty_columns_list(self) -> None:
         tc = parse_table_config({"data_bind": "x", "columns": []})

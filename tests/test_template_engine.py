@@ -14,8 +14,10 @@ from bm_reports.core.template_config import (
 )
 from bm_reports.core.template_engine import (
     _BuildContext,
+    _draw_text_zones,
     _get_pagesize,
     _paginate_table_data,
+    _resolve_font,
     format_value,
     resolve_bind,
 )
@@ -49,6 +51,23 @@ class TestResolveBind:
     def test_non_dict_intermediate(self) -> None:
         """Pad gaat door een non-dict → None."""
         assert resolve_bind({"a": "string"}, "a.b") is None
+
+    def test_static_simple_label(self) -> None:
+        """_static.Label → returns literal 'Label'."""
+        assert resolve_bind({}, "_static.Locatie") == "Locatie"
+
+    def test_static_label_with_spaces(self) -> None:
+        """_static.Conform opdracht → returns 'Conform opdracht'."""
+        assert resolve_bind({}, "_static.Conform opdracht") == "Conform opdracht"
+
+    def test_static_label_ignores_data(self) -> None:
+        """_static.* returns literal regardless of data contents."""
+        data = {"_static": {"Foo": "Bar"}}
+        assert resolve_bind(data, "_static.Foo") == "Foo"
+
+    def test_page_number_returns_none(self) -> None:
+        """_page_number is not resolved by resolve_bind (handled elsewhere)."""
+        assert resolve_bind({}, "_page_number") is None
 
 
 # ============================================================
@@ -220,3 +239,155 @@ class TestBuildContext:
         assert ctx.brand is brand
         assert ctx.stationery is stationery
         assert ctx.stationery_dir == stationery_dir
+
+
+# ============================================================
+# _draw_text_zones — _page_number handling
+# ============================================================
+
+
+class TestDrawTextZonesPageNumber:
+    """Verify _page_number binding uses canvas.getPageNumber()."""
+
+    @staticmethod
+    def _make_brand() -> MagicMock:
+        brand = MagicMock()
+        brand.fonts = {"heading": "Helvetica-Bold", "body": "Helvetica"}
+        brand.colors = {"text": "#000000", "primary": "#006FAB"}
+        return brand
+
+    def test_page_number_drawn(self) -> None:
+        from bm_reports.core.template_config import TextZone
+
+        canvas = MagicMock()
+        canvas.getPageNumber.return_value = 3
+
+        zone = TextZone(bind="_page_number", x_mm=186.1, y_mm=292.0, size=9.5)
+        _draw_text_zones(canvas, [zone], {}, self._make_brand(), 842.0)
+
+        canvas.getPageNumber.assert_called_once()
+        canvas.drawString.assert_called_once()
+        drawn_text = canvas.drawString.call_args[0][2]
+        assert drawn_text == "3"
+
+    def test_static_label_drawn(self) -> None:
+        from bm_reports.core.template_config import TextZone
+
+        canvas = MagicMock()
+        canvas.getPageNumber.return_value = 1
+
+        zone = TextZone(bind="_static.Werkelijke kosten", x_mm=180.0, y_mm=35.6,
+                        align="right", font="heading", size=10, color="secondary")
+        brand = self._make_brand()
+        brand.colors["secondary"] = "#94571E"
+        _draw_text_zones(canvas, [zone], {}, brand, 842.0)
+
+        canvas.drawRightString.assert_called_once()
+        drawn_text = canvas.drawRightString.call_args[0][2]
+        assert drawn_text == "Werkelijke kosten"
+
+
+# ============================================================
+# _resolve_font
+# ============================================================
+
+
+class TestResolveFont:
+    """Verify _resolve_font lookup order for brand.fonts dict.
+
+    We patch get_font_name to be a passthrough so we can test the
+    resolution logic without Inter→Helvetica fallback interfering.
+    """
+
+    @staticmethod
+    def _make_brand(fonts: dict[str, str] | None = None) -> MagicMock:
+        brand = MagicMock()
+        brand.fonts = fonts or {"heading": "Helvetica-Bold", "body": "Helvetica"}
+        return brand
+
+    @staticmethod
+    def _passthrough_get_font(name: str) -> str:
+        return name
+
+    def test_heading_from_brand(self) -> None:
+        from unittest.mock import patch
+        brand = self._make_brand({"heading": "Inter-Bold", "body": "Inter-Book"})
+        with patch("bm_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+            result = _resolve_font("heading", brand)
+        assert result == "Inter-Bold"
+
+    def test_body_from_brand(self) -> None:
+        from unittest.mock import patch
+        brand = self._make_brand({"heading": "Helvetica-Bold", "body": "Helvetica"})
+        with patch("bm_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+            result = _resolve_font("body", brand)
+        assert result == "Helvetica"
+
+    def test_heading_bold_from_brand(self) -> None:
+        """heading_bold in brand.fonts -> direct lookup."""
+        from unittest.mock import patch
+        brand = self._make_brand({
+            "heading": "Helvetica-Bold",
+            "heading_bold": "Helvetica-Bold",
+            "body": "Helvetica",
+        })
+        with patch("bm_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+            result = _resolve_font("heading_bold", brand)
+        assert result == "Helvetica-Bold"
+
+    def test_heading_bold_fallback(self) -> None:
+        """heading_bold NOT in brand.fonts -> falls back to heading."""
+        from unittest.mock import patch
+        brand = self._make_brand({"heading": "Inter-Bold", "body": "Inter-Book"})
+        with patch("bm_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+            result = _resolve_font("heading_bold", brand)
+        assert result == "Inter-Bold"
+
+    def test_body_bold_from_brand(self) -> None:
+        """body_bold in brand.fonts -> direct lookup."""
+        from unittest.mock import patch
+        brand = self._make_brand({
+            "heading": "Helvetica-Bold",
+            "body": "Helvetica",
+            "body_bold": "Helvetica-Bold",
+        })
+        with patch("bm_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+            result = _resolve_font("body_bold", brand)
+        assert result == "Helvetica-Bold"
+
+    def test_body_bold_fallback_appends_bold(self) -> None:
+        """body_bold NOT in brand.fonts -> body + '-Bold'."""
+        from unittest.mock import patch
+        brand = self._make_brand({"heading": "Helvetica-Bold", "body": "Helvetica"})
+        with patch("bm_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+            result = _resolve_font("body_bold", brand)
+        assert result == "Helvetica-Bold"
+
+    def test_body_bold_fallback_already_bold(self) -> None:
+        """body is already Bold -> no double suffix."""
+        from unittest.mock import patch
+        brand = self._make_brand({"heading": "Inter-Bold", "body": "Inter-Bold"})
+        with patch("bm_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+            result = _resolve_font("body_bold", brand)
+        assert result == "Inter-Bold"
+        assert "Bold-Bold" not in result
+
+    def test_literal_font_name(self) -> None:
+        """Unknown ref -> treated as literal font name."""
+        from unittest.mock import patch
+        brand = self._make_brand()
+        with patch("bm_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+            result = _resolve_font("Courier", brand)
+        assert result == "Courier"
+
+    def test_medium_from_brand(self) -> None:
+        """medium in brand.fonts -> direct lookup."""
+        from unittest.mock import patch
+        brand = self._make_brand({
+            "heading": "Helvetica-Bold",
+            "body": "Helvetica",
+            "medium": "Helvetica-Bold",
+        })
+        with patch("bm_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+            result = _resolve_font("medium", brand)
+        assert result == "Helvetica-Bold"

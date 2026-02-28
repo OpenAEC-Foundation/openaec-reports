@@ -24,8 +24,10 @@ from bm_reports.auth.dependencies import get_current_user, init_api_key_db, init
 from bm_reports.auth.models import User, UserDB
 from bm_reports.auth.routes import auth_router
 from bm_reports.auth.security import is_default_secret
+from bm_reports.core.data_transform import transform_json_to_engine_data
 from bm_reports.core.engine import Report
 from bm_reports.core.renderer_v2 import ReportGeneratorV2
+from bm_reports.core.template_engine import TemplateEngine
 from bm_reports.core.tenant import TenantConfig
 from bm_reports.core.tenant_resolver import get_brand_loader, get_template_loader, get_tenant_config
 
@@ -397,6 +399,99 @@ async def generate_report_v2(request: Request, user: User = Depends(get_current_
         generator.generate(data, stationery_dir, output_path)
 
     return _generate_and_respond(build, data)
+
+
+# ============================================================
+# Template Engine Endpoint — YAML-driven multi-tenant
+# ============================================================
+
+
+@_protected.post("/api/generate/template")
+async def generate_template_report(request: Request, user: User = Depends(get_current_user)):
+    """Genereer PDF rapport via TemplateEngine (YAML-driven, multi-tenant).
+
+    Ondersteunt Symitech BIC facturen en andere template-gebaseerde rapporten
+    met per-pagina orientatie, stationery PDFs, en YAML text zones.
+
+    Body:
+        JSON data met template naam, project info, sections.
+        Wordt intern getransformeerd naar flat dot-notatie dict.
+
+    Returns:
+        PDF bestand als binary response (application/pdf).
+    """
+    data = await request.json()
+
+    template_name = data.get("template")
+    if not template_name:
+        raise HTTPException(status_code=422, detail="Veld 'template' is verplicht")
+
+    # Resolve tenant
+    tenant = user.tenant or "symitech"
+
+    # Normalize template name: strip "{tenant}_" prefix if present
+    # e.g. "symitech_bic_factuur" → "bic_factuur" for tenant "symitech"
+    prefix = f"{tenant}_"
+    if template_name.startswith(prefix):
+        template_name = template_name[len(prefix):]
+
+    # Resolve brand
+    brand = (
+        data.get("brand")
+        or _resolve_brand_from_template(data, tenant)
+        or tenant
+        or _DEFAULT_BRAND
+    )
+
+    # Resolve tenants directory
+    tenants_dir = _resolve_tenants_dir(tenant)
+
+    if not tenants_dir or not tenants_dir.exists():
+        raise HTTPException(
+            status_code=500,
+            detail="Tenants directory niet gevonden — configureer BM_TENANT_DIR",
+        )
+
+    # Transformeer JSON data naar engine formaat
+    engine_data = transform_json_to_engine_data(data)
+
+    # Bouw PDF via TemplateEngine
+    engine = TemplateEngine(tenants_dir=tenants_dir)
+
+    def build(output_path: Path) -> None:
+        engine.build(
+            template_name=template_name,
+            tenant=tenant,
+            data=engine_data,
+            output_path=output_path,
+            brand=brand,
+        )
+
+    return _generate_and_respond(build, data)
+
+
+def _resolve_tenants_dir(tenant: str = "") -> Path | None:
+    """Resolve de tenants root directory.
+
+    Probeert:
+    1. TenantConfig.tenants_root (uit BM_TENANT_DIR)
+    2. Source tree: <package>/../../tenants
+    3. Package-relatief: <package>/tenants
+    """
+    if tenant:
+        tc = get_tenant_config(tenant)
+        if hasattr(tc, "tenants_root") and tc.tenants_root and tc.tenants_root.exists():
+            return tc.tenants_root
+
+    candidates = [
+        Path(__file__).parent.parent.parent / "tenants",  # source tree
+        Path(__file__).parent / "tenants",                  # package
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+
+    return None
 
 
 @_protected.post("/api/upload")

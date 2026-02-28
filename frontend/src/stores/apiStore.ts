@@ -8,6 +8,7 @@ import {
 } from '@/services/api';
 import { useReportStore } from './reportStore';
 import { toReportDefinition } from '@/utils/conversion';
+import type { ReportDefinition } from '@/types/report';
 
 interface ApiStore {
   // Connection
@@ -47,6 +48,39 @@ interface ApiStore {
   clearValidation: () => void;
   setAutoPreview: (enabled: boolean) => void;
   schedulePreview: () => void;
+}
+
+/**
+ * Detecteer of een rapport via de TemplateEngine moet worden gegenereerd.
+ *
+ * Heuristiek (in volgorde):
+ * 1. Template naam bevat bekende Customer prefixen
+ * 2. Brand is 'customer'
+ * 3. Report type bevat 'BIC'
+ *
+ * Alle andere rapporten gaan via renderer_v2.
+ */
+function _isTemplateEngineReport(def: ReportDefinition): boolean {
+  const template = (def.template ?? '').toLowerCase();
+  const brand = (def.brand ?? '').toLowerCase();
+  const reportType = (def.report_type ?? '').toLowerCase();
+
+  // Customer templates → TemplateEngine
+  if (template.includes('bic_factuur') || template.includes('bic_rapport') || template.includes('sanering')) {
+    return true;
+  }
+
+  // Customer brand → TemplateEngine
+  if (brand === 'customer') {
+    return true;
+  }
+
+  // BIC report types → TemplateEngine
+  if (reportType.includes('bic')) {
+    return true;
+  }
+
+  return false;
 }
 
 export const useApiStore = create<ApiStore>()((set, get) => ({
@@ -115,7 +149,11 @@ export const useApiStore = create<ApiStore>()((set, get) => ({
     try {
       const report = useReportStore.getState().report;
       const definition = toReportDefinition(report);
-      const blob = await api.generate(definition);
+      // Smart endpoint routing: TemplateEngine voor YAML-driven templates
+      const isTemplateEngine = _isTemplateEngineReport(definition);
+      const blob = isTemplateEngine
+        ? await api.generateTemplate(definition)
+        : await api.generate(definition);
 
       // Revoke previous URL if exists
       const prev = get().lastPdfUrl;

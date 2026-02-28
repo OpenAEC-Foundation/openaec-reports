@@ -1,150 +1,97 @@
 # TODO — bm-reports
 
 > Prioriteit: 🔴 Hoog | 🟡 Middel | 🟢 Laag
-> Laatst bijgewerkt: 2026-02-28
+> Laatst bijgewerkt: 2026-02-28 21:30
 
 ---
 
-## Architectuur-besluit (2026-02-28)
+## ✅ T-API — API Endpoint voor TemplateEngine — VOLTOOID
 
-**renderer_v2 brand-aware refactor is VERVALLEN.**  
-Nieuwe aanpak: **Template-Driven Engine (Optie C)** — declaratieve YAML templates die
-documentstructuur definiëren. Drie pagina-modes: `special`, `fixed`, `flow`.
+- [x] T-API.1 — Endpoint `/api/generate/template` in `api.py`
+- [x] T-API.2 — `data_transform.py` als production module
+- [x] T-API.3 — Frontend smart endpoint routing
+- [x] T-API.4 — Integratietests (`test_api_template.py`)
 
-Zie: `docs/ARCHITECTURE_PLAN_TENANT_MODULES.md`
+## ✅ T1 — Template Engine Fase 1 — VOLTOOID
 
-Kern: stationery-first. Alle visuele elementen (lijnen, headers, kleur) zitten in de
-stationery PDF. Engine vult alleen text zones + transparante tabellen.
+- [x] T1.1–T1.8 — Compleet (102+ unit tests, 3 E2E tests, 6-pagina PDF)
 
----
+## ✅ T2 — Stationery + Coördinaten — VOLTOOID
 
-## 🔴 T1 — Template Engine Fase 1: Fixed + Special mode
+- [x] T2.1–T2.6 — Compleet (referentie-gebaseerde coördinaten)
 
-Nieuwe engine: `src/bm_reports/core/template_engine.py`
+## ✅ CLEANUP — Deprecated Code Verwijderd
 
-### ✅ T1.1 — Dataclasses + Parsers
-- [x] `template_config.py` — TemplateConfig, PageDef, PageType, TableConfig, TextZone, ContentFrame
-- [x] Parse helpers voor YAML → dataclass conversie
-
-### ✅ T1.2 — Template Resolver
-- [x] `template_resolver.py` — laadt template + page_type YAML's uit tenant dirs
-- [x] Caching, fallback naar package assets
-
-### ✅ T1.3 — Template Engine (v2 naast bestaand)
-- [x] `template_engine.py` — TemplateEngine met DocTemplate (Optie C)
-- [x] `_render_special()` — stationery + text zones via onPage callback
-- [x] `_render_fixed()` — stationery + text zones + tabel met auto-paginering
-- [x] `_render_flow()` — stationery + flowables in content frame
-- [x] `resolve_bind()` — dot-notatie data binding
-- [x] `format_value()` — currency_nl formatter
-- [x] `_draw_text_zones()` — text zones op canvas (top-down → bottom-up)
-- [x] `_draw_table()` — transparante tabel met vaste kolommen
-- [x] `_paginate_table_data()` — verdeel rijen over pagina's
-
-### ✅ T1.4 — Compilatie + imports fixen (2026-02-28)
-- [x] Forward reference `_BuildContext` → al opgelost (_BuildContext staat vóór TemplateEngine)
-- [x] Import paden: `brand.py` `load_from_path()` niet nodig → engine gebruikt `BrandLoader.load(name)`
-- [x] `document.py`: A4.width_pt=595.3, A4.height_pt=841.9, MM_TO_PT=2.8346 ✅
-- [x] `block_registry.py`: `create_block()` niet gebruikt — flow mode gebruikt directe Paragraph()
-- [x] `fonts.py`: `get_font_name()` ✅ (fallback Helvetica als Inter niet registered)
-- [x] Import test: `from bm_reports.core.template_engine import TemplateEngine` ✅
-- [x] Runtime verificatie: 10/10 integratiepunten gevalideerd (dataclasses, parsers, helpers, pagination, BrandLoader, StationeryRenderer)
-
-### ✅ T1.5 — Customer page_type YAML's (2026-02-28)
-- [x] `tenants/customer/page_types/voorblad_bic.yaml` — text zones
-- [x] `tenants/customer/page_types/locatie.yaml` — text zones
-- [x] `tenants/customer/page_types/bic_controles.yaml` — text zones + tabel
-- [x] `tenants/customer/page_types/detail_weergave.yaml` — tabel (landscape)
-- [x] `tenants/customer/page_types/objecten.yaml` — tabel (landscape)
-- [x] `tenants/customer/page_types/achterblad.yaml` — leeg (stationery only)
-
-### ✅ T1.6 — Customer template YAML (2026-02-28)
-- [x] `tenants/customer/templates/bic_factuur.yaml` — documentstructuur
-
-### ✅ T1.7 — Unit tests (2026-02-28)
-- [x] `test_template_config.py` — 23 tests: alle dataclasses + parse helpers
-- [x] `test_template_resolver.py` — 12 tests: loading, caching, fallback, edge cases
-- [x] `test_template_engine.py` — 17 tests: resolve_bind, format_value, _get_pagesize, _paginate_table_data, _BuildContext
-- [x] `test_data_binding.py` — 28 tests: diep nested, arrays, mixed types, currency edge cases
-- [x] Bugfix: `pageSize` → `pagesize` in template_engine.py (ReportLab API)
-
-### ✅ T1.8 — End-to-end test Customer BIC factuur (2026-02-28)
-- [x] `test_template_e2e.py` — 3 tests: PDF generatie, page count (6 pagina's), data transformatie
-- [x] Test JSON fixture → engine data transformatie
-- [x] `TemplateEngine.build("bic_factuur", "customer", data, "output/test_template_e2e.pdf")` ✅
-- [x] PDF output: 6 pagina's (voorblad, locatie, bic_controles, detail, objecten, achterblad)
+- [x] `modules/customer/` verwijderd (vervangen door TemplateEngine)
+- [x] `modules/yaml_module.py` verwijderd (vervangen door TemplateEngine)
+- [x] `tenants/customer/modules/` verwijderd (vervangen door page_types/)
+- [x] `assets/templates/customer_*.yaml` verwijderd
+- [x] Bijbehorende tests opgeruimd
+- [x] Prompt bestanden gearchiveerd naar `_archive/prompts/`
 
 ---
 
-## ✅ T2 — Stationery + Coördinaten Extraheren (2026-02-28)
+## 🔴 D-DEPLOY — Deploy Nieuwe Versie
 
-### ✅ T2.1 — Analyse script
-- [x] `tools/extract_reference_coords.py` — extraheer tekst-coördinaten uit referentie-PDF
-- [x] `output/reference_coords.json` — gemeten coördinaten per pagina
+### D-DEPLOY.1 — Docker build testen
+- [ ] `docker build -t bm-reports:latest .` — moet slagen
+- [ ] Controleer dat `tenants/` correct meekomt in image
+- [ ] Test: `docker run --rm -p 8000:8000 bm-reports:latest` + health check
 
-### ✅ T2.2 — Stationery beoordeling
-- [x] Generic stationery PDFs **voldoende** — geen page-type-specifieke nodig
-- [x] Visuele elementen (blauwe lijnen, tabel header bars, rij achtergronden) worden
-  dynamisch gerenderd door de engine, niet door stationery
-- [x] Referentie-PDF kleurbalken: #006EAA lijnen, #44233B header bar, #F8F9F9 alternerende rijen
+### D-DEPLOY.2 — VPS deployment
+- [ ] Push naar GitHub (main branch)
+- [ ] SSH naar VPS, pull + rebuild
+- [ ] Verifieer `/api/generate/template` endpoint live
+- [ ] Test met Customer test JSON via curl
 
-### ✅ T2.3 — Coördinaten updaten in page_type YAML's
-- [x] `voorblad_bic.yaml` — x/y aangepast op stationery label-posities (53.1, 116.4)
-- [x] `locatie.yaml` — volledig geherstructureerd: aparte _static labels + data zones
-  - Gemeten posities: titel y=28.6, sectie y=41.1, labels x=35.3, waarden x=91.0
-  - Kleuren via brand refs: "primary", "secondary", "text"
-- [x] `bic_controles.yaml` — header y=29.3, kolomkoppen y=35.6, tabel origin y=46.2
-  - Kolom right-edges: 147.4mm (conform) en 189.0mm (werkelijk)
-- [x] `detail_weergave.yaml` — tabel styling bijgewerkt (header_bg=#44233B, body_color=#45243D)
-- [x] `objecten.yaml` — kolommen proportioneel geschaald voor landscape (260mm totaal)
-
-### ✅ Pre-bestaande issues opgelost (T2.5, 2026-02-28)
-- [x] Fix 1: PageTemplate switching volgorde — NextPageTemplate vóór PageBreak (5 locaties)
-- [x] Fix 2: `_static.*` bindings → literal label tekst in `resolve_bind()`
-- [x] Fix 3: `_page_number` → `canvas.getPageNumber()` in `_draw_text_zones()`
-- [x] Fix 4: `TableColumn.header` display naam + `TableConfig` styling velden (header_bg, body_font/size/color, alt_row_bg, grid_color)
-- [x] Fix 5: `_resolve_font()` uitgebreid — brand.fonts dict lookup voor heading_bold/body_bold/medium/italic
-- [x] 22 nieuwe unit tests (totaal 66 in config+engine, 69 in e2e)
+### D-DEPLOY.3 — Frontend rebuild
+- [ ] `cd frontend && npm run build`
+- [ ] Kopieer `dist/` naar `static/` (of via Docker multi-stage)
+- [ ] Verifieer frontend op https://report.open-aec.com
 
 ---
 
-## 🟡 T3 — Flow mode integratie (OpenAEC rapporten)
+## 🟡 V-VALIDATE — Visuele Validatie Customer
+
+- [ ] Genereer PDF via API met `test_336_bic_factuur.json`
+- [ ] Open in PDF viewer naast referentie 336.01
+- [ ] Controleer per pagina:
+  - [ ] Pagina 1: Cover (portrait) — logo, kleur, tekst positie
+  - [ ] Pagina 2: Location detail (portrait) — adressen, project info
+  - [ ] Pagina 3: BIC tabel (landscape) — kolommen, rijen, totalen
+  - [ ] Pagina 4: Detail items (landscape) — tabelopmaak
+  - [ ] Pagina 5: Objecten (landscape) — Type kolommen
+  - [ ] Pagina 6: Cost summary (portrait) — bedragen, layout
+
+---
+
+## 🟡 T3 — OpenAEC TemplateEngine Migratie
 
 ### T3.1 — OpenAEC page_type YAML's
 - [ ] `tenants/default/page_types/voorblad.yaml`
 - [ ] `tenants/default/page_types/colofon.yaml`
-- [ ] `tenants/default/page_types/inhoud.yaml` (content_frame)
+- [ ] `tenants/default/page_types/inhoud.yaml`
+- [ ] `tenants/default/page_types/standaard.yaml`
+- [ ] `tenants/default/page_types/bijlage_scheidblad.yaml`
 - [ ] `tenants/default/page_types/achterblad.yaml`
 
-### T3.2 — OpenAEC template YAML's
-- [ ] `tenants/default/templates/rapport.yaml`
-- [ ] `tenants/default/templates/berekening.yaml`
-- [ ] `tenants/default/templates/offerte.yaml`
+### T3.2 — OpenAEC template YAML's (TemplateEngine formaat)
+- [ ] `tenants/default/templates/rapport_v3.yaml`
+- [ ] `tenants/default/templates/berekening_v3.yaml`
 
 ### T3.3 — Flow mode engine
-- [ ] `_build_flow_content()` integreren met bestaande block_registry
-- [ ] Bestaande OpenAEC rapporten werken ongewijzigd via nieuwe engine
-- [ ] Regressietest: output v1 engine vs template engine
+- [ ] `_build_flow_content()` integreren met block_registry
+- [ ] Regressietest: V2 output vs TemplateEngine output
+- [ ] Migratie-pad: `/api/generate/v2` → `/api/generate/template` voor OpenAEC
 
 ---
 
-## 🟡 T4 — Cleanup na validatie
-
-- [ ] Verwijder `src/bm_reports/modules/customer/` (4 Python modules)
-- [ ] Verwijder `tenants/customer/modules/` (4 YAML modules)  
-- [ ] Verwijder `yaml_module.py` (500+ regels) — niet meer nodig voor fixed pages
-- [ ] Verwijder `src/bm_reports/assets/templates/customer_*.yaml` (verplaatst)
-- [ ] API endpoint `/api/generate/v2` omschakelen naar TemplateEngine
-- [ ] CLI `generate` command omschakelen naar TemplateEngine
-
----
-
-## 🟡 D1 — Deploy & Infrastructure
+## 🟡 D1 — Server & Infrastructure
 
 - [x] Monorepo deployed op VPS
 - [x] SSH key-based auth (thuis + kantoor)
 - [x] Cockpit admin panel
-- [ ] Caddyfile vereenvoudigen: enkele reverse_proxy
+- [ ] Caddyfile vereenvoudigen (reverse proxy cleanup)
 - [ ] fail2ban installeren
 - [ ] Portainer installeren
 
@@ -152,17 +99,19 @@ Nieuwe engine: `src/bm_reports/core/template_engine.py`
 
 ## 🟢 P5 — Toekomstige Features
 
-- [ ] Customer rapport simpel (flow mode — zelfde als OpenAEC)
-- [ ] Tweede brand (BBL Engineering)
-- [ ] `reports/structural.py` — Constructief rapport
+- [ ] Customer rapport simpel (flow mode, niet alleen BIC)
+- [ ] Tweede brand onboarding (BBL Engineering)
 - [ ] RevitAdapter: Revit model data → rapport JSON
 - [ ] PDF caching op basis van JSON hash
 - [ ] Rate limiting per tenant
+- [ ] Rich text editing in frontend
 
 ---
 
 ## 🟢 Housekeeping
 
-- [ ] **pytest cache cleanup:** 38+ `pytest-cache-files-*` dirs verwijderen
+- [x] pytest cache cleanup
+- [x] Oude PROMPT_*.md bestanden gearchiveerd
 - [ ] `lessons_learned.md` aanmaken
-- [ ] Oude PROMPT_*.md bestanden archiveren
+- [ ] CLAUDE.md updaten met TemplateEngine documentatie
+- [ ] README.md updaten met nieuwe architectuur

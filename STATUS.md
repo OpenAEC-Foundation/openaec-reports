@@ -1,161 +1,105 @@
-# Backend Status — bm-reports
+# STATUS — bm-reports
 
-> Laatst bijgewerkt: 2026-02-28
+> Laatst bijgewerkt: 2026-02-28 21:30
+
+---
 
 ## Deployment
 
-| Component | URL | Status |
-|-----------|-----|--------|
-| **API (productie)** | https://report.open-aec.com/api/* | ✅ Live |
-| **Frontend (productie)** | https://report.open-aec.com/ | ✅ Monorepo deployed |
-| **Cutlist Optimizer** | https://zaagplan.open-aec.com/ | ✅ Live |
-| **Cockpit** | https://46.224.215.142:9090 | ✅ User: jochem |
+| Omgeving | URL | Status |
+|----------|-----|--------|
+| Productie | https://report.open-aec.com | ✅ Online |
+| API Health | https://report.open-aec.com/api/health | ✅ OK |
 
-### Infrastructuur
-- **Server:** Hetzner CX22 (2 vCPU, 4GB RAM, 75GB SSD) — Ubuntu 24.04
-- **IP:** 46.224.215.142
-- **SSH:** Key-based only (root), password login disabled
-- **Reverse proxy:** Caddy 2 (auto-SSL via Let's Encrypt)
-- **Container runtime:** Docker 29.2.1 + Compose v5.0.2
-- **Monitoring:** Cockpit (port 9090), CrowdSec
-- **Repository:** https://github.com/OpenAEC-Foundation/openaec-reports
+---
 
-## 🔴 Actief: Template-Driven Engine Refactor
+## Engines
 
-### Besluit (2026-02-28)
+| Engine | Endpoint | Status | Gebruik |
+|--------|----------|--------|---------|
+| V1 — `Report.from_dict()` | `/api/generate` | ✅ Werkend | OpenAEC standaard rapporten |
+| V2 — `ReportGeneratorV2` | `/api/generate/v2` | ✅ Werkend | OpenAEC pixel-perfect rapporten |
+| V3 — `TemplateEngine` | `/api/generate/template` | ✅ Werkend | Customer BIC + multi-tenant YAML |
 
-`renderer_v2.py` brand-aware maken is **vervallen**. Nieuwe aanpak:
-**Template-Driven Engine** met declaratieve YAML configuratie.
+### TemplateEngine (V3) — Detail
 
-**Kernprincipe:**
-```
-TEMPLATE  = documentstructuur (volgorde pagina's)
-PAGE_TYPE = stationery + text zones + optioneel tabel
-ENGINE    = generiek, nul tenant-specifieke code
-```
+| Component | Status | Tests |
+|-----------|--------|-------|
+| `template_config.py` — dataclasses + parsers | ✅ | 40+ |
+| `template_resolver.py` — template discovery | ✅ | 20+ |
+| `template_engine.py` — PDF assembly | ✅ | 42+ |
+| `data_transform.py` — JSON → flat dict | ✅ | via E2E |
+| API endpoint `/api/generate/template` | ✅ | 3 tests |
+| E2E: 6-pagina PDF mixed orientation | ✅ | 3 tests |
 
-**Drie pagina-modes:**
+### Customer Tenant
 
-| Mode | Gedrag | Gebruik |
-|------|--------|---------|
-| `special` | Stationery + text zones | Voorblad, colofon, achterblad |
-| `fixed` | Stationery + text zones + tabel (auto-paginering) | BIC controles, detail tabellen |
-| `flow` | Stationery + ReportLab flowables | OpenAEC inhoudspagina's, berekeningen |
+| Asset | Status | Pad |
+|-------|--------|-----|
+| `brand.yaml` | ✅ | `tenants/customer/brand.yaml` |
+| Stationery PDFs (5) | ✅ | `tenants/customer/stationery/` |
+| Page type YAMLs (6) | ✅ | `tenants/customer/page_types/` |
+| Template YAML | ✅ | `tenants/customer/templates/bic_factuur.yaml` |
+| Test data | ✅ | `schemas/test_336_bic_factuur.json` |
 
-**Implementatie: Optie C** — alles via ReportLab DocTemplate. Special/fixed als
-PageTemplates met onPage callbacks. Flow als standaard flowable content frames.
+---
 
-### Voortgang
+## Frontend
 
-| Component | Status | Bestand |
-|-----------|--------|---------|
-| Architectuurplan | ✅ Goedgekeurd | `docs/ARCHITECTURE_PLAN_TENANT_MODULES.md` |
-| Dataclasses + parsers | ✅ Geschreven | `core/template_config.py` |
-| Template resolver | ✅ Geschreven | `core/template_resolver.py` |
-| Template engine | ✅ Geschreven | `core/template_engine.py` |
-| Compilatie + imports | ✅ Gevalideerd | 10/10 runtime checks |
-| Customer page_type YAML's | ✅ 6/6, coördinaten gemeten | `tenants/customer/page_types/` |
-| Customer template YAML | ✅ Aangemaakt | `tenants/customer/templates/bic_factuur.yaml` |
-| Stationery PDFs per page-type | ✅ Generic stationery voldoende | `tenants/customer/stationery/` |
-| Coördinaten extraheren (T2) | ✅ Gemeten + YAML's bijgewerkt | `tools/extract_reference_coords.py` |
-| Unit tests | ✅ 102 tests (4 bestanden) | `tests/test_template_*.py`, `tests/test_data_binding.py` |
-| End-to-end test | ✅ 3 tests, 6 pagina PDF | `tests/test_template_e2e.py` |
-| Pre-bestaande engine fixes | ✅ 5/5 opgelost | `template_engine.py`, `template_config.py` |
+| Feature | Status |
+|---------|--------|
+| Block editors (paragraph, table, image, calc, check, map) | ✅ |
+| Template selector + scaffold loader | ✅ |
+| Split view + live preview | ✅ |
+| JSON import/export | ✅ |
+| Undo/redo | ✅ |
+| Auto-save | ✅ |
+| Smart endpoint routing (V2 vs TemplateEngine) | ✅ |
+| Brand wizard (admin) | ✅ |
+| User/tenant management (admin) | ✅ |
 
-### Wat wordt verwijderd (na validatie)
-- `src/bm_reports/modules/customer/` — 4 Python modules (redundant met YAML)
-- `tenants/customer/modules/` — 4 YAML module configs
-- `yaml_module.py` — 500+ regels (niet nodig voor fixed pages)
-
-### Wat blijft
-- `renderer_v2.py` — werkt voor OpenAEC, wordt niet aangeraakt
-- Bestaande flow components (table, calculation, check, etc.)
-- Brand systeem (brand.yaml, BrandLoader)
-- Stationery renderer
-- Auth + tenant systeem
-
-## Architectuur
-
-```
-src/bm_reports/
-├── core/
-│   ├── template_config.py    ✅ NEW — dataclasses voor template YAML's
-│   ├── template_resolver.py  ✅ NEW — laadt templates + page_types uit tenant dirs
-│   ├── template_engine.py    ✅ NEW — template-driven PDF generator
-│   ├── engine.py             ✅ Bestaande v1 engine (flow mode)
-│   ├── renderer_v2.py        ✅ Bestaande v2 renderer (OpenAEC only)
-│   ├── stationery.py         ✅ Stationery renderer (gedeeld)
-│   ├── brand.py              ✅ Brand configuratie + loader
-│   ├── tenant_resolver.py    ✅ Per-request tenant resolution
-│   ├── page_templates.py     ✅ ReportLab page templates
-│   ├── styles.py             ✅ Paragraph/table styles
-│   ├── fonts.py              ✅ Font management
-│   ├── toc.py                ✅ Table of contents
-│   └── document.py           ✅ Document config + constants
-├── components/     ✅ Table, Calculation, Check, Image, Map, Spacer
-├── modules/
-│   ├── __init__.py           ✅ ModuleRegistry
-│   ├── yaml_module.py        ⚠️ Te verwijderen na template engine validatie
-│   └── customer/             ⚠️ Te verwijderen na template engine validatie
-├── auth/           ✅ JWT + API Key, SQLite store
-├── admin/          ✅ User CRUD, tenant/brand beheer
-├── tools/          ✅ Brand analyzer, stationery extractor
-├── api.py          ✅ Tenant-aware endpoints
-├── brand_api.py    ✅ Brand onboarding wizard
-└── cli.py          ✅ CLI tools
-```
-
-### Tenant Directory Structuur
-
-```
-tenants/
-├── default/
-│   ├── brand.yaml            ✅
-│   ├── fonts/                ✅ Inter
-│   ├── logos/                ✅
-│   ├── stationery/           ✅ 5 PDFs
-│   └── templates/            ⏳ Nog migreren naar nieuwe structuur
-│
-├── customer/
-│   ├── brand.yaml            ✅ Volledig
-│   ├── stationery/           ✅ 5 PDFs (generic voldoende)
-│   ├── modules/              ⚠️ Te verwijderen
-│   ├── templates/            ✅ bic_factuur.yaml
-│   └── page_types/           ✅ 6 YAML's met gemeten coördinaten
-```
-
-## Tests
-
-**Totaal:** 916+ tests | **Coverage:** ~75%
+---
 
 ## API Endpoints
 
-| Endpoint | Method | Status |
-|----------|--------|--------|
-| `/api/health` | GET | ✅ |
-| `/api/templates` | GET | ✅ Tenant-aware |
-| `/api/brands` | GET | ✅ Tenant-aware |
-| `/api/generate` | POST | ✅ v1 engine |
-| `/api/generate/v2` | POST | ✅ OpenAEC only (renderer_v2) |
-| `/api/brand/*` | CRUD | ✅ |
-| `/api/admin/*` | CRUD | ✅ Admin only |
+| Endpoint | Method | Auth | Doel |
+|----------|--------|------|------|
+| `/api/health` | GET | ❌ | Health check |
+| `/api/templates` | GET | ✅ | Lijst templates |
+| `/api/templates/{name}/scaffold` | GET | ✅ | Leeg rapport scaffold |
+| `/api/brands` | GET | ✅ | Lijst brands |
+| `/api/validate` | POST | ✅ | JSON validatie |
+| `/api/generate` | POST | ✅ | V1 PDF generatie |
+| `/api/generate/v2` | POST | ✅ | V2 pixel-perfect PDF |
+| `/api/generate/template` | POST | ✅ | TemplateEngine PDF |
+| `/api/upload` | POST | ✅ | Afbeelding upload |
+| `/api/stationery` | GET | ✅ | Stationery status |
+| `/api/admin/*` | * | ✅ Admin | User/tenant beheer |
 
-## Recente Wijzigingen (week 9, 2026)
+---
 
-- **Template engine architectuur:** Nieuwe aanpak goedgekeurd — YAML-driven met 3 page modes
-- **Nieuwe bestanden:** `template_config.py`, `template_resolver.py`, `template_engine.py`
-- **Architectuurplan:** `docs/ARCHITECTURE_PLAN_TENANT_MODULES.md`
-- **Ontdekking:** Python modules Customer 100% redundant met YAML modules — eliminatie gepland
-- **T1.7+T1.8:** 92 tests toegevoegd (unit + e2e), bugfix `pageSize` → `pagesize`
-- **T2:** Stationery analyse + coördinaten extraheren uit referentie-PDF
-  - Generic stationery PDFs voldoende (geen page-type-specifieke nodig)
-  - 5 page_type YAML's bijgewerkt met exacte gemeten coördinaten
-  - Analyse script: `tools/extract_reference_coords.py`
-  - Gemeten data: `output/reference_coords.json`
-- **T2.5:** 5 pre-bestaande template engine issues opgelost
-  - Fix 1: PageTemplate switching volgorde (NextPageTemplate vóór PageBreak)
-  - Fix 2: `_static.*` bindings → literal label tekst
-  - Fix 3: `_page_number` → `canvas.getPageNumber()`
-  - Fix 4: `TableColumn.header` + `TableConfig` styling velden (header_bg, body_font/size/color, alt_row_bg, grid_color)
-  - Fix 5: `_resolve_font()` uitgebreid voor heading_bold/body_bold + brand.yaml fonts
-  - 22 nieuwe unit tests, totaal 69 in template_config + template_engine
+## Cleanup Status
+
+| Item | Status |
+|------|--------|
+| Deprecated `modules/customer/` verwijderd | ✅ |
+| Deprecated `modules/yaml_module.py` verwijderd | ✅ |
+| Deprecated `tenants/customer/modules/` verwijderd | ✅ |
+| Deprecated `assets/templates/customer_*.yaml` verwijderd | ✅ |
+| Oude PROMPT_*.md bestanden gearchiveerd | ✅ |
+| pytest cache opgeruimd | ✅ |
+
+---
+
+## Volgende Stappen
+
+Zie `TODO.md` voor gedetailleerde taken.
+
+Korte termijn:
+1. 🟡 Deploy nieuwe versie naar VPS (met TemplateEngine endpoint)
+2. 🟡 Visuele validatie Customer PDF vs referentie 336.01
+3. 🟡 OpenAEC page_type YAML's voor TemplateEngine migratie
+
+Lange termijn:
+4. 🟢 Tweede brand onboarding (BBL Engineering)
+5. 🟢 RevitAdapter voor automatische rapport data

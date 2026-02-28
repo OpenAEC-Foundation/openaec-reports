@@ -1,0 +1,190 @@
+"""Template-driven report configuratie.
+
+Dataclasses voor het laden van template YAML's en page_type YAML's.
+Templates definiëren documentstructuur (volgorde pagina's).
+Page types definiëren wat er op elke pagina komt.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Literal
+
+
+@dataclass
+class TextZone:
+    """Tekstveld op een vaste positie op de pagina."""
+
+    bind: str                          # dot-notatie pad in data: "client.name"
+    x_mm: float = 0.0
+    y_mm: float = 0.0                  # top-down (mm vanaf bovenkant)
+    font: str = "body"                 # "heading", "body", of font naam
+    size: float = 10.0
+    color: str = "text"                # "primary", "secondary", "text", of hex
+    align: Literal["left", "right", "center"] = "left"
+
+
+@dataclass
+class TableColumn:
+    """Kolomdefinitie voor een fixed-page tabel."""
+
+    field: str                         # key in data dict
+    width_mm: float = 40.0
+    align: Literal["left", "right", "center"] = "left"
+    format: str | None = None          # "currency_nl", None = plain text
+    font: str = "body"
+    size: float = 9.0
+    color: str = "text"
+
+
+@dataclass
+class TableConfig:
+    """Tabelconfiguratie voor fixed pages."""
+
+    data_bind: str                     # dot-notatie pad naar list in data
+    columns: list[TableColumn] = field(default_factory=list)
+    origin_x_mm: float = 20.0
+    origin_y_mm: float = 60.0          # top-down
+    row_height_mm: float = 5.6
+    max_y_mm: float = 260.0            # ondergrens (top-down), daarna nieuwe pagina
+    header_font: str = "heading"
+    header_size: float = 9.0
+    header_color: str = "text"
+    show_header: bool = False          # kolomkoppen al in stationery
+
+
+@dataclass
+class ContentFrame:
+    """Frame definitie voor flow-mode pagina's."""
+
+    x_mm: float = 20.0
+    y_mm: float = 25.0                 # top-down
+    width_mm: float = 175.0
+    height_mm: float = 247.0
+
+
+@dataclass
+class PageType:
+    """Definitie van wat er op een pagina-type komt."""
+
+    name: str
+    stationery: str | None = None      # bestandsnaam in tenant stationery dir
+    text_zones: list[TextZone] = field(default_factory=list)
+    table: TableConfig | None = None
+    content_frame: ContentFrame | None = None  # voor flow mode
+
+
+@dataclass
+class PageDef:
+    """Pagina in een template — verwijst naar een page_type."""
+
+    type: Literal["special", "fixed", "flow", "toc"]
+    page_type: str                     # naam → resolves naar PageType
+    orientation: Literal["portrait", "landscape"] = "portrait"
+    repeat: Literal["auto", "none"] = "none"  # auto = pagineer tabeldata
+
+
+@dataclass
+class TemplateConfig:
+    """Documentstructuur — volgorde van pagina's."""
+
+    name: str
+    tenant: str
+    pages: list[PageDef] = field(default_factory=list)
+
+
+# ============================================================
+# Parsing helpers
+# ============================================================
+
+
+def parse_text_zone(data: dict[str, Any]) -> TextZone:
+    """Parse een text zone dict naar TextZone dataclass."""
+    return TextZone(
+        bind=data["bind"],
+        x_mm=float(data.get("x_mm", 0)),
+        y_mm=float(data.get("y_mm", 0)),
+        font=data.get("font", "body"),
+        size=float(data.get("size", 10)),
+        color=data.get("color", "text"),
+        align=data.get("align", "left"),
+    )
+
+
+def parse_table_column(data: dict[str, Any]) -> TableColumn:
+    """Parse een tabel kolom dict naar TableColumn dataclass."""
+    return TableColumn(
+        field=data["field"],
+        width_mm=float(data.get("width_mm", 40)),
+        align=data.get("align", "left"),
+        format=data.get("format"),
+        font=data.get("font", "body"),
+        size=float(data.get("size", 9)),
+        color=data.get("color", "text"),
+    )
+
+
+def parse_table_config(data: dict[str, Any]) -> TableConfig:
+    """Parse een tabel config dict naar TableConfig dataclass."""
+    origin = data.get("origin", {})
+    return TableConfig(
+        data_bind=data["data_bind"],
+        columns=[parse_table_column(c) for c in data.get("columns", [])],
+        origin_x_mm=float(origin.get("x_mm", 20)),
+        origin_y_mm=float(origin.get("y_mm", 60)),
+        row_height_mm=float(data.get("row_height_mm", 5.6)),
+        max_y_mm=float(data.get("max_y_mm", 260)),
+        header_font=data.get("header_font", "heading"),
+        header_size=float(data.get("header_size", 9)),
+        header_color=data.get("header_color", "text"),
+        show_header=data.get("show_header", False),
+    )
+
+
+def parse_content_frame(data: dict[str, Any]) -> ContentFrame:
+    """Parse een content frame dict naar ContentFrame dataclass."""
+    return ContentFrame(
+        x_mm=float(data.get("x_mm", 20)),
+        y_mm=float(data.get("y_mm", 25)),
+        width_mm=float(data.get("width_mm", 175)),
+        height_mm=float(data.get("height_mm", 247)),
+    )
+
+
+def parse_page_type(data: dict[str, Any]) -> PageType:
+    """Parse een page_type YAML dict naar PageType dataclass."""
+    pt = PageType(
+        name=data.get("name", "unknown"),
+        stationery=data.get("stationery"),
+    )
+
+    if "text_zones" in data:
+        pt.text_zones = [parse_text_zone(z) for z in data["text_zones"]]
+
+    if "table" in data:
+        pt.table = parse_table_config(data["table"])
+
+    if "content_frame" in data:
+        pt.content_frame = parse_content_frame(data["content_frame"])
+
+    return pt
+
+
+def parse_page_def(data: dict[str, Any]) -> PageDef:
+    """Parse een page definitie uit template YAML."""
+    return PageDef(
+        type=data["type"],
+        page_type=data["page_type"],
+        orientation=data.get("orientation", "portrait"),
+        repeat=data.get("repeat", "none"),
+    )
+
+
+def parse_template_config(data: dict[str, Any]) -> TemplateConfig:
+    """Parse een volledige template YAML naar TemplateConfig."""
+    return TemplateConfig(
+        name=data.get("name", "unknown"),
+        tenant=data.get("tenant", ""),
+        pages=[parse_page_def(p) for p in data.get("pages", [])],
+    )

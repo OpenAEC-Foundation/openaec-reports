@@ -1,0 +1,36 @@
+# Symitech BIC Factuur — locatie detail
+name: locatie
+stationery: content_portrait_stationery.pdf
+
+text_zones:
+  - bind: location.name
+    x_mm: 185
+    y_mm: 30
+    align: right
+    font: heading
+    size: 14
+    color: primary
+
+  - bind: location.address
+    x_mm: 30
+    y_mm: 65
+    font: body
+    size: 10
+
+  - bind: location.postcode_plaats
+    x_mm: 30
+    y_mm: 73
+    font: body
+    size: 10
+
+  - bind: location.contact
+    x_mm: 30
+    y_mm: 90
+    font: body
+    size: 10
+
+  - bind: location.telefoon
+    x_mm: 30
+    y_mm: 98
+    font: body
+    size: 10

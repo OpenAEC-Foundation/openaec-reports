@@ -1,0 +1,17 @@
+# Symitech BIC Factuur — objecten overzicht (landscape)
+name: objecten
+stationery: content_landscape_stationery.pdf
+
+table:
+  data_bind: objecten
+  origin:
+    x_mm: 20
+    y_mm: 60
+  row_height_mm: 5.6
+  max_y_mm: 170
+  columns:
+    - { field: object_id, width_mm: 25, align: left }
+    - { field: description, width_mm: 130, align: left }
+    - { field: type, width_mm: 40, align: left }
+    - { field: status, width_mm: 30, align: center }
+    - { field: cost, width_mm: 30, align: right, format: currency_nl }

@@ -1,0 +1,31 @@
+# Symitech BIC Factuur — documentstructuur
+name: symitech_bic_factuur
+tenant: symitech
+
+pages:
+  - type: special
+    page_type: voorblad_bic
+    orientation: portrait
+
+  - type: fixed
+    page_type: locatie
+    orientation: portrait
+
+  - type: fixed
+    page_type: bic_controles
+    orientation: portrait
+    repeat: auto
+
+  - type: fixed
+    page_type: detail_weergave
+    orientation: landscape
+    repeat: auto
+
+  - type: fixed
+    page_type: objecten
+    orientation: landscape
+    repeat: auto
+
+  - type: special
+    page_type: achterblad
+    orientation: portrait

@@ -1,216 +1,159 @@
 # TODO — bm-reports
 
 > Prioriteit: 🔴 Hoog | 🟡 Middel | 🟢 Laag
-> Laatst bijgewerkt: 2026-02-27
+> Laatst bijgewerkt: 2026-02-28
 
 ---
 
-## 🟡 Code Quality Audit (7 fasen)
+## Architectuur-besluit (2026-02-28)
 
-### Fase 1 — Kritieke fixes (schema & security) ✅
+**renderer_v2 brand-aware refactor is VERVALLEN.**  
+Nieuwe aanpak: **Template-Driven Engine (Optie C)** — declaratieve YAML templates die
+documentstructuur definiëren. Drie pagina-modes: `special`, `fixed`, `flow`.
 
-- [x] 1.1 MapLayer type mismatch: frontend TypeScript aligned met schema/Python (`percelen`, `bebouwing`, etc.)
-- [x] 1.2 `bullet_list` en `heading_2` block types toegevoegd aan JSON schema (backend ondersteunde ze al)
-- [x] 1.3 `tempfile.mktemp()` → `NamedTemporaryFile(delete=False)` in `block_registry.py`
-- [x] 1.4 Colofon schema uitgebreid met renderer_v2 velden (`opdrachtgever_naam`, `adviseur_bedrijf`, etc.)
+Zie: `docs/ARCHITECTURE_PLAN_TENANT_MODULES.md`
 
-### Fase 2 — PEP8 & consistentie ✅
-
-- [x] 2.1 Bare `except Exception:` vervangen door specifieke types in 7 bestanden
-- [x] 2.2 Duplicate `Colors.hex()` → alias van `as_hex`
-- [x] 2.3 Foutafhandelingsstrategie gedocumenteerd (components raise, registry graceful, API catch)
-- [x] 2.4 Lange regels opgesplitst in `api.py`
-- [x] 2.5 Whitespace fixes in `special_pages.py`
-- [x] 2.6 Volledige autoformat met `ruff format` (28 bestanden)
-- [x] 2.7 Import ordering met `ruff check --select I --fix` (14 fixes)
-
-### Fase 3 — Code duplication reduceren ✅
-
-- [x] 3.1 `BLOCK_PADDING = 6` constante in `styles.py`, gebruikt in 3 componenten
-- [x] 3.2 `_generate_and_respond()` helper in `api.py` (dedupliceert generate endpoints)
-- [x] 3.3 `BMFlowable` base class met standaard `wrap()`/`draw()` (4 componenten, map_block uitgezonderd)
-- [x] 3.4 Gedeelde style factories in `styles.py` voor calculation/check_block (~30 regels minder)
-- [x] 3.5 Dead code verwijderd: ongebruikte `_brand_primary`/`_brand_secondary`/`_brand_text` uit special_pages
-
-### Fase 4 — Performance & efficiëntie ✅
-
-- [x] 4.1 Image size caching in `ImageBlock._get_natural_size()`
-- [x] 4.2 Cached `_template_loader` en `_brand_loader` in `api.py` (module-level)
-- [x] 4.3 Map cache LRU eviction (`_CACHE_MAX_FILES = 200`) in `KadasterMap`
-- [x] 4.4 Lazy font initialization via `@functools.cache` in `_ensure_fonts_registered()`
-
-### Fase 5 — Type hints ✅
-
-- [x] 5.1 `wrap()` return type hints op alle Flowable componenten
-- [x] 5.2 `TableBlock.wrap()` zet `self.width`/`self.height` consistent
-- [x] 5.3 `**_kwargs` verwijderd uit block_registry factories (niet nodig, `create_block()` geeft selectief door)
-- [x] 5.4 PEP 604 union syntax — al consistent (`from __future__ import annotations` + `str | Path` overal)
-
-### Fase 6 — Configuratie & build ✅
-
-- [x] 6.1 Dockerfile vereenvoudigd: `pip install .` ipv hardcoded deps
-- [x] 6.2 CORS origins configureerbaar via `CORS_ORIGINS` env var
-- [x] 6.3 Brand kleuren geünificeerd: `#40124A` (primary), `#38BDA0` (secondary) in 15+ bestanden
-- [x] 6.4 Schema sync validatie script: `python scripts/check_schema_sync.py`
-
-### Fase 7 — Dead code & cleanup ✅
-
-- [x] 7.1 STATUS.md bijgewerkt (datum, test count, deps)
-- [x] 7.2 Test assertions bijgewerkt voor nieuwe kleurwaarden
-- [x] 7.3 `TOCBuilder._entries` lijst → vervangen door `_entry_count` counter (alleen len() werd gebruikt)
-- [x] 7.4 `special_pages._build_colofon_rows()` verwijderd (dead code, 45 regels + 7 tests)
-- [x] 7.5 STATUS.md verrijkt: recente features, correcte test counts (603+), nieuwe modules
-
-### Fase 8 — Hardcoded data eliminatie ✅
-
-- [x] 8.1 `special_pages.py`: 15+ hardcoded hex fallbacks vervangen door `BM_COLORS.*` constanten
-- [x] 8.2 `page_templates.py`: `"GothamBook"` → `BM_FONTS.body`, `"#45243D"` → `BM_COLORS.text`
-- [x] 8.3 `page_templates.py`: Return type hints toegevoegd aan 7 functies
-- [x] 8.4 `brand_renderer.py`: `"#000000"` fallbacks → `BM_COLORS.text`
-- [x] 8.5 `map_block.py`: Magic DPI `150` → `_MAP_DPI` constante, `"#F0F0F0"` → `BM_COLORS.background_alt`
-- [x] 8.6 `check_block.py`: Magic `bar_h = 8` → `_UC_BAR_HEIGHT` constante
-- [x] 8.7 `api.py`: `"3bm_cooperatie"` → `_DEFAULT_BRAND` constante
+Kern: stationery-first. Alle visuele elementen (lijnen, headers, kleur) zitten in de
+stationery PDF. Engine vult alleen text zones + transparante tabellen.
 
 ---
 
-## 🟡 D1 — Monorepo Deploy op VPS
+## 🔴 T1 — Template Engine Fase 1: Fixed + Special mode
 
-**Status:** Deployed en getest, nog 2 cleanup items
+Nieuwe engine: `src/bm_reports/core/template_engine.py`
 
-- [x] `git push` naar GitHub
-- [x] Op server: `git pull` + `docker compose build --no-cache bm-reports-api`
-- [x] `docker compose up -d bm-reports-api`
-- [x] Verifiëren: https://report.3bm.co.nl/ laadt frontend (via StaticFiles)
-- [x] Verifiëren: https://report.3bm.co.nl/api/health werkt
-- [x] End-to-end test: template laden → rapport genereren → PDF download
-- [ ] Caddyfile vereenvoudigen: enkele `reverse_proxy` naar API container
-- [ ] Verwijder `bm-reports-ui/dist` volume mount uit docker-compose.yml
+### ✅ T1.1 — Dataclasses + Parsers
+- [x] `template_config.py` — TemplateConfig, PageDef, PageType, TableConfig, TextZone, ContentFrame
+- [x] Parse helpers voor YAML → dataclass conversie
+
+### ✅ T1.2 — Template Resolver
+- [x] `template_resolver.py` — laadt template + page_type YAML's uit tenant dirs
+- [x] Caching, fallback naar package assets
+
+### ✅ T1.3 — Template Engine (v2 naast bestaand)
+- [x] `template_engine.py` — TemplateEngine met DocTemplate (Optie C)
+- [x] `_render_special()` — stationery + text zones via onPage callback
+- [x] `_render_fixed()` — stationery + text zones + tabel met auto-paginering
+- [x] `_render_flow()` — stationery + flowables in content frame
+- [x] `resolve_bind()` — dot-notatie data binding
+- [x] `format_value()` — currency_nl formatter
+- [x] `_draw_text_zones()` — text zones op canvas (top-down → bottom-up)
+- [x] `_draw_table()` — transparante tabel met vaste kolommen
+- [x] `_paginate_table_data()` — verdeel rijen over pagina's
+
+### ✅ T1.4 — Compilatie + imports fixen (2026-02-28)
+- [x] Forward reference `_BuildContext` → al opgelost (_BuildContext staat vóór TemplateEngine)
+- [x] Import paden: `brand.py` `load_from_path()` niet nodig → engine gebruikt `BrandLoader.load(name)`
+- [x] `document.py`: A4.width_pt=595.3, A4.height_pt=841.9, MM_TO_PT=2.8346 ✅
+- [x] `block_registry.py`: `create_block()` niet gebruikt — flow mode gebruikt directe Paragraph()
+- [x] `fonts.py`: `get_font_name()` ✅ (fallback Helvetica als Gotham niet registered)
+- [x] Import test: `from bm_reports.core.template_engine import TemplateEngine` ✅
+- [x] Runtime verificatie: 10/10 integratiepunten gevalideerd (dataclasses, parsers, helpers, pagination, BrandLoader, StationeryRenderer)
+
+### ✅ T1.5 — Symitech page_type YAML's (2026-02-28)
+- [x] `tenants/symitech/page_types/voorblad_bic.yaml` — text zones
+- [x] `tenants/symitech/page_types/locatie.yaml` — text zones
+- [x] `tenants/symitech/page_types/bic_controles.yaml` — text zones + tabel
+- [x] `tenants/symitech/page_types/detail_weergave.yaml` — tabel (landscape)
+- [x] `tenants/symitech/page_types/objecten.yaml` — tabel (landscape)
+- [x] `tenants/symitech/page_types/achterblad.yaml` — leeg (stationery only)
+
+### ✅ T1.6 — Symitech template YAML (2026-02-28)
+- [x] `tenants/symitech/templates/bic_factuur.yaml` — documentstructuur
+
+### ✅ T1.7 — Unit tests (2026-02-28)
+- [x] `test_template_config.py` — 23 tests: alle dataclasses + parse helpers
+- [x] `test_template_resolver.py` — 12 tests: loading, caching, fallback, edge cases
+- [x] `test_template_engine.py` — 17 tests: resolve_bind, format_value, _get_pagesize, _paginate_table_data, _BuildContext
+- [x] `test_data_binding.py` — 28 tests: diep nested, arrays, mixed types, currency edge cases
+- [x] Bugfix: `pageSize` → `pagesize` in template_engine.py (ReportLab API)
+
+### ✅ T1.8 — End-to-end test Symitech BIC factuur (2026-02-28)
+- [x] `test_template_e2e.py` — 3 tests: PDF generatie, page count (6 pagina's), data transformatie
+- [x] Test JSON fixture → engine data transformatie
+- [x] `TemplateEngine.build("bic_factuur", "symitech", data, "output/test_template_e2e.pdf")` ✅
+- [x] PDF output: 6 pagina's (voorblad, locatie, bic_controles, detail, objecten, achterblad)
 
 ---
 
-## ✅ D3 — CI/CD Pipeline
+## 🔴 T2 — Stationery PDFs per page-type
 
-- [x] GitHub Actions workflow: build + push Docker image (multi-stage)
-- [x] Lint (ruff) + test (pytest) in CI pipeline
-- [x] Frontend + backend in één pipeline (multi-stage Dockerfile)
+Huidige Symitech stationery PDFs (5 stuks) dekken het hele document.
+Nodig: **per page-type een stationery** met alle visuele elementen erop.
 
----
+### T2.1 — Stationery extraheren/maken
+- [ ] Referentie-PDF analyseren: welke elementen zijn vast per pagina
+- [ ] Per page-type stationery PDF maken:
+  - `voorblad_bic.pdf` (bestaand: cover_stationery.pdf ≈ hernoemen)
+  - `locatie.pdf` (extract uit referentie, zonder dynamische tekst)
+  - `bic_controles.pdf` (extract: blauwe lijnen, kolomkoppen, sectielijnen)
+  - `detail_landscape.pdf` (extract: kolomkoppen, tabelstructuur)
+  - `objecten_landscape.pdf` (extract: kolomkoppen, tabelstructuur)
+  - `achterblad.pdf` (bestaand: backcover_stationery.pdf ≈ hernoemen)
+- [ ] Optie A: split referentie-PDF, verwijder data → InDesign/Illustrator
+- [ ] Optie B: vanuit bron opnieuw exporteren zonder data
 
-## 🟡 D4 — CrowdSec Bouncer
-
-- [ ] Caddy bouncer installeren voor actieve IP blocking
-- [ ] Testen met `cscli decisions list`
-
----
-
-## 🟡 S1 — Symitech Tenant (resterend)
-
-**Status:** Core modules klaar, integratie klaar, stationery PDF's nog nodig
-
-- [x] ModuleRegistry + ContentModule base class
-- [x] 4 Symitech modules (bic_table, cost_summary, location_detail, object_description)
-- [x] Symitech brand.yaml + rapport templates (bic_rapport, sanering)
-- [x] create_block() tenant fallback naar ModuleRegistry
-- [x] Module registratie bij app startup (__init__.py)
-- [x] Integratie tests (14 tests)
-- [x] Volledige test suite groen (824 tests)
-- [ ] Symitech stationery PDF's aanleveren (cover, colofon, content, backcover)
-- [ ] Symitech logo aanleveren (symitech_logo.png)
-- [ ] End-to-end test: JSON → Symitech rapport met stationery → PDF
-- [ ] renderer_v2 integratie met tenant modules
+### T2.2 — Text zone coördinaten extraheren
+- [ ] Per page-type: exact x,y van elke text zone meten uit referentie-PDF
+- [ ] Vastleggen in page_type YAML's (T1.5)
 
 ---
 
-## 🟡 P1 — Stationery Extractie
+## 🟡 T3 — Flow mode integratie (3BM rapporten)
 
-**Prompt:** `PROMPT_P1_STATIONERY_EXTRACTIE.md`
+### T3.1 — 3BM page_type YAML's
+- [ ] `tenants/3bm_cooperatie/page_types/voorblad.yaml`
+- [ ] `tenants/3bm_cooperatie/page_types/colofon.yaml`
+- [ ] `tenants/3bm_cooperatie/page_types/inhoud.yaml` (content_frame)
+- [ ] `tenants/3bm_cooperatie/page_types/achterblad.yaml`
 
-- [ ] `build-brand` draaien tegen referentie-PDF
-- [ ] Visueel verifiëren: tekst gestript, graphics intact
-- [ ] `source:` paden + `text_zones:` invullen in `3bm_cooperatie.yaml`
+### T3.2 — 3BM template YAML's
+- [ ] `tenants/3bm_cooperatie/templates/rapport.yaml`
+- [ ] `tenants/3bm_cooperatie/templates/berekening.yaml`
+- [ ] `tenants/3bm_cooperatie/templates/offerte.yaml`
+
+### T3.3 — Flow mode engine
+- [ ] `_build_flow_content()` integreren met bestaande block_registry
+- [ ] Bestaande 3BM rapporten werken ongewijzigd via nieuwe engine
+- [ ] Regressietest: output v1 engine vs template engine
+
+---
+
+## 🟡 T4 — Cleanup na validatie
+
+- [ ] Verwijder `src/bm_reports/modules/symitech/` (4 Python modules)
+- [ ] Verwijder `tenants/symitech/modules/` (4 YAML modules)  
+- [ ] Verwijder `yaml_module.py` (500+ regels) — niet meer nodig voor fixed pages
+- [ ] Verwijder `src/bm_reports/assets/templates/symitech_*.yaml` (verplaatst)
+- [ ] API endpoint `/api/generate/v2` omschakelen naar TemplateEngine
+- [ ] CLI `generate` command omschakelen naar TemplateEngine
+
+---
+
+## 🟡 D1 — Deploy & Infrastructure
+
+- [x] Monorepo deployed op VPS
+- [x] SSH key-based auth (thuis + kantoor)
+- [x] Cockpit admin panel
+- [ ] Caddyfile vereenvoudigen: enkele reverse_proxy
+- [ ] fail2ban installeren
+- [ ] Portainer installeren
 
 ---
 
 ## 🟢 P5 — Toekomstige Features
 
-### Multi-bureau support
-- [ ] Tweede brand toevoegen (bijv. BBL Engineering)
-- [ ] Brand selector via API
-- [ ] Stamkaart parser: PMS/CMYK kleurcodes
-
-### Rapport types
+- [ ] Symitech rapport simpel (flow mode — zelfde als 3BM)
+- [ ] Tweede brand (BBL Engineering)
 - [ ] `reports/structural.py` — Constructief rapport
-- [ ] `reports/daylight.py` — Daglichttoetreding
-- [ ] `reports/building_code.py` — BBL-toetsing
-
-### Revit integratie
 - [ ] RevitAdapter: Revit model data → rapport JSON
-- [ ] pyRevit commands: Generate rapport vanuit Revit UI
-
-### SaaS / Deployment
-- [ ] Frontend brand setup wizard (roept B5 tools aan)
-- [x] Multi-tenant brand management (Tenants tab: overzicht, aanmaken, verwijderen)
 - [ ] PDF caching op basis van JSON hash
-- [x] User authentication (JWT via httpOnly cookies, SQLite user store)
-- [x] API Key authenticatie (X-API-Key header, SHA-256, expiry, admin CRUD)
-- [x] Bearer token authenticatie (Authorization header voor scripts/pyRevit)
-- [x] Admin panel (user CRUD, tenant/template/brand/asset beheer)
 - [ ] Rate limiting per tenant
 
 ---
 
-## 🟡 Housekeeping (uit Lessons Learned audit 2026-02-24)
+## 🟢 Housekeeping
 
-- [ ] **pytest cache cleanup:** 28+ `pytest-cache-files-*` directories verwijderen
-- [ ] `pytest-cache-files-*` toevoegen aan `.gitignore`
-- [ ] Overweeg `--basetemp=/tmp/pytest-bm` in `pyproject.toml` om cache te centraliseren
-- [ ] `lessons_learned.md` aanmaken op basis van template (zie `../lessons_learned_template.md`)
-- [ ] Vastleggen: "Schema-first" als architectuurregel heeft veel rework voorkomen — opnemen in lessons learned
-- [ ] Vastleggen: Fase 8 (hardcoded eliminatie) had vermeden kunnen worden door vanaf dag 1 constanten te definiëren
-- [ ] Vastleggen: Multi-tenant fallback-chain patroon documenteren als herbruikbaar pattern voor andere projecten
-- [ ] D1 (VPS deploy) afronden — handmatig deployen is foutgevoelig en niet herhaalbaar
-
----
-
-## Afgerond ✅
-
-| Item | Wanneer |
-|------|---------|
-| Fase A: Brand Analyzer (PDF → YAML pipeline) | Week 7 |
-| B1: KadasterMap + PDOK WMS | Week 8 |
-| B2: FastAPI API (6 endpoints) | Week 8 |
-| B3: Scaffold + Landscape oriëntatie | Week 8 |
-| Font/kleur fixes (6 bugs) | Week 8 |
-| Stationery systeem (code) | Week 8 |
-| Brand Builder pipeline (code) | Week 8 |
-| Page templates met stationery-first | Week 8 |
-| CLI: analyze-brand, build-brand, serve | Week 8 |
-| Test suite: 397 tests, 70% coverage | Week 8 |
-| P2: Cleanup + archivering | Week 8 |
-| P3: Special pages → brand YAML aansluiting | Week 8 |
-| P4: Coverage gaps dichten (70% → 75%) | Week 8 |
-| B5: Huisstijl extractie tool (6 modules, 50 tests) | Week 8 |
-| **VPS opgezet: Hetzner CX22, Caddy, CrowdSec** | **Week 8** |
-| **Docker image gebuild + API live** | **Week 8** |
-| **GitHub repo: OpenAEC-Foundation/openaec-reports** | **Week 8** |
-| **Cutlist Optimizer gemigreerd naar Caddy stack** | **Week 8** |
-| **SSL auto-provisioned (Let's Encrypt)** | **Week 8** |
-| **Dockerfile + pyproject.toml fixes (pycairo, README, force-include)** | **Week 8** |
-| **D2: Tenant Separation (TenantConfig, loaders, tests)** | **Week 8** |
-| **Monorepo merge: frontend + backend in één repo** | **Week 8** |
-| **Multi-stage Dockerfile (node build + python runtime)** | **Week 8** |
-| **StaticFiles mount in FastAPI (SPA serving)** | **Week 8** |
-| **Vite dev proxy voor lokale ontwikkeling** | **Week 8** |
-| **JSON alignment fixes (6 fixes, 22 tests)** | **Week 8** |
-| **P2: Opschonen — dead code, docs archiveren, CLAUDE.md** | **Week 8** |
-| **Code Quality Audit Fase 1-6 (schema fixes, PEP8, DRY, perf, types, config)** | **Week 8** |
-| **Brand kleur unificatie (#40124A, #38BDA0) in 15+ bestanden** | **Week 8** |
-| **bullet_list + heading_2 block types in JSON schema** | **Week 8** |
-| **Fase 8: Hardcoded data eliminatie (BM_COLORS, constanten, type hints)** | **Week 8** |
-| **D3: CI/CD Pipeline (GitHub Actions: lint, test, Docker build+push GHCR)** | **Week 8** |
-| **Auth: Bearer token + API Key authenticatie** | **Week 9** |
-| **Admin panel: user CRUD, tenant/asset beheer, API key management** | **Week 9** |
-| **Font embedding fix: Gotham subset via TextWriter (renderer_v2.py)** | **Week 9** |
-| **Git repo hersteld na Synology Drive sync (.git exclusie)** | **Week 9** |
-| **Tenant management: admin panel Tenants tab (create/delete + overzicht)** | **Week 9** |
-| **Symitech tenant: ModuleRegistry, 4 modules, brand, templates, integratie** | **Week 9** |
+- [ ] **pytest cache cleanup:** 38+ `pytest-cache-files-*` dirs verwijderen
+- [ ] `lessons_learned.md` aanmaken
+- [ ] Oude PROMPT_*.md bestanden archiveren

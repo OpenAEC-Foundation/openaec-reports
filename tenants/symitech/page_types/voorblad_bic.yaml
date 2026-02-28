@@ -1,0 +1,36 @@
+# Symitech BIC Factuur — voorblad
+name: voorblad_bic
+stationery: cover_stationery.pdf
+
+text_zones:
+  - bind: meta.factuur_kop
+    x_mm: 20
+    y_mm: 99
+    font: heading
+    size: 14
+    color: primary
+
+  - bind: meta.datum
+    x_mm: 20
+    y_mm: 112
+    font: body
+    size: 10
+
+  - bind: meta.factuurnummer
+    x_mm: 20
+    y_mm: 122
+    font: body
+    size: 10
+
+  - bind: project.name
+    x_mm: 20
+    y_mm: 140
+    font: heading
+    size: 12
+    color: primary
+
+  - bind: client.name
+    x_mm: 20
+    y_mm: 155
+    font: body
+    size: 10

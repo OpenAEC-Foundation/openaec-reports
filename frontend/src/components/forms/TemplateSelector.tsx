@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApiStore } from '@/stores/apiStore';
-import { useReportStore } from '@/stores/reportStore';
+import { useReportStore, reportHasContent } from '@/stores/reportStore';
 
 const inputClass =
   'w-full rounded border border-gray-200 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none';
@@ -14,12 +14,35 @@ export function TemplateSelector() {
   const currentTemplate = useReportStore((s) => s.report.template);
 
   const [loading, setLoading] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingTemplate, setPendingTemplate] = useState<string | null>(null);
 
   async function handleChange(value: string) {
     if (!connected || value === currentTemplate) return;
+
+    const report = useReportStore.getState().report;
+    if (reportHasContent(report)) {
+      setPendingTemplate(value);
+      setShowConfirm(true);
+    } else {
+      setLoading(true);
+      await loadScaffold(value);
+      setLoading(false);
+    }
+  }
+
+  async function handleConfirm() {
+    if (!pendingTemplate) return;
+    setShowConfirm(false);
     setLoading(true);
-    await loadScaffold(value);
+    await loadScaffold(pendingTemplate);
     setLoading(false);
+    setPendingTemplate(null);
+  }
+
+  function handleCancel() {
+    setShowConfirm(false);
+    setPendingTemplate(null);
   }
 
   return (
@@ -59,6 +82,36 @@ export function TemplateSelector() {
               Backend niet beschikbaar — templates laden niet mogelijk
             </p>
           )}
+        </div>
+      )}
+
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm mx-4">
+            <div className="flex items-center gap-3 mb-3">
+              <svg className="h-6 w-6 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+              <h3 className="text-sm font-semibold text-gray-900">Template wijzigen</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">
+              Template wijzigen wist je huidige rapport inclusief alle secties en instellingen. Wil je doorgaan?
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={handleCancel}
+                className="px-3 py-1.5 text-sm text-gray-700 border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={handleConfirm}
+                className="px-3 py-1.5 text-sm text-white bg-red-500 rounded hover:bg-red-600"
+              >
+                Doorgaan
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

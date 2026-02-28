@@ -2,25 +2,19 @@
 
 from __future__ import annotations
 
-import json
-import uuid
-from pathlib import Path
-from unittest.mock import MagicMock, patch
-
 import pytest
 import yaml
 from fastapi.testclient import TestClient
 
 from bm_reports.admin.brand_extraction import (
-    generate_prompt_package,
-    merge_brand_yaml,
-    get_reference_pages_yaml,
-    _generate_stationery_scaffold,
     _generate_modules_scaffold,
+    _generate_stationery_scaffold,
     _serialize_layouts,
+    generate_prompt_package,
+    get_reference_pages_yaml,
+    merge_brand_yaml,
 )
 from bm_reports.api import app
-
 
 # ============================================================
 # Unit tests: brand_extraction.py functies
@@ -315,10 +309,10 @@ class TestSerializeLayouts:
     def test_serializes_basic_layout(self):
         """Layout met elementen wordt correct geserialiseerd."""
         from bm_reports.tools.layout_extractor import (
+            BadgeSpec,
             PageLayout,
             StaticElement,
             TextZone,
-            BadgeSpec,
         )
         from bm_reports.tools.page_classifier import PageType
 

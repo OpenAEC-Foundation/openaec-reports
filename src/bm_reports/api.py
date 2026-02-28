@@ -27,7 +27,7 @@ from bm_reports.auth.security import is_default_secret
 from bm_reports.core.engine import Report
 from bm_reports.core.renderer_v2 import ReportGeneratorV2
 from bm_reports.core.tenant import TenantConfig
-from bm_reports.core.tenant_resolver import get_brand_loader, get_tenant_config, get_template_loader
+from bm_reports.core.tenant_resolver import get_brand_loader, get_template_loader, get_tenant_config
 
 logger = logging.getLogger(__name__)
 
@@ -333,7 +333,12 @@ async def generate_report(request: Request, user: User = Depends(get_current_use
     if not data.get("template"):
         raise HTTPException(status_code=422, detail="Veld 'template' is verplicht")
 
-    brand = data.get("brand") or _resolve_brand_from_template(data, user.tenant) or user.tenant or _DEFAULT_BRAND
+    brand = (
+        data.get("brand")
+        or _resolve_brand_from_template(data, user.tenant)
+        or user.tenant
+        or _DEFAULT_BRAND
+    )
     report = Report.from_dict(data, brand=brand)
 
     def build(output_path: Path) -> None:
@@ -362,7 +367,12 @@ async def generate_report_v2(request: Request, user: User = Depends(get_current_
     if not data.get("project"):
         raise HTTPException(status_code=422, detail="Veld 'project' is verplicht")
 
-    brand = data.get("brand") or _resolve_brand_from_template(data, user.tenant) or user.tenant or _DEFAULT_BRAND
+    brand = (
+        data.get("brand")
+        or _resolve_brand_from_template(data, user.tenant)
+        or user.tenant
+        or _DEFAULT_BRAND
+    )
 
     tc = get_tenant_config(user.tenant)
     stationery_dir = tc.stationery_dir or STATIONERY_DIR

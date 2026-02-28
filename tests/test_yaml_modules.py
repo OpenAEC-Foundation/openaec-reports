@@ -19,18 +19,18 @@ import yaml
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-from bm_reports.modules.base import ContentModule, ModuleConfig
-from bm_reports.modules.yaml_module import (
-    YamlModule,
-    create_yaml_module_class,
-    load_yaml_modules_from_dir,
-)
+from bm_reports.modules.base import ContentModule
 
 # Originele Python modules (voor vergelijking)
 from bm_reports.modules.symitech.bic_table import BicTableModule
 from bm_reports.modules.symitech.cost_summary import CostSummaryModule
 from bm_reports.modules.symitech.location_detail import LocationDetailModule
 from bm_reports.modules.symitech.object_description import ObjectDescriptionModule
+from bm_reports.modules.yaml_module import (
+    YamlModule,
+    create_yaml_module_class,
+    load_yaml_modules_from_dir,
+)
 
 # ---------------------------------------------------------------------------
 # Constants en helpers
@@ -76,7 +76,11 @@ def bic_table_data() -> dict:
                 "title": "BIC Controles",
                 "rows": [
                     {"label": "Aantal BIC controles", "ref_value": "12", "actual_value": "14"},
-                    {"label": "Kosten", "ref_value": "\u20ac 3.400,00", "actual_value": "\u20ac 3.966,67"},
+                    {
+                        "label": "Kosten",
+                        "ref_value": "\u20ac 3.400,00",
+                        "actual_value": "\u20ac 3.966,67",
+                    },
                 ],
             },
             {
@@ -89,8 +93,16 @@ def bic_table_data() -> dict:
         "summary": {
             "title": "Overzicht samenvatting",
             "rows": [
-                {"label": "BIC controles", "ref_value": "\u20ac 3.400,00", "actual_value": "\u20ac 3.966,67"},
-                {"label": "Reinigen", "ref_value": "\u20ac 900,00", "actual_value": "\u20ac 1.200,00"},
+                {
+                    "label": "BIC controles",
+                    "ref_value": "\u20ac 3.400,00",
+                    "actual_value": "\u20ac 3.966,67",
+                },
+                {
+                    "label": "Reinigen",
+                    "ref_value": "\u20ac 900,00",
+                    "actual_value": "\u20ac 1.200,00",
+                },
             ],
             "total": {
                 "label": "Totaal",
@@ -109,7 +121,12 @@ def cost_summary_data() -> dict:
         "title": "Kostenopgave",
         "columns": ["Omschrijving", "Aantal", "Eenheidsprijs", "Totaal"],
         "rows": [
-            {"description": "BIC controles", "quantity": 12, "unit_price": 283.33, "total": 3400.00},
+            {
+                "description": "BIC controles",
+                "quantity": 12,
+                "unit_price": 283.33,
+                "total": 3400.00,
+            },
             {"description": "Reinigingen", "quantity": 3, "unit_price": 300.00, "total": 900.00},
         ],
         "total": 4550.00,
@@ -559,7 +576,12 @@ class TestYamlElements:
     def test_total_row_element(self) -> None:
         """total_row element werkt."""
         module = self._make_module(
-            [{"type": "total_row", "data_key": "total", "label": "Totaal", "format": "currency_nl"}],
+            [{
+                "type": "total_row",
+                "data_key": "total",
+                "label": "Totaal",
+                "format": "currency_nl",
+            }],
             {"total": 4550.00},
         )
         assert module.height > 20.0

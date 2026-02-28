@@ -1,8 +1,6 @@
 """Tests voor Symitech brand configuratie."""
 
-from pathlib import Path
 
-import pytest
 import yaml
 
 from bm_reports.core.brand import BRANDS_DIR, BrandConfig, BrandLoader

@@ -472,7 +472,6 @@ class YamlModule(ContentModule):
 
     def _draw_sectioned_rows(self, y: float, elem: dict) -> float:
         c = self.canv
-        w = self.available_width
         cfg = self.config
         data_key = elem.get("data_key", "sections")
         sections = self.data.get(data_key, [])

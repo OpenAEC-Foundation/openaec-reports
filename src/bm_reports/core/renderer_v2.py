@@ -174,7 +174,11 @@ class FontManager:
     @classmethod
     def _is_builtin(cls, fontname: str) -> bool:
         """Check of een fontnaam een ingebouwde PDF font is."""
-        return fontname in cls._BUILTIN_FONTS or fontname.startswith("Helvetica") or fontname.startswith("Arial")
+        return (
+            fontname in cls._BUILTIN_FONTS
+            or fontname.startswith("Helvetica")
+            or fontname.startswith("Arial")
+        )
 
     def register_reportlab(self) -> None:
         """Register fonts with ReportLab (once)."""
@@ -1343,11 +1347,13 @@ class ContentRenderer:
         self._check_overflow(block_h + 8)
 
         # Light background box
+        bg_color = _hex_to_rgb(cad_s.get("background", "#F8F8F8"))
         bg_rect = fitz.Rect(x, self.y, x + max_w, self.y + block_h)
-        self.page.draw_rect(bg_rect, color=None, fill=_hex_to_rgb(cad_s.get("background", "#F8F8F8")))
+        self.page.draw_rect(bg_rect, color=None, fill=bg_color)
         # Left accent bar
+        accent_color = _hex_to_rgb(cad_s.get("accent_color", "#56B49B"))
         accent_rect = fitz.Rect(x, self.y, x + 3, self.y + block_h)
-        self.page.draw_rect(accent_rect, color=None, fill=_hex_to_rgb(cad_s.get("accent_color", "#56B49B")))
+        self.page.draw_rect(accent_rect, color=None, fill=accent_color)
 
         inner_x = x + 10
         y_line = self.y + 4
@@ -1438,8 +1444,9 @@ class ContentRenderer:
         self._check_overflow(block_h)
 
         # Background rect
+        bg_color = _hex_to_rgb(calc_s.get("background", "#F5F5F5"))
         bg_rect = fitz.Rect(x - 4, self.y - 2, x + max_w + 4, self.y + block_h - 8)
-        self.page.draw_rect(bg_rect, color=None, fill=_hex_to_rgb(calc_s.get("background", "#F5F5F5")))
+        self.page.draw_rect(bg_rect, color=None, fill=bg_color)
 
         # Title
         self._text(
@@ -1515,8 +1522,9 @@ class ContentRenderer:
         self._check_overflow(block_h)
 
         # Background rect
+        bg_color = _hex_to_rgb(chk_s.get("background", "#F5F5F5"))
         bg_rect = fitz.Rect(x - 4, self.y - 2, x + max_w + 4, self.y + block_h - 16)
-        self.page.draw_rect(bg_rect, color=None, fill=_hex_to_rgb(chk_s.get("background", "#F5F5F5")))
+        self.page.draw_rect(bg_rect, color=None, fill=bg_color)
 
         # Description
         self._text(
@@ -1554,7 +1562,9 @@ class ContentRenderer:
 
         # Result indicator
         is_ok = result.upper() == "VOLDOET"
-        result_color = chk_s.get("ok_color", "#56B49B") if is_ok else chk_s.get("fail_color", "#FF0000")
+        ok = chk_s.get("ok_color", "#56B49B")
+        fail = chk_s.get("fail_color", "#FF0000")
+        result_color = ok if is_ok else fail
         self._text(
             x + 200, self.y, result,
             result_s.get("font", "GothamBold"),
@@ -1738,12 +1748,42 @@ class ReportGeneratorV2:
         """Resolve stationery bestandspaden uit brand config of fallback naar conventie."""
         result = {}
         stationery_mapping = {
-            "cover":             {"brand_keys": ["cover"], "fallbacks": ["cover.pdf", "cover_stationery.pdf"]},
-            "colofon":           {"brand_keys": ["colofon"], "fallbacks": ["colofon.pdf", "colofon_stationery.pdf"]},
-            "standaard":         {"brand_keys": ["content", "content_portrait"], "fallbacks": ["standaard.pdf", "content_portrait_stationery.pdf", "content_portrait.pdf"]},
-            "content_landscape": {"brand_keys": ["content_landscape"], "fallbacks": ["standaard_landscape.pdf", "content_landscape_stationery.pdf", "content_landscape.pdf"]},
-            "bijlagen":          {"brand_keys": ["appendix", "bijlagen"], "fallbacks": ["bijlagen.pdf", "bijlagen_stationery.pdf"]},
-            "achterblad":        {"brand_keys": ["backcover", "achterblad"], "fallbacks": ["achterblad.pdf", "backcover_stationery.pdf", "backcover.pdf"]},
+            "cover": {
+                "brand_keys": ["cover"],
+                "fallbacks": ["cover.pdf", "cover_stationery.pdf"],
+            },
+            "colofon": {
+                "brand_keys": ["colofon"],
+                "fallbacks": ["colofon.pdf", "colofon_stationery.pdf"],
+            },
+            "standaard": {
+                "brand_keys": ["content", "content_portrait"],
+                "fallbacks": [
+                    "standaard.pdf",
+                    "content_portrait_stationery.pdf",
+                    "content_portrait.pdf",
+                ],
+            },
+            "content_landscape": {
+                "brand_keys": ["content_landscape"],
+                "fallbacks": [
+                    "standaard_landscape.pdf",
+                    "content_landscape_stationery.pdf",
+                    "content_landscape.pdf",
+                ],
+            },
+            "bijlagen": {
+                "brand_keys": ["appendix", "bijlagen"],
+                "fallbacks": ["bijlagen.pdf", "bijlagen_stationery.pdf"],
+            },
+            "achterblad": {
+                "brand_keys": ["backcover", "achterblad"],
+                "fallbacks": [
+                    "achterblad.pdf",
+                    "backcover_stationery.pdf",
+                    "backcover.pdf",
+                ],
+            },
         }
 
         for key, config in stationery_mapping.items():
@@ -1836,7 +1876,8 @@ class ReportGeneratorV2:
 
             # 2. Colofon (optioneel)
             colofon_stationery = stationery.get("colofon")
-            if data.get("colofon", {}).get("enabled", True) and colofon_stationery and colofon_stationery.exists():
+            colofon_enabled = data.get("colofon", {}).get("enabled", True)
+            if colofon_enabled and colofon_stationery and colofon_stationery.exists():
                 logger.info("Generating colofon...")
                 colofon_gen = ColofonGenerator(self.templates, self.fonts)
                 colofon_gen.generate(data, colofon_stationery, tmp_colofon)
@@ -1844,7 +1885,10 @@ class ReportGeneratorV2:
 
             # 3. Content (TOC + sections + appendices + backcover)
             logger.info("Generating content...")
-            content = ContentRenderer(self.templates, self.fonts, stationery, brand_config=self.brand_config)
+            content = ContentRenderer(
+                self.templates, self.fonts, stationery,
+                brand_config=self.brand_config,
+            )
             # Adjust page numbering based on which parts are included
             content.current_page_nr = len(parts) + 1
             self._render_content(content, data)

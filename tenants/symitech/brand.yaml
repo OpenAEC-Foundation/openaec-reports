@@ -16,7 +16,9 @@ colors:
 
 fonts:
   heading: "Helvetica-Bold"
+  heading_bold: "Helvetica-Bold"
   body: "Helvetica"
+  body_bold: "Helvetica-Bold"
   medium: "Helvetica-Bold"
   italic: "Helvetica-Oblique"
 

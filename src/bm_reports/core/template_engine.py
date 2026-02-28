@@ -29,6 +29,7 @@ from reportlab.platypus import (
 )
 
 from bm_reports.core.document import A4, MM_TO_PT
+from bm_reports.core.fonts import get_font_name
 from bm_reports.core.stationery import StationeryRenderer
 from bm_reports.core.template_config import (
     ContentFrame,
@@ -53,9 +54,17 @@ A4_H = A4.height_pt
 
 
 def resolve_bind(data: dict[str, Any], path: str) -> Any:
-    """Resolve dot-notatie pad naar waarde in data dict."""
+    """Resolve dot-notatie pad naar waarde in data dict.
+
+    Special prefixes:
+    - ``_static.<label>``: returns the label text literally (not from data).
+    - ``_page_number``: returns None here; handled by _draw_text_zones.
+    """
     if not path:
         return None
+    # _static.* → literal label text
+    if path.startswith("_static."):
+        return path[8:]
     parts = path.split(".")
     current: Any = data
     for part in parts:
@@ -98,13 +107,23 @@ def _get_pagesize(orientation: str) -> tuple[float, float]:
 
 
 def _resolve_font(font_ref: str, brand) -> str:
-    """Resolve font referentie naar ReportLab font naam."""
-    if font_ref in ("heading", "body"):
-        font_name = brand.fonts.get(font_ref, "Helvetica")
+    """Resolve font referentie naar ReportLab font naam.
+
+    Lookup order:
+    1. Direct match in brand.fonts dict (heading, body, heading_bold, etc.)
+    2. Fallback heuristics for heading_bold / body_bold
+    3. Treat font_ref as literal ReportLab font name
+    """
+    if font_ref in brand.fonts:
+        font_name = brand.fonts[font_ref]
+    elif font_ref == "heading_bold":
+        font_name = brand.fonts.get("heading", "Helvetica-Bold")
+    elif font_ref == "body_bold":
+        base = brand.fonts.get("body", "Helvetica")
+        font_name = base + "-Bold" if not base.endswith("Bold") else base
     else:
         font_name = font_ref
     try:
-        from bm_reports.core.fonts import get_font_name
         return get_font_name(font_name)
     except Exception:
         return font_name
@@ -130,7 +149,10 @@ def _draw_text_zones(
 ) -> None:
     """Vul text zones in op het canvas (top-down mm → bottom-up pt)."""
     for zone in text_zones:
-        value = resolve_bind(data, zone.bind)
+        if zone.bind == "_page_number":
+            value = str(canvas.getPageNumber())
+        else:
+            value = resolve_bind(data, zone.bind)
         if not value:
             continue
 
@@ -165,11 +187,21 @@ def _draw_table(
     """Teken een transparante tabel met vaste kolommen op canvas."""
     x_origin = table_config.origin_x_mm * MM_TO_PT
     row_h = table_config.row_height_mm * MM_TO_PT
+    total_w = sum(c.width_mm for c in table_config.columns) * MM_TO_PT
 
     y_td = table_config.origin_y_mm * MM_TO_PT  # top-down in pt
 
     # Optionele kolomkoppen
     if table_config.show_header:
+        rl_y = page_height - y_td
+
+        # Header achtergrondkleur
+        if table_config.header_bg:
+            canvas.saveState()
+            canvas.setFillColor(_resolve_color(table_config.header_bg, brand))
+            canvas.rect(x_origin, rl_y - row_h * 0.3, total_w, row_h, fill=1, stroke=0)
+            canvas.restoreState()
+
         canvas.saveState()
         header_font = _resolve_font(table_config.header_font, brand)
         header_color = _resolve_color(table_config.header_color, brand)
@@ -179,23 +211,31 @@ def _draw_table(
         x = x_origin
         for col in table_config.columns:
             col_w = col.width_mm * MM_TO_PT
-            rl_y = page_height - y_td
+            header_text = col.header or col.field
 
             if col.align == "right":
-                canvas.drawRightString(x + col_w, rl_y, col.field)
+                canvas.drawRightString(x + col_w, rl_y, header_text)
             elif col.align == "center":
-                canvas.drawCentredString(x + col_w / 2, rl_y, col.field)
+                canvas.drawCentredString(x + col_w / 2, rl_y, header_text)
             else:
-                canvas.drawString(x, rl_y, col.field)
+                canvas.drawString(x, rl_y, header_text)
             x += col_w
 
         canvas.restoreState()
         y_td += row_h
 
     # Data rijen
-    for row in rows:
+    for row_idx, row in enumerate(rows):
         rl_y = page_height - y_td
         x = x_origin
+
+        # Alternerende rijkleur
+        if table_config.alt_row_bg and row_idx % 2 == 1:
+            canvas.saveState()
+            canvas.setFillColor(_resolve_color(table_config.alt_row_bg, brand))
+            canvas.rect(x_origin, rl_y - row_h * 0.3, total_w, row_h, fill=1, stroke=0)
+            canvas.restoreState()
+
         for col in table_config.columns:
             col_w = col.width_mm * MM_TO_PT
             raw_value = row.get(col.field, "")
@@ -203,9 +243,14 @@ def _draw_table(
 
             if text:
                 canvas.saveState()
-                font_name = _resolve_font(col.font, brand)
-                color = _resolve_color(col.color, brand)
-                canvas.setFont(font_name, col.size)
+                # Body overrides op TableConfig niveau
+                font_ref = table_config.body_font or col.font
+                color_ref = table_config.body_color or col.color
+                size = table_config.body_size or col.size
+
+                font_name = _resolve_font(font_ref, brand)
+                color = _resolve_color(color_ref, brand)
+                canvas.setFont(font_name, size)
                 canvas.setFillColor(color)
 
                 if col.align == "right":
@@ -217,6 +262,15 @@ def _draw_table(
 
                 canvas.restoreState()
             x += col_w
+
+        # Grid lijnen
+        if table_config.grid_color:
+            canvas.saveState()
+            canvas.setStrokeColor(_resolve_color(table_config.grid_color, brand))
+            canvas.setLineWidth(0.25)
+            canvas.line(x_origin, rl_y - row_h * 0.3, x_origin + total_w, rl_y - row_h * 0.3)
+            canvas.restoreState()
+
         y_td += row_h
 
 
@@ -520,9 +574,9 @@ class TemplateEngine:
         for template_id, pt, page_def, page_type in template_info:
 
             if page_def.type == "special":
+                elements.append(NextPageTemplate(template_id))
                 if not first:
                     elements.append(PageBreak())
-                elements.append(NextPageTemplate(template_id))
                 elements.append(Spacer(1, 1))
                 first = False
 
@@ -542,22 +596,22 @@ class TemplateEngine:
                         )
                         self._pending_chunk_templates.append(chunk_pt)
 
+                        elements.append(NextPageTemplate(chunk_id))
                         if not first:
                             elements.append(PageBreak())
-                        elements.append(NextPageTemplate(chunk_id))
                         elements.append(Spacer(1, 1))
                         first = False
                 else:
+                    elements.append(NextPageTemplate(template_id))
                     if not first:
                         elements.append(PageBreak())
-                    elements.append(NextPageTemplate(template_id))
                     elements.append(Spacer(1, 1))
                     first = False
 
             elif page_def.type == "flow":
+                elements.append(NextPageTemplate(template_id))
                 if not first:
                     elements.append(PageBreak())
-                elements.append(NextPageTemplate(template_id))
                 first = False
 
                 flow = self._build_flow_content(ctx)
@@ -567,9 +621,9 @@ class TemplateEngine:
                     elements.append(Spacer(1, 1))
 
             elif page_def.type == "toc":
+                elements.append(NextPageTemplate(template_id))
                 if not first:
                     elements.append(PageBreak())
-                elements.append(NextPageTemplate(template_id))
                 first = False
                 elements.append(Spacer(1, 20))  # placeholder
 

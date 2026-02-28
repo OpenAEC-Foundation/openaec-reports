@@ -8,7 +8,6 @@ Page types definiëren wat er op elke pagina komt.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any, Literal
 
 
@@ -36,6 +35,7 @@ class TableColumn:
     font: str = "body"
     size: float = 9.0
     color: str = "text"
+    header: str | None = None          # display naam voor kolomkop (fallback: field)
 
 
 @dataclass
@@ -52,6 +52,12 @@ class TableConfig:
     header_size: float = 9.0
     header_color: str = "text"
     show_header: bool = False          # kolomkoppen al in stationery
+    header_bg: str | None = None       # achtergrondkleur kolomkoppen
+    body_font: str | None = None       # override font voor data rijen
+    body_size: float | None = None     # override size voor data rijen
+    body_color: str | None = None      # override kleur voor data rijen
+    alt_row_bg: str | None = None      # alternerende rij achtergrond
+    grid_color: str | None = None      # tabel rasterlijnen
 
 
 @dataclass
@@ -122,12 +128,14 @@ def parse_table_column(data: dict[str, Any]) -> TableColumn:
         font=data.get("font", "body"),
         size=float(data.get("size", 9)),
         color=data.get("color", "text"),
+        header=data.get("header"),
     )
 
 
 def parse_table_config(data: dict[str, Any]) -> TableConfig:
     """Parse een tabel config dict naar TableConfig dataclass."""
     origin = data.get("origin", {})
+    body_size_raw = data.get("body_size")
     return TableConfig(
         data_bind=data["data_bind"],
         columns=[parse_table_column(c) for c in data.get("columns", [])],
@@ -139,6 +147,12 @@ def parse_table_config(data: dict[str, Any]) -> TableConfig:
         header_size=float(data.get("header_size", 9)),
         header_color=data.get("header_color", "text"),
         show_header=data.get("show_header", False),
+        header_bg=data.get("header_bg"),
+        body_font=data.get("body_font"),
+        body_size=float(body_size_raw) if body_size_raw is not None else None,
+        body_color=data.get("body_color"),
+        alt_row_bg=data.get("alt_row_bg"),
+        grid_color=data.get("grid_color"),
     )
 
 

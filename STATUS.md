@@ -54,11 +54,13 @@ PageTemplates met onPage callbacks. Flow als standaard flowable content frames.
 | Template resolver | ✅ Geschreven | `core/template_resolver.py` |
 | Template engine | ✅ Geschreven | `core/template_engine.py` |
 | Compilatie + imports | ✅ Gevalideerd | 10/10 runtime checks |
-| Symitech page_type YAML's | ✅ 6/6 aangemaakt | `tenants/symitech/page_types/` |
+| Symitech page_type YAML's | ✅ 6/6, coördinaten gemeten | `tenants/symitech/page_types/` |
 | Symitech template YAML | ✅ Aangemaakt | `tenants/symitech/templates/bic_factuur.yaml` |
-| Stationery PDFs per page-type | ⏳ Nog extraheren | `tenants/symitech/stationery/` |
-| Unit tests | ✅ 80 tests (4 bestanden) | `tests/test_template_*.py`, `tests/test_data_binding.py` |
+| Stationery PDFs per page-type | ✅ Generic stationery voldoende | `tenants/symitech/stationery/` |
+| Coördinaten extraheren (T2) | ✅ Gemeten + YAML's bijgewerkt | `tools/extract_reference_coords.py` |
+| Unit tests | ✅ 102 tests (4 bestanden) | `tests/test_template_*.py`, `tests/test_data_binding.py` |
 | End-to-end test | ✅ 3 tests, 6 pagina PDF | `tests/test_template_e2e.py` |
+| Pre-bestaande engine fixes | ✅ 5/5 opgelost | `template_engine.py`, `template_config.py` |
 
 ### Wat wordt verwijderd (na validatie)
 - `src/bm_reports/modules/symitech/` — 4 Python modules (redundant met YAML)
@@ -116,10 +118,10 @@ tenants/
 │
 ├── symitech/
 │   ├── brand.yaml            ✅ Volledig
-│   ├── stationery/           ✅ 5 PDFs (moeten per page-type gesplit)
+│   ├── stationery/           ✅ 5 PDFs (generic voldoende)
 │   ├── modules/              ⚠️ Te verwijderen
-│   ├── templates/            ⏳ Nieuw
-│   └── page_types/           ⏳ Nieuw (directory aangemaakt)
+│   ├── templates/            ✅ bic_factuur.yaml
+│   └── page_types/           ✅ 6 YAML's met gemeten coördinaten
 ```
 
 ## Tests
@@ -145,3 +147,15 @@ tenants/
 - **Architectuurplan:** `docs/ARCHITECTURE_PLAN_TENANT_MODULES.md`
 - **Ontdekking:** Python modules Symitech 100% redundant met YAML modules — eliminatie gepland
 - **T1.7+T1.8:** 92 tests toegevoegd (unit + e2e), bugfix `pageSize` → `pagesize`
+- **T2:** Stationery analyse + coördinaten extraheren uit referentie-PDF
+  - Generic stationery PDFs voldoende (geen page-type-specifieke nodig)
+  - 5 page_type YAML's bijgewerkt met exacte gemeten coördinaten
+  - Analyse script: `tools/extract_reference_coords.py`
+  - Gemeten data: `output/reference_coords.json`
+- **T2.5:** 5 pre-bestaande template engine issues opgelost
+  - Fix 1: PageTemplate switching volgorde (NextPageTemplate vóór PageBreak)
+  - Fix 2: `_static.*` bindings → literal label tekst
+  - Fix 3: `_page_number` → `canvas.getPageNumber()`
+  - Fix 4: `TableColumn.header` + `TableConfig` styling velden (header_bg, body_font/size/color, alt_row_bg, grid_color)
+  - Fix 5: `_resolve_font()` uitgebreid voor heading_bold/body_bold + brand.yaml fonts
+  - 22 nieuwe unit tests, totaal 69 in template_config + template_engine

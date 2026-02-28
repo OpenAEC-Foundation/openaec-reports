@@ -76,26 +76,35 @@ Nieuwe engine: `src/bm_reports/core/template_engine.py`
 
 ---
 
-## 🔴 T2 — Stationery PDFs per page-type
+## ✅ T2 — Stationery + Coördinaten Extraheren (2026-02-28)
 
-Huidige Symitech stationery PDFs (5 stuks) dekken het hele document.
-Nodig: **per page-type een stationery** met alle visuele elementen erop.
+### ✅ T2.1 — Analyse script
+- [x] `tools/extract_reference_coords.py` — extraheer tekst-coördinaten uit referentie-PDF
+- [x] `output/reference_coords.json` — gemeten coördinaten per pagina
 
-### T2.1 — Stationery extraheren/maken
-- [ ] Referentie-PDF analyseren: welke elementen zijn vast per pagina
-- [ ] Per page-type stationery PDF maken:
-  - `voorblad_bic.pdf` (bestaand: cover_stationery.pdf ≈ hernoemen)
-  - `locatie.pdf` (extract uit referentie, zonder dynamische tekst)
-  - `bic_controles.pdf` (extract: blauwe lijnen, kolomkoppen, sectielijnen)
-  - `detail_landscape.pdf` (extract: kolomkoppen, tabelstructuur)
-  - `objecten_landscape.pdf` (extract: kolomkoppen, tabelstructuur)
-  - `achterblad.pdf` (bestaand: backcover_stationery.pdf ≈ hernoemen)
-- [ ] Optie A: split referentie-PDF, verwijder data → InDesign/Illustrator
-- [ ] Optie B: vanuit bron opnieuw exporteren zonder data
+### ✅ T2.2 — Stationery beoordeling
+- [x] Generic stationery PDFs **voldoende** — geen page-type-specifieke nodig
+- [x] Visuele elementen (blauwe lijnen, tabel header bars, rij achtergronden) worden
+  dynamisch gerenderd door de engine, niet door stationery
+- [x] Referentie-PDF kleurbalken: #006EAA lijnen, #44233B header bar, #F8F9F9 alternerende rijen
 
-### T2.2 — Text zone coördinaten extraheren
-- [ ] Per page-type: exact x,y van elke text zone meten uit referentie-PDF
-- [ ] Vastleggen in page_type YAML's (T1.5)
+### ✅ T2.3 — Coördinaten updaten in page_type YAML's
+- [x] `voorblad_bic.yaml` — x/y aangepast op stationery label-posities (53.1, 116.4)
+- [x] `locatie.yaml` — volledig geherstructureerd: aparte _static labels + data zones
+  - Gemeten posities: titel y=28.6, sectie y=41.1, labels x=35.3, waarden x=91.0
+  - Kleuren via brand refs: "primary", "secondary", "text"
+- [x] `bic_controles.yaml` — header y=29.3, kolomkoppen y=35.6, tabel origin y=46.2
+  - Kolom right-edges: 147.4mm (conform) en 189.0mm (werkelijk)
+- [x] `detail_weergave.yaml` — tabel styling bijgewerkt (header_bg=#44233B, body_color=#45243D)
+- [x] `objecten.yaml` — kolommen proportioneel geschaald voor landscape (260mm totaal)
+
+### ✅ Pre-bestaande issues opgelost (T2.5, 2026-02-28)
+- [x] Fix 1: PageTemplate switching volgorde — NextPageTemplate vóór PageBreak (5 locaties)
+- [x] Fix 2: `_static.*` bindings → literal label tekst in `resolve_bind()`
+- [x] Fix 3: `_page_number` → `canvas.getPageNumber()` in `_draw_text_zones()`
+- [x] Fix 4: `TableColumn.header` display naam + `TableConfig` styling velden (header_bg, body_font/size/color, alt_row_bg, grid_color)
+- [x] Fix 5: `_resolve_font()` uitgebreid — brand.fonts dict lookup voor heading_bold/body_bold/medium/italic
+- [x] 22 nieuwe unit tests (totaal 66 in config+engine, 69 in e2e)
 
 ---
 

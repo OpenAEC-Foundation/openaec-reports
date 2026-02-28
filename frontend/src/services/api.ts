@@ -13,6 +13,8 @@ export interface ApiError {
 export interface TemplateInfo {
   name: string;
   report_type: string;
+  /** Engine type: 'v2' (ReportLab/PyMuPDF) of 'template' (TemplateEngine YAML-driven) */
+  engine?: 'v2' | 'template';
 }
 
 export interface BrandInfo {
@@ -360,6 +362,25 @@ export const api = {
 
   generate: async (data: ReportDefinition): Promise<Blob> => {
     const res = await fetch(`${API_BASE}/api/generate/v2`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      const err: ApiError = {
+        status: res.status,
+        detail: body.detail ?? res.statusText,
+        type: body.type,
+      };
+      throw err;
+    }
+    return res.blob();
+  },
+
+  generateTemplate: async (data: ReportDefinition): Promise<Blob> => {
+    const res = await fetch(`${API_BASE}/api/generate/template`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },

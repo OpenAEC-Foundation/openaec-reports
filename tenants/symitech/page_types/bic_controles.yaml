@@ -1,24 +1,85 @@
-# Symitech BIC Factuur — controle resultaten
+# Symitech BIC Factuur — BIC controle resultaten
+# Coördinaten gemeten uit 336.01-BIC Factuur_BIC.pdf (pagina 2)
+# Stationery: content_portrait (schoon canvas)
+#
+# Gemeten waarden (PyMuPDF, top-down mm):
+#   "BIC Controles" titel:   x=19.5  y=27.6  size=10  #94571E  Arial-BoldMT
+#   Locatienaam rechts:      x=162.3 y=31.7  size=10  #006FAB  Arial-BoldMT
+#   "Conform opdracht":      x=117.4 y=39.8  size=10  #000000  Arial-BoldMT
+#   "Werkelijke kosten":     x=160.9 y=39.8  size=10  #000000  Arial-BoldMT
+#   Labels links:            x=19.5
+#   Ref-waarden:             x~114.8  (right-aligned ~147mm)
+#   Werkelijke waarden:      x~159.9  (right-aligned ~189mm)
+#   Footer: [OPDRACHT] x=10.0 y=272.0, paginanr x=140.1 y=273.5
 name: bic_controles
 stationery: content_portrait_stationery.pdf
 
 text_zones:
+  # Sectietitel
+  - bind: _static.BIC Controles
+    x_mm: 19.5
+    y_mm: 27.6
+    font: heading
+    size: 10
+    color: "secondary"
+
+  # Locatienaam rechtsboven
   - bind: location.name
-    x_mm: 185
-    y_mm: 30
+    x_mm: 189.0
+    y_mm: 31.7
     align: right
     font: heading
-    size: 14
-    color: primary
+    size: 10
+    color: "primary"
+
+  # Kolomkoppen (zwart, niet secondary)
+  - bind: _static.Conform opdracht
+    x_mm: 147.0
+    y_mm: 39.8
+    align: right
+    font: heading
+    size: 10
+    color: "text"
+
+  - bind: _static.Werkelijke kosten
+    x_mm: 189.0
+    y_mm: 39.8
+    align: right
+    font: heading
+    size: 10
+    color: "text"
+
+  # === Footer ===
+  - bind: client.name
+    x_mm: 10.0
+    y_mm: 272.0
+    font: heading
+    size: 10
+    color: "white"
+
+  - bind: _page_number
+    x_mm: 140.1
+    y_mm: 273.5
+    font: heading
+    size: 12
+    color: "white"
+    align: right
+
+  - bind: meta.rapportkop_locatie
+    x_mm: 10.0
+    y_mm: 280.1
+    font: heading
+    size: 10
+    color: "white"
 
 table:
   data_bind: bic_sections
   origin:
-    x_mm: 20
-    y_mm: 80
-  row_height_mm: 5.6
+    x_mm: 19.5
+    y_mm: 45.5
+  row_height_mm: 5.7
   max_y_mm: 260
   columns:
-    - { field: label, width_mm: 85, align: left }
+    - { field: label, width_mm: 95, align: left }
     - { field: ref_value, width_mm: 42, align: right }
     - { field: actual_value, width_mm: 42, align: right }

@@ -1,17 +1,79 @@
-# Symitech BIC Factuur — objecten overzicht (landscape)
+# Symitech BIC Factuur — voorzieningen en objecten overzicht (landscape)
+# Coördinaten gemeten uit 336.01-BIC Factuur_BIC.pdf (pagina 4)
+# Stationery: content_landscape (297x210mm)
+#
+# Gemeten waarden (PyMuPDF, top-down mm):
+#   Sectietitel:            x=21.9  y=31.0  size=10  #94571E
+#   Locatienaam:            x=151.9 y=31.0  size=10  #006FAB
+#   Kolomkoppen y=36.7 size=8 #94571E:
+#     Voorziening=21.9, Type=43.2, Status=76.9, Object=106.9,
+#     Type=124.4, Beschrijving=151.9, Gebouw=229.5, Ruimte=252.0
+#   Tabeldata:              x=20.0  y=41.5
+#   Footer: [OPDRACHT] x=13.5 y=185.0, paginanr x=229.2 y=186.5
 name: objecten
 stationery: content_landscape_stationery.pdf
+
+text_zones:
+  # Sectietitel (bruin)
+  - bind: _static.Voorziening en objecten beschrijving
+    x_mm: 21.9
+    y_mm: 31.0
+    font: heading
+    size: 10
+    color: "secondary"
+
+  # Locatienaam rechtsboven
+  - bind: location.name
+    x_mm: 260
+    y_mm: 31.0
+    font: heading
+    size: 10
+    color: "primary"
+    align: right
+
+  # === Footer ===
+  - bind: client.name
+    x_mm: 13.5
+    y_mm: 185.0
+    font: heading
+    size: 10
+    color: "white"
+
+  - bind: _page_number
+    x_mm: 229.2
+    y_mm: 186.5
+    font: heading
+    size: 12
+    color: "white"
+    align: right
+
+  - bind: meta.rapportkop_locatie
+    x_mm: 13.5
+    y_mm: 193.1
+    font: heading
+    size: 10
+    color: "white"
 
 table:
   data_bind: objecten
   origin:
-    x_mm: 20
-    y_mm: 60
+    x_mm: 21.9
+    y_mm: 36.7
   row_height_mm: 5.6
-  max_y_mm: 170
+  max_y_mm: 175
+  show_header: true
+  header_font: heading
+  header_size: 8
+  header_color: "secondary"
+  body_font: body
+  body_size: 8
+  body_color: "secondary"
   columns:
-    - { field: object_id, width_mm: 25, align: left }
-    - { field: description, width_mm: 130, align: left }
-    - { field: type, width_mm: 40, align: left }
-    - { field: status, width_mm: 30, align: center }
-    - { field: cost, width_mm: 30, align: right, format: currency_nl }
+    - { field: "Voorziening", header: "Voorziening", width_mm: 21, align: left }
+    - { field: "Type", header: "Type", width_mm: 34, align: left }
+    - { field: "Status", header: "Status", width_mm: 30, align: left }
+    - { field: "Object", header: "Object", width_mm: 18, align: left }
+    - { field: "Type2", header: "Type", width_mm: 28, align: left }
+    - { field: "Beschrijving", header: "Beschrijving", width_mm: 78, align: left }
+    - { field: "Gebouw", header: "Gebouw", width_mm: 23, align: left }
+    - { field: "Ruimte", header: "Ruimte", width_mm: 23, align: left }

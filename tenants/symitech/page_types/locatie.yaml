@@ -1,36 +1,152 @@
 # Symitech BIC Factuur — locatie detail
+# Coördinaten gemeten uit 336.01-BIC Factuur_BIC.pdf (pagina 1)
+# Stationery: content_portrait (schoon canvas met logo/kleurbalken)
+#
+# Gemeten waarden (PyMuPDF, top-down mm):
+#   Paginatitel "Locatie":  x=17.6  y=31.9  size=14  #006FAB  Arial-BoldMT
+#   "Opdrachtgever":        x=19.5  y=39.7  size=10  #94571E  Arial-BoldMT
+#   Waarden:                x=132.0 (rechterkolom)
+#   "Locatie van uitvoer":  x=19.5  y=65.6  size=10  #94571E
+#   Locatie labels:         x=19.5  y=65.6..87.5 (stap ~5.6mm per adresregel, ~11.5 per sectie)
+#   Locatiefoto:            x=91.7  y=115.9
+#   Footer: [OPDRACHT] x=10.0 y=272.0, paginanr x=140.1 y=273.5
 name: locatie
 stationery: content_portrait_stationery.pdf
 
 text_zones:
-  - bind: location.name
-    x_mm: 185
-    y_mm: 30
-    align: right
+  # === Paginatitel ===
+  - bind: _static.Locatie
+    x_mm: 17.6
+    y_mm: 31.9
     font: heading
     size: 14
-    color: primary
+    color: "primary"
+
+  # === Subsectie: Opdrachtgever ===
+  - bind: _static.Opdrachtgever
+    x_mm: 19.5
+    y_mm: 39.7
+    font: heading
+    size: 10
+    color: "secondary"
+
+  - bind: client.name
+    x_mm: 132.0
+    y_mm: 39.7
+    font: body
+    size: 10
+    color: "text"
+
+  - bind: client.address
+    x_mm: 132.0
+    y_mm: 45.3
+    font: body
+    size: 10
+    color: "text"
+
+  - bind: client.postcode_plaats
+    x_mm: 132.0
+    y_mm: 49.4
+    font: body
+    size: 10
+    color: "text"
+
+  # === Subsectie: Locatie van uitvoer ===
+  - bind: _static.Locatie van uitvoer
+    x_mm: 19.5
+    y_mm: 65.6
+    font: heading
+    size: 10
+    color: "secondary"
+
+  - bind: location.name
+    x_mm: 132.1
+    y_mm: 65.6
+    font: body
+    size: 10
+    color: "text"
 
   - bind: location.address
-    x_mm: 30
-    y_mm: 65
+    x_mm: 132.1
+    y_mm: 71.2
     font: body
     size: 10
+    color: "text"
 
   - bind: location.postcode_plaats
-    x_mm: 30
-    y_mm: 73
+    x_mm: 132.1
+    y_mm: 75.3
     font: body
     size: 10
+    color: "text"
 
-  - bind: location.contact
-    x_mm: 30
-    y_mm: 90
-    font: body
+  # === Locatie code ===
+  - bind: _static.Locatie code
+    x_mm: 19.5
+    y_mm: 79.4
+    font: heading
     size: 10
+    color: "secondary"
 
-  - bind: location.telefoon
-    x_mm: 30
-    y_mm: 98
+  - bind: location.code
+    x_mm: 132.1
+    y_mm: 79.4
     font: body
     size: 10
+    color: "text"
+
+  # === Voorziening ===
+  - bind: _static.Voorziening
+    x_mm: 19.5
+    y_mm: 83.4
+    font: heading
+    size: 10
+    color: "secondary"
+
+  - bind: location.provision
+    x_mm: 132.1
+    y_mm: 83.4
+    font: body
+    size: 10
+    color: "text"
+
+  # === Object ===
+  - bind: _static.Object
+    x_mm: 19.5
+    y_mm: 87.5
+    font: heading
+    size: 10
+    color: "secondary"
+
+  - bind: location.object
+    x_mm: 132.1
+    y_mm: 87.5
+    font: body
+    size: 10
+    color: "text"
+
+  # === Locatiefoto placeholder ===
+  # Foto area: centered around x=91.7, y=115.9
+
+  # === Footer ===
+  - bind: client.name
+    x_mm: 10.0
+    y_mm: 272.0
+    font: heading
+    size: 10
+    color: "white"
+
+  - bind: _page_number
+    x_mm: 140.1
+    y_mm: 273.5
+    font: heading
+    size: 12
+    color: "white"
+    align: right
+
+  - bind: meta.rapportkop_locatie
+    x_mm: 10.0
+    y_mm: 280.1
+    font: heading
+    size: 10
+    color: "white"

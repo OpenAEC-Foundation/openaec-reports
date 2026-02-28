@@ -1,36 +1,92 @@
 # Symitech BIC Factuur — voorblad
+# Coördinaten gemeten uit referentie-PDF 336.01-BIC Factuur_BIC.pdf (pagina 0)
+# Stationery bevat: logo, kleurbalken, tagline "SYNERGIE IN MILIEUTECHNIEK", contactinfo
+# LOCATIE en OPDRACHTGEVER labels zitten IN de stationery (niet dynamisch)
 name: voorblad_bic
 stationery: cover_stationery.pdf
 
 text_zones:
+  # === Rapport header ===
+  # Factuurkop (bijv. "BIC Factuur")
   - bind: meta.factuur_kop
-    x_mm: 20
-    y_mm: 99
+    x_mm: 53.1
+    y_mm: 27.7
     font: heading
-    size: 14
-    color: primary
+    size: 16
+    color: "primary"
 
+  # Datum (witte tekst op gekleurde balk)
   - bind: meta.datum
-    x_mm: 20
-    y_mm: 112
-    font: body
-    size: 10
-
-  - bind: meta.factuurnummer
-    x_mm: 20
-    y_mm: 122
-    font: body
-    size: 10
-
-  - bind: project.name
-    x_mm: 20
-    y_mm: 140
+    x_mm: 53.1
+    y_mm: 34.1
     font: heading
-    size: 12
-    color: primary
+    size: 9
+    color: "white"
 
-  - bind: client.name
-    x_mm: 20
-    y_mm: 155
+  # Factuurnummer (witte tekst op gekleurde balk)
+  - bind: meta.factuurnummer
+    x_mm: 115.6
+    y_mm: 34.1
+    font: heading
+    size: 9
+    color: "white"
+
+  # === Type offerte ===
+  - bind: meta.type_offerte
+    x_mm: 53.1
+    y_mm: 50.1
+    font: heading
+    size: 18
+    color: "primary"
+
+  # Offertecode + naam (witte tekst)
+  - bind: meta.offerte_regel
+    x_mm: 53.1
+    y_mm: 57.3
+    font: heading
+    size: 11
+    color: "white"
+
+  # === Locatie gegevens (witte tekst onder LOCATIE label in stationery) ===
+  - bind: location.name
+    x_mm: 53.1
+    y_mm: 72.7
     font: body
-    size: 10
+    size: 8
+    color: "white"
+
+  - bind: location.address
+    x_mm: 53.1
+    y_mm: 76.0
+    font: body
+    size: 8
+    color: "white"
+
+  - bind: location.postcode_plaats
+    x_mm: 53.1
+    y_mm: 79.2
+    font: body
+    size: 8
+    color: "white"
+
+  # === Opdrachtgever gegevens (witte tekst onder OPDRACHTGEVER label) ===
+  - bind: client.name
+    x_mm: 116.4
+    y_mm: 72.7
+    font: body
+    size: 8
+    color: "white"
+
+  - bind: client.address
+    x_mm: 116.4
+    y_mm: 76.0
+    font: body
+    size: 8
+    color: "white"
+
+  - bind: client.postcode_plaats
+    x_mm: 116.4
+    y_mm: 79.2
+    font: body
+    size: 8
+    color: "white"

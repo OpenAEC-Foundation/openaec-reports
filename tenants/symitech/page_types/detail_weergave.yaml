@@ -1,17 +1,79 @@
 # Symitech BIC Factuur — detail weergave (landscape)
+# Coördinaten gemeten uit 336.01-BIC Factuur_BIC.pdf (pagina 3)
+# Stationery: content_landscape (297x210mm)
+#
+# Gemeten waarden (PyMuPDF, top-down mm):
+#   "Detail weergave*":     x=21.9  y=31.0  size=10  #94571E
+#   Locatienaam:            x=145.8 y=31.0  size=10  #006FAB
+#   Kolomkoppen y=36.7 size=8 #94571E:
+#     BIC Controle nummer=21.9, Type=64.4, Datum=101.9,
+#     BIC controle=119.2, Int. inspectie=140.9, Reiniging=164.4, Additioneel=181.9
+#   Tabeldata:              x=20.0  y=42.3
+#   Footnote:               x=20.0  y=~onderkant
+#   Footer: [OPDRACHT] x=13.5 y=185.0, paginanr x=229.2 y=186.5
 name: detail_weergave
 stationery: content_landscape_stationery.pdf
+
+text_zones:
+  # Sectietitel (bruin)
+  - bind: _static.Detail weergave*
+    x_mm: 21.9
+    y_mm: 31.0
+    font: heading
+    size: 10
+    color: "secondary"
+
+  # Locatienaam rechtsboven
+  - bind: location.name
+    x_mm: 260
+    y_mm: 31.0
+    font: heading
+    size: 10
+    color: "primary"
+    align: right
+
+  # === Footer ===
+  - bind: client.name
+    x_mm: 13.5
+    y_mm: 185.0
+    font: heading
+    size: 10
+    color: "white"
+
+  - bind: _page_number
+    x_mm: 229.2
+    y_mm: 186.5
+    font: heading
+    size: 12
+    color: "white"
+    align: right
+
+  - bind: meta.rapportkop_locatie
+    x_mm: 13.5
+    y_mm: 193.1
+    font: heading
+    size: 10
+    color: "white"
 
 table:
   data_bind: detail_items
   origin:
-    x_mm: 20
-    y_mm: 60
+    x_mm: 21.9
+    y_mm: 36.7
   row_height_mm: 5.6
-  max_y_mm: 170
+  max_y_mm: 175
+  show_header: true
+  header_font: heading
+  header_size: 8
+  header_color: "secondary"
+  body_font: body
+  body_size: 8
+  body_color: "secondary"
   columns:
-    - { field: code, width_mm: 30, align: left }
-    - { field: description, width_mm: 120, align: left }
-    - { field: status, width_mm: 25, align: center }
-    - { field: remark, width_mm: 60, align: left }
-    - { field: cost, width_mm: 30, align: right, format: currency_nl }
+    - { field: "BIC Controle nummer", header: "BIC Controle nummer", width_mm: 42, align: left }
+    - { field: "Type", header: "Type", width_mm: 38, align: left }
+    - { field: "Datum", header: "Datum", width_mm: 17, align: left }
+    - { field: "BIC controle", header: "BIC controle", width_mm: 22, align: center }
+    - { field: "Int. inspectie", header: "Int. inspectie", width_mm: 24, align: center }
+    - { field: "Reiniging", header: "Reiniging", width_mm: 18, align: center }
+    - { field: "Additioneel", header: "Additioneel", width_mm: 40, align: left }

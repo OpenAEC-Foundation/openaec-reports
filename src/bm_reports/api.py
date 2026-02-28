@@ -21,14 +21,13 @@ from bm_reports import __version__
 from bm_reports.admin.routes import admin_router
 from bm_reports.auth.api_keys import ApiKeyDB
 from bm_reports.auth.dependencies import get_current_user, init_api_key_db, init_user_db
-from bm_reports.auth.models import UserDB
+from bm_reports.auth.models import User, UserDB
 from bm_reports.auth.routes import auth_router
 from bm_reports.auth.security import is_default_secret
-from bm_reports.core.brand import BrandLoader
 from bm_reports.core.engine import Report
 from bm_reports.core.renderer_v2 import ReportGeneratorV2
-from bm_reports.core.template_loader import TemplateLoader
 from bm_reports.core.tenant import TenantConfig
+from bm_reports.core.tenant_resolver import get_brand_loader, get_tenant_config, get_template_loader
 
 logger = logging.getLogger(__name__)
 
@@ -63,9 +62,6 @@ _default_uploads = str(Path(__file__).parent.parent.parent / "uploads")
 UPLOAD_DIR = Path(os.environ.get("BM_UPLOAD_DIR", _default_uploads))
 ASSETS_DIR = Path(__file__).parent / "assets"
 
-# Gecachte loader instances (hergebruik i.p.v. per-request constructie)
-_template_loader = TemplateLoader(templates_dirs=tenant_config.templates_dirs)
-_brand_loader = BrandLoader(tenant_config=tenant_config)
 
 app = FastAPI(
     title="3BM Report Generator API",
@@ -127,7 +123,7 @@ _protected = APIRouter(dependencies=[Depends(get_current_user)])
 # ============================================================
 
 
-def _resolve_brand_from_template(data: dict) -> str | None:
+def _resolve_brand_from_template(data: dict, tenant_slug: str = "") -> str | None:
     """Leid brand af uit het template's tenant veld.
 
     Als de request geen ``brand`` bevat maar wel een ``template``, kijk dan
@@ -137,7 +133,8 @@ def _resolve_brand_from_template(data: dict) -> str | None:
     if not template_name:
         return None
     try:
-        config = _template_loader.load(template_name)
+        loader = get_template_loader(tenant_slug)
+        config = loader.load(template_name)
         return config.tenant if config.tenant else None
     except (FileNotFoundError, Exception):
         return None
@@ -249,17 +246,18 @@ async def health():
 
 
 @_protected.get("/api/templates")
-async def list_templates():
+async def list_templates(user: User = Depends(get_current_user)):
     """Lijst beschikbare rapport templates.
 
     Returns:
         Dict met lijst van templates (naam + type).
     """
-    return {"templates": _template_loader.list_templates()}
+    loader = get_template_loader(user.tenant)
+    return {"templates": loader.list_templates()}
 
 
 @_protected.get("/api/templates/{name}/scaffold")
-async def get_template_scaffold(name: str):
+async def get_template_scaffold(name: str, user: User = Depends(get_current_user)):
     """Retourneer een leeg JSON scaffold voor een template.
 
     De frontend kan dit laden als startpunt voor een nieuw rapport.
@@ -270,18 +268,20 @@ async def get_template_scaffold(name: str):
     Returns:
         Dict conform report.schema.json met defaults uit het template.
     """
-    scaffold = _template_loader.to_scaffold(name)
+    loader = get_template_loader(user.tenant)
+    scaffold = loader.to_scaffold(name)
     return scaffold
 
 
 @_protected.get("/api/brands")
-async def list_brands():
+async def list_brands(user: User = Depends(get_current_user)):
     """Lijst beschikbare brand configuraties.
 
     Returns:
         Dict met lijst van brands (naam + slug).
     """
-    return {"brands": _brand_loader.list_brands()}
+    loader = get_brand_loader(user.tenant)
+    return {"brands": loader.list_brands()}
 
 
 @_protected.post("/api/validate")
@@ -317,7 +317,7 @@ async def validate_report(request: Request):
 
 
 @_protected.post("/api/generate")
-async def generate_report(request: Request):
+async def generate_report(request: Request, user: User = Depends(get_current_user)):
     """Genereer PDF rapport uit JSON data.
 
     Body:
@@ -333,7 +333,7 @@ async def generate_report(request: Request):
     if not data.get("template"):
         raise HTTPException(status_code=422, detail="Veld 'template' is verplicht")
 
-    brand = data.get("brand") or _resolve_brand_from_template(data) or _DEFAULT_BRAND
+    brand = data.get("brand") or _resolve_brand_from_template(data, user.tenant) or user.tenant or _DEFAULT_BRAND
     report = Report.from_dict(data, brand=brand)
 
     def build(output_path: Path) -> None:
@@ -348,7 +348,7 @@ async def generate_report(request: Request):
 
 
 @_protected.post("/api/generate/v2")
-async def generate_report_v2(request: Request):
+async def generate_report_v2(request: Request, user: User = Depends(get_current_user)):
     """Genereer PDF rapport via renderer_v2 (pixel-perfect huisstijl).
 
     Body:
@@ -362,17 +362,20 @@ async def generate_report_v2(request: Request):
     if not data.get("project"):
         raise HTTPException(status_code=422, detail="Veld 'project' is verplicht")
 
-    brand = data.get("brand") or _resolve_brand_from_template(data) or _DEFAULT_BRAND
-    stationery_dir = STATIONERY_DIR
+    brand = data.get("brand") or _resolve_brand_from_template(data, user.tenant) or user.tenant or _DEFAULT_BRAND
+
+    tc = get_tenant_config(user.tenant)
+    stationery_dir = tc.stationery_dir or STATIONERY_DIR
 
     # Resolve stationery: brand_dir/stationery → tenant → package
-    brand_config = _brand_loader.load(brand)
+    brand_loader = get_brand_loader(user.tenant)
+    brand_config = brand_loader.load(brand)
     if brand_config.brand_dir:
         brand_stat = brand_config.brand_dir / "stationery"
         if brand_stat.exists():
             stationery_dir = brand_stat
-    elif tenant_config.stationery_dir and tenant_config.stationery_dir.exists():
-        stationery_dir = tenant_config.stationery_dir
+    elif tc.stationery_dir and tc.stationery_dir.exists():
+        stationery_dir = tc.stationery_dir
     else:
         brand_stationery = ASSETS_DIR / "stationery" / brand
         if brand_stationery.exists():
@@ -411,7 +414,7 @@ async def upload_file(file: UploadFile = File(...)):
 
 
 @_protected.get("/api/stationery")
-async def list_stationery():
+async def list_stationery(user: User = Depends(get_current_user)):
     """Retourneer beschikbare brands en hun stationery status.
 
     Controleert zowel tenant stationery als package stationery.
@@ -434,7 +437,8 @@ async def list_stationery():
             }
 
     # Tenant stationery
-    tenant_stat = tenant_config.stationery_dir
+    tc = get_tenant_config(user.tenant)
+    tenant_stat = tc.stationery_dir
     if tenant_stat and tenant_stat.exists():
         _scan_stationery_dir(
             tenant_stat, tenant_stat.name if tenant_stat.name != "stationery" else "tenant"

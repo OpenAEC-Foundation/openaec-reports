@@ -109,10 +109,89 @@ blocks:
       color: "#40124A"
       line_height: 20.8       # rijhoogte (493.8 - 473.0)
       alternating_bg: null     # geen zebra-striping in BBL
+    title:
+      font: GothamBold
+      size: 9.5
+      color: "#401246"
+    stripe_color: "#F5F5F5"
+    grid_color: "#E0E0E0"
+    header_grid_color: "#FFFFFF"
     x: 125.4
     max_width: 415.9
     spacing_before: 20.0
     spacing_after: 20.0
+
+  # --- Image ---
+  image:
+    caption:
+      font: GothamBook
+      size: 8.0
+      color: "#401246"
+    error:
+      font: GothamBook
+      size: 9.5
+      color: "#FF0000"
+
+  # --- Map ---
+  map:
+    caption:
+      font: GothamBook
+      size: 8.0
+      color: "#401246"
+    error:
+      font: GothamBook
+      size: 9.5
+      color: "#FF0000"
+
+  # --- Cadastral info ---
+  cadastral:
+    background: "#F8F8F8"
+    accent_color: "#56B49B"
+    title:
+      font: GothamBold
+      size: 8.5
+      color: "#401246"
+    body:
+      font: GothamBook
+      size: 8.5
+      color: "#401246"
+
+  # --- Calculation ---
+  calculation:
+    background: "#F5F5F5"
+    title:
+      font: GothamBold
+      size: 9.5
+      color: "#401246"
+    body:
+      font: GothamBook
+      size: 9.5
+      color: "#401246"
+    result:
+      font: GothamBold
+      size: 9.5
+      color: "#401246"
+    reference:
+      font: GothamBook
+      size: 8.0
+      color: "#56B49B"
+
+  # --- Check ---
+  check:
+    background: "#F5F5F5"
+    title:
+      font: GothamBold
+      size: 9.5
+      color: "#401246"
+    body:
+      font: GothamBook
+      size: 9.5
+      color: "#401246"
+    result:
+      font: GothamBold
+      size: 9.5
+    ok_color: "#56B49B"
+    fail_color: "#FF0000"
 
   # --- Superscript (m², etc.) ---
   superscript:

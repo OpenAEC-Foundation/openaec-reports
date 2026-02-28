@@ -112,23 +112,72 @@ class TemplateSet:
 # Font Manager
 # ---------------------------------------------------------------------------
 class FontManager:
-    """Manages font registration for both ReportLab and PyMuPDF."""
+    """Manages font registration for both ReportLab and PyMuPDF.
 
-    FONT_MAP = {
+    Ondersteunt twee modi:
+    - Custom fonts (Gotham): laad TTF bestanden uit font_dir
+    - Standaard fonts (Helvetica, Arial): gebruik fitz ingebouwde fonts
+    """
+
+    _DEFAULT_FONT_MAP = {
         "GothamBold": "Gotham-Bold.ttf",
         "GothamBook": "Gotham-Book.ttf",
         "GothamMedium": "Gotham-Medium.ttf",
     }
 
-    def __init__(self, font_dir: Path | None = None):
+    _BUILTIN_FONTS = {
+        "Helvetica", "Helvetica-Bold", "Helvetica-Oblique", "Helvetica-BoldOblique",
+        "Courier", "Courier-Bold", "Courier-Oblique", "Courier-BoldOblique",
+        "Times-Roman", "Times-Bold", "Times-Italic", "Times-BoldItalic",
+        "Symbol", "ZapfDingbats",
+        "Arial", "ArialMT", "Arial-BoldMT",
+    }
+
+    def __init__(self, font_dir: Path | None = None, brand_fonts: dict | None = None):
         self.font_dir = font_dir or FONT_DIR
         self._rl_registered = False
-        # PyMuPDF font objects for accurate text measurement
-        self.gotham_book = fitz.Font(fontfile=str(self.font_dir / "Gotham-Book.ttf"))
-        self.gotham_bold = fitz.Font(fontfile=str(self.font_dir / "Gotham-Bold.ttf"))
+        self._fitz_fonts: dict[str, fitz.Font] = {}
+        self._uses_custom_fonts = True
+
+        # Bepaal of we custom fonts of builtin fonts gebruiken
+        if brand_fonts:
+            heading = brand_fonts.get("heading", "")
+            body = brand_fonts.get("body", "")
+            heading_fb = brand_fonts.get("heading_fallback", heading)
+            body_fb = brand_fonts.get("body_fallback", body)
+            if self._is_builtin(heading or heading_fb) and self._is_builtin(body or body_fb):
+                self._uses_custom_fonts = False
+
+        if self._uses_custom_fonts:
+            self.FONT_MAP = dict(self._DEFAULT_FONT_MAP)
+            for name, filename in self.FONT_MAP.items():
+                path = self.font_dir / filename
+                if path.exists():
+                    self._fitz_fonts[name] = fitz.Font(fontfile=str(path))
+            self._bold_font = self._fitz_fonts.get("GothamBold") or fitz.Font("helv")
+            self._book_font = self._fitz_fonts.get("GothamBook") or fitz.Font("helv")
+        else:
+            self.FONT_MAP = {}
+            self._bold_font = fitz.Font("helv")
+            self._book_font = fitz.Font("helv")
+
+    @property
+    def gotham_book(self) -> fitz.Font:
+        """Backward compatibility alias."""
+        return self._book_font
+
+    @property
+    def gotham_bold(self) -> fitz.Font:
+        """Backward compatibility alias."""
+        return self._bold_font
+
+    @classmethod
+    def _is_builtin(cls, fontname: str) -> bool:
+        """Check of een fontnaam een ingebouwde PDF font is."""
+        return fontname in cls._BUILTIN_FONTS or fontname.startswith("Helvetica") or fontname.startswith("Arial")
 
     def register_reportlab(self) -> None:
-        """Register Gotham fonts with ReportLab (once)."""
+        """Register fonts with ReportLab (once)."""
         if self._rl_registered:
             return
         for name, filename in self.FONT_MAP.items():
@@ -141,7 +190,9 @@ class FontManager:
         self._rl_registered = True
 
     def insert_into_page(self, page: fitz.Page) -> None:
-        """Insert Gotham fonts into a PyMuPDF page."""
+        """Insert custom fonts into a PyMuPDF page."""
+        if not self._uses_custom_fonts:
+            return
         for name, filename in self.FONT_MAP.items():
             path = self.font_dir / filename
             if path.exists():
@@ -149,13 +200,14 @@ class FontManager:
 
     def get_fitz_font(self, fontname: str) -> fitz.Font:
         """Return fitz.Font object for given fontname string."""
-        if fontname in ("GothamBold",):
-            return self.gotham_bold
-        return self.gotham_book  # default fallback voor GothamBook, GothamMedium, etc.
+        if fontname in self._fitz_fonts:
+            return self._fitz_fonts[fontname]
+        is_bold = "bold" in fontname.lower() or "Bold" in fontname
+        return self._bold_font if is_bold else self._book_font
 
     def measure(self, text: str, fontsize: float, bold: bool = False) -> float:
-        """Measure text width using actual Gotham font metrics."""
-        font = self.gotham_bold if bold else self.gotham_book
+        """Measure text width using font metrics."""
+        font = self._bold_font if bold else self._book_font
         return font.text_length(text, fontsize=fontsize)
 
     def wrap_text(
@@ -263,14 +315,74 @@ class CoverGenerator:
         self.tpl = templates.cover
         self.fonts = fonts
 
-    def generate(self, data: dict, stationery_png: Path, output: Path) -> Path:
+    def generate(
+        self, data: dict, stationery: Path | None, output: Path, cover_is_pdf: bool = False,
+    ) -> Path:
         """Generate cover PDF.
 
-        Args:
-            data: Report data dict with project info.
-            stationery_png: Path to RGBA overlay PNG.
-            output: Output PDF path.
+        Twee modi:
+        - PNG overlay (3BM): ReportLab canvas met foto + PNG overlay + tekst
+        - PDF stationery (Symitech): PyMuPDF insert tekst op PDF stationery
         """
+        if cover_is_pdf and stationery and stationery.exists():
+            return self._generate_from_pdf(data, stationery, output)
+        return self._generate_from_png(data, stationery, output)
+
+    def _generate_from_pdf(self, data: dict, stationery_pdf: Path, output: Path) -> Path:
+        """Cover via PyMuPDF: tekst op PDF stationery."""
+        doc = fitz.open(str(stationery_pdf))
+        page = doc[0]
+        self.fonts.insert_into_page(page)
+
+        fields = self.tpl.get("dynamic_fields", {})
+
+        # Rapport type
+        tf = fields.get("rapport_type", {})
+        title_text = data.get("report_type", "")
+        if title_text:
+            font_obj = self.fonts.get_fitz_font(tf.get("font", "Helvetica-Bold"))
+            size = tf.get("size", 28)
+            y_bl = tf.get("y_bl", tf.get("y", 93))
+            y_td = page.rect.height - y_bl
+            tw = fitz.TextWriter(page.rect)
+            tw.append((tf.get("x", 54), y_td), title_text, font=font_obj, fontsize=size)
+            tw.write_text(page, color=_hex_to_rgb(tf.get("color", "#006FAB")))
+
+        # Project naam
+        sf = fields.get("project_naam", {})
+        subtitle_text = data.get("project", "")
+        if subtitle_text:
+            font_obj = self.fonts.get_fitz_font(sf.get("font", "Helvetica"))
+            size = sf.get("size", 17)
+            y_bl = sf.get("y_bl", sf.get("y", 63))
+            y_td = page.rect.height - y_bl
+            tw = fitz.TextWriter(page.rect)
+            tw.append((sf.get("x", 55), y_td), subtitle_text, font=font_obj, fontsize=size)
+            tw.write_text(page, color=_hex_to_rgb(sf.get("color", "#94571E")))
+
+        # Cover image (als beschikbaar en er is een foto-zone in de template)
+        photo_cfg = self.tpl.get("photo")
+        cover_image_src = data.get("cover", {}).get("image")
+        if photo_cfg and cover_image_src:
+            cover_image_path = _resolve_image(cover_image_src)
+            if cover_image_path:
+                px = photo_cfg.get("x", 55.6)
+                py_bl = photo_cfg.get("y", 161.7)
+                pw = photo_cfg.get("width", 484.0)
+                ph = photo_cfg.get("height", 560.8)
+                py_td = page.rect.height - py_bl - ph
+                rect = fitz.Rect(px, py_td, px + pw, py_td + ph)
+                try:
+                    page.insert_image(rect, filename=str(cover_image_path))
+                except (OSError, ValueError, RuntimeError) as e:
+                    logger.warning("Cover image insert failed: %s", e)
+
+        doc.save(str(output))
+        doc.close()
+        return output
+
+    def _generate_from_png(self, data: dict, stationery_png: Path | None, output: Path) -> Path:
+        """Bestaande ReportLab PNG overlay cover (3BM)."""
         self.fonts.register_reportlab()
         w, h = A4
         c = rl_canvas.Canvas(str(output), pagesize=A4)
@@ -282,17 +394,14 @@ class CoverGenerator:
             from reportlab.lib.utils import ImageReader
 
             img = ImageReader(str(cover_image_path))
-            # "Cover" style: fill entire area, crop overflow
             iw, ih = img.getSize()
             box_w, box_h = 484.0, 560.8
             box_x, box_y = 55.6, 161.7
             scale = max(box_w / iw, box_h / ih)
             draw_w = iw * scale
             draw_h = ih * scale
-            # Center the oversized image within the box
             draw_x = box_x - (draw_w - box_w) / 2
             draw_y = box_y - (draw_h - box_h) / 2
-            # Clip to the box area
             c.saveState()
             p = c.beginPath()
             p.rect(box_x, box_y, box_w, box_h)
@@ -300,7 +409,6 @@ class CoverGenerator:
             c.drawImage(img, draw_x, draw_y, width=draw_w, height=draw_h)
             c.restoreState()
         else:
-            # Teal gradient placeholder
             c.setFillColor(HexColor("#38BDAB"))
             c.rect(55.6, 161.7, 484.0, 560.8, fill=1, stroke=0)
             c.setFillColor(Color(0.15, 0.35, 0.35, alpha=0.4))
@@ -310,7 +418,7 @@ class CoverGenerator:
             c.drawCentredString(w / 2, 440, "[ PROJECTFOTO ]")
 
         # Layer 2: Stationery overlay (with alpha channel)
-        if stationery_png.exists():
+        if stationery_png and stationery_png.exists():
             from reportlab.lib.utils import ImageReader
 
             img = ImageReader(str(stationery_png))
@@ -319,7 +427,6 @@ class CoverGenerator:
         # Layer 3: Dynamic text
         fields = self.tpl.get("dynamic_fields", {})
 
-        # Rapport type (title)
         tf = fields.get("rapport_type", {})
         title_text = data.get("report_type", "")
         if title_text:
@@ -327,7 +434,6 @@ class CoverGenerator:
             c.setFillColor(HexColor(tf.get("color", "#401246")))
             c.drawString(tf.get("x", 54.3), tf.get("y_bl", 120.5), title_text)
 
-        # Project naam (subtitle)
         sf = fields.get("project_naam", {})
         subtitle_text = data.get("project", "")
         if subtitle_text:
@@ -490,17 +596,38 @@ class ContentRenderer:
         templates: TemplateSet,
         fonts: FontManager,
         stationery: dict[str, Path],
+        brand_config=None,
     ):
         self.tpl = templates
         self.fonts = fonts
         self.stationery = stationery  # {"standaard": Path, "bijlagen": Path, "achterblad": Path}
         self.blocks = templates.blocks
+        self._brand_config = brand_config
+
+        # Content frame uit brand config of defaults
+        if brand_config and brand_config.stationery:
+            content_spec = brand_config.stationery.get("content")
+            if content_spec and content_spec.content_frame:
+                cf = content_spec.content_frame
+                self._default_y_max_portrait = cf.get("y_pt", 38.9) + cf.get("height_pt", 746.0)
+            else:
+                self._default_y_max_portrait = Y_MAX_PORTRAIT
+
+            landscape_spec = brand_config.stationery.get("content_landscape")
+            if landscape_spec and landscape_spec.content_frame:
+                cf = landscape_spec.content_frame
+                self._default_y_max_landscape = cf.get("y_pt", 38.9) + cf.get("height_pt", 517.5)
+            else:
+                self._default_y_max_landscape = Y_MAX_LANDSCAPE
+        else:
+            self._default_y_max_portrait = Y_MAX_PORTRAIT
+            self._default_y_max_landscape = Y_MAX_LANDSCAPE
 
         self.doc = fitz.open()
         self.page: fitz.Page | None = None
         self.y = 0.0
         self.page_count = 0
-        self.y_max = Y_MAX_PORTRAIT
+        self.y_max = self._default_y_max_portrait
         self.current_page_nr = 3  # starts after cover (1) + colofon (2)
         self._orientation: str = "portrait"
 
@@ -544,9 +671,9 @@ class ContentRenderer:
 
         # Y-max instellen op basis van oriëntatie
         if self._orientation == "landscape":
-            self.y_max = Y_MAX_LANDSCAPE
+            self.y_max = self._default_y_max_landscape
         else:
-            self.y_max = Y_MAX_PORTRAIT
+            self.y_max = self._default_y_max_portrait
 
     def _check_overflow(self, needed: float) -> bool:
         """Check if content fits; if not, finalize page and start new one."""
@@ -792,9 +919,9 @@ class ContentRenderer:
         b_fontsize = body_s.get("size", 8)
         b_color = _hex_to_rgb(body_s.get("color", "#401246"))
         bg_color = _hex_to_rgb(header_s.get("background", "#56B49B"))
-        stripe_color = _hex_to_rgb("#F5F5F5")
-        grid_color = _hex_to_rgb("#E0E0E0")
-        line_color_hdr = _hex_to_rgb("#FFFFFF")
+        stripe_color = _hex_to_rgb(s.get("stripe_color", "#F5F5F5"))
+        grid_color = _hex_to_rgb(s.get("grid_color", "#E0E0E0"))
+        line_color_hdr = _hex_to_rgb(s.get("header_grid_color", "#FFFFFF"))
         cell_line_h = b_fontsize * 1.35  # line height within cells
 
         # Pre-wrap all header cells
@@ -810,8 +937,14 @@ class ContentRenderer:
 
         # Title above table
         if title:
+            title_s = s.get("title", {})
             self._check_overflow(16 + header_h)
-            self._text(x, self.y, title, "GothamBold", 9.5, "#401246")
+            self._text(
+                x, self.y, title,
+                title_s.get("font", "GothamBold"),
+                title_s.get("size", 9.5),
+                title_s.get("color", "#401246"),
+            )
             self.y += 16
 
         self._check_overflow(header_h + cell_line_h + 8)  # at least header + 1 row line
@@ -922,6 +1055,9 @@ class ContentRenderer:
     def image(self, block: dict) -> None:
         """Render an image block with optional caption."""
         s = self.blocks.get("paragraph", {})  # use paragraph x/max_width
+        img_s = self.blocks.get("image", {})
+        caption_s = img_s.get("caption", {})
+        error_s = img_s.get("error", {})
         x = s.get("x", 125.4)
         max_w = s.get("max_width", 393.0)
 
@@ -935,7 +1071,10 @@ class ContentRenderer:
             # Placeholder text
             self.y += 12
             self._text(
-                x, self.y, f"[Image: {src or 'niet gevonden'}]", "GothamBook", 9.5, "#FF0000"
+                x, self.y, f"[Image: {src or 'niet gevonden'}]",
+                error_s.get("font", "GothamBook"),
+                error_s.get("size", 9.5),
+                error_s.get("color", "#FF0000"),
             )
             self.y += 16
             return
@@ -968,12 +1107,22 @@ class ContentRenderer:
             self.page.insert_image(rect, filename=str(img_path))
         except (OSError, ValueError, RuntimeError) as e:
             logger.warning("Image insert failed: %s", e)
-            self._text(x, self.y, f"[Image error: {e}]", "GothamBook", 9.5, "#FF0000")
+            self._text(
+                x, self.y, f"[Image error: {e}]",
+                error_s.get("font", "GothamBook"),
+                error_s.get("size", 9.5),
+                error_s.get("color", "#FF0000"),
+            )
 
         self.y += target_h + 4
 
         if caption:
-            self._text(x, self.y, caption, "GothamBook", 8.0, "#401246")
+            self._text(
+                x, self.y, caption,
+                caption_s.get("font", "GothamBook"),
+                caption_s.get("size", 8.0),
+                caption_s.get("color", "#401246"),
+            )
             self.y += 14
 
         self.y += 8
@@ -1005,6 +1154,9 @@ class ContentRenderer:
         from bm_reports.core.map_generator import MapGenerator
 
         s = self.blocks.get("paragraph", {})
+        map_s = self.blocks.get("map", {})
+        caption_s = map_s.get("caption", {})
+        error_s = map_s.get("error", {})
         x = s.get("x", 125.4)
         max_w = s.get("max_width", 393.0)
 
@@ -1074,9 +1226,9 @@ class ContentRenderer:
                     x,
                     self.y,
                     "[Kaart: geen adres of coördinaten opgegeven]",
-                    "GothamBook",
-                    9.5,
-                    "#FF0000",
+                    error_s.get("font", "GothamBook"),
+                    error_s.get("size", 9.5),
+                    error_s.get("color", "#FF0000"),
                 )
                 self.y += 20
                 return
@@ -1088,9 +1240,9 @@ class ContentRenderer:
                     x,
                     self.y,
                     f"[Kaart kon niet worden opgehaald voor: {loc_str}]",
-                    "GothamBook",
-                    9.5,
-                    "#FF0000",
+                    error_s.get("font", "GothamBook"),
+                    error_s.get("size", 9.5),
+                    error_s.get("color", "#FF0000"),
                 )
                 self.y += 20
                 return
@@ -1109,11 +1261,21 @@ class ContentRenderer:
                     self.page.insert_image(rect, filename=str(img_path))
                 except (OSError, ValueError, RuntimeError) as e:
                     logger.warning("Map image insert failed: %s", e)
-                    self._text(x, self.y + 10, f"[Kaart fout: {e}]", "GothamBook", 9.5, "#FF0000")
+                    self._text(
+                        x, self.y + 10, f"[Kaart fout: {e}]",
+                        error_s.get("font", "GothamBook"),
+                        error_s.get("size", 9.5),
+                        error_s.get("color", "#FF0000"),
+                    )
                 self.y += target_h + 4
 
                 if map_caption:
-                    self._text(x, self.y, map_caption, "GothamBook", 8.0, "#401246")
+                    self._text(
+                        x, self.y, map_caption,
+                        caption_s.get("font", "GothamBook"),
+                        caption_s.get("size", 8.0),
+                        caption_s.get("color", "#401246"),
+                    )
                     self.y += 14
 
                 self.y += 8
@@ -1134,15 +1296,20 @@ class ContentRenderer:
                 x,
                 self.y,
                 "[Kaartmodule niet beschikbaar — PIL/requests ontbreekt]",
-                "GothamBook",
-                9.5,
-                "#FF0000",
+                error_s.get("font", "GothamBook"),
+                error_s.get("size", 9.5),
+                error_s.get("color", "#FF0000"),
             )
             self.y += 20
         except (OSError, ValueError, RuntimeError) as e:
             logger.error("Map generation failed: %s", e)
             self.y += 12
-            self._text(x, self.y, f"[Kaart fout: {e}]", "GothamBook", 9.5, "#FF0000")
+            self._text(
+                x, self.y, f"[Kaart fout: {e}]",
+                error_s.get("font", "GothamBook"),
+                error_s.get("size", 9.5),
+                error_s.get("color", "#FF0000"),
+            )
             self.y += 20
 
     def _render_cadastral_info(self, x: float, max_w: float, cadastral: dict) -> None:
@@ -1153,6 +1320,10 @@ class ContentRenderer:
         - Gemeente: naam (code)
         - Oppervlakte: xxx m²
         """
+        cad_s = self.blocks.get("cadastral", {})
+        title_s = cad_s.get("title", {})
+        body_s = cad_s.get("body", {})
+
         identificatie = cadastral.get("identificatie", "")
         gemeentenaam = cadastral.get("gemeentenaam", "")
         gemeentecode = cadastral.get("gemeentecode", "")
@@ -1173,17 +1344,20 @@ class ContentRenderer:
 
         # Light background box
         bg_rect = fitz.Rect(x, self.y, x + max_w, self.y + block_h)
-        self.page.draw_rect(bg_rect, color=None, fill=_hex_to_rgb("#F8F8F8"))
+        self.page.draw_rect(bg_rect, color=None, fill=_hex_to_rgb(cad_s.get("background", "#F8F8F8")))
         # Left accent bar
         accent_rect = fitz.Rect(x, self.y, x + 3, self.y + block_h)
-        self.page.draw_rect(accent_rect, color=None, fill=_hex_to_rgb("#56B49B"))
+        self.page.draw_rect(accent_rect, color=None, fill=_hex_to_rgb(cad_s.get("accent_color", "#56B49B")))
 
         inner_x = x + 10
         y_line = self.y + 4
 
         # Perceel identification (bold)
         self._text(
-            inner_x, y_line, f"Kadastraal perceel:  {identificatie}", "GothamBold", 8.5, "#401246"
+            inner_x, y_line, f"Kadastraal perceel:  {identificatie}",
+            title_s.get("font", "GothamBold"),
+            title_s.get("size", 8.5),
+            title_s.get("color", "#401246"),
         )
         y_line += 14
 
@@ -1192,13 +1366,23 @@ class ContentRenderer:
             gem_str = f"Kadastrale gemeente:  {gemeentenaam}"
             if gemeentecode:
                 gem_str += f" ({gemeentecode})"
-            self._text(inner_x, y_line, gem_str, "GothamBook", 8.5, "#401246")
+            self._text(
+                inner_x, y_line, gem_str,
+                body_s.get("font", "GothamBook"),
+                body_s.get("size", 8.5),
+                body_s.get("color", "#401246"),
+            )
             y_line += 14
 
         # Oppervlakte
         if grootte:
             opp_str = f"Perceeloppervlakte:  {grootte:,.0f} m²".replace(",", ".")
-            self._text(inner_x, y_line, opp_str, "GothamBook", 8.5, "#401246")
+            self._text(
+                inner_x, y_line, opp_str,
+                body_s.get("font", "GothamBook"),
+                body_s.get("size", 8.5),
+                body_s.get("color", "#401246"),
+            )
             y_line += 14
 
         self.y += block_h + 8
@@ -1223,6 +1407,12 @@ class ContentRenderer:
 
     def calculation(self, block: dict) -> None:
         """Render engineering calculation block with formula/result."""
+        calc_s = self.blocks.get("calculation", {})
+        title_s = calc_s.get("title", {})
+        body_s = calc_s.get("body", {})
+        result_s = calc_s.get("result", {})
+        ref_s = calc_s.get("reference", {})
+
         title = block.get("title", "")
         formula = block.get("formula", "")
         substitution = block.get("substitution", "")
@@ -1249,30 +1439,55 @@ class ContentRenderer:
 
         # Background rect
         bg_rect = fitz.Rect(x - 4, self.y - 2, x + max_w + 4, self.y + block_h - 8)
-        self.page.draw_rect(bg_rect, color=None, fill=_hex_to_rgb("#F5F5F5"))
+        self.page.draw_rect(bg_rect, color=None, fill=_hex_to_rgb(calc_s.get("background", "#F5F5F5")))
 
         # Title
-        self._text(x, self.y, title, "GothamBold", 9.5, "#401246")
+        self._text(
+            x, self.y, title,
+            title_s.get("font", "GothamBold"),
+            title_s.get("size", 9.5),
+            title_s.get("color", "#401246"),
+        )
         self.y += 16
 
         # Formula
         if formula:
-            self._text(x + 8, self.y, formula, "GothamBook", 9.5, "#401246")
+            self._text(
+                x + 8, self.y, formula,
+                body_s.get("font", "GothamBook"),
+                body_s.get("size", 9.5),
+                body_s.get("color", "#401246"),
+            )
             self.y += 16
 
         # Substitution
         if substitution:
-            self._text(x + 8, self.y, substitution, "GothamBook", 9.5, "#401246")
+            self._text(
+                x + 8, self.y, substitution,
+                body_s.get("font", "GothamBook"),
+                body_s.get("size", 9.5),
+                body_s.get("color", "#401246"),
+            )
             self.y += 16
 
         # Result
         result_text = f"{result} {unit}".strip()
-        self._text(x + 8, self.y, result_text, "GothamBold", 9.5, "#401246")
+        self._text(
+            x + 8, self.y, result_text,
+            result_s.get("font", "GothamBold"),
+            result_s.get("size", 9.5),
+            result_s.get("color", "#401246"),
+        )
         self.y += 16
 
         # Reference
         if reference:
-            self._text(x + 8, self.y, f"Ref: {reference}", "GothamBook", 8.0, "#56B49B")
+            self._text(
+                x + 8, self.y, f"Ref: {reference}",
+                ref_s.get("font", "GothamBook"),
+                ref_s.get("size", 8.0),
+                ref_s.get("color", "#56B49B"),
+            )
             self.y += 14
 
         self.y += 12
@@ -1281,6 +1496,11 @@ class ContentRenderer:
 
     def check(self, block: dict) -> None:
         """Render engineering check block (voldoet/voldoet niet)."""
+        chk_s = self.blocks.get("check", {})
+        title_s = chk_s.get("title", {})
+        body_s = chk_s.get("body", {})
+        result_s = chk_s.get("result", {})
+
         description = block.get("description", "")
         required = block.get("required_value", "")
         calculated = block.get("calculated_value", "")
@@ -1296,26 +1516,51 @@ class ContentRenderer:
 
         # Background rect
         bg_rect = fitz.Rect(x - 4, self.y - 2, x + max_w + 4, self.y + block_h - 16)
-        self.page.draw_rect(bg_rect, color=None, fill=_hex_to_rgb("#F5F5F5"))
+        self.page.draw_rect(bg_rect, color=None, fill=_hex_to_rgb(chk_s.get("background", "#F5F5F5")))
 
         # Description
-        self._text(x, self.y, description, "GothamBold", 9.5, "#401246")
+        self._text(
+            x, self.y, description,
+            title_s.get("font", "GothamBold"),
+            title_s.get("size", 9.5),
+            title_s.get("color", "#401246"),
+        )
         self.y += 16
 
         # Required vs calculated
-        self._text(x + 8, self.y, f"Vereist: {required}", "GothamBook", 9.5, "#401246")
+        self._text(
+            x + 8, self.y, f"Vereist: {required}",
+            body_s.get("font", "GothamBook"),
+            body_s.get("size", 9.5),
+            body_s.get("color", "#401246"),
+        )
         self.y += 14
-        self._text(x + 8, self.y, f"Berekend: {calculated}", "GothamBook", 9.5, "#401246")
+        self._text(
+            x + 8, self.y, f"Berekend: {calculated}",
+            body_s.get("font", "GothamBook"),
+            body_s.get("size", 9.5),
+            body_s.get("color", "#401246"),
+        )
         self.y += 14
 
         # Unity check
         uc_text = f"Unity check: {unity:.2f}"
-        self._text(x + 8, self.y, uc_text, "GothamBook", 9.5, "#401246")
+        self._text(
+            x + 8, self.y, uc_text,
+            body_s.get("font", "GothamBook"),
+            body_s.get("size", 9.5),
+            body_s.get("color", "#401246"),
+        )
 
         # Result indicator
         is_ok = result.upper() == "VOLDOET"
-        result_color = "#56B49B" if is_ok else "#FF0000"
-        self._text(x + 200, self.y, result, "GothamBold", 9.5, result_color)
+        result_color = chk_s.get("ok_color", "#56B49B") if is_ok else chk_s.get("fail_color", "#FF0000")
+        self._text(
+            x + 200, self.y, result,
+            result_s.get("font", "GothamBold"),
+            result_s.get("size", 9.5),
+            result_color,
+        )
         self.y += 20
 
     # --- Section rendering ---
@@ -1365,9 +1610,9 @@ class ContentRenderer:
         if orientation_changed:
             self._orientation = previous_orientation
             self.y_max = (
-                Y_MAX_LANDSCAPE
+                self._default_y_max_landscape
                 if self._orientation == "landscape"
-                else Y_MAX_PORTRAIT
+                else self._default_y_max_portrait
             )
 
     def _render_block(self, block: dict) -> None:
@@ -1467,8 +1712,72 @@ class ReportGeneratorV2:
     """
 
     def __init__(self, brand: str = "3bm_cooperatie"):
+        self.brand_name = brand
         self.templates = TemplateSet(brand)
-        self.fonts = FontManager()
+
+        # Laad brand config voor stationery mapping en font info
+        from bm_reports.core.brand import BrandLoader
+
+        try:
+            loader = BrandLoader()
+            self.brand_config = loader.load(brand)
+        except FileNotFoundError:
+            self.brand_config = None
+            logger.warning("Brand config niet gevonden voor '%s', gebruik defaults", brand)
+
+        # FontManager met brand font info
+        brand_fonts = self.brand_config.fonts if self.brand_config else None
+        font_dir = None
+        if self.brand_config and self.brand_config.brand_dir:
+            candidate = self.brand_config.brand_dir / "fonts"
+            if candidate.exists() and any(candidate.glob("*.ttf")):
+                font_dir = candidate
+        self.fonts = FontManager(font_dir=font_dir, brand_fonts=brand_fonts)
+
+    def _resolve_stationery(self, stationery_dir: Path) -> dict[str, Path]:
+        """Resolve stationery bestandspaden uit brand config of fallback naar conventie."""
+        result = {}
+        stationery_mapping = {
+            "cover":             {"brand_keys": ["cover"], "fallbacks": ["cover.pdf", "cover_stationery.pdf"]},
+            "colofon":           {"brand_keys": ["colofon"], "fallbacks": ["colofon.pdf", "colofon_stationery.pdf"]},
+            "standaard":         {"brand_keys": ["content", "content_portrait"], "fallbacks": ["standaard.pdf", "content_portrait_stationery.pdf", "content_portrait.pdf"]},
+            "content_landscape": {"brand_keys": ["content_landscape"], "fallbacks": ["standaard_landscape.pdf", "content_landscape_stationery.pdf", "content_landscape.pdf"]},
+            "bijlagen":          {"brand_keys": ["appendix", "bijlagen"], "fallbacks": ["bijlagen.pdf", "bijlagen_stationery.pdf"]},
+            "achterblad":        {"brand_keys": ["backcover", "achterblad"], "fallbacks": ["achterblad.pdf", "backcover_stationery.pdf", "backcover.pdf"]},
+        }
+
+        for key, config in stationery_mapping.items():
+            resolved = None
+
+            # 1. Probeer brand config
+            if self.brand_config and self.brand_config.stationery:
+                for brand_key in config["brand_keys"]:
+                    spec = self.brand_config.stationery.get(brand_key)
+                    if spec and spec.source:
+                        # Relatief t.o.v. brand_dir
+                        if self.brand_config.brand_dir:
+                            candidate = self.brand_config.brand_dir / spec.source
+                            if candidate.exists():
+                                resolved = candidate
+                                break
+                        # Zoek op bestandsnaam in stationery_dir
+                        candidate = stationery_dir / Path(spec.source).name
+                        if candidate.exists():
+                            resolved = candidate
+                            break
+
+            # 2. Fallback: zoek in stationery_dir op conventie-naam
+            if resolved is None:
+                for fallback_name in config["fallbacks"]:
+                    candidate = stationery_dir / fallback_name
+                    if candidate.exists():
+                        resolved = candidate
+                        break
+
+            if resolved:
+                result[key] = resolved
+
+        return result
 
     def generate(
         self,
@@ -1488,15 +1797,24 @@ class ReportGeneratorV2:
         """
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # Resolve stationery files
-        stationery_png = stationery_dir / "2707_BBLrapportage_v01_1.png"
-        stationery = {
-            "colofon": stationery_dir / "colofon.pdf",
-            "standaard": stationery_dir / "standaard.pdf",
-            "content_landscape": stationery_dir / "standaard_landscape.pdf",
-            "bijlagen": stationery_dir / "bijlagen.pdf",
-            "achterblad": stationery_dir / "achterblad.pdf",
-        }
+        # Resolve stationery via brand config
+        stationery = self._resolve_stationery(stationery_dir)
+
+        # Cover: bepaal modus (PDF of PNG)
+        cover_stationery = stationery.get("cover")
+        cover_is_pdf = bool(cover_stationery and cover_stationery.suffix.lower() == ".pdf")
+
+        # PNG overlay (legacy 3BM)
+        if not cover_is_pdf:
+            overlay_name = self.templates.cover.get("overlay", {}).get("file")
+            stationery_png = (stationery_dir / overlay_name) if overlay_name else None
+            # Fallback: zoek bekende PNG overlay
+            if (not stationery_png or not stationery_png.exists()):
+                legacy_png = stationery_dir / "2707_BBLrapportage_v01_1.png"
+                if legacy_png.exists():
+                    stationery_png = legacy_png
+        else:
+            stationery_png = None
 
         tmp_dir = output_path.parent
         tmp_cover = tmp_dir / "_tmp_cover.pdf"
@@ -1510,19 +1828,23 @@ class ReportGeneratorV2:
             if data.get("cover", {}).get("enabled", True):
                 logger.info("Generating cover...")
                 cover_gen = CoverGenerator(self.templates, self.fonts)
-                cover_gen.generate(data, stationery_png, tmp_cover)
+                if cover_is_pdf:
+                    cover_gen.generate(data, cover_stationery, tmp_cover, cover_is_pdf=True)
+                else:
+                    cover_gen.generate(data, stationery_png, tmp_cover, cover_is_pdf=False)
                 parts.append(tmp_cover)
 
             # 2. Colofon (optioneel)
-            if data.get("colofon", {}).get("enabled", True):
+            colofon_stationery = stationery.get("colofon")
+            if data.get("colofon", {}).get("enabled", True) and colofon_stationery and colofon_stationery.exists():
                 logger.info("Generating colofon...")
                 colofon_gen = ColofonGenerator(self.templates, self.fonts)
-                colofon_gen.generate(data, stationery["colofon"], tmp_colofon)
+                colofon_gen.generate(data, colofon_stationery, tmp_colofon)
                 parts.append(tmp_colofon)
 
             # 3. Content (TOC + sections + appendices + backcover)
             logger.info("Generating content...")
-            content = ContentRenderer(self.templates, self.fonts, stationery)
+            content = ContentRenderer(self.templates, self.fonts, stationery, brand_config=self.brand_config)
             # Adjust page numbering based on which parts are included
             content.current_page_nr = len(parts) + 1
             self._render_content(content, data)

@@ -108,10 +108,89 @@ blocks:
       color: "#000000"
       line_height: 20.8
       alternating_bg: null
+    title:
+      font: Helvetica-Bold
+      size: 9.5
+      color: "#000000"
+    stripe_color: "#F5F5F5"
+    grid_color: "#CCCCCC"
+    header_grid_color: "#FFFFFF"
     x: 125.4
     max_width: 415.9
     spacing_before: 20.0
     spacing_after: 20.0
+
+  # --- Image ---
+  image:
+    caption:
+      font: Helvetica
+      size: 8.0
+      color: "#000000"
+    error:
+      font: Helvetica
+      size: 9.5
+      color: "#FF0000"
+
+  # --- Map ---
+  map:
+    caption:
+      font: Helvetica
+      size: 8.0
+      color: "#000000"
+    error:
+      font: Helvetica
+      size: 9.5
+      color: "#FF0000"
+
+  # --- Cadastral info ---
+  cadastral:
+    background: "#F8F8F8"
+    accent_color: "#006FAB"
+    title:
+      font: Helvetica-Bold
+      size: 8.5
+      color: "#000000"
+    body:
+      font: Helvetica
+      size: 8.5
+      color: "#000000"
+
+  # --- Calculation ---
+  calculation:
+    background: "#F5F5F5"
+    title:
+      font: Helvetica-Bold
+      size: 9.5
+      color: "#000000"
+    body:
+      font: Helvetica
+      size: 9.5
+      color: "#000000"
+    result:
+      font: Helvetica-Bold
+      size: 9.5
+      color: "#006FAB"
+    reference:
+      font: Helvetica
+      size: 8.0
+      color: "#006FAB"
+
+  # --- Check ---
+  check:
+    background: "#F5F5F5"
+    title:
+      font: Helvetica-Bold
+      size: 9.5
+      color: "#000000"
+    body:
+      font: Helvetica
+      size: 9.5
+      color: "#000000"
+    result:
+      font: Helvetica-Bold
+      size: 9.5
+    ok_color: "#006FAB"
+    fail_color: "#FF0000"
 
   # --- Superscript (m2, etc.) ---
   superscript:

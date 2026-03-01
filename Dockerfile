@@ -20,6 +20,7 @@ COPY pyproject.toml README.md ./
 COPY src/ ./src/
 COPY schemas/ ./schemas/
 COPY tenants/ ./tenants/
+COPY docs/ ./docs/
 RUN pip install --no-cache-dir .
 
 # Frontend dist van stage 1

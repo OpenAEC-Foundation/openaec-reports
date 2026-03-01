@@ -1,10 +1,7 @@
 # Symitech BIC Factuur — BIC controle resultaten (content portrait)
-# Pixel-exact gemeten uit extraction_results.json content_portrait (2026-03-01)
+# Pixel-exact gemeten uit extraction_results.json + 1.0mm y-correctie (2026-03-01)
 # Stationery: SCHOON canvas (alleen header/footer grafische balk)
 # Engine rendert: ALLES — labels, waarden, sectie-lijnen, subtotaal-lijnen
-#
-# Coördinaten: PyMuPDF y0 pt → mm (×0.352778), top-down
-# Pagina: A4 portrait 595.3×841.9pt (210×297mm)
 #
 # === REFERENTIE STYLING ===
 # ALLE labels links:   font=Arial-BoldMT (heading), color=#94571e (secondary)
@@ -15,153 +12,145 @@
 # Labels links:              x0=55.2pt → 19.5mm (left-aligned)
 # Conform opdracht (right):  x1=419.9pt → 148.1mm
 # Werkelijke kosten (right): x1=540.5pt → 190.6mm
-#
-# === LIJN PATRONEN ===
-# Blauwe dubbele lijn (sectie):   3.0pt + 0.75pt, x=49.7→227.2pt (17.5→80.2mm)
-# Bruine enkele lijn (subtotaal): 2.25pt, x=283.5→545.8pt (100.0→192.5mm)
 
 name: bic_controles
 stationery: content_portrait_stationery.pdf
 
 # ============================================================
-# Decoratieve lijnen
+# Decoratieve lijnen (+1.0mm y-correctie)
 # ============================================================
 line_zones:
   # --- Sectie "BIC Controles" dubbele lijn ---
-  # y=125.5pt → 44.3mm (dik), y=128.2pt → 45.2mm (dun)
   - x0_mm: 17.5
-    y_mm: 44.3
+    y_mm: 45.3
     x1_mm: 80.2
     width_pt: 3.0
     color: "primary"
   - x0_mm: 17.5
-    y_mm: 45.2
+    y_mm: 46.2
     x1_mm: 80.2
     width_pt: 0.75
     color: "primary"
 
-  # --- Subtotaal BIC: y=233.2pt → 82.3mm ---
+  # --- Subtotaal BIC ---
   - x0_mm: 100.0
-    y_mm: 82.3
+    y_mm: 83.3
     x1_mm: 192.5
     width_pt: 2.25
     color: "secondary"
 
   # --- Sectie "Reinigen tijdens BIC" dubbele lijn ---
-  # y=281.8pt → 99.4mm (dik), y=284.5pt → 100.4mm (dun)
   - x0_mm: 17.5
-    y_mm: 99.4
+    y_mm: 100.4
     x1_mm: 80.2
     width_pt: 3.0
     color: "primary"
   - x0_mm: 17.5
-    y_mm: 100.4
+    y_mm: 101.4
     x1_mm: 80.2
     width_pt: 0.75
     color: "primary"
 
-  # --- Subtotaal Reiniging: y=297.5pt → 105.0mm ---
+  # --- Subtotaal Reiniging ---
   - x0_mm: 100.0
-    y_mm: 105.0
+    y_mm: 106.0
     x1_mm: 192.5
     width_pt: 2.25
     color: "secondary"
 
   # --- Sectie "Additioneel tijdens BIC" dubbele lijn ---
-  # y=334.5pt → 118.0mm (dik), y=337.2pt → 118.9mm (dun)
   - x0_mm: 17.5
-    y_mm: 118.0
+    y_mm: 119.0
     x1_mm: 80.2
     width_pt: 3.0
     color: "primary"
   - x0_mm: 17.5
-    y_mm: 118.9
+    y_mm: 119.9
     x1_mm: 80.2
     width_pt: 0.75
     color: "primary"
 
-  # --- Subtotaal Additioneel: y=361.7pt → 127.6mm ---
+  # --- Subtotaal Additioneel ---
   - x0_mm: 100.0
-    y_mm: 127.6
+    y_mm: 128.6
     x1_mm: 192.5
     width_pt: 2.25
     color: "secondary"
 
   # --- Sectie "Overzicht samenvatting" dubbele lijn ---
-  # y=433.3pt → 152.8mm (dik), y=436.0pt → 153.8mm (dun)
   - x0_mm: 17.5
-    y_mm: 152.8
+    y_mm: 153.8
     x1_mm: 80.2
     width_pt: 3.0
     color: "primary"
   - x0_mm: 17.5
-    y_mm: 153.8
+    y_mm: 154.8
     x1_mm: 80.2
     width_pt: 0.75
     color: "primary"
 
-  # --- Totaal scheidingslijn: y=506.5pt → 178.7mm ---
+  # --- Totaal scheidingslijn ---
   - x0_mm: 100.0
-    y_mm: 178.7
+    y_mm: 179.7
     x1_mm: 192.5
     width_pt: 2.25
     color: "secondary"
 
 # ============================================================
-# Tekst zones — exact uit referentie PDF extractie
+# Tekst zones (alle +1.0mm behalve footer)
 # ============================================================
 text_zones:
 
   # ========== SECTIETITEL + HEADER ==========
 
-  # "BIC Controles" — x0=55.2 y0=78.4pt → 27.7mm
+  # "BIC Controles" — 27.7 + 1.0 = 28.7
   - bind: _static.BIC Controles
     x_mm: 19.5
-    y_mm: 27.7
+    y_mm: 28.7
     font: heading
     size: 10
     color: "secondary"
 
-  # [LOCATIENAAM] rechts — x1=540.5 y0=89.9pt → 31.7mm
+  # [LOCATIENAAM] — 31.7 + 1.0 = 32.7
   - bind: location.name
     x_mm: 190.6
-    y_mm: 31.7
+    y_mm: 32.7
     align: right
     font: heading
     size: 10
     color: "primary"
 
-  # "Conform opdracht" — x1=419.9 y0=112.9pt → 39.8mm
+  # "Conform opdracht" — 39.8 + 1.0 = 40.8
   - bind: _static.Conform opdracht
     x_mm: 148.1
-    y_mm: 39.8
+    y_mm: 40.8
     align: right
     font: heading
     size: 10
     color: "text"
 
-  # "Werkelijke kosten" — x1=540.5 y0=112.9pt → 39.8mm
+  # "Werkelijke kosten" — 39.8 + 1.0 = 40.8
   - bind: _static.Werkelijke kosten
     x_mm: 190.6
-    y_mm: 39.8
+    y_mm: 40.8
     align: right
     font: heading
     size: 10
     color: "text"
 
-  # ========== SECTIE 1: BIC Controles rijen ==========
+  # ========== SECTIE 1: BIC Controles ==========
 
-  # "Aantal BIC controles" — y0=128.9pt → 45.5mm
+  # "Aantal BIC controles" — 45.5 + 1.0 = 46.5
   - bind: _static.Aantal BIC controles
     x_mm: 19.5
-    y_mm: 45.5
+    y_mm: 46.5
     font: heading
     size: 10
     color: "secondary"
 
   - bind: bic.aantal_conform
     x_mm: 148.1
-    y_mm: 45.5
+    y_mm: 46.5
     align: right
     font: body
     size: 10
@@ -169,23 +158,23 @@ text_zones:
 
   - bind: bic.aantal_werkelijk
     x_mm: 190.6
-    y_mm: 45.5
+    y_mm: 46.5
     align: right
     font: body
     size: 10
     color: "text"
 
-  # "Kosten" (BIC) — y0=140.4pt → 49.5mm
+  # "Kosten" (BIC) — 49.5 + 1.0 = 50.5
   - bind: _static.Kosten
     x_mm: 19.5
-    y_mm: 49.5
+    y_mm: 50.5
     font: heading
     size: 10
     color: "secondary"
 
   - bind: bic.kosten_conform
     x_mm: 148.1
-    y_mm: 49.5
+    y_mm: 50.5
     align: right
     font: body
     size: 10
@@ -193,23 +182,23 @@ text_zones:
 
   - bind: bic.kosten_werkelijk
     x_mm: 190.6
-    y_mm: 49.5
+    y_mm: 50.5
     align: right
     font: body
     size: 10
     color: "text"
 
-  # "Aantal interne inspecties" — y0=163.4pt → 57.6mm
+  # "Aantal interne inspecties" — 57.6 + 1.0 = 58.6
   - bind: _static.Aantal interne inspecties
     x_mm: 19.5
-    y_mm: 57.6
+    y_mm: 58.6
     font: heading
     size: 10
     color: "secondary"
 
   - bind: bic.hydro_aantal_conform
     x_mm: 148.1
-    y_mm: 57.6
+    y_mm: 58.6
     align: right
     font: body
     size: 10
@@ -217,23 +206,23 @@ text_zones:
 
   - bind: bic.hydro_aantal_werkelijk
     x_mm: 190.6
-    y_mm: 57.6
+    y_mm: 58.6
     align: right
     font: body
     size: 10
     color: "text"
 
-  # "Kosten" (Hydro) — y0=174.9pt → 61.7mm
+  # "Kosten" (Hydro) — 61.7 + 1.0 = 62.7
   - bind: _static.Kosten
     x_mm: 19.5
-    y_mm: 61.7
+    y_mm: 62.7
     font: heading
     size: 10
     color: "secondary"
 
   - bind: bic.hydro_kosten_conform
     x_mm: 148.1
-    y_mm: 61.7
+    y_mm: 62.7
     align: right
     font: body
     size: 10
@@ -241,23 +230,23 @@ text_zones:
 
   - bind: bic.hydro_kosten_werkelijk
     x_mm: 190.6
-    y_mm: 61.7
+    y_mm: 62.7
     align: right
     font: body
     size: 10
     color: "text"
 
-  # "Reiskosten" — y0=197.9pt → 69.8mm
+  # "Reiskosten" — 69.8 + 1.0 = 70.8
   - bind: _static.Reiskosten
     x_mm: 19.5
-    y_mm: 69.8
+    y_mm: 70.8
     font: heading
     size: 10
     color: "secondary"
 
   - bind: bic.reiskosten_conform
     x_mm: 148.1
-    y_mm: 69.8
+    y_mm: 70.8
     align: right
     font: body
     size: 10
@@ -265,23 +254,23 @@ text_zones:
 
   - bind: bic.reiskosten_werkelijk
     x_mm: 190.6
-    y_mm: 69.8
+    y_mm: 70.8
     align: right
     font: body
     size: 10
     color: "text"
 
-  # "Subtotaal" — y0=234.6pt → 82.8mm (bold, secondary)
+  # "Subtotaal" — 82.8 + 1.0 = 83.8
   - bind: _static.Subtotaal
     x_mm: 19.5
-    y_mm: 82.8
+    y_mm: 83.8
     font: heading
     size: 10
     color: "secondary"
 
   - bind: bic.subtotaal_conform
     x_mm: 148.1
-    y_mm: 82.8
+    y_mm: 83.8
     align: right
     font: body
     size: 10
@@ -289,7 +278,7 @@ text_zones:
 
   - bind: bic.subtotaal_werkelijk
     x_mm: 190.6
-    y_mm: 82.8
+    y_mm: 83.8
     align: right
     font: body
     size: 10
@@ -297,25 +286,25 @@ text_zones:
 
   # ========== SECTIE 2: Reinigen tijdens BIC ==========
 
-  # Sectietitel — y0=269.1pt → 94.9mm
+  # Sectietitel — 94.9 + 1.0 = 95.9
   - bind: _static.Reinigen tijdens BIC
     x_mm: 19.5
-    y_mm: 94.9
+    y_mm: 95.9
     font: heading
     size: 10
     color: "secondary"
 
-  # "Aantal reinigingen" — y0=285.1pt → 100.6mm
+  # "Aantal reinigingen" — 100.6 + 1.0 = 101.6
   - bind: _static.Aantal reinigingen
     x_mm: 19.5
-    y_mm: 100.6
+    y_mm: 101.6
     font: heading
     size: 10
     color: "secondary"
 
   - bind: reiniging.aantal_conform
     x_mm: 148.1
-    y_mm: 100.6
+    y_mm: 101.6
     align: right
     font: body
     size: 10
@@ -323,23 +312,23 @@ text_zones:
 
   - bind: reiniging.aantal_werkelijk
     x_mm: 190.6
-    y_mm: 100.6
+    y_mm: 101.6
     align: right
     font: body
     size: 10
     color: "text"
 
-  # "Kosten" (Reiniging) — y0=298.9pt → 105.4mm
+  # "Kosten" (Reiniging) — 105.4 + 1.0 = 106.4
   - bind: _static.Kosten
     x_mm: 19.5
-    y_mm: 105.4
+    y_mm: 106.4
     font: heading
     size: 10
     color: "secondary"
 
   - bind: reiniging.kosten_conform
     x_mm: 148.1
-    y_mm: 105.4
+    y_mm: 106.4
     align: right
     font: body
     size: 10
@@ -347,7 +336,7 @@ text_zones:
 
   - bind: reiniging.kosten_werkelijk
     x_mm: 190.6
-    y_mm: 105.4
+    y_mm: 106.4
     align: right
     font: body
     size: 10
@@ -355,25 +344,25 @@ text_zones:
 
   # ========== SECTIE 3: Additioneel tijdens BIC ==========
 
-  # Sectietitel — y0=321.9pt → 113.6mm
+  # Sectietitel — 113.6 + 1.0 = 114.6
   - bind: _static.Additioneel tijdens BIC
     x_mm: 19.5
-    y_mm: 113.6
+    y_mm: 114.6
     font: heading
     size: 10
     color: "secondary"
 
-  # "Aantal additionele activiteiten" — y0=337.9pt → 119.2mm
+  # "Aantal additionele activiteiten" — 119.2 + 1.0 = 120.2
   - bind: _static.Aantal additionele activiteiten
     x_mm: 19.5
-    y_mm: 119.2
+    y_mm: 120.2
     font: heading
     size: 10
     color: "secondary"
 
   - bind: additioneel.aantal_conform
     x_mm: 148.1
-    y_mm: 119.2
+    y_mm: 120.2
     align: right
     font: body
     size: 10
@@ -381,23 +370,23 @@ text_zones:
 
   - bind: additioneel.aantal_werkelijk
     x_mm: 190.6
-    y_mm: 119.2
+    y_mm: 120.2
     align: right
     font: body
     size: 10
     color: "text"
 
-  # "Kosten" (Additioneel) — y0=363.1pt → 128.1mm
+  # "Kosten" (Additioneel) — 128.1 + 1.0 = 129.1
   - bind: _static.Kosten
     x_mm: 19.5
-    y_mm: 128.1
+    y_mm: 129.1
     font: heading
     size: 10
     color: "secondary"
 
   - bind: additioneel.kosten_conform
     x_mm: 148.1
-    y_mm: 128.1
+    y_mm: 129.1
     align: right
     font: body
     size: 10
@@ -405,7 +394,7 @@ text_zones:
 
   - bind: additioneel.kosten_werkelijk
     x_mm: 190.6
-    y_mm: 128.1
+    y_mm: 129.1
     align: right
     font: body
     size: 10
@@ -413,25 +402,25 @@ text_zones:
 
   # ========== SECTIE 4: Overzicht samenvatting ==========
 
-  # Sectietitel — y0=420.6pt → 148.4mm
+  # Sectietitel — 148.4 + 1.0 = 149.4
   - bind: _static.Overzicht samenvatting
     x_mm: 19.5
-    y_mm: 148.4
+    y_mm: 149.4
     font: heading
     size: 10
     color: "secondary"
 
-  # "BIC controles" — y0=436.6pt → 154.0mm
+  # "BIC controles" — 154.0 + 1.0 = 155.0
   - bind: _static.BIC controles
     x_mm: 19.5
-    y_mm: 154.0
+    y_mm: 155.0
     font: heading
     size: 10
     color: "secondary"
 
   - bind: samenvatting.bic_conform
     x_mm: 148.1
-    y_mm: 154.0
+    y_mm: 155.0
     align: right
     font: body
     size: 10
@@ -439,23 +428,23 @@ text_zones:
 
   - bind: samenvatting.bic_werkelijk
     x_mm: 190.6
-    y_mm: 154.0
+    y_mm: 155.0
     align: right
     font: body
     size: 10
     color: "text"
 
-  # "Reinigen tijdens BIC" — y0=459.6pt → 162.1mm
+  # "Reinigen tijdens BIC" — 162.1 + 1.0 = 163.1
   - bind: _static.Reinigen tijdens BIC
     x_mm: 19.5
-    y_mm: 162.1
+    y_mm: 163.1
     font: heading
     size: 10
     color: "secondary"
 
   - bind: samenvatting.reinigen_conform
     x_mm: 148.1
-    y_mm: 162.1
+    y_mm: 163.1
     align: right
     font: body
     size: 10
@@ -463,23 +452,23 @@ text_zones:
 
   - bind: samenvatting.reinigen_werkelijk
     x_mm: 190.6
-    y_mm: 162.1
+    y_mm: 163.1
     align: right
     font: body
     size: 10
     color: "text"
 
-  # "Additioneel tijdens BIC" — y0=471.1pt → 166.2mm
+  # "Additioneel tijdens BIC" — 166.2 + 1.0 = 167.2
   - bind: _static.Additioneel tijdens BIC
     x_mm: 19.5
-    y_mm: 166.2
+    y_mm: 167.2
     font: heading
     size: 10
     color: "secondary"
 
   - bind: samenvatting.additioneel_conform
     x_mm: 148.1
-    y_mm: 166.2
+    y_mm: 167.2
     align: right
     font: body
     size: 10
@@ -487,25 +476,23 @@ text_zones:
 
   - bind: samenvatting.additioneel_werkelijk
     x_mm: 190.6
-    y_mm: 166.2
+    y_mm: 167.2
     align: right
     font: body
     size: 10
     color: "text"
 
-  # "Totaal" — y0=507.9pt → 179.2mm
-  # Label: heading + secondary (bruin)
-  # Waarden: heading + primary (blauw) — UITZONDERING!
+  # "Totaal" — 179.2 + 1.0 = 180.2
   - bind: _static.Totaal
     x_mm: 19.5
-    y_mm: 179.2
+    y_mm: 180.2
     font: heading
     size: 10
     color: "secondary"
 
   - bind: samenvatting.totaal_conform
     x_mm: 148.1
-    y_mm: 179.2
+    y_mm: 180.2
     align: right
     font: heading
     size: 10
@@ -513,15 +500,14 @@ text_zones:
 
   - bind: samenvatting.totaal_werkelijk
     x_mm: 190.6
-    y_mm: 179.2
+    y_mm: 180.2
     align: right
     font: heading
     size: 10
     color: "primary"
 
-  # ========== FOOTER (in gekleurde balk) ==========
+  # ========== FOOTER (NIET verschoven) ==========
 
-  # [OPDRACHT] — x0=28.3 y0=771.0pt → 271.9mm
   - bind: client.name
     x_mm: 10.0
     y_mm: 271.9
@@ -529,7 +515,6 @@ text_zones:
     size: 10
     color: "white"
 
-  # Pagina X van Y — x0=397.2 y0=775.3pt → 273.5mm
   - bind: _page_number
     x_mm: 140.1
     y_mm: 273.5
@@ -538,7 +523,6 @@ text_zones:
     color: "white"
     align: right
 
-  # [RAPPORTKOP]: [LOCATIECODE] — x0=28.3 y0=794.0pt → 280.1mm
   - bind: meta.rapportkop_locatie
     x_mm: 10.0
     y_mm: 280.1

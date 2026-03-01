@@ -65,6 +65,41 @@ Pas uitvoeren NADAT FIX-1, FIX-2, FIX-3 allemaal live staan.
 
 ---
 
+## 🟡 T4 — OpenAEC Rebranding
+
+Alle OpenAEC-specifieke referenties uit de codebase halen (package naam, API endpoints, Docker labels, README, etc.). OpenAEC blijft alleen bestaan als tenant data (`tenants/default/`).
+
+- [ ] T4.1 — Package rename: `bm_reports` → `openaec_reports`
+- [ ] T4.2 — API prefix: `/api/` → blijft, maar branding aanpassen
+- [ ] T4.3 — Docker image: `bm-reports` → `openaec-reports`
+- [ ] T4.4 — Frontend: OpenAEC logo/naam → OpenAEC branding
+- [ ] T4.5 — README, LICENSE, docs bijwerken
+- [ ] T4.6 — Domain: `report.open-aec.com` → `reports.openaec.org` (of soortgelijk)
+
+---
+
+## 🟡 T5 — YAML Editor in Admin Panel
+
+Self-service YAML beheer per tenant — geen git push nodig voor positioneering/styling.
+
+**Fase 1 — Upload & beheer (quick win):**
+- [ ] T5.1 — API: `/api/tenants/{tenant}/page_types/` CRUD endpoints
+- [ ] T5.2 — Frontend: YAML file browser per tenant
+- [ ] T5.3 — Upload/download YAML's + brand.yaml
+- [ ] T5.4 — Preview: upload → render test-PDF → bekijk resultaat
+
+**Fase 2 — Visuele editor:**
+- [ ] T5.5 — YAML als formulier: text_zones bewerkbare rijen (x, y, font, size, color)
+- [ ] T5.6 — Live preview bij wijziging
+- [ ] T5.7 — Kleurenpicker uit brand.yaml
+
+**Fase 3 — Brand onboarding wizard:**
+- [ ] T5.8 — Upload brand guidelines PDF → auto-extractie kleuren/fonts
+- [ ] T5.9 — Upload referentie PDF → coördinaten-extractie naar YAML
+- [ ] T5.10 — Stationery PDF generator vanuit guidelines
+
+---
+
 ## 🟢 Housekeeping
 
 - [ ] `_temp_analyze.py` verwijderen uit project root

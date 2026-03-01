@@ -1,0 +1,143 @@
+{
+  "template": "structural",
+  "format": "A4",
+  "project": "Loosduinse Hoofdstraat 123",
+  "project_number": "2503-15",
+  "client": "BPD Ontwikkeling B.V.",
+  "author": "3BM Bouwkunde",
+  "date": "2026-03-01",
+  "version": "1.0",
+  "status": "DEFINITIEF",
+
+  "cover": {
+    "subtitle": "Constructief advies — funderingsherstel en gevelstabiliteit"
+  },
+
+  "colofon": { "enabled": false },
+  "toc": { "enabled": false },
+
+  "sections": [
+    {
+      "title": "Geachte heer Van Vliet",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Naar aanleiding van onze inspectie op 20 februari jl. en het aanvullende grondonderzoek (sondering d.d. 25-02-2026) brengen wij u hierbij ons advies uit inzake het funderingsherstel en de gevelstabiliteit van het pand Loosduinse Hoofdstraat 123 te Den Haag."
+        }
+      ]
+    },
+    {
+      "title": "Bevindingen",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Bij de inspectie zijn de volgende gebreken geconstateerd:"
+        },
+        {
+          "type": "bullet_list",
+          "items": [
+            "Scheefstand voorgevel: 38 mm over de gebouwhoogte (9,2 m), ratio 1:242. De grenswaarde conform NEN 8700 bedraagt 1:100 — de scheefstand is <b>binnen de norm</b> maar vereist monitoring.",
+            "Zettingsscheuren in de voorgevel: maximale scheurwijdte 8 mm, trapsgewijs verloop. Patroon wijst op ongelijkmatige zetting aan de rechterzijde.",
+            "Fundering op staal (houten kespen) op een diepte van circa 1,20 m -mv. Onder het grondwaterpeil (0,90 m -mv) zijn de kespen intact. Boven het grondwaterpeil is aantasting door droogstand waargenomen.",
+            "Achtergevel: geen bijzonderheden. Scheidingsmuren: stabiel, geen scheuren."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Het sondeerrapport (bijlage 1) toont een eerste zandlaag op NAP -5,0 m met een conusweerstand van q<sub>c</sub> = 12–15 MPa. Dit is geschikt als draaghorizont voor eventuele herpalingen."
+        }
+      ]
+    },
+    {
+      "title": "Advies",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Wij adviseren het volgende maatregelenpakket:"
+        },
+        {
+          "type": "paragraph",
+          "text": "<b>Optie A — Funderingsherstel (aanbevolen)</b>"
+        },
+        {
+          "type": "paragraph",
+          "text": "Plaatsing van 6 schroefinjectiepalen (Ø 168 mm) onder de rechterhelft van de voorgevel tot NAP -5,0 m, met stalen jukconstructie op de bestaande fundering. Hiermee wordt de ongelijkmatige zetting gestopt en kan de gevel na injectie van de scheuren worden hersteld."
+        },
+        {
+          "type": "table",
+          "title": "Raming kosten Optie A",
+          "headers": ["Onderdeel", "Raming excl. BTW"],
+          "rows": [
+            ["Funderingsherstel (6 palen + jukken)", "€ 35.000 – € 45.000"],
+            ["Gevelscheuren injecteren + hervoegen", "€ 4.000 – € 6.000"],
+            ["Constructief toezicht 3BM", "€ 3.500"],
+            ["Monitoring (12 maanden)", "€ 2.000"],
+            ["", "Totaal: € 44.500 – € 56.500"]
+          ]
+        },
+        {
+          "type": "spacer",
+          "height_mm": 5
+        },
+        {
+          "type": "paragraph",
+          "text": "<b>Optie B — Monitoring en conservering (minimaal)</b>"
+        },
+        {
+          "type": "paragraph",
+          "text": "Plaatsing van 4 meetbouten op de voorgevel voor deformatiemonitoring (meetfrequentie: per kwartaal, duur: 2 jaar). Scheuren worden geïnjecteerd maar de oorzaak wordt niet weggenomen. Dit is alleen verantwoord als de zetting tot stilstand is gekomen."
+        },
+        {
+          "type": "table",
+          "title": "Raming kosten Optie B",
+          "headers": ["Onderdeel", "Raming excl. BTW"],
+          "rows": [
+            ["Meetbouten + nulmeting", "€ 1.500"],
+            ["Monitoring 2 jaar (8 metingen)", "€ 4.000"],
+            ["Gevelscheuren injecteren + hervoegen", "€ 4.000 – € 6.000"],
+            ["", "Totaal: € 9.500 – € 11.500"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Aanbeveling",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Gezien de actieve zetting (scheurpatroon wijst op recente vervorming) en de staat van de houten kespen adviseren wij <b>Optie A</b>. Het risico van voortschrijdende zetting bij Optie B achten wij te groot voor een pand in deze prijsklasse."
+        },
+        {
+          "type": "paragraph",
+          "text": "Wij zijn graag bereid dit advies nader toe te lichten. Voor vragen kunt u contact opnemen met ondergetekende."
+        },
+        {
+          "type": "spacer",
+          "height_mm": 15
+        },
+        {
+          "type": "paragraph",
+          "text": "Met vriendelijke groet,"
+        },
+        {
+          "type": "spacer",
+          "height_mm": 10
+        },
+        {
+          "type": "paragraph",
+          "text": "<b>J. Kolthof</b>"
+        },
+        {
+          "type": "paragraph",
+          "text": "3BM Coöperatie<br/>T: 06-12345678<br/>E: jochem@3bm.co.nl"
+        }
+      ]
+    }
+  ],
+
+  "backcover": { "enabled": true }
+}

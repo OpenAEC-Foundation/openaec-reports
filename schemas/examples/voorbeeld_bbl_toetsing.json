@@ -1,0 +1,214 @@
+{
+  "template": "building_code",
+  "format": "A4",
+  "project": "Woongebouw Laakpark — Bbl toetsing",
+  "project_number": "2501-34",
+  "client": "Provastgoed B.V.",
+  "author": "3BM Bouwkunde",
+  "date": "2026-01-20",
+  "version": "2.0",
+  "status": "DEFINITIEF",
+
+  "cover": {
+    "subtitle": "Toetsing Besluit bouwwerken leefomgeving — Hoofdstuk 4",
+    "extra_fields": {
+      "Kenmerk": "3BM-2501-34-BBL02",
+      "Fase": "Definitief Ontwerp"
+    }
+  },
+
+  "colofon": {
+    "enabled": true,
+    "opdrachtgever_naam": "Provastgoed B.V.",
+    "opdrachtgever_contact": "Dhr. M. van Dijk",
+    "opdrachtgever_adres": "Bezuidenhoutseweg 50, 2594 AW Den Haag",
+    "adviseur_bedrijf": "3BM Coöperatie",
+    "adviseur_naam": "J. Kolthof",
+    "normen": "Besluit bouwwerken leefomgeving (Bbl) — Hoofdstuk 4",
+    "fase": "Definitief Ontwerp",
+    "kenmerk": "3BM-2501-34-BBL02",
+    "revision_history": [
+      {
+        "version": "1.0",
+        "date": "2025-12-10",
+        "author": "J. Kolthof",
+        "description": "Concept op basis van VO"
+      },
+      {
+        "version": "2.0",
+        "date": "2026-01-20",
+        "author": "J. Kolthof",
+        "description": "Definitief op basis van DO tekeningen d.d. 15-01-2026"
+      }
+    ]
+  },
+
+  "toc": { "enabled": true, "max_depth": 2 },
+
+  "sections": [
+    {
+      "title": "Inleiding",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Dit rapport bevat de toetsing aan het Besluit bouwwerken leefomgeving (Bbl) — Hoofdstuk 4 voor het nieuwbouwproject Woongebouw Laakpark te Den Haag. Het project omvat 24 appartementen verdeeld over 6 bouwlagen met een ondergrondse parkeergarage."
+        },
+        {
+          "type": "paragraph",
+          "text": "De toetsing is gebaseerd op de DO-tekeningen van architectenbureau Studio X (kenmerk SX-2501-DO-A, d.d. 15-01-2026) en het constructief ontwerp van 3BM Coöperatie."
+        }
+      ]
+    },
+    {
+      "title": "Projectgegevens",
+      "level": 1,
+      "content": [
+        {
+          "type": "table",
+          "title": "Algemene projectinformatie",
+          "headers": ["Gegeven", "Waarde"],
+          "rows": [
+            ["Projectnaam", "Woongebouw Laakpark"],
+            ["Locatie", "Laakweg 40-50, Den Haag"],
+            ["Gebruiksfunctie", "Woonfunctie (appartement)"],
+            ["Aantal woningen", "24 (4 per laag)"],
+            ["Bouwlagen", "6 + kelder (parkeergarage)"],
+            ["BVO totaal", "3.840 m²"],
+            ["Gebruiksoppervlakte", "2.160 m²"],
+            ["Bouwklasse", "Nieuwbouw — Gevolgklasse CC2"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Afd. 4.3 — Afmetingen: toegankelijkheid",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Toetsing van de minimale afmetingen voor toegankelijkheid conform Bbl afdeling 4.3."
+        },
+        {
+          "type": "table",
+          "title": "Toetsing afmetingen",
+          "headers": ["Onderdeel", "Eis Bbl", "Ontwerp", "Toets"],
+          "rows": [
+            ["Breedte verkeersroute", "≥ 1,20 m", "1,20 m", "VOLDOET"],
+            ["Breedte voordeur", "≥ 0,85 m vrije doorgang", "0,93 m", "VOLDOET"],
+            ["Draaicirkel rolstoel entree", "Ø 1,50 m", "Ø 1,50 m", "VOLDOET"],
+            ["Hoogte verkeersruimte", "≥ 2,30 m", "2,60 m", "VOLDOET"],
+            ["Breedte trap gemeensch.", "≥ 1,20 m (> 6 woningen)", "1,20 m", "VOLDOET"],
+            ["Hellingspercentage hellingbaan", "≤ 1:12", "1:15", "VOLDOET"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Afd. 4.6 — Daglicht",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Toetsing van de daglichttoetreding conform Bbl afdeling 4.6. De equivalente daglichtoppervlakte is bepaald volgens NEN 2057."
+        },
+        {
+          "type": "table",
+          "title": "Daglichtberekening per woning (representatief)",
+          "headers": ["Woning", "Ruimte", "A_vloer [m²]", "Eis A_e [m²]", "Aanwezig A_e [m²]", "Toets"],
+          "rows": [
+            ["Type A (hoek)", "Woonkamer", "28,5", "1,43", "3,52", "VOLDOET"],
+            ["Type A (hoek)", "Slaapkamer 1", "14,2", "0,71", "1,24", "VOLDOET"],
+            ["Type A (hoek)", "Slaapkamer 2", "10,8", "0,54", "0,88", "VOLDOET"],
+            ["Type B (midden)", "Woonkamer", "32,0", "1,60", "2,86", "VOLDOET"],
+            ["Type B (midden)", "Slaapkamer 1", "13,5", "0,68", "1,12", "VOLDOET"],
+            ["Type B (midden)", "Slaapkamer 2", "9,8", "0,49", "0,62", "VOLDOET"]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Alle verblijfsruimten voldoen aan de eis van een equivalente daglichtoppervlakte van minimaal 1/20 × A<sub>vloer</sub>."
+        }
+      ]
+    },
+    {
+      "title": "Afd. 4.7 — Ventilatie",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Toetsing ventilatiecapaciteit conform Bbl afdeling 4.7 en NEN 1087."
+        },
+        {
+          "type": "table",
+          "title": "Ventilatiedebieten Type A woning",
+          "headers": ["Ruimte", "Eis [dm³/s]", "Ontwerp [dm³/s]", "Toets"],
+          "rows": [
+            ["Woonkamer", "21,0", "28,0", "VOLDOET"],
+            ["Slaapkamer 1", "10,5", "14,0", "VOLDOET"],
+            ["Slaapkamer 2", "7,0", "7,0", "VOLDOET"],
+            ["Keuken (afvoer)", "21,0", "21,0", "VOLDOET"],
+            ["Badkamer (afvoer)", "14,0", "21,0", "VOLDOET"],
+            ["Toilet (afvoer)", "7,0", "7,0", "VOLDOET"]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Het ventilatiesysteem betreft een gebalanceerd systeem met WTW (rendement ≥ 90%). Alle debieten voldoen aan de minimum eisen."
+        }
+      ]
+    },
+    {
+      "title": "Afd. 4.9 — Bescherming tegen geluid",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Toetsing geluidsisolatie conform Bbl afdeling 4.9. De karakteristieke waarden zijn bepaald op basis van de detaillering in het DO."
+        },
+        {
+          "type": "table",
+          "title": "Geluidsisolatie woningscheidende constructies",
+          "headers": ["Constructie", "Eis D_nT,A [dB]", "Berekend [dB]", "Toets"],
+          "rows": [
+            ["Woningscheidende wand", "≥ 52", "56", "VOLDOET"],
+            ["Woningscheidende vloer", "≥ 52", "54", "VOLDOET"],
+            ["Contactgeluid vloer L_nT,A", "≤ 54", "48", "VOLDOET"],
+            ["Gevel (Lden = 58 dB)", "≥ 20 + (58-50) = 28", "33", "VOLDOET"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Samenvatting en conclusie",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Onderstaand een overzicht van de getoetste afdelingen uit het Bbl."
+        },
+        {
+          "type": "table",
+          "title": "Overzicht toetsresultaten",
+          "headers": ["Afdeling Bbl", "Onderwerp", "Resultaat"],
+          "rows": [
+            ["4.3", "Afmetingen: toegankelijkheid", "VOLDOET"],
+            ["4.6", "Daglicht", "VOLDOET"],
+            ["4.7", "Ventilatie", "VOLDOET"],
+            ["4.9", "Bescherming tegen geluid", "VOLDOET"]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Op basis van de uitgevoerde toetsing wordt geconcludeerd dat het ontwerp van Woongebouw Laakpark voldoet aan de eisen van het Besluit bouwwerken leefomgeving — Hoofdstuk 4, voor zover getoetst in dit rapport. De toetsing van brandveiligheid (Hoofdstuk 6) en constructieve veiligheid (Hoofdstuk 3) zijn opgenomen in separate rapporten."
+        }
+      ]
+    }
+  ],
+
+  "backcover": { "enabled": true }
+}

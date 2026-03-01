@@ -1,0 +1,188 @@
+{
+  "template": "structural",
+  "format": "A4",
+  "project": "Bouwkundige opname — Dorpsstraat 12, Wassenaar",
+  "project_number": "2503-08",
+  "client": "Dhr. P. de Graaf",
+  "author": "3BM Bouwkunde",
+  "date": "2026-02-25",
+  "version": "1.0",
+  "status": "DEFINITIEF",
+
+  "cover": {
+    "subtitle": "Bouwkundige inspectie bestaande woning met advies"
+  },
+
+  "colofon": {
+    "enabled": true,
+    "opdrachtgever_naam": "Dhr. P. de Graaf",
+    "opdrachtgever_adres": "Dorpsstraat 12, 2241 AB Wassenaar",
+    "adviseur_bedrijf": "3BM Coöperatie",
+    "adviseur_naam": "J. Kolthof",
+    "fase": "Aankoop",
+    "kenmerk": "3BM-2503-08-INS01",
+    "revision_history": [
+      {
+        "version": "1.0",
+        "date": "2026-02-25",
+        "author": "J. Kolthof",
+        "description": "Definitief rapport na inspectie d.d. 18-02-2026"
+      }
+    ]
+  },
+
+  "toc": { "enabled": true, "max_depth": 2 },
+
+  "sections": [
+    {
+      "title": "Inleiding",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "In opdracht van de heer De Graaf is op 18 februari 2026 een bouwkundige inspectie uitgevoerd aan de woning Dorpsstraat 12 te Wassenaar. Het doel van de inspectie is het in kaart brengen van de bouwkundige staat ten behoeve van de aankoop."
+        },
+        {
+          "type": "paragraph",
+          "text": "Het betreft een vrijstaande woning uit 1953, bestaande uit twee bouwlagen met een kap. De woning is voorzien van een kelder en een aangebouwde garage. De inspectie is visueel en niet-destructief uitgevoerd."
+        }
+      ]
+    },
+    {
+      "title": "Buitenzijde",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De buitenzijde is beoordeeld op metselwerk, voegwerk, kozijnen, dakbedekking en hemelwaterafvoer."
+        }
+      ]
+    },
+    {
+      "title": "Gevels en metselwerk",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Het metselwerk verkeert in redelijke staat. Aan de noordgevel zijn enkele lintvoegen verweerd en is plaatselijk inwatering zichtbaar. Aan de zuidgevel is een scheur waargenomen (breedte circa 2–3 mm) ter hoogte van de eerste verdieping. De scheur loopt trapsgewijs door het voegwerk en wijst op lichte zetting."
+        },
+        {
+          "type": "table",
+          "title": "Bevindingen gevels",
+          "headers": ["Locatie", "Bevinding", "Ernst", "Actie"],
+          "rows": [
+            ["Noordgevel", "Verweerd voegwerk", "Matig", "Hervoegen binnen 2 jaar"],
+            ["Zuidgevel", "Zettingsscheur ±3mm", "Serieus", "Monitoring + nader onderzoek"],
+            ["Oostgevel", "Geen bijzonderheden", "Goed", "—"],
+            ["Westgevel", "Algengroei onderzijde", "Licht", "Reiniging"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Kozijnen en ramen",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De houten kozijnen op de begane grond zijn origineel (1953) en vertonen houtrot aan de onderdorpels. Met name de kozijnen aan de noordzijde zijn aan vervanging toe. De kunststof kozijnen op de verdieping (geplaatst circa 2005) verkeren in goede staat."
+        }
+      ]
+    },
+    {
+      "title": "Dakbedekking",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De dakpannen (betonpannen, geschat leeftijd 25–30 jaar) vertonen slijtage en enkele gebroken exemplaren. De dakgoten zijn plaatselijk doorgebogen. Aanbevolen wordt het dak binnen 3–5 jaar volledig te vernieuwen inclusief isolatie."
+        }
+      ]
+    },
+    {
+      "title": "Binnenzijde",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De binnenzijde is beoordeeld op constructie, vocht, installaties en afwerking."
+        }
+      ]
+    },
+    {
+      "title": "Constructie en draagstructuur",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De houten balklaag (eerste verdieping) is in goede conditie, geen doorbuiging of aantasting waargenomen. De kapconstructie is droog en stabiel. In de kelder is lichte vochtdoorslag zichtbaar aan de noordwand, passend bij het verweerde voegwerk aan de buitenzijde."
+        }
+      ]
+    },
+    {
+      "title": "Installaties",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De CV-installatie (Nefit Ecomline, bouwjaar 2012) functioneert maar nadert het einde van de levensduur. Elektrische installatie is deels vernieuwd; de groepenkast is voorzien van aardlekschakelaars. Leidingwerk in de kelder is deels origineel (lood). Dit dient op korte termijn vervangen te worden."
+        }
+      ]
+    },
+    {
+      "title": "Kostenoverzicht",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Onderstaand een indicatie van de te verwachten kosten, onderverdeeld in direct noodzakelijk (0–2 jaar) en op termijn (2–5 jaar). Prijzen zijn indicatief, exclusief BTW."
+        },
+        {
+          "type": "table",
+          "title": "Directe kosten (0–2 jaar)",
+          "headers": ["Omschrijving", "Geschatte kosten"],
+          "rows": [
+            ["Vervanging houten kozijnen BG (4 stuks)", "€ 8.000 – € 12.000"],
+            ["Hervoegen noordgevel", "€ 2.500 – € 4.000"],
+            ["Vervanging loden leidingwerk kelder", "€ 1.500 – € 2.500"],
+            ["Nader onderzoek zettingsscheur", "€ 750 – € 1.500"],
+            ["", "Subtotaal: € 12.750 – € 20.000"]
+          ]
+        },
+        {
+          "type": "spacer",
+          "height_mm": 5
+        },
+        {
+          "type": "table",
+          "title": "Kosten op termijn (2–5 jaar)",
+          "headers": ["Omschrijving", "Geschatte kosten"],
+          "rows": [
+            ["Vernieuwing dakpannen + isolatie", "€ 18.000 – € 25.000"],
+            ["Vervanging CV-ketel (warmtepomp-ready)", "€ 3.500 – € 6.000"],
+            ["Schilderwerk buitenzijde volledig", "€ 4.000 – € 6.000"],
+            ["", "Subtotaal: € 25.500 – € 37.000"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Conclusie en advies",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De woning verkeert in een redelijke tot matige bouwkundige staat, passend bij de leeftijd (73 jaar). De draagconstructie is solide, maar de buitenschil vraagt op korte termijn aandacht. De zettingsscheur in de zuidgevel verdient monitoring; bij toename is een funderingsonderzoek aan te raden."
+        },
+        {
+          "type": "paragraph",
+          "text": "Het totale investeringsbedrag wordt geraamd op <b>€ 38.000 – € 57.000</b> over de komende 5 jaar. Dit bedrag is exclusief eventuele verduurzamingsmaatregelen en binnenafwerking."
+        }
+      ]
+    }
+  ],
+
+  "backcover": { "enabled": true }
+}

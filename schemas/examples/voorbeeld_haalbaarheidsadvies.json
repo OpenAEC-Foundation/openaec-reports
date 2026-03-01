@@ -1,0 +1,181 @@
+{
+  "template": "structural",
+  "format": "A4",
+  "project": "Haringkade 17-21 — Dakopbouw advies",
+  "project_number": "2502-19",
+  "client": "VvE Haringkade 17-21",
+  "author": "3BM Bouwkunde",
+  "date": "2026-02-14",
+  "version": "1.0",
+  "status": "DEFINITIEF",
+
+  "cover": {
+    "subtitle": "Haalbaarheidsadvies dakopbouw 3 appartementen",
+    "extra_fields": {
+      "Kenmerk": "3BM-2502-19-ADV01",
+      "T.a.v.": "Bestuur VvE Haringkade"
+    }
+  },
+
+  "colofon": {
+    "enabled": true,
+    "opdrachtgever_naam": "VvE Haringkade 17-21",
+    "opdrachtgever_contact": "Mw. A. Jansen (voorzitter)",
+    "opdrachtgever_adres": "Haringkade 17, 2512 GL Den Haag",
+    "adviseur_bedrijf": "3BM Coöperatie",
+    "adviseur_naam": "J. Kolthof",
+    "fase": "Haalbaarheidsstudie",
+    "kenmerk": "3BM-2502-19-ADV01",
+    "revision_history": [
+      {
+        "version": "1.0",
+        "date": "2026-02-14",
+        "author": "J. Kolthof",
+        "description": "Definitief advies"
+      }
+    ]
+  },
+
+  "toc": { "enabled": false },
+
+  "sections": [
+    {
+      "title": "Aanleiding",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Het bestuur van VvE Haringkade 17-21 heeft 3BM Coöperatie gevraagd om de haalbaarheid te beoordelen van een dakopbouw met 3 appartementen op het bestaande gebouw. Het pand (bouwjaar 1962) bestaat uit 4 bouwlagen met een plat dak en is gefundeerd op betonpalen."
+        }
+      ]
+    },
+    {
+      "title": "Bestaande situatie",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Het gebouw is een portiekflat in baksteen-constructie met betonnen vloeren en een betonnen dakconstructie. Op basis van het originele funderingsrapport (Gemeentearchief, 1961) is het pand gefundeerd op geprefabriceerde betonpalen (systeem Vibro), draaglast 200 kN per paal."
+        },
+        {
+          "type": "table",
+          "title": "Kenmerken bestaand gebouw",
+          "headers": ["Kenmerk", "Waarde"],
+          "rows": [
+            ["Bouwjaar", "1962"],
+            ["Constructietype", "Dragende baksteen wanden + betonvloeren"],
+            ["Bouwlagen", "4 + plat dak"],
+            ["Fundering", "Betonpalen Ø 250, lengte ±12m"],
+            ["Draagkracht per paal", "200 kN (ontwerp)"],
+            ["Aantal palen (schatting)", "48 stuks"],
+            ["Footprint", "12,0 × 28,5 m"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Beoordeling haalbaarheid",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De haalbaarheid is beoordeeld op drie criteria: constructieve draagkracht, planologische mogelijkheden en bouwfysische consequenties."
+        }
+      ]
+    },
+    {
+      "title": "Constructieve draagkracht",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De extra belasting van een dakopbouw in lichte houtskeletbouw (HSB) wordt geraamd op circa 2,5 kN/m², ofwel circa 855 kN totaal. De beschikbare reserve in de paalfundering is berekend op basis van het verschil tussen het oorspronkelijk ontwerp (4 lagen + dak) en de werkelijke situatie."
+        },
+        {
+          "type": "calculation",
+          "title": "Totale paaldraagkracht",
+          "formula": "F_paal,totaal = n × F_paal",
+          "substitution": "F_paal,totaal = 48 × 200",
+          "result": "9600",
+          "unit": "kN",
+          "reference": "Funderingsrapport 1961"
+        },
+        {
+          "type": "calculation",
+          "title": "Huidige belasting (schatting)",
+          "formula": "G_bestaand = A × q_gem × n_lagen",
+          "substitution": "G_bestaand = 342 × 5.5 × 4 + 342 × 2.0",
+          "result": "8208",
+          "unit": "kN"
+        },
+        {
+          "type": "calculation",
+          "title": "Reserve",
+          "formula": "F_reserve = F_totaal - G_bestaand",
+          "substitution": "F_reserve = 9600 - 8208",
+          "result": "1392",
+          "unit": "kN"
+        },
+        {
+          "type": "check",
+          "description": "Funderingsreserve voor dakopbouw",
+          "required_value": "F_reserve ≥ G_opbouw = 855 kN",
+          "calculated_value": "F_reserve = 1392 kN",
+          "unity_check": 0.61,
+          "limit": 1.0,
+          "reference": "NEN 9997-1"
+        },
+        {
+          "type": "paragraph",
+          "text": "<b>Conclusie constructief:</b> De globale berekening toont voldoende reserve in de fundering (UC = 0,61). Kanttekening: de werkelijke paaldraagkracht dient geverifieerd te worden middels een paalbelastingsproef of sondering nabij de fundering. Ook de draagkracht van het bestaande dak als werkvloer moet nader worden beoordeeld."
+        }
+      ]
+    },
+    {
+      "title": "Planologie en vergunning",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Het vigerende bestemmingsplan 'Centrum-West' staat 5 bouwlagen toe met een maximale bouwhoogte van 18 meter. Het huidige gebouw is circa 13,5 m hoog. Een extra bouwlaag van 3,0 m brengt de hoogte op 16,5 m — binnen het bestemmingsplan. Dakopbouw is daarmee <b>vergunningsvrij niet mogelijk</b> maar <b>vergunbaar onder het bestemmingsplan</b>."
+        }
+      ]
+    },
+    {
+      "title": "Bouwfysica",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De dakopbouw dient te voldoen aan de huidige BENG-eisen (Bbl 2024). HSB-constructie met 200 mm minerale wol (Rc ≥ 6,0 m²·K/W) en triple-glas (U ≤ 0,80 W/m²·K) is hiervoor toereikend. Geluidsisolatie tussen bestaand en nieuw dient minimaal DnT,A ≥ 52 dB te bedragen."
+        }
+      ]
+    },
+    {
+      "title": "Advies en vervolg",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Op basis van deze haalbaarheidsanalyse concluderen wij dat de dakopbouw <b>constructief haalbaar</b> en <b>planologisch vergunbaar</b> is. Wij adviseren het volgende vervolgtraject:"
+        },
+        {
+          "type": "bullet_list",
+          "items": [
+            "Fase 1 — Nader constructief onderzoek: paalbelastingsproef, opname bestaande constructie (€ 5.000 – € 8.000)",
+            "Fase 2 — Voorlopig ontwerp: architect + constructeur + installatieadviseur (€ 12.000 – € 18.000)",
+            "Fase 3 — Definitief ontwerp + vergunningaanvraag (€ 8.000 – € 12.000)",
+            "Fase 4 — Realisatie: raming bouwkosten 3 appartementen HSB: € 450.000 – € 600.000 excl. BTW"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "3BM Coöperatie kan het constructieve deel van fase 1 t/m 3 verzorgen. Wij zien uw reactie met belangstelling tegemoet."
+        }
+      ]
+    }
+  ],
+
+  "backcover": { "enabled": true }
+}

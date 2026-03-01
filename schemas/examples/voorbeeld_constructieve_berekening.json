@@ -1,0 +1,242 @@
+{
+  "template": "structural",
+  "format": "A4",
+  "project": "Strandweg 45 — Aanbouw achterzijde",
+  "project_number": "2503-12",
+  "client": "Fam. Van der Berg",
+  "author": "3BM Bouwkunde",
+  "date": "2026-03-01",
+  "version": "1.0",
+  "status": "CONCEPT",
+
+  "cover": {
+    "subtitle": "Constructieve beoordeling uitbouw begane grond"
+  },
+
+  "colofon": {
+    "enabled": true,
+    "opdrachtgever_naam": "Fam. Van der Berg",
+    "opdrachtgever_adres": "Strandweg 45, 2586 JK Den Haag",
+    "adviseur_bedrijf": "3BM Coöperatie",
+    "adviseur_naam": "J. Kolthof",
+    "normen": "NEN-EN 1990 t/m 1999 (Eurocode met NB)",
+    "fase": "Vergunningaanvraag",
+    "kenmerk": "3BM-2503-12-R01",
+    "revision_history": [
+      {
+        "version": "1.0",
+        "date": "2026-03-01",
+        "author": "J. Kolthof",
+        "description": "Eerste uitgave"
+      }
+    ]
+  },
+
+  "toc": { "enabled": true, "max_depth": 2 },
+
+  "sections": [
+    {
+      "title": "Inleiding",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "In opdracht van de familie Van der Berg is een constructieve beoordeling uitgevoerd voor de voorgenomen aanbouw aan de achterzijde van de woning aan de Strandweg 45 te Den Haag. De uitbouw heeft een oppervlakte van circa 3,0 × 4,5 m en wordt uitgevoerd in één bouwlaag met een plat dak."
+        },
+        {
+          "type": "paragraph",
+          "text": "De berekeningen zijn uitgevoerd ten behoeve van de omgevingsvergunningaanvraag conform het Besluit bouwwerken leefomgeving (Bbl)."
+        }
+      ]
+    },
+    {
+      "title": "Uitgangspunten",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De constructieve uitgangspunten zijn gebaseerd op de bouwtekeningen d.d. 15-02-2026 van architectenbureau Duin & Zee en een visuele inspectie ter plaatse op 20-02-2026."
+        },
+        {
+          "type": "table",
+          "title": "Materiaaloverzicht",
+          "headers": ["Onderdeel", "Materiaal", "Sterkteklasse"],
+          "rows": [
+            ["Fundering", "Gewapend beton", "C20/25 — B500B"],
+            ["Metselwerk", "Kalkzandsteen", "CS 12 — M10"],
+            ["Latei achtergevel", "Staal", "S235 — HEA 160"],
+            ["Dakconstructie", "Hout", "C18 — 63×175"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Belastingen",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De belastingen zijn bepaald conform NEN-EN 1991 met de Nederlandse Nationale Bijlage."
+        }
+      ]
+    },
+    {
+      "title": "Permanente belasting",
+      "level": 2,
+      "content": [
+        {
+          "type": "table",
+          "title": "Opbouw plat dak",
+          "headers": ["Laag", "Dikte [mm]", "Gewicht [kN/m²]"],
+          "rows": [
+            ["EPDM dakbedekking", "1.5", "0.02"],
+            ["Isolatie PIR", "120", "0.05"],
+            ["Dampremmer", "-", "0.01"],
+            ["Multiplex", "18", "0.12"],
+            ["Houten gordingen 63×175", "-", "0.08"],
+            ["Gipskartonplafond", "12.5", "0.10"],
+            ["", "Totaal", "0.38"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Veranderlijke belasting",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Niet-toegankelijk plat dak (categorie H): q<sub>k</sub> = 1.0 kN/m². Sneeuwbelasting (zone 3): s = 0.56 kN/m². Maatgevend: q<sub>k</sub> = 1.0 kN/m² (NEN-EN 1991-1-1 Tabel 6.10NL)."
+        }
+      ]
+    },
+    {
+      "title": "Stalen latei achtergevel — HEA 160",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De stalen latei overspant de opening in de bestaande achtergevel (4,20 m). Het profiel draagt het metselwerk erboven (2 lagen) en de dakconstructie. Profiel: HEA 160 — staal S235."
+        },
+        {
+          "type": "calculation",
+          "title": "Lijnlast op latei",
+          "formula": "q_Ed = (q_dak + q_mw) × b",
+          "substitution": "q_Ed = (1.38 + 2.16) × 1.0 × 1.35 + 1.0 × 1.0 × 1.5",
+          "result": "6.28",
+          "unit": "kN/m",
+          "reference": "NEN-EN 1990 Tabel A1.2(B) — 6.10a/b"
+        },
+        {
+          "type": "calculation",
+          "title": "Veldmoment",
+          "formula": "M_Ed = q × l² / 8",
+          "substitution": "M_Ed = 6.28 × 4.20² / 8",
+          "result": "13.85",
+          "unit": "kNm",
+          "reference": "NEN-EN 1993-1-1"
+        },
+        {
+          "type": "calculation",
+          "title": "Momentcapaciteit HEA 160",
+          "formula": "M_Rd = W_pl,y × f_y / γ_M0",
+          "substitution": "M_Rd = 245.1e3 × 235 / 1.0 × 10⁻⁶",
+          "result": "57.6",
+          "unit": "kNm",
+          "reference": "NEN-EN 1993-1-1 §6.2.5"
+        },
+        {
+          "type": "check",
+          "description": "Unity check buiging latei achtergevel",
+          "required_value": "UC ≤ 1.0",
+          "calculated_value": "M_Ed / M_Rd = 13.85 / 57.6",
+          "unity_check": 0.24,
+          "limit": 1.0,
+          "reference": "NEN-EN 1993-1-1 §6.2.5"
+        },
+        {
+          "type": "calculation",
+          "title": "Doorbuiging (BGT)",
+          "formula": "δ = 5 × q × l⁴ / (384 × E × I)",
+          "substitution": "δ = 5 × 3.54 × 4200⁴ / (384 × 210000 × 1673e4)",
+          "result": "4.6",
+          "unit": "mm",
+          "reference": "NEN-EN 1993-1-1 §7.2"
+        },
+        {
+          "type": "check",
+          "description": "Unity check doorbuiging latei",
+          "required_value": "δ ≤ l/250 = 16.8 mm",
+          "calculated_value": "δ = 4.6 mm",
+          "unity_check": 0.27,
+          "limit": 1.0,
+          "reference": "NEN-EN 1993-1-1 §7.2"
+        }
+      ]
+    },
+    {
+      "title": "Houten dakliggers",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De houten dakgordingen 63×175 mm (C18) overspannen 3,0 m met h.o.h. afstand 600 mm."
+        },
+        {
+          "type": "calculation",
+          "title": "Buigspanning",
+          "formula": "σ_m,d = M_Ed / W_el",
+          "substitution": "σ_m,d = 0.85e6 / (63 × 175² / 6)",
+          "result": "2.63",
+          "unit": "N/mm²",
+          "reference": "NEN-EN 1995-1-1 §6.1.6"
+        },
+        {
+          "type": "check",
+          "description": "Unity check buiging dakligger",
+          "required_value": "UC ≤ 1.0",
+          "calculated_value": "σ_m,d / f_m,d = 2.63 / 11.1",
+          "unity_check": 0.24,
+          "limit": 1.0,
+          "reference": "NEN-EN 1995-1-1 §6.1.6"
+        }
+      ]
+    },
+    {
+      "title": "Fundering",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "De aanbouw wordt gefundeerd op een gewapende betonnen strook van 600 × 250 mm op staal (funderingsdiepte 0,80 m -mv). De draagkracht is gebaseerd op een aanname van σ<sub>grond</sub> = 100 kN/m² (zandgrond, licht voorgespannen). Een sondering is aanbevolen ter verificatie."
+        },
+        {
+          "type": "check",
+          "description": "Gronddruk onder funderingsstrook",
+          "required_value": "σ ≤ 100 kN/m²",
+          "calculated_value": "σ = N_Ed / A = 12.4 / (0.6 × 1.0) = 20.7 kN/m²",
+          "unity_check": 0.21,
+          "limit": 1.0,
+          "reference": "NEN 9997-1 — Geotechnisch ontwerp"
+        }
+      ]
+    },
+    {
+      "title": "Conclusie",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Op basis van de uitgevoerde berekeningen wordt geconcludeerd dat de voorgestelde constructie van de aanbouw voldoet aan de eisen uit de Eurocode. Alle unity checks zijn ruim binnen de norm (UC < 0.30)."
+        },
+        {
+          "type": "paragraph",
+          "text": "Aanbevelingen: een sondering ter verificatie van de draagkracht is gewenst. Tijdens de bouw dient een uitvoeringscontrole plaats te vinden op de wapenings- en profielkeuzes."
+        }
+      ]
+    }
+  ],
+
+  "backcover": { "enabled": true }
+}

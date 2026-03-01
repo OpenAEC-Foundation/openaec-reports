@@ -1,0 +1,36 @@
+report_type: sanering
+tenant: symitech
+format: A4
+orientation: portrait
+
+cover:
+  subtitle_hint: "Saneringsrapportage"
+colofon:
+  enabled: true
+toc:
+  enabled: true
+  title: "Inhoudsopgave"
+backcover:
+  enabled: true
+
+structure:
+  - cover
+  - colofon
+  - toc
+  - sections
+  - backcover
+
+section_presets:
+  - title: "Locatie"
+    default_blocks:
+      - type: location_detail
+  - title: "Saneringswerkzaamheden"
+    default_blocks:
+      - type: paragraph
+  - title: "Objectbeschrijving"
+    default_blocks:
+      - type: object_description
+  - title: "Kostenopgave"
+    orientation: landscape
+    default_blocks:
+      - type: cost_summary

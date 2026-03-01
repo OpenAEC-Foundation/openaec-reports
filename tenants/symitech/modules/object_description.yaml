@@ -1,0 +1,44 @@
+# Symitech Object Description — YAML module definition
+# Equivalent of ObjectDescriptionModule (object_description.py)
+#
+# Objectbeschrijving pagina met velden, notities en optionele foto.
+
+name: object_description
+tenant: symitech
+
+style:
+  title_height: 28.0
+  subtitle_height: 22.0
+  row_height: 16.0
+  section_gap: 14.0
+  double_line_gap: 2.7
+  label_indent: 4.0
+  label_col_frac: 0.30
+  notes_line_height: 14.0
+  notes_top_margin: 10.0
+  chars_per_line: 80
+  photo_max_height: 250.0
+  photo_top_margin: 16.0
+  placeholder_height: 60.0
+  bottom_padding: 8.0
+
+elements:
+  - type: title
+    field: title
+    default: "Objectbeschrijving"
+
+  - type: subtitle
+    field: object_name
+
+  - type: field_list
+    data_key: fields
+    label_key: label
+    value_key: value
+
+  - type: notes
+    field: notes
+    separator_above: true
+
+  - type: photo
+    field: photo_path
+    placeholder_text: "[OBJECTFOTO]"

@@ -406,56 +406,67 @@ async def generate_report_v2(request: Request, user: User = Depends(get_current_
 # ============================================================
 
 
+def _resolve_tenant_and_template(
+    template_name: str,
+    tenants_dir: Path,
+    data: dict,
+    user: User,
+) -> tuple[str, str]:
+    """Leid tenant en template naam af uit de template identifier.
+
+    Strategie:
+    1. Check of template_name begint met een bekende tenant prefix
+       bijv. "symitech_bic_factuur" → tenant="symitech", template="bic_factuur"
+    2. Fallback naar data["brand"]
+    3. Fallback naar user.tenant
+    4. Laatste fallback: "symitech"
+    """
+    # Scan bestaande tenant directories
+    if tenants_dir and tenants_dir.exists():
+        for d in sorted(tenants_dir.iterdir(), key=lambda p: len(p.name), reverse=True):
+            if not d.is_dir():
+                continue
+            prefix = d.name + "_"
+            if template_name.startswith(prefix):
+                return d.name, template_name[len(prefix):]
+
+    # Geen prefix match → probeer data["brand"] of user.tenant als tenant
+    tenant = data.get("brand") or user.tenant or "symitech"
+
+    return tenant, template_name
+
+
 @_protected.post("/api/generate/template")
 async def generate_template_report(request: Request, user: User = Depends(get_current_user)):
-    """Genereer PDF rapport via TemplateEngine (YAML-driven, multi-tenant).
-
-    Ondersteunt Symitech BIC facturen en andere template-gebaseerde rapporten
-    met per-pagina orientatie, stationery PDFs, en YAML text zones.
-
-    Body:
-        JSON data met template naam, project info, sections.
-        Wordt intern getransformeerd naar flat dot-notatie dict.
-
-    Returns:
-        PDF bestand als binary response (application/pdf).
-    """
+    """Genereer PDF rapport via TemplateEngine (YAML-driven, multi-tenant)."""
     data = await request.json()
 
     template_name = data.get("template")
     if not template_name:
         raise HTTPException(status_code=422, detail="Veld 'template' is verplicht")
 
-    # Resolve tenant
-    tenant = user.tenant or "symitech"
-
-    # Normalize template name: strip "{tenant}_" prefix if present
-    # e.g. "symitech_bic_factuur" → "bic_factuur" for tenant "symitech"
-    prefix = f"{tenant}_"
-    if template_name.startswith(prefix):
-        template_name = template_name[len(prefix):]
-
-    # Resolve brand
-    brand = (
-        data.get("brand")
-        or _resolve_brand_from_template(data, tenant)
-        or tenant
-        or _DEFAULT_BRAND
-    )
-
-    # Resolve tenants directory
-    tenants_dir = _resolve_tenants_dir(tenant)
+    # Resolve tenants directory EERST — nodig voor tenant detectie
+    tenants_dir = _resolve_tenants_dir()
 
     if not tenants_dir or not tenants_dir.exists():
         raise HTTPException(
             status_code=500,
-            detail="Tenants directory niet gevonden — configureer BM_TENANT_DIR",
+            detail="Tenants directory niet gevonden — configureer BM_TENANTS_ROOT",
         )
+
+    # Resolve tenant uit template naam (niet uit user sessie!)
+    tenant, template_name = _resolve_tenant_and_template(
+        template_name, tenants_dir, data, user,
+    )
+
+    logger.info("TemplateEngine: tenant=%s, template=%s", tenant, template_name)
+
+    # Brand = tenant (Symitech brand.yaml zit in tenants/symitech/)
+    brand = data.get("brand") or tenant or _DEFAULT_BRAND
 
     # Transformeer JSON data naar engine formaat
     engine_data = transform_json_to_engine_data(data)
 
-    # Bouw PDF via TemplateEngine
     engine = TemplateEngine(tenants_dir=tenants_dir)
 
     def build(output_path: Path) -> None:
@@ -471,25 +482,41 @@ async def generate_template_report(request: Request, user: User = Depends(get_cu
 
 
 def _resolve_tenants_dir(tenant: str = "") -> Path | None:
-    """Resolve de tenants root directory.
+    """Resolve de tenants ROOT directory (bevat alle tenant subdirectories).
 
-    Probeert:
-    1. TenantConfig.tenants_root (uit BM_TENANT_DIR)
-    2. Source tree: <package>/../../tenants
-    3. Package-relatief: <package>/tenants
+    Probeert in volgorde:
+    1. BM_TENANTS_ROOT environment variable (expliciet)
+    2. Parent van BM_TENANT_DIR (als die meerdere tenant dirs bevat)
+    3. Source tree: <package>/../../tenants
+    4. Package-relatief: <package>/tenants
     """
-    if tenant:
-        tc = get_tenant_config(tenant)
-        if hasattr(tc, "tenants_root") and tc.tenants_root and tc.tenants_root.exists():
-            return tc.tenants_root
+    # 1. Expliciete tenants root
+    root_env = os.environ.get("BM_TENANTS_ROOT")
+    if root_env:
+        root = Path(root_env)
+        if root.exists():
+            return root
 
-    candidates = [
-        Path(__file__).parent.parent.parent / "tenants",  # source tree
-        Path(__file__).parent / "tenants",                  # package
-    ]
-    for candidate in candidates:
-        if candidate.exists():
-            return candidate
+    # 2. Parent van BM_TENANT_DIR
+    td_env = os.environ.get("BM_TENANT_DIR")
+    if td_env:
+        parent = Path(td_env).parent
+        # Verify: parent moet meerdere tenant dirs bevatten
+        if parent.exists() and any(
+            d.is_dir() and (d / "brand.yaml").exists()
+            for d in parent.iterdir()
+        ):
+            return parent
+
+    # 3. Source tree
+    source_tenants = Path(__file__).parent.parent.parent / "tenants"
+    if source_tenants.exists():
+        return source_tenants
+
+    # 4. Package-relatief
+    pkg_tenants = Path(__file__).parent / "tenants"
+    if pkg_tenants.exists():
+        return pkg_tenants
 
     return None
 

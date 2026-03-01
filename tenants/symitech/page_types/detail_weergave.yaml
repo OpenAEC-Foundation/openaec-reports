@@ -37,14 +37,14 @@ line_zones:
     color: "primary"
 
   # --- Dubbele lijn ONDER kolom headers (FULL WIDTH) ---
-  # +5.0mm visuele correctie (20px offset)
+  # -2.5mm correctie (10px te laag)
   - x0_mm: 20.0
-    y_mm: 47.2
+    y_mm: 44.7
     x1_mm: 286.1
     width_pt: 3.0
     color: "primary"
   - x0_mm: 20.0
-    y_mm: 48.1
+    y_mm: 45.6
     x1_mm: 286.1
     width_pt: 0.75
     color: "primary"

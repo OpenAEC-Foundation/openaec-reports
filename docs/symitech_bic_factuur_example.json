@@ -3,157 +3,90 @@
   "tenant": "symitech",
   "brand": "symitech",
 
-  "project": "BIC Monitoring Depot Noord",
-  "project_number": "336.01",
-  "client": "Gemeente Amsterdam",
-  "author": "Symitech B.V.",
-  "date": "2026-03-15",
-  "version": "1.0",
-  "status": "DEFINITIEF",
-
-  "cover": {
-    "subtitle": "BIC Factuur"
+  "meta": {
+    "factuur_kop": "BIC Factuur",
+    "datum": "15-03-2026",
+    "factuurnummer": "336.01-F001",
+    "type_offerte": "BIC Controle:",
+    "offerte_regel": "336.01: BIC Factuur",
+    "rapportkop_locatie": "BIC Factuur: LOC-2026-001"
   },
 
-  "colofon": {
-    "enabled": false
+  "client": {
+    "name": "Gemeente Amsterdam",
+    "address": "Amstel 1",
+    "postcode_plaats": "1011 PN Amsterdam"
   },
 
-  "toc": {
-    "enabled": false
+  "location": {
+    "name": "Depot Noord",
+    "address": "Industrieweg 10",
+    "postcode_plaats": "1013 AB Amsterdam",
+    "code": "LOC-2026-001",
+    "provision_label": "Voorziening",
+    "provision": "Grondwatermonitoring",
+    "object_label": "Object",
+    "object": "Peilbuis PB-01",
+    "photo_path": null
   },
 
-  "backcover": {
-    "enabled": true
+  "bic": {
+    "aantal_conform": "12",
+    "aantal_werkelijk": "14",
+    "kosten_conform": "\u20ac 2.040,00",
+    "kosten_werkelijk": "\u20ac 1.785,00",
+    "hydro_aantal_conform": "4",
+    "hydro_aantal_werkelijk": "4",
+    "hydro_kosten_conform": "\u20ac 680,00",
+    "hydro_kosten_werkelijk": "\u20ac 680,00",
+    "reiskosten_conform": "\u20ac 450,00",
+    "reiskosten_werkelijk": "\u20ac 525,00",
+    "subtotaal_conform": "\u20ac 3.170,00",
+    "subtotaal_werkelijk": "\u20ac 2.990,00"
   },
 
-  "sections": [
-    {
-      "title": "Locatie",
-      "content": [
-        {
-          "type": "location_detail",
-          "title": "Locatie",
-          "client": {
-            "section_title": "Opdrachtgever",
-            "name": "Gemeente Amsterdam",
-            "address": "Amstel 1",
-            "city": "1011 PN Amsterdam"
-          },
-          "location": {
-            "section_title": "Locatie van uitvoer",
-            "name": "Depot Noord",
-            "address": "Industrieweg 10",
-            "city": "1013 AB Amsterdam",
-            "code": "LOC-2026-001",
-            "provision": "Grondwatermonitoring",
-            "object": "Peilbuis PB-01"
-          },
-          "photo_path": null
-        }
-      ]
-    },
-    {
-      "title": "BIC Controles",
-      "content": [
-        {
-          "type": "bic_table",
-          "location_name": "Depot Noord — Amsterdam",
-          "sections": [
-            {
-              "title": "BIC Controles",
-              "rows": [
-                {"label": "Aantal BIC controles", "ref_value": "12", "actual_value": "14"},
-                {"label": "Uren per controle", "ref_value": "2,0", "actual_value": "1,5"},
-                {"label": "Kosten per uur", "ref_value": "€ 85,00", "actual_value": "€ 85,00"},
-                {"label": "Reiskosten", "ref_value": "€ 450,00", "actual_value": "€ 525,00"}
-              ]
-            },
-            {
-              "title": "Rapportage",
-              "rows": [
-                {"label": "Tussenrapportages", "ref_value": "4", "actual_value": "4"},
-                {"label": "Eindrapportage", "ref_value": "1", "actual_value": "1"}
-              ]
-            }
-          ],
-          "summary": {
-            "title": "Overzicht samenvatting",
-            "rows": [
-              {"label": "BIC controles", "ref_value": "€ 3.400,00", "actual_value": "€ 2.975,00"},
-              {"label": "Rapportage", "ref_value": "€ 1.150,00", "actual_value": "€ 1.150,00"}
-            ],
-            "total": {
-              "label": "Totaal excl. BTW",
-              "ref_value": "€ 4.550,00",
-              "actual_value": "€ 4.125,00"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "title": "Detail weergave",
-      "orientation": "landscape",
-      "content": [
-        {
-          "type": "table",
-          "title": "Detail weergave",
-          "headers": [
-            "BIC Controle nummer",
-            "Type",
-            "Datum",
-            "BIC controle",
-            "Int. inspectie",
-            "Reiniging",
-            "Additioneel"
-          ],
-          "rows": [
-            ["BIC-001", "Regulier", "15-01-2026", "Ja", "Ja", "Nee", ""],
-            ["BIC-002", "Regulier", "12-02-2026", "Ja", "Nee", "Nee", ""],
-            ["BIC-003", "Regulier", "12-03-2026", "Ja", "Ja", "Ja", "Lekkage geconstateerd"],
-            ["BIC-004", "Regulier", "09-04-2026", "Ja", "Nee", "Nee", ""],
-            ["BIC-005", "Extra", "15-04-2026", "Ja", "Ja", "Ja", "Hercontrole lekkage"],
-            ["BIC-006", "Regulier", "14-05-2026", "Ja", "Nee", "Nee", ""],
-            ["BIC-007", "Regulier", "11-06-2026", "Ja", "Ja", "Nee", ""],
-            ["BIC-008", "Regulier", "09-07-2026", "Ja", "Nee", "Nee", ""],
-            ["BIC-009", "Regulier", "13-08-2026", "Ja", "Ja", "Nee", ""],
-            ["BIC-010", "Regulier", "10-09-2026", "Ja", "Nee", "Nee", ""],
-            ["BIC-011", "Regulier", "08-10-2026", "Ja", "Ja", "Ja", "Jaarlijks onderhoud"],
-            ["BIC-012", "Regulier", "12-11-2026", "Ja", "Nee", "Nee", ""],
-            ["BIC-013", "Extra", "20-11-2026", "Ja", "Ja", "Nee", "Grondwaterstand controle"],
-            ["BIC-014", "Regulier", "10-12-2026", "Ja", "Nee", "Nee", ""]
-          ],
-          "style": "default"
-        }
-      ]
-    },
-    {
-      "title": "Voorziening en objecten beschrijving",
-      "orientation": "landscape",
-      "content": [
-        {
-          "type": "table",
-          "title": "Voorziening en objecten beschrijving",
-          "headers": [
-            "Voorziening",
-            "Type",
-            "Status",
-            "Object",
-            "Type",
-            "Beschrijving",
-            "Gebouw",
-            "Ruimte"
-          ],
-          "rows": [
-            ["Grondwater", "Monitoring", "Actief", "PB-01", "Peilbuis", "50mm PVC, 12,5 m-mv", "Depot Noord", "Buitenterrein"],
-            ["Grondwater", "Monitoring", "Actief", "PB-02", "Peilbuis", "50mm PVC, 8,0 m-mv", "Depot Noord", "Buitenterrein"],
-            ["Bodem", "Sanering", "Afgerond", "SAN-01", "Ontgraving", "Verontreinigde grond, 45 m³", "Depot Noord", "Hal A"],
-            ["Lucht", "Ventilatie", "Actief", "VENT-01", "Afzuiging", "Kruipruimte ventilatie", "Depot Noord", "Hal B"]
-          ],
-          "style": "default"
-        }
-      ]
-    }
+  "reiniging": {
+    "kosten_conform": "\u20ac 850,00",
+    "kosten_werkelijk": "\u20ac 1.200,00"
+  },
+
+  "additioneel": {
+    "kosten_conform": "\u20ac 0,00",
+    "kosten_werkelijk": "\u20ac 375,00"
+  },
+
+  "samenvatting": {
+    "bic_conform": "\u20ac 3.170,00",
+    "bic_werkelijk": "\u20ac 2.990,00",
+    "reinigen_conform": "\u20ac 850,00",
+    "reinigen_werkelijk": "\u20ac 1.200,00",
+    "additioneel_conform": "\u20ac 0,00",
+    "additioneel_werkelijk": "\u20ac 375,00",
+    "totaal_conform": "\u20ac 4.020,00",
+    "totaal_werkelijk": "\u20ac 4.565,00"
+  },
+
+  "detail_items": [
+    {"bic_nummer": "BIC-001", "type": "Regulier", "datum": "15-01-2026", "bic_controle": "Ja", "int_inspectie": "Ja", "reiniging": "Nee", "additioneel": ""},
+    {"bic_nummer": "BIC-002", "type": "Regulier", "datum": "12-02-2026", "bic_controle": "Ja", "int_inspectie": "Nee", "reiniging": "Nee", "additioneel": ""},
+    {"bic_nummer": "BIC-003", "type": "Regulier", "datum": "12-03-2026", "bic_controle": "Ja", "int_inspectie": "Ja", "reiniging": "Ja", "additioneel": "Lekkage geconstateerd"},
+    {"bic_nummer": "BIC-004", "type": "Regulier", "datum": "09-04-2026", "bic_controle": "Ja", "int_inspectie": "Nee", "reiniging": "Nee", "additioneel": ""},
+    {"bic_nummer": "BIC-005", "type": "Extra", "datum": "15-04-2026", "bic_controle": "Ja", "int_inspectie": "Ja", "reiniging": "Ja", "additioneel": "Hercontrole lekkage"},
+    {"bic_nummer": "BIC-006", "type": "Regulier", "datum": "14-05-2026", "bic_controle": "Ja", "int_inspectie": "Nee", "reiniging": "Nee", "additioneel": ""},
+    {"bic_nummer": "BIC-007", "type": "Regulier", "datum": "11-06-2026", "bic_controle": "Ja", "int_inspectie": "Ja", "reiniging": "Nee", "additioneel": ""},
+    {"bic_nummer": "BIC-008", "type": "Regulier", "datum": "09-07-2026", "bic_controle": "Ja", "int_inspectie": "Nee", "reiniging": "Nee", "additioneel": ""},
+    {"bic_nummer": "BIC-009", "type": "Regulier", "datum": "13-08-2026", "bic_controle": "Ja", "int_inspectie": "Ja", "reiniging": "Nee", "additioneel": ""},
+    {"bic_nummer": "BIC-010", "type": "Regulier", "datum": "10-09-2026", "bic_controle": "Ja", "int_inspectie": "Nee", "reiniging": "Nee", "additioneel": ""},
+    {"bic_nummer": "BIC-011", "type": "Regulier", "datum": "08-10-2026", "bic_controle": "Ja", "int_inspectie": "Ja", "reiniging": "Ja", "additioneel": "Jaarlijks onderhoud"},
+    {"bic_nummer": "BIC-012", "type": "Regulier", "datum": "12-11-2026", "bic_controle": "Ja", "int_inspectie": "Nee", "reiniging": "Nee", "additioneel": ""},
+    {"bic_nummer": "BIC-013", "type": "Extra", "datum": "20-11-2026", "bic_controle": "Ja", "int_inspectie": "Ja", "reiniging": "Nee", "additioneel": "Grondwaterstand controle"},
+    {"bic_nummer": "BIC-014", "type": "Regulier", "datum": "10-12-2026", "bic_controle": "Ja", "int_inspectie": "Nee", "reiniging": "Nee", "additioneel": ""}
+  ],
+
+  "objecten": [
+    {"Voorziening": "Grondwater", "Type": "Monitoring", "Status": "Actief", "Object": "PB-01", "Type2": "Peilbuis", "Beschrijving": "50mm PVC, 12,5 m-mv", "Gebouw": "Depot Noord", "Ruimte": "Buitenterrein"},
+    {"Voorziening": "Grondwater", "Type": "Monitoring", "Status": "Actief", "Object": "PB-02", "Type2": "Peilbuis", "Beschrijving": "50mm PVC, 8,0 m-mv", "Gebouw": "Depot Noord", "Ruimte": "Buitenterrein"},
+    {"Voorziening": "Bodem", "Type": "Sanering", "Status": "Afgerond", "Object": "SAN-01", "Type2": "Ontgraving", "Beschrijving": "Verontreinigde grond, 45 m\u00b3", "Gebouw": "Depot Noord", "Ruimte": "Hal A"},
+    {"Voorziening": "Lucht", "Type": "Ventilatie", "Status": "Actief", "Object": "VENT-01", "Type2": "Afzuiging", "Beschrijving": "Kruipruimte ventilatie", "Gebouw": "Depot Noord", "Ruimte": "Hal B"}
   ]
 }

@@ -1,14 +1,14 @@
 # TODO — bm-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-01
+> Laatst bijgewerkt: 2026-03-01 (pixel fixes + admin cleanup)
 > Volgende actie: deploy met `docker build --no-cache`
 
 ---
 
 ## 🔴 DEPLOY — Frontend Rebuild + Deploy (BLOCKER)
 
-Code fixes zijn gecommit (cfaa808). Frontend smart routing code was al correct, maar productie serveerde een gecachte bundle.
+Alle code fixes zijn gecommit (cfaa808, f3b8228, ab93b13). Frontend smart routing + replace button + BrandWizard cleanup klaar. Productie serveerde een gecachte bundle.
 
 **Stappen:**
 ```bash
@@ -43,12 +43,12 @@ Pas uitvoeren NADAT FIX-1, FIX-2, FIX-3 allemaal live staan.
 
 | Pagina | Wat controleren |
 |--------|----------------|
-| 1 - Voorblad (portrait) | Stationery achtergrond, logo, kleurbanen, tekst op juiste positie |
-| 2 - Locatie (portrait) | Stationery, labels links, waarden rechts, footer balk |
-| 3 - BIC Controles (portrait) | Stationery, tabel met 3 kolommen, bedragen, footer |
+| 1 - Voorblad (portrait) | Stationery achtergrond, logo, kleurbanen, tekst op juiste positie (Arial) |
+| 2 - Locatie (portrait) | Stationery, labels links, waarden rechts, footer balk, paginanummer |
+| 3 - BIC Controles (portrait) | Stationery, tabel met 3 kolommen (fontsize 10pt), bedragen, footer |
 | 4 - Detail weergave (LANDSCAPE) | Orientatie correct, 7 kolommen, stationery |
 | 5 - Objecten (LANDSCAPE) | Orientatie correct, 8 kolommen, stationery |
-| 6 - Achterblad (portrait) | Alleen stationery, geen tekst |
+| 6 - Achterblad (portrait) | Stationery + tekst "Deze pagina is [met opzet] leeg gelaten", footer, paginanummer |
 
 **Referentie verschil (verwacht):**
 - Generated: 5 XObjects/pagina, Reference: 10 XObjects/pagina
@@ -83,6 +83,19 @@ Pas uitvoeren NADAT FIX-1, FIX-2, FIX-3 allemaal live staan.
 ---
 
 ## ✅ VOLTOOID
+
+### Pixel Precision Fixes — 6 issues (1 maart, f3b8228)
+- [x] Arial fonts: per-tenant font registratie via `font_files` in brand.yaml
+- [x] Page numbering: "Pagina X van Y" met cover exclusion
+- [x] Y-offset: font ascent correctie, delta <0.7pt
+- [x] Image zones: `ImageZone` dataclass + `_draw_image_zones()` + locatie.yaml
+- [x] Achterblad: text zones (leeg-gelaten tekst, footer, paginanummer)
+- [x] BIC controles: table body fontsize → 10pt
+
+### Admin Panel Cleanup (1 maart, ab93b13)
+- [x] "Vervangen" knop per asset bestand in BrandManagement
+- [x] Standalone BrandWizard (blauw, 3-stap) verwijderd (8 bestanden)
+- [x] AdminTab type opgeschoond
 
 ### FIX-1 + FIX-2 — Tenant Resolution Fix (1 maart, cfaa808)
 - [x] `_resolve_tenant_and_template()` — tenant uit template naam prefix

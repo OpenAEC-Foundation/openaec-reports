@@ -1,6 +1,6 @@
 # STATUS — bm-reports
 
-> Laatst bijgewerkt: 2026-02-28 21:30
+> Laatst bijgewerkt: 2026-03-01 (sessie: tenant resolution fix)
 
 ---
 
@@ -8,20 +8,22 @@
 
 | Omgeving | URL | Status |
 |----------|-----|--------|
-| Productie | https://report.open-aec.com | ✅ Online |
-| API Health | https://report.open-aec.com/api/health | ✅ OK |
+| Productie | https://report.open-aec.com | ⚠️ Online, wacht op rebuild (`docker build --no-cache`) |
+| API Health | https://report.open-aec.com/api/health | ✅ OK (v0.1.0) |
+| `/api/generate/v2` | POST | ✅ Werkt (OpenAEC rapporten) |
+| `/api/generate/template` | POST | ✅ Code gefixt, wacht op deploy |
 
 ---
 
 ## Engines
 
-| Engine | Endpoint | Status | Gebruik |
-|--------|----------|--------|---------|
-| V1 — `Report.from_dict()` | `/api/generate` | ✅ Werkend | OpenAEC standaard rapporten |
-| V2 — `ReportGeneratorV2` | `/api/generate/v2` | ✅ Werkend | OpenAEC pixel-perfect rapporten |
-| V3 — `TemplateEngine` | `/api/generate/template` | ✅ Werkend | Customer BIC + multi-tenant YAML |
+| Engine | Endpoint | Lokaal | Productie | Gebruik |
+|--------|----------|--------|-----------|---------|
+| V1 — `Report.from_dict()` | `/api/generate` | ✅ | ✅ | Legacy |
+| V2 — `ReportGeneratorV2` | `/api/generate/v2` | ✅ | ✅ | OpenAEC rapporten |
+| V3 — `TemplateEngine` | `/api/generate/template` | ✅ | ⏳ Wacht op deploy | Customer BIC |
 
-### TemplateEngine (V3) — Detail
+### TemplateEngine (V3) — Lokale Tests
 
 | Component | Status | Tests |
 |-----------|--------|-------|
@@ -29,10 +31,15 @@
 | `template_resolver.py` — template discovery | ✅ | 20+ |
 | `template_engine.py` — PDF assembly | ✅ | 42+ |
 | `data_transform.py` — JSON → flat dict | ✅ | via E2E |
-| API endpoint `/api/generate/template` | ✅ | 3 tests |
-| E2E: 6-pagina PDF mixed orientation | ✅ | 3 tests |
+| E2E: 6-pagina PDF mixed orientation + stationery | ✅ | 3 tests |
 
-### Customer Tenant
+**Lokale E2E output (`output/test_template_e2e.pdf`):**
+- 6 pagina's, correct P-P-P-L-L-P orientatie
+- 5 XObjects per pagina (stationery embedded)
+- Tekst correct ingevuld op alle pagina's
+- Achterblad aanwezig
+
+### Customer Tenant Assets
 
 | Asset | Status | Pad |
 |-------|--------|-----|
@@ -46,60 +53,46 @@
 
 ## Frontend
 
-| Feature | Status |
-|---------|--------|
-| Block editors (paragraph, table, image, calc, check, map) | ✅ |
-| Template selector + scaffold loader | ✅ |
-| Split view + live preview | ✅ |
-| JSON import/export | ✅ |
-| Undo/redo | ✅ |
-| Auto-save | ✅ |
-| Smart endpoint routing (V2 vs TemplateEngine) | ✅ |
-| Brand wizard (admin) | ✅ |
-| User/tenant management (admin) | ✅ |
+| Feature | Lokaal | Productie |
+|---------|--------|-----------|
+| Block editors (paragraph, table, image, calc, check, map) | ✅ | ✅ |
+| Template selector + scaffold loader | ✅ | ✅ |
+| Split view + live preview | ✅ | ✅ |
+| JSON import/export | ✅ | ✅ |
+| Smart endpoint routing (V2 vs TemplateEngine) | ✅ | ⏳ Wacht op `--no-cache` rebuild |
+| Brand wizard (admin) | ✅ | ✅ |
 
 ---
 
 ## API Endpoints
 
-| Endpoint | Method | Auth | Doel |
-|----------|--------|------|------|
-| `/api/health` | GET | ❌ | Health check |
-| `/api/templates` | GET | ✅ | Lijst templates |
-| `/api/templates/{name}/scaffold` | GET | ✅ | Leeg rapport scaffold |
-| `/api/brands` | GET | ✅ | Lijst brands |
-| `/api/validate` | POST | ✅ | JSON validatie |
-| `/api/generate` | POST | ✅ | V1 PDF generatie |
-| `/api/generate/v2` | POST | ✅ | V2 pixel-perfect PDF |
-| `/api/generate/template` | POST | ✅ | TemplateEngine PDF |
-| `/api/upload` | POST | ✅ | Afbeelding upload |
-| `/api/stationery` | GET | ✅ | Stationery status |
-| `/api/admin/*` | * | ✅ Admin | User/tenant beheer |
+| Endpoint | Method | Auth | Status |
+|----------|--------|------|--------|
+| `/api/health` | GET | ❌ | ✅ |
+| `/api/templates` | GET | ✅ | ✅ |
+| `/api/brands` | GET | ✅ | ✅ |
+| `/api/validate` | POST | ✅ | ✅ |
+| `/api/generate` | POST | ✅ | ✅ |
+| `/api/generate/v2` | POST | ✅ | ✅ |
+| `/api/generate/template` | POST | ✅ | ⏳ Wacht op deploy |
+| `/api/upload` | POST | ✅ | ✅ |
 
 ---
 
-## Cleanup Status
+## Cleanup Status (28 feb)
 
-| Item | Status |
-|------|--------|
-| Deprecated `modules/customer/` verwijderd | ✅ |
-| Deprecated `modules/yaml_module.py` verwijderd | ✅ |
-| Deprecated `tenants/customer/modules/` verwijderd | ✅ |
-| Deprecated `assets/templates/customer_*.yaml` verwijderd | ✅ |
-| Oude PROMPT_*.md bestanden gearchiveerd | ✅ |
-| pytest cache opgeruimd | ✅ |
+- [x] Deprecated `modules/customer/` verwijderd
+- [x] Deprecated `modules/yaml_module.py` verwijderd
+- [x] Deprecated `tenants/customer/modules/` verwijderd
+- [x] Prompt bestanden gearchiveerd naar `_archive/prompts/`
+- [x] pytest cache opgeruimd
 
 ---
 
-## Volgende Stappen
+## Fixes (1 maart)
 
-Zie `TODO.md` voor gedetailleerde taken.
-
-Korte termijn:
-1. 🟡 Deploy nieuwe versie naar VPS (met TemplateEngine endpoint)
-2. 🟡 Visuele validatie Customer PDF vs referentie 336.01
-3. 🟡 OpenAEC page_type YAML's voor TemplateEngine migratie
-
-Lange termijn:
-4. 🟢 Tweede brand onboarding (BBL Engineering)
-5. 🟢 RevitAdapter voor automatische rapport data
+### Tenant resolution in `/api/generate/template` — GEFIXT (cfaa808)
+- **FIX-1:** Nieuwe `_resolve_tenant_and_template()` helper leidt tenant af uit template naam prefix (bijv. `customer_bic_factuur` → tenant=`customer`). Scant bestaande tenant directories, sorted by name length (langste eerst) om ambiguïteit te voorkomen. Fallback: `data["brand"]` → `user.tenant` → `"customer"`.
+- **FIX-2:** `_resolve_tenants_dir()` herschreven: checkt `BM_TENANTS_ROOT` env var eerst, dan parent van `BM_TENANT_DIR` (met brand.yaml verificatie), dan source tree, dan package-relatief. Dockerfile had `BM_TENANTS_ROOT=/app/tenants` al.
+- **FIX-3:** Frontend smart routing code was al correct in broncode. Probleem was Docker cache → vereist `docker build --no-cache` bij volgende deploy.
+- **Tests:** 888 passed, 0 failures. E2E PDF generatie OK.

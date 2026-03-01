@@ -239,14 +239,17 @@ def _map_bic_rows(rows: list[dict], out: dict) -> None:
 def _map_simple_rows(rows: list[dict], out: dict) -> None:
     """Map eenvoudige sectie rijen (reiniging/additioneel).
 
-    Pakt de laatste rij met 'kosten' in het label als kosten.
+    Mapt zowel 'aantal' als 'kosten' rijen.
     """
     for row in rows:
         label = row.get("label", "").lower()
         ref = row.get("ref_value", "")
         actual = row.get("actual_value", "")
 
-        if "kosten" in label:
+        if "aantal" in label:
+            out["aantal_conform"] = ref
+            out["aantal_werkelijk"] = actual
+        elif "kosten" in label:
             out["kosten_conform"] = ref
             out["kosten_werkelijk"] = actual
 

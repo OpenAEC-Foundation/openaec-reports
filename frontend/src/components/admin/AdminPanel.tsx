@@ -4,12 +4,14 @@ import { TenantManagement } from "./TenantManagement";
 import { UserManagement } from "./UserManagement";
 import { TemplateManagement } from "./TemplateManagement";
 import { BrandManagement } from "./BrandManagement";
+import { HelpPanel } from "./HelpPanel";
 
 const TABS = [
   { key: "tenants" as const, label: "Tenants" },
   { key: "users" as const, label: "Gebruikers" },
   { key: "templates" as const, label: "Templates" },
   { key: "brand" as const, label: "Brand" },
+  { key: "help" as const, label: "📖 Help" },
 ];
 
 export function AdminPanel() {
@@ -71,6 +73,7 @@ export function AdminPanel() {
       {activeTab === "users" && <UserManagement />}
       {activeTab === "templates" && <TemplateManagement />}
       {activeTab === "brand" && <BrandManagement />}
+      {activeTab === "help" && <HelpPanel />}
     </div>
   );
 }

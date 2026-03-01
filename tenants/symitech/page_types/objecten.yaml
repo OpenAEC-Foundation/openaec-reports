@@ -1,41 +1,50 @@
 # Symitech BIC Factuur — voorzieningen en objecten overzicht (landscape)
-# Gebaseerd op detail_weergave layout (zelfde landscape stationery)
-# Stationery: LEEG — engine rendert alles
+# Zelfde layout patroon als detail_weergave (landscape stationery)
 # Pagina: A4 landscape 841.9×595.3pt (297×210mm)
+#
+# === LIJN PATRONEN (identiek aan detail_weergave) ===
+# Boven headers (kort):      dun 0.75pt + dik 3.0pt, x=20.0→72.1mm
+# Onder headers (full-width): dik 3.0pt + dun 0.75pt, x=20.0→286.1mm
 
 name: objecten
 stationery: content_landscape_stationery.pdf
 
+# ============================================================
+# Decoratieve lijnen (zelfde posities als detail_weergave)
+# ============================================================
 line_zones:
-  # Dubbele blauwe lijn BOVEN tabel
-  - x0_mm: 21.9
-    y_mm: 31.0
-    x1_mm: 80.1
+  # --- Dubbele lijn BOVEN kolom headers (kort, sectietitel) ---
+  - x0_mm: 20.0
+    y_mm: 36.1
+    x1_mm: 72.1
+    width_pt: 0.75
+    color: "primary"
+  - x0_mm: 20.0
+    y_mm: 37.1
+    x1_mm: 72.1
     width_pt: 3.0
     color: "primary"
-  - x0_mm: 21.9
-    y_mm: 32.0
-    x1_mm: 80.1
+
+  # --- Dubbele lijn ONDER kolom headers (FULL WIDTH) ---
+  - x0_mm: 20.0
+    y_mm: 44.7
+    x1_mm: 286.1
+    width_pt: 3.0
+    color: "primary"
+  - x0_mm: 20.0
+    y_mm: 45.6
+    x1_mm: 286.1
     width_pt: 0.75
     color: "primary"
 
-  # Dubbele blauwe lijn ONDER tabel
-  - x0_mm: 21.9
-    y_mm: 192.4
-    x1_mm: 80.1
-    width_pt: 3.0
-    color: "primary"
-  - x0_mm: 21.9
-    y_mm: 193.3
-    x1_mm: 80.1
-    width_pt: 0.75
-    color: "primary"
-
+# ============================================================
+# Tekst zones (+1.0mm behalve footer)
+# ============================================================
 text_zones:
   # Sectietitel (bruin)
   - bind: _static.Voorziening en objecten beschrijving
     x_mm: 21.9
-    y_mm: 31.0
+    y_mm: 32.0
     font: heading
     size: 10
     color: "secondary"
@@ -43,13 +52,13 @@ text_zones:
   # Locatienaam rechtsboven
   - bind: location.name
     x_mm: 275.0
-    y_mm: 31.0
+    y_mm: 32.0
     font: heading
     size: 10
     color: "primary"
     align: right
 
-  # === Footer ===
+  # === Footer (NIET verschoven) ===
   - bind: client.name
     x_mm: 13.5
     y_mm: 185.0
@@ -72,13 +81,16 @@ text_zones:
     size: 10
     color: "white"
 
+# ============================================================
+# Tabel configuratie
+# ============================================================
 table:
   data_bind: objecten
   origin:
     x_mm: 21.9
-    y_mm: 36.7
+    y_mm: 42.7
   row_height_mm: 5.6
-  max_y_mm: 180
+  max_y_mm: 172
   show_header: true
   header_font: heading
   header_size: 8

@@ -1,9 +1,14 @@
-# Symitech — achterblad
-# Referentie pagina 6: statische tekst + footer + paginanummer
+# Symitech — achterblad (backcover)
+# Pixel-exact gemeten uit backcover_reference.pdf (2026-03-01)
+# Stationery: LEEG — engine rendert alles
+# Pagina: A4 portrait 595.3×841.9pt (210×297mm)
+
 name: achterblad
 stationery: backcover_stationery.pdf
 
 text_zones:
+  # Statische tekst bovenaan
+  # ref: x0=49.8pt y0=78.4pt  10pt ArialMT #000000
   - bind: "_static.Deze pagina is [met opzet] leeg gelaten \u2013 Niet verwijderen"
     x_mm: 17.6
     y_mm: 27.6
@@ -12,6 +17,7 @@ text_zones:
     color: "text"
 
   # === Footer ===
+  # ref: x0=28.3pt y0=771.0pt  10pt Arial-BoldMT #ffffff
   - bind: client.name
     x_mm: 10.0
     y_mm: 272.0
@@ -19,6 +25,7 @@ text_zones:
     size: 10
     color: "white"
 
+  # ref: x0=397.2pt y0=775.3pt  12pt Arial-BoldMT #ffffff
   - bind: _page_number
     x_mm: 140.1
     y_mm: 273.5
@@ -27,6 +34,7 @@ text_zones:
     color: "white"
     align: right
 
+  # ref: x0=28.3pt y0=794.0pt  10pt Arial-BoldMT #ffffff
   - bind: meta.rapportkop_locatie
     x_mm: 10.0
     y_mm: 280.1

@@ -1,13 +1,19 @@
-# Symitech BIC Factuur — voorblad
-# Coördinaten gemeten uit referentie-PDF 336.01-BIC Factuur_BIC.pdf (pagina 0)
-# Stationery bevat: logo, kleurbalken, tagline "SYNERGIE IN MILIEUTECHNIEK", contactinfo
-# LOCATIE en OPDRACHTGEVER labels zitten IN de stationery (niet dynamisch)
+# Symitech BIC Factuur — voorblad (cover)
+# Pixel-exact gemeten uit cover_reference.pdf (2026-03-01)
+# Stationery bevat: logo, kleurbalken, tagline, contactinfo footer,
+#   "LOCATIE" label (150.6, 194.7), "OPDRACHTGEVER" label (330.0, 194.8)
+# Engine rendert alleen DYNAMISCHE velden hieronder.
+#
+# Coördinaten: PyMuPDF top-down pt → mm (×0.352778)
+# Pagina: A4 portrait 595.3×841.9pt (210×297mm)
+
 name: voorblad_bic
 stationery: cover_stationery.pdf
 
 text_zones:
   # === Rapport header ===
-  # Factuurkop (bijv. "BIC Factuur")
+  # [FACTUURKOP] bijv. "BIC Factuur"
+  # ref: x0=150.6pt y0=78.6pt  16pt Arial-BoldMT #006fab
   - bind: meta.factuur_kop
     x_mm: 53.1
     y_mm: 27.7
@@ -15,7 +21,8 @@ text_zones:
     size: 16
     color: "primary"
 
-  # Datum (witte tekst op gekleurde balk)
+  # [DATUM] witte tekst op gekleurde balk
+  # ref: x0=150.6pt y0=96.8pt  9pt Arial-BoldMT #ffffff
   - bind: meta.datum
     x_mm: 53.1
     y_mm: 34.1
@@ -23,7 +30,8 @@ text_zones:
     size: 9
     color: "white"
 
-  # Factuurnummer (witte tekst op gekleurde balk)
+  # [FACTUURNUMMER] witte tekst op gekleurde balk
+  # ref: x0=327.8pt y0=96.8pt  9pt Arial-BoldMT #ffffff
   - bind: meta.factuurnummer
     x_mm: 115.6
     y_mm: 34.1
@@ -32,6 +40,8 @@ text_zones:
     color: "white"
 
   # === Type offerte ===
+  # [TYPEOFFERTE]: bijv. "BIC Controle:"
+  # ref: x0=150.6pt y0=142.1pt  18pt Arial-BoldMT #006fab
   - bind: meta.type_offerte
     x_mm: 53.1
     y_mm: 50.1
@@ -39,7 +49,8 @@ text_zones:
     size: 18
     color: "primary"
 
-  # Offertecode + naam (witte tekst)
+  # [TYPEOFFERTECODE]: [TYPEOFFERTENAAM] bijv. "336.01: BIC Factuur"
+  # ref: x0=150.6pt y0=162.5pt  11pt Arial-BoldMT #ffffff
   - bind: meta.offerte_regel
     x_mm: 53.1
     y_mm: 57.3
@@ -47,46 +58,48 @@ text_zones:
     size: 11
     color: "white"
 
-  # === Locatie gegevens (witte tekst onder LOCATIE label in stationery) ===
+  # === Locatie gegevens (onder "LOCATIE" label in stationery) ===
+  # ref: x0=150.6pt  8pt ArialMT #ffffff
   - bind: location.name
     x_mm: 53.1
-    y_mm: 72.7
+    y_mm: 72.7       # y0=206.1pt
     font: body
     size: 8
     color: "white"
 
   - bind: location.address
     x_mm: 53.1
-    y_mm: 76.0
+    y_mm: 76.0       # y0=215.3pt
     font: body
     size: 8
     color: "white"
 
   - bind: location.postcode_plaats
     x_mm: 53.1
-    y_mm: 79.2
+    y_mm: 79.2       # y0=224.5pt
     font: body
     size: 8
     color: "white"
 
-  # === Opdrachtgever gegevens (witte tekst onder OPDRACHTGEVER label) ===
+  # === Opdrachtgever gegevens (onder "OPDRACHTGEVER" label) ===
+  # ref: x0=330.0pt  8pt ArialMT #ffffff
   - bind: client.name
     x_mm: 116.4
-    y_mm: 72.7
+    y_mm: 72.7       # y0=206.2pt
     font: body
     size: 8
     color: "white"
 
   - bind: client.address
     x_mm: 116.4
-    y_mm: 76.0
+    y_mm: 76.0       # y0=215.4pt
     font: body
     size: 8
     color: "white"
 
   - bind: client.postcode_plaats
     x_mm: 116.4
-    y_mm: 79.2
+    y_mm: 79.2       # y0=224.6pt
     font: body
     size: 8
     color: "white"

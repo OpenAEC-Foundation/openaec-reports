@@ -1,35 +1,18 @@
-# Symitech BIC Factuur — locatie detail
-# Coördinaten gemeten uit 336.01-BIC Factuur_BIC.pdf (pagina 1)
-# Stationery: content_portrait (schoon canvas met logo/kleurbalken)
+# Symitech BIC Factuur — locatie detail (colofon)
+# Pixel-exact gemeten uit colofon_reference.pdf (2026-03-01)
+# Stationery bevat: "Locatie" heading, "Opdrachtgever"/"Locatie van uitvoer"/
+#   "Locatie code" labels, decoratieve dubbele blauwe lijnen
+# Engine rendert: waarden, dynamische labels, foto, footer
 #
-# Gemeten waarden (PyMuPDF, top-down mm):
-#   Paginatitel "Locatie":  x=17.6  y=31.9  size=14  #006FAB  Arial-BoldMT
-#   "Opdrachtgever":        x=19.5  y=39.7  size=10  #94571E  Arial-BoldMT
-#   Waarden:                x=132.0 (rechterkolom)
-#   "Locatie van uitvoer":  x=19.5  y=65.6  size=10  #94571E
-#   Locatie labels:         x=19.5  y=65.6..87.5 (stap ~5.6mm per adresregel, ~11.5 per sectie)
-#   Locatiefoto:            x=91.7  y=115.9
-#   Footer: [OPDRACHT] x=10.0 y=272.0, paginanr x=140.1 y=273.5
+# Coördinaten: PyMuPDF top-down pt → mm (×0.352778)
+# Pagina: A4 portrait 595.3×841.9pt (210×297mm)
+
 name: locatie
-stationery: content_portrait_stationery.pdf
+stationery: colofon_stationery.pdf
 
 text_zones:
-  # === Paginatitel ===
-  - bind: _static.Locatie
-    x_mm: 17.6
-    y_mm: 31.9
-    font: heading
-    size: 14
-    color: "primary"
-
-  # === Subsectie: Opdrachtgever ===
-  - bind: _static.Opdrachtgever
-    x_mm: 19.5
-    y_mm: 39.7
-    font: heading
-    size: 10
-    color: "secondary"
-
+  # === Opdrachtgever waarden (rechterkolom) ===
+  # ref: x0=374.2pt y0=112.5pt  10pt ArialMT #000000
   - bind: client.name
     x_mm: 132.0
     y_mm: 39.7
@@ -37,6 +20,7 @@ text_zones:
     size: 10
     color: "text"
 
+  # ref: x0=374.2pt y0=128.5pt
   - bind: client.address
     x_mm: 132.0
     y_mm: 45.3
@@ -44,6 +28,7 @@ text_zones:
     size: 10
     color: "text"
 
+  # ref: x0=374.2pt y0=140.0pt
   - bind: client.postcode_plaats
     x_mm: 132.0
     y_mm: 49.4
@@ -51,14 +36,8 @@ text_zones:
     size: 10
     color: "text"
 
-  # === Subsectie: Locatie van uitvoer ===
-  - bind: _static.Locatie van uitvoer
-    x_mm: 19.5
-    y_mm: 65.6
-    font: heading
-    size: 10
-    color: "secondary"
-
+  # === Locatie van uitvoer waarden ===
+  # ref: x0=374.4pt y0=186.0pt  10pt ArialMT #000000
   - bind: location.name
     x_mm: 132.1
     y_mm: 65.6
@@ -66,13 +45,15 @@ text_zones:
     size: 10
     color: "text"
 
+  # ref: x0=374.4pt y0=202.0pt
   - bind: location.address
     x_mm: 132.1
-    y_mm: 71.2
+    y_mm: 71.3
     font: body
     size: 10
     color: "text"
 
+  # ref: x0=374.4pt y0=213.5pt
   - bind: location.postcode_plaats
     x_mm: 132.1
     y_mm: 75.3
@@ -80,14 +61,8 @@ text_zones:
     size: 10
     color: "text"
 
-  # === Locatie code ===
-  - bind: _static.Locatie code
-    x_mm: 19.5
-    y_mm: 79.4
-    font: heading
-    size: 10
-    color: "secondary"
-
+  # === Locatie code waarde ===
+  # ref: x0=374.4pt y0=225.0pt  10pt ArialMT #000000
   - bind: location.code
     x_mm: 132.1
     y_mm: 79.4
@@ -95,14 +70,16 @@ text_zones:
     size: 10
     color: "text"
 
-  # === Voorziening ===
-  - bind: _static.Voorziening
+  # === Dynamische label+waarde: Voorziening ===
+  # ref: x0=55.2pt y0=236.5pt  10pt Arial-BoldMT #94571e (label)
+  - bind: location.provision_label
     x_mm: 19.5
     y_mm: 83.4
     font: heading
     size: 10
     color: "secondary"
 
+  # ref: x0=374.4pt y0=236.5pt  10pt ArialMT #000000 (waarde)
   - bind: location.provision
     x_mm: 132.1
     y_mm: 83.4
@@ -110,14 +87,16 @@ text_zones:
     size: 10
     color: "text"
 
-  # === Object ===
-  - bind: _static.Object
+  # === Dynamische label+waarde: Object ===
+  # ref: x0=55.2pt y0=248.0pt  10pt Arial-BoldMT #94571e (label)
+  - bind: location.object_label
     x_mm: 19.5
     y_mm: 87.5
     font: heading
     size: 10
     color: "secondary"
 
+  # ref: x0=374.4pt y0=248.0pt  10pt ArialMT #000000 (waarde)
   - bind: location.object
     x_mm: 132.1
     y_mm: 87.5
@@ -125,15 +104,8 @@ text_zones:
     size: 10
     color: "text"
 
-image_zones:
-  - bind: location.photo_path
-    x_mm: 40.0
-    y_mm: 100.0
-    width_mm: 104
-    height_mm: 70
-    fallback: "placeholder_aerial.png"
-
   # === Footer ===
+  # ref: x0=28.3pt y0=771.0pt  10pt Arial-BoldMT #ffffff
   - bind: client.name
     x_mm: 10.0
     y_mm: 272.0
@@ -141,6 +113,7 @@ image_zones:
     size: 10
     color: "white"
 
+  # ref: x0=397.2pt y0=775.3pt  12pt Arial-BoldMT #ffffff
   - bind: _page_number
     x_mm: 140.1
     y_mm: 273.5
@@ -149,9 +122,20 @@ image_zones:
     color: "white"
     align: right
 
+  # ref: x0=28.3pt y0=794.0pt  10pt Arial-BoldMT #ffffff
   - bind: meta.rapportkop_locatie
     x_mm: 10.0
     y_mm: 280.1
     font: heading
     size: 10
     color: "white"
+
+# Locatiefoto placeholder
+# ref: x0=259.9pt y0=328.5pt → gecentreerd op pagina, ~y=116mm
+image_zones:
+  - bind: location.photo_path
+    x_mm: 40.0
+    y_mm: 100.0
+    width_mm: 130
+    height_mm: 90
+    fallback: ""

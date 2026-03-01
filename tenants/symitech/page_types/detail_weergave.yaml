@@ -1,21 +1,56 @@
 # Symitech BIC Factuur — detail weergave (landscape)
-# Coördinaten gemeten uit 336.01-BIC Factuur_BIC.pdf (pagina 3)
-# Stationery: content_landscape (297x210mm)
+# Pixel-exact gemeten uit content_landscape_reference.pdf (2026-03-01)
+# Stationery: LEEG — engine rendert alles
+# Pagina: A4 landscape 841.9×595.3pt (297×210mm)
 #
-# Gemeten waarden (PyMuPDF, top-down mm):
-#   "Detail weergave*":     x=21.9  y=31.0  size=10  #94571E
-#   Locatienaam:            x=145.8 y=31.0  size=10  #006FAB
-#   Kolomkoppen y=36.7 size=8 #94571E:
-#     BIC Controle nummer=21.9, Type=64.4, Datum=101.9,
-#     BIC controle=119.2, Int. inspectie=140.9, Reiniging=164.4, Additioneel=181.9
-#   Tabeldata:              x=20.0  y=42.3
-#   Footnote:               x=20.0  y=~onderkant
-#   Footer: [OPDRACHT] x=13.5 y=185.0, paginanr x=229.2 y=186.5
+# === Decoratieve lijnen ===
+# Dubbele blauwe lijn boven tabel:
+#   Dik  3.0pt: y=88.0pt (31.0mm), x=62.2→227.2pt (21.9→80.1mm)
+#   Dun 0.75pt: y=90.7pt (32.0mm), x=62.2→227.2pt
+# Dubbele blauwe lijn onder tabel:
+#   Dik  3.0pt: y=545.5pt (192.4mm), x=62.2→227.2pt
+#   Dun 0.75pt: y=548.2pt (193.3mm), x=62.2→227.2pt
+#
+# === Tabel layout ===
+# Kolomkoppen: y=104.0pt (36.7mm) 8pt Arial-BoldMT #94571e
+# Data start:  y=120.0pt (42.3mm) 8pt ArialMT #94571e
+# Row height: ~15.9pt (5.6mm)
+
 name: detail_weergave
 stationery: content_landscape_stationery.pdf
 
+line_zones:
+  # Dubbele blauwe lijn BOVEN tabel
+  # Dik: y=88.0pt → 31.0mm
+  - x0_mm: 21.9
+    y_mm: 31.0
+    x1_mm: 80.1
+    width_pt: 3.0
+    color: "primary"
+  # Dun: y=90.7pt → 32.0mm
+  - x0_mm: 21.9
+    y_mm: 32.0
+    x1_mm: 80.1
+    width_pt: 0.75
+    color: "primary"
+
+  # Dubbele blauwe lijn ONDER tabel
+  # Dik: y=545.5pt → 192.4mm (let op: landscape, page_height=595.3pt=210mm)
+  - x0_mm: 21.9
+    y_mm: 192.4
+    x1_mm: 80.1
+    width_pt: 3.0
+    color: "primary"
+  # Dun: y=548.2pt → 193.3mm
+  - x0_mm: 21.9
+    y_mm: 193.3
+    x1_mm: 80.1
+    width_pt: 0.75
+    color: "primary"
+
 text_zones:
-  # Sectietitel (bruin)
+  # Sectietitel: "Detail weergave*"
+  # ref: x0=62.2pt y0=88.0pt  10pt Arial-BoldMT #94571e
   - bind: _static.Detail weergave*
     x_mm: 21.9
     y_mm: 31.0
@@ -23,9 +58,10 @@ text_zones:
     size: 10
     color: "secondary"
 
-  # Locatienaam rechtsboven
+  # [LOCATIENAAM] rechtsboven
+  # ref: right-aligned x=~780pt y0=88.0pt  10pt Arial-BoldMT #006fab
   - bind: location.name
-    x_mm: 260
+    x_mm: 275.0
     y_mm: 31.0
     font: heading
     size: 10
@@ -33,6 +69,7 @@ text_zones:
     align: right
 
   # === Footer ===
+  # ref: x0=38.3pt y0=556.0pt  10pt Arial-BoldMT #ffffff
   - bind: client.name
     x_mm: 13.5
     y_mm: 185.0
@@ -40,6 +77,7 @@ text_zones:
     size: 10
     color: "white"
 
+  # ref: x0=649.8pt y0=559.0pt  12pt Arial-BoldMT #ffffff
   - bind: _page_number
     x_mm: 229.2
     y_mm: 186.5
@@ -48,6 +86,7 @@ text_zones:
     color: "white"
     align: right
 
+  # ref: x0=38.3pt y0=579.0pt  10pt Arial-BoldMT #ffffff
   - bind: meta.rapportkop_locatie
     x_mm: 13.5
     y_mm: 193.1
@@ -55,13 +94,22 @@ text_zones:
     size: 10
     color: "white"
 
+  # Footnote onderaan tabel
+  # ref: x0=62.2pt y_bottom  8pt ArialMT #94571e
+  - bind: _static.* indien niet opgenomen in bovenstaande tabel, zijn werkzaamheden niet van toepassing
+    x_mm: 21.9
+    y_mm: 195.0
+    font: body
+    size: 8
+    color: "secondary"
+
 table:
   data_bind: detail_items
   origin:
     x_mm: 21.9
     y_mm: 36.7
   row_height_mm: 5.6
-  max_y_mm: 175
+  max_y_mm: 180
   show_header: true
   header_font: heading
   header_size: 8
@@ -70,10 +118,17 @@ table:
   body_size: 8
   body_color: "secondary"
   columns:
-    - { field: "BIC Controle nummer", header: "BIC Controle nummer", width_mm: 42, align: left }
-    - { field: "Type", header: "Type", width_mm: 38, align: left }
-    - { field: "Datum", header: "Datum", width_mm: 17, align: left }
-    - { field: "BIC controle", header: "BIC controle", width_mm: 22, align: center }
-    - { field: "Int. inspectie", header: "Int. inspectie", width_mm: 24, align: center }
-    - { field: "Reiniging", header: "Reiniging", width_mm: 18, align: center }
-    - { field: "Additioneel", header: "Additioneel", width_mm: 40, align: left }
+    # ref: x0=62.2pt  (21.9mm)
+    - { field: "bic_nummer", header: "BIC Controle nummer", width_mm: 42, align: left }
+    # ref: x0=182.5pt (64.4mm)
+    - { field: "type", header: "Type", width_mm: 38, align: left }
+    # ref: x0=288.8pt (101.9mm)
+    - { field: "datum", header: "Datum", width_mm: 17, align: left }
+    # ref: x0=337.8pt (119.2mm)
+    - { field: "bic_controle", header: "BIC controle", width_mm: 22, align: center }
+    # ref: x0=399.4pt (140.9mm)
+    - { field: "int_inspectie", header: "Int. inspectie", width_mm: 24, align: center }
+    # ref: x0=466.0pt (164.4mm)
+    - { field: "reiniging", header: "Reiniging", width_mm: 18, align: center }
+    # ref: x0=515.7pt (181.9mm)
+    - { field: "additioneel", header: "Additioneel", width_mm: 93, align: left }

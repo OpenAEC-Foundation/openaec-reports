@@ -37,6 +37,17 @@ class ImageZone:
 
 
 @dataclass
+class LineZone:
+    """Decoratieve lijn op een vaste positie op de pagina."""
+
+    x0_mm: float = 0.0                # startpunt x (mm)
+    y_mm: float = 0.0                  # y positie (top-down mm)
+    x1_mm: float = 100.0              # eindpunt x (mm)
+    width_pt: float = 1.0             # lijndikte in points
+    color: str = "primary"            # kleur referentie of hex
+
+
+@dataclass
 class TableColumn:
     """Kolomdefinitie voor een fixed-page tabel."""
 
@@ -90,6 +101,7 @@ class PageType:
     stationery: str | None = None      # bestandsnaam in tenant stationery dir
     text_zones: list[TextZone] = field(default_factory=list)
     image_zones: list[ImageZone] = field(default_factory=list)
+    line_zones: list[LineZone] = field(default_factory=list)
     table: TableConfig | None = None
     content_frame: ContentFrame | None = None  # voor flow mode
 
@@ -140,6 +152,17 @@ def parse_image_zone(data: dict[str, Any]) -> ImageZone:
         width_mm=float(data.get("width_mm", 100)),
         height_mm=float(data.get("height_mm", 70)),
         fallback=data.get("fallback", ""),
+    )
+
+
+def parse_line_zone(data: dict[str, Any]) -> LineZone:
+    """Parse een line zone dict naar LineZone dataclass."""
+    return LineZone(
+        x0_mm=float(data.get("x0_mm", 0)),
+        y_mm=float(data.get("y_mm", 0)),
+        x1_mm=float(data.get("x1_mm", 100)),
+        width_pt=float(data.get("width_pt", 1.0)),
+        color=data.get("color", "primary"),
     )
 
 
@@ -203,6 +226,9 @@ def parse_page_type(data: dict[str, Any]) -> PageType:
 
     if "image_zones" in data:
         pt.image_zones = [parse_image_zone(z) for z in data["image_zones"]]
+
+    if "line_zones" in data:
+        pt.line_zones = [parse_line_zone(z) for z in data["line_zones"]]
 
     if "table" in data:
         pt.table = parse_table_config(data["table"])

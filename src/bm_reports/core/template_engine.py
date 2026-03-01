@@ -34,6 +34,7 @@ from bm_reports.core.stationery import StationeryRenderer
 from bm_reports.core.template_config import (
     ContentFrame,
     ImageZone,
+    LineZone,
     PageDef,
     PageType,
     TableConfig,
@@ -233,6 +234,33 @@ def _draw_image_zones(
             )
         except Exception:
             logger.exception("Image zone render fout: %s", img_src)
+
+
+def _draw_line_zones(
+    canvas,
+    line_zones: list[LineZone],
+    brand,
+    page_height: float,
+) -> None:
+    """Teken decoratieve lijnen op het canvas.
+
+    Horizontale lijnen op vaste posities — gebruikt voor sectie-scheiding
+    en subtotaal-lijnen in Symitech BIC facturen.
+
+    YAML y_mm is top-down. ReportLab y is bottom-up.
+    """
+    for zone in line_zones:
+        x0 = zone.x0_mm * MM_TO_PT
+        x1 = zone.x1_mm * MM_TO_PT
+        rl_y = page_height - (zone.y_mm * MM_TO_PT)
+
+        color = _resolve_color(zone.color, brand)
+
+        canvas.saveState()
+        canvas.setStrokeColor(color)
+        canvas.setLineWidth(zone.width_pt)
+        canvas.line(x0, rl_y, x1, rl_y)
+        canvas.restoreState()
 
 
 def _draw_table(
@@ -574,6 +602,8 @@ class TemplateEngine:
             canvas.setPageSize((_pw, _ph))
             if _pt.stationery:
                 _ctx.stationery.draw(canvas, _pt.stationery, _pw, _ph)
+            if _pt.line_zones:
+                _draw_line_zones(canvas, _pt.line_zones, _ctx.brand, _ph)
             _draw_text_zones(canvas, _pt.text_zones, _ctx.data, _ctx.brand, _ph, _ctx)
             if _pt.image_zones:
                 assets_dir = _ctx.stationery_dir.parent / "assets"
@@ -637,6 +667,8 @@ class TemplateEngine:
             canvas.setPageSize((_pw, _ph))
             if _pt.stationery:
                 _ctx.stationery.draw(canvas, _pt.stationery, _pw, _ph)
+            if _pt.line_zones:
+                _draw_line_zones(canvas, _pt.line_zones, _ctx.brand, _ph)
             _draw_text_zones(canvas, _pt.text_zones, _ctx.data, _ctx.brand, _ph, _ctx)
             if _pt.image_zones:
                 assets_dir = _ctx.stationery_dir.parent / "assets"

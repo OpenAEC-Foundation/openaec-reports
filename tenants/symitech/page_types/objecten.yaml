@@ -1,17 +1,35 @@
 # Symitech BIC Factuur — voorzieningen en objecten overzicht (landscape)
-# Coördinaten gemeten uit 336.01-BIC Factuur_BIC.pdf (pagina 4)
-# Stationery: content_landscape (297x210mm)
-#
-# Gemeten waarden (PyMuPDF, top-down mm):
-#   Sectietitel:            x=21.9  y=31.0  size=10  #94571E
-#   Locatienaam:            x=151.9 y=31.0  size=10  #006FAB
-#   Kolomkoppen y=36.7 size=8 #94571E:
-#     Voorziening=21.9, Type=43.2, Status=76.9, Object=106.9,
-#     Type=124.4, Beschrijving=151.9, Gebouw=229.5, Ruimte=252.0
-#   Tabeldata:              x=20.0  y=41.5
-#   Footer: [OPDRACHT] x=13.5 y=185.0, paginanr x=229.2 y=186.5
+# Gebaseerd op detail_weergave layout (zelfde landscape stationery)
+# Stationery: LEEG — engine rendert alles
+# Pagina: A4 landscape 841.9×595.3pt (297×210mm)
+
 name: objecten
 stationery: content_landscape_stationery.pdf
+
+line_zones:
+  # Dubbele blauwe lijn BOVEN tabel
+  - x0_mm: 21.9
+    y_mm: 31.0
+    x1_mm: 80.1
+    width_pt: 3.0
+    color: "primary"
+  - x0_mm: 21.9
+    y_mm: 32.0
+    x1_mm: 80.1
+    width_pt: 0.75
+    color: "primary"
+
+  # Dubbele blauwe lijn ONDER tabel
+  - x0_mm: 21.9
+    y_mm: 192.4
+    x1_mm: 80.1
+    width_pt: 3.0
+    color: "primary"
+  - x0_mm: 21.9
+    y_mm: 193.3
+    x1_mm: 80.1
+    width_pt: 0.75
+    color: "primary"
 
 text_zones:
   # Sectietitel (bruin)
@@ -24,7 +42,7 @@ text_zones:
 
   # Locatienaam rechtsboven
   - bind: location.name
-    x_mm: 260
+    x_mm: 275.0
     y_mm: 31.0
     font: heading
     size: 10
@@ -60,7 +78,7 @@ table:
     x_mm: 21.9
     y_mm: 36.7
   row_height_mm: 5.6
-  max_y_mm: 175
+  max_y_mm: 180
   show_header: true
   header_font: heading
   header_size: 8

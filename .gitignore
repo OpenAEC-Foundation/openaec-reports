@@ -64,8 +64,19 @@ _archive/
 huisstijl/
 DIAGNOSE_*.md
 PROMPT_*.md
+PLAN_*.md
+ORCHESTRATION_GUIDE.md
+TODO_TENANT_TEMPLATES.md
 frontend/_archive/
 frontend/PROMPT_*.md
+
+# Temp analysis scripts
+_temp_*.py
+t2_analyze.py
+stationery_diff.py
+
+# TypeScript build cache
+frontend/tsconfig.tsbuildinfo
 
 # Ruff
 .ruff_cache/

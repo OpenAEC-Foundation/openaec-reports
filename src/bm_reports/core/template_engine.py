@@ -263,6 +263,36 @@ def _draw_line_zones(
         canvas.restoreState()
 
 
+def _truncate_text(canvas, text: str, max_width: float, font_name: str, size: float, padding: float = 2.0) -> str:
+    """Truncate tekst met ellipsis als deze breder is dan max_width.
+
+    Args:
+        canvas: ReportLab canvas (voor stringWidth berekening).
+        text: Originele tekst.
+        max_width: Maximale breedte in points.
+        font_name: Font naam.
+        size: Font grootte.
+        padding: Extra marge in points om overlap te voorkomen.
+
+    Returns:
+        Originele tekst of afgebroken tekst met "…".
+    """
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+
+    usable = max_width - padding
+    if usable <= 0:
+        return ""
+    if stringWidth(text, font_name, size) <= usable:
+        return text
+
+    ellipsis = "…"
+    ew = stringWidth(ellipsis, font_name, size)
+    for i in range(len(text), 0, -1):
+        if stringWidth(text[:i], font_name, size) + ew <= usable:
+            return text[:i] + ellipsis
+    return ellipsis
+
+
 def _draw_table(
     canvas,
     table_config: TableConfig,
@@ -338,6 +368,9 @@ def _draw_table(
                 color = _resolve_color(color_ref, brand)
                 canvas.setFont(font_name, size)
                 canvas.setFillColor(color)
+
+                # Truncate tekst als deze breder is dan de kolom
+                text = _truncate_text(canvas, text, col_w, font_name, size)
 
                 if col.align == "right":
                     canvas.drawRightString(x + col_w, rl_y, text)

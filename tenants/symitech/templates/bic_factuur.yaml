@@ -14,7 +14,7 @@ pages:
   - type: fixed
     page_type: bic_controles
     orientation: portrait
-    repeat: auto
+    repeat: none
 
   - type: fixed
     page_type: detail_weergave

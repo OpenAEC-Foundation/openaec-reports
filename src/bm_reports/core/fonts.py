@@ -147,21 +147,65 @@ def register_fonts(fonts_dir: Path | None = None) -> dict[str, str]:
     return result
 
 
-def get_font_name(gotham_name: str) -> str:
-    """Geef de effectieve font naam voor gebruik in ReportLab.
-
-    Als Gotham geregistreerd is, retourneer de Gotham naam.
-    Anders retourneer de Helvetica fallback.
+def register_tenant_fonts(font_files: dict[str, str], fonts_dir: Path) -> dict[str, str]:
+    """Registreer tenant-specifieke fonts in ReportLab.
 
     Args:
-        gotham_name: Gewenste Gotham font naam (bijv. 'GothamBold').
+        font_files: Mapping van ReportLab font naam naar bestandsnaam,
+                    bijv. {"Arial": "arial.ttf", "Arial-Bold": "arialbd.ttf"}.
+        fonts_dir: Directory met de font bestanden.
 
     Returns:
-        Effectieve font naam voor ReportLab (Gotham of Helvetica fallback).
+        Dict van font naam → geregistreerde naam.
     """
-    if _registered.get(gotham_name, False):
-        return gotham_name
-    return _FALLBACK_FONTS.get(gotham_name, "Helvetica")
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+
+    result: dict[str, str] = {}
+    for font_name, filename in font_files.items():
+        if font_name in _registered and _registered[font_name]:
+            result[font_name] = font_name
+            continue
+
+        font_path = fonts_dir / filename
+        if font_path.exists():
+            try:
+                pdfmetrics.registerFont(TTFont(font_name, str(font_path)))
+                _registered[font_name] = True
+                result[font_name] = font_name
+                logger.info("Tenant font geregistreerd: %s (%s)", font_name, font_path.name)
+            except (OSError, ValueError):
+                logger.exception("Fout bij registreren van tenant font %s", font_name)
+                result[font_name] = font_name  # val terug op letterlijke naam
+        else:
+            logger.warning("Tenant font niet gevonden: %s → %s", font_name, font_path)
+            result[font_name] = font_name
+
+    return result
+
+
+def get_font_name(font_name: str) -> str:
+    """Geef de effectieve font naam voor gebruik in ReportLab.
+
+    Controleert of een font geregistreerd is (Gotham, tenant fonts, etc.).
+    Als het geregistreerd is, retourneer de naam.
+    Anders check Gotham fallback mapping.
+    Als laatste: retourneer de letterlijke naam (ReportLab built-in).
+
+    Args:
+        font_name: Gewenste font naam (bijv. 'GothamBold', 'Arial', 'Helvetica-Bold').
+
+    Returns:
+        Effectieve font naam voor ReportLab.
+    """
+    # Tenant of custom font geregistreerd?
+    if _registered.get(font_name, False):
+        return font_name
+    # Gotham fallback?
+    if font_name in _FALLBACK_FONTS:
+        return _FALLBACK_FONTS[font_name]
+    # Letterlijke naam (built-in ReportLab fonts: Helvetica, etc.)
+    return font_name
 
 
 def gotham_available() -> bool:

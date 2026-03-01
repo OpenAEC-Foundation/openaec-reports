@@ -14,13 +14,19 @@ colors:
   table_footer_bg: "#94571E"
   separator: "#CCCCCC"
 
+font_files:
+  Arial: "fonts/arial.ttf"
+  Arial-Bold: "fonts/arialbd.ttf"
+  Arial-Italic: "fonts/ariali.ttf"
+  Arial-BoldItalic: "fonts/arialbi.ttf"
+
 fonts:
-  heading: "Helvetica-Bold"
-  heading_bold: "Helvetica-Bold"
-  body: "Helvetica"
-  body_bold: "Helvetica-Bold"
-  medium: "Helvetica-Bold"
-  italic: "Helvetica-Oblique"
+  heading: "Arial-Bold"
+  heading_bold: "Arial-Bold"
+  body: "Arial"
+  body_bold: "Arial-Bold"
+  medium: "Arial-Bold"
+  italic: "Arial-Italic"
 
 logos:
   main: ""

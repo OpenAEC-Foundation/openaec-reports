@@ -122,6 +122,7 @@ class BrandConfig:
     modules: dict[str, dict] = field(default_factory=dict)
     tenant_modules: list[str] = field(default_factory=list)
     module_config: dict = field(default_factory=dict)
+    font_files: dict[str, str] = field(default_factory=dict)
     brand_dir: Path | None = None
 
 
@@ -291,6 +292,7 @@ class BrandLoader:
             modules=modules_dict,
             tenant_modules=tenant_modules,
             module_config=data.get("module_config", {}),
+            font_files=data.get("font_files", {}),
             brand_dir=path.parent,
         )
 

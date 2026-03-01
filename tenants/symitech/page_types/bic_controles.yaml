@@ -79,6 +79,9 @@ table:
     y_mm: 45.5
   row_height_mm: 5.7
   max_y_mm: 260
+  body_font: body
+  body_size: 10
+  body_color: "text"
   columns:
     - { field: label, width_mm: 95, align: left }
     - { field: ref_value, width_mm: 42, align: right }

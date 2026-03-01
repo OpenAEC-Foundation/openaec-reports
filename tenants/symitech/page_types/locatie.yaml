@@ -125,8 +125,13 @@ text_zones:
     size: 10
     color: "text"
 
-  # === Locatiefoto placeholder ===
-  # Foto area: centered around x=91.7, y=115.9
+image_zones:
+  - bind: location.photo_path
+    x_mm: 40.0
+    y_mm: 100.0
+    width_mm: 104
+    height_mm: 70
+    fallback: "placeholder_aerial.png"
 
   # === Footer ===
   - bind: client.name

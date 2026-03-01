@@ -29,10 +29,11 @@ from reportlab.platypus import (
 )
 
 from bm_reports.core.document import A4, MM_TO_PT
-from bm_reports.core.fonts import get_font_name
+from bm_reports.core.fonts import get_font_name, register_tenant_fonts
 from bm_reports.core.stationery import StationeryRenderer
 from bm_reports.core.template_config import (
     ContentFrame,
+    ImageZone,
     PageDef,
     PageType,
     TableConfig,
@@ -146,11 +147,25 @@ def _draw_text_zones(
     data: dict[str, Any],
     brand,
     page_height: float,
+    ctx: _BuildContext | None = None,
 ) -> None:
-    """Vul text zones in op het canvas (top-down mm → bottom-up pt)."""
+    """Vul text zones in op het canvas (top-down mm → bottom-up pt).
+
+    YAML y_mm is gemeten als bbox-top (PyMuPDF top-down).
+    ReportLab drawString tekent op de baseline.
+    Correctie: rl_y = page_height - y_td - ascent.
+    """
+    from reportlab.pdfbase import pdfmetrics
+
     for zone in text_zones:
         if zone.bind == "_page_number":
-            value = str(canvas.getPageNumber())
+            if ctx:
+                abs_page = canvas.getPageNumber()
+                content_n = abs_page - ctx.page_number_offset
+                total = ctx.content_page_count
+                value = f"Pagina {content_n} van {total}"
+            else:
+                value = str(canvas.getPageNumber())
         else:
             value = resolve_bind(data, zone.bind)
         if not value:
@@ -161,7 +176,14 @@ def _draw_text_zones(
         color = _resolve_color(zone.color, brand)
 
         x = zone.x_mm * MM_TO_PT
-        rl_y = page_height - (zone.y_mm * MM_TO_PT)
+        y_td = zone.y_mm * MM_TO_PT  # top-down: bbox top
+
+        # Corrigeer voor font ascent (bbox top → baseline)
+        try:
+            ascent = pdfmetrics.getAscent(font_name, zone.size)
+        except Exception:
+            ascent = zone.size * 0.77  # safe fallback
+        rl_y = page_height - y_td - ascent
 
         canvas.saveState()
         canvas.setFont(font_name, zone.size)
@@ -175,6 +197,42 @@ def _draw_text_zones(
             canvas.drawString(x, rl_y, text)
 
         canvas.restoreState()
+
+
+def _draw_image_zones(
+    canvas,
+    image_zones: list[ImageZone],
+    data: dict[str, Any],
+    page_height: float,
+    assets_dir: Path | None = None,
+) -> None:
+    """Teken afbeeldingen op vaste posities op het canvas."""
+    for zone in image_zones:
+        img_src = resolve_bind(data, zone.bind)
+        if not img_src and zone.fallback and assets_dir:
+            fallback_path = assets_dir / zone.fallback
+            if fallback_path.exists():
+                img_src = str(fallback_path)
+        if not img_src:
+            continue
+
+        img_path = Path(str(img_src))
+        if not img_path.exists():
+            logger.warning("Image zone niet gevonden: %s", img_src)
+            continue
+
+        x = zone.x_mm * MM_TO_PT
+        w = zone.width_mm * MM_TO_PT
+        h = zone.height_mm * MM_TO_PT
+        y = page_height - (zone.y_mm * MM_TO_PT) - h  # ReportLab y = bottom-left
+
+        try:
+            canvas.drawImage(
+                str(img_path), x, y, width=w, height=h,
+                preserveAspectRatio=True, anchor="nw", mask="auto",
+            )
+        except Exception:
+            logger.exception("Image zone render fout: %s", img_src)
 
 
 def _draw_table(
@@ -302,6 +360,7 @@ class _BuildContext:
     __slots__ = (
         "template", "page_types", "data", "brand",
         "stationery", "stationery_dir",
+        "content_page_count", "page_number_offset",
     )
 
     def __init__(
@@ -319,6 +378,8 @@ class _BuildContext:
         self.brand = brand
         self.stationery = stationery
         self.stationery_dir = stationery_dir
+        self.content_page_count: int = 0
+        self.page_number_offset: int = 0
 
 
 # ============================================================
@@ -381,6 +442,12 @@ class TemplateEngine:
         else:
             brand_config = self._load_tenant_brand(tenant)
 
+        # Registreer tenant-specifieke fonts (vóór eerste pagina)
+        font_files = getattr(brand_config, "font_files", None)
+        if font_files and isinstance(font_files, dict):
+            fonts_dir = self._tenants_dir / tenant
+            register_tenant_fonts(font_files, fonts_dir)
+
         # Stationery renderer met tenant stationery dir
         stationery_dir = self._tenants_dir / tenant / "stationery"
         stationery = StationeryRenderer(brand_dir=stationery_dir)
@@ -393,6 +460,23 @@ class TemplateEngine:
             stationery=stationery,
             stationery_dir=stationery_dir,
         )
+
+        # Bereken content paginanummering (excl cover)
+        cover_pages = 0
+        content_pages = 0
+        for page_def in template.pages:
+            pt = page_types[page_def.page_type]
+            if page_def.type == "special" and cover_pages == 0:
+                # Eerste special page = cover (telt niet mee)
+                cover_pages = 1
+            elif page_def.type == "fixed" and page_def.repeat == "auto" and pt.table:
+                table_data = resolve_bind(data, pt.table.data_bind) or []
+                chunks = _paginate_table_data(table_data, pt.table)
+                content_pages += max(1, len(chunks))
+            else:
+                content_pages += 1
+        ctx.content_page_count = content_pages
+        ctx.page_number_offset = cover_pages
 
         self._build_pdf(ctx, output)
 
@@ -490,7 +574,10 @@ class TemplateEngine:
             canvas.setPageSize((_pw, _ph))
             if _pt.stationery:
                 _ctx.stationery.draw(canvas, _pt.stationery, _pw, _ph)
-            _draw_text_zones(canvas, _pt.text_zones, _ctx.data, _ctx.brand, _ph)
+            _draw_text_zones(canvas, _pt.text_zones, _ctx.data, _ctx.brand, _ph, _ctx)
+            if _pt.image_zones:
+                assets_dir = _ctx.stationery_dir.parent / "assets"
+                _draw_image_zones(canvas, _pt.image_zones, _ctx.data, _ph, assets_dir)
             # Fixed zonder repeat: tabel direct tekenen
             if _pd.type == "fixed" and _pt.table:
                 rows = resolve_bind(_ctx.data, _pt.table.data_bind)
@@ -550,7 +637,10 @@ class TemplateEngine:
             canvas.setPageSize((_pw, _ph))
             if _pt.stationery:
                 _ctx.stationery.draw(canvas, _pt.stationery, _pw, _ph)
-            _draw_text_zones(canvas, _pt.text_zones, _ctx.data, _ctx.brand, _ph)
+            _draw_text_zones(canvas, _pt.text_zones, _ctx.data, _ctx.brand, _ph, _ctx)
+            if _pt.image_zones:
+                assets_dir = _ctx.stationery_dir.parent / "assets"
+                _draw_image_zones(canvas, _pt.image_zones, _ctx.data, _ph, assets_dir)
             if _pt.table and _chunk:
                 _draw_table(canvas, _pt.table, _chunk, _ctx.brand, _ph)
 

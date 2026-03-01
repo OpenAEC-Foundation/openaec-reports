@@ -25,6 +25,18 @@ class TextZone:
 
 
 @dataclass
+class ImageZone:
+    """Afbeelding op een vaste positie op de pagina."""
+
+    bind: str                          # dot-notatie pad naar afbeelding (pad of base64)
+    x_mm: float = 0.0
+    y_mm: float = 0.0                  # top-down (mm vanaf bovenkant)
+    width_mm: float = 100.0
+    height_mm: float = 70.0
+    fallback: str = ""                 # fallback bestandsnaam in assets/
+
+
+@dataclass
 class TableColumn:
     """Kolomdefinitie voor een fixed-page tabel."""
 
@@ -77,6 +89,7 @@ class PageType:
     name: str
     stationery: str | None = None      # bestandsnaam in tenant stationery dir
     text_zones: list[TextZone] = field(default_factory=list)
+    image_zones: list[ImageZone] = field(default_factory=list)
     table: TableConfig | None = None
     content_frame: ContentFrame | None = None  # voor flow mode
 
@@ -115,6 +128,18 @@ def parse_text_zone(data: dict[str, Any]) -> TextZone:
         size=float(data.get("size", 10)),
         color=data.get("color", "text"),
         align=data.get("align", "left"),
+    )
+
+
+def parse_image_zone(data: dict[str, Any]) -> ImageZone:
+    """Parse een image zone dict naar ImageZone dataclass."""
+    return ImageZone(
+        bind=data["bind"],
+        x_mm=float(data.get("x_mm", 0)),
+        y_mm=float(data.get("y_mm", 0)),
+        width_mm=float(data.get("width_mm", 100)),
+        height_mm=float(data.get("height_mm", 70)),
+        fallback=data.get("fallback", ""),
     )
 
 
@@ -175,6 +200,9 @@ def parse_page_type(data: dict[str, Any]) -> PageType:
 
     if "text_zones" in data:
         pt.text_zones = [parse_text_zone(z) for z in data["text_zones"]]
+
+    if "image_zones" in data:
+        pt.image_zones = [parse_image_zone(z) for z in data["image_zones"]]
 
     if "table" in data:
         pt.table = parse_table_config(data["table"])

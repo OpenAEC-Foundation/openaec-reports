@@ -596,6 +596,32 @@ from bm_reports.brand_api import brand_router  # noqa: E402
 app.include_router(brand_router)
 
 # ============================================================
+# Documentation endpoint (voor admin Help tab)
+# ============================================================
+
+
+def _find_docs_dir() -> Path | None:
+    """Zoek docs/architecture op meerdere locaties."""
+    candidates = [
+        Path(__file__).parent.parent.parent / "docs" / "architecture",  # dev
+        Path("/app/docs/architecture"),                                  # Docker
+    ]
+    for p in candidates:
+        if p.exists() and (p / "architecture.html").exists():
+            return p
+    return None
+
+
+@app.get("/api/docs/architecture")
+async def serve_architecture_docs():
+    """Serve de architecture HTML documentatie voor het admin panel."""
+    docs_dir = _find_docs_dir()
+    if not docs_dir:
+        raise HTTPException(status_code=404, detail="Documentation not found")
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content=(docs_dir / "architecture.html").read_text(encoding="utf-8"))
+
+# ============================================================
 # Static frontend (moet ONDERAAN staan, na alle API routes)
 # ============================================================
 

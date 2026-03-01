@@ -4,92 +4,156 @@
   "brand": "customer",
   "project": "Jaarlijkse BIC controle 2025",
   "project_number": "336.01",
+  "client": "Haagwonen",
+  "author": "Customer B.V.",
+  "date": "2025-12-15",
+  "version": "1.0",
+  "status": "DEFINITIEF",
+  "report_type": "BIC Factuur",
 
-  "meta": {
-    "factuur_kop": "BIC Factuur",
-    "datum": "15 december 2025",
-    "factuurnummer": "F2025-1247",
-    "type_offerte": "BIC Controle:",
-    "offerte_regel": "336.01: Jaarlijkse BIC controle Strandbaak Kijkduin",
-    "rapportkop_locatie": "BIC Factuur: HW-DH-0336"
+  "cover": {
+    "subtitle": "BIC Factuur",
+    "extra_fields": {
+      "Factuurnummer": "F2025-1247",
+      "Datum": "15 december 2025",
+      "Type offerte": "BIC Controle",
+      "Offertecode": "336.01",
+      "Offertenaam": "Jaarlijkse BIC controle Strandbaak Kijkduin"
+    }
   },
 
-  "client": {
-    "name": "Haagwonen",
-    "address": "Wielingenstraat 22",
-    "postcode_plaats": "2584 XZ Den Haag"
-  },
+  "colofon": { "enabled": false },
+  "toc": { "enabled": false },
 
-  "location": {
-    "name": "Strandbaak Kijkduin",
-    "address": "Kijkduinsestraat 730-798",
-    "postcode_plaats": "2554 EB Den Haag",
-    "code": "HW-DH-0336",
-    "provision_label": "Voorziening",
-    "provision": "Droge blusleiding / BMI / Sprinkler",
-    "object_label": "Object",
-    "object": "Flatgebouw Strandbaak (730 t/m 798)",
-    "photo_path": null
-  },
-
-  "bic": {
-    "aantal_conform": "6",
-    "aantal_werkelijk": "6",
-    "kosten_conform": "\u20ac 1.860,00",
-    "kosten_werkelijk": "\u20ac 1.860,00",
-    "hydro_aantal_conform": "3",
-    "hydro_aantal_werkelijk": "4",
-    "hydro_kosten_conform": "\u20ac 720,00",
-    "hydro_kosten_werkelijk": "\u20ac 960,00",
-    "reiskosten_conform": "\u20ac 270,00",
-    "reiskosten_werkelijk": "\u20ac 324,00",
-    "subtotaal_conform": "\u20ac 2.850,00",
-    "subtotaal_werkelijk": "\u20ac 3.144,00"
-  },
-
-  "reiniging": {
-    "kosten_conform": "\u20ac 525,00",
-    "kosten_werkelijk": "\u20ac 700,00"
-  },
-
-  "additioneel": {
-    "kosten_conform": "",
-    "kosten_werkelijk": "\u20ac 430,00"
-  },
-
-  "samenvatting": {
-    "bic_conform": "\u20ac 2.850,00",
-    "bic_werkelijk": "\u20ac 3.144,00",
-    "reinigen_conform": "\u20ac 525,00",
-    "reinigen_werkelijk": "\u20ac 700,00",
-    "additioneel_conform": "",
-    "additioneel_werkelijk": "\u20ac 430,00",
-    "totaal_conform": "\u20ac 3.375,00",
-    "totaal_werkelijk": "\u20ac 4.274,00"
-  },
-
-  "detail_items": [
-    {"bic_nummer": "BIC-2025-0336-001", "type": "Droge blusleiding", "datum": "12-03-2025", "bic_controle": "\u20ac 310,00", "int_inspectie": "", "reiniging": "", "additioneel": ""},
-    {"bic_nummer": "BIC-2025-0336-002", "type": "BMI", "datum": "12-03-2025", "bic_controle": "\u20ac 310,00", "int_inspectie": "\u20ac 240,00", "reiniging": "\u20ac 175,00", "additioneel": ""},
-    {"bic_nummer": "BIC-2025-0336-003", "type": "Sprinkler", "datum": "12-03-2025", "bic_controle": "\u20ac 310,00", "int_inspectie": "\u20ac 240,00", "reiniging": "", "additioneel": "\u20ac 245,00"},
-    {"bic_nummer": "BIC-2025-0336-004", "type": "Droge blusleiding", "datum": "18-06-2025", "bic_controle": "\u20ac 310,00", "int_inspectie": "", "reiniging": "\u20ac 175,00", "additioneel": ""},
-    {"bic_nummer": "BIC-2025-0336-005", "type": "BMI", "datum": "18-06-2025", "bic_controle": "\u20ac 310,00", "int_inspectie": "\u20ac 240,00", "reiniging": "\u20ac 175,00", "additioneel": "\u20ac 185,00"},
-    {"bic_nummer": "BIC-2025-0336-006", "type": "Sprinkler", "datum": "18-06-2025", "bic_controle": "\u20ac 310,00", "int_inspectie": "\u20ac 240,00", "reiniging": "\u20ac 175,00", "additioneel": ""}
-  ],
-
-  "objecten": [
-    {"Voorziening": "Droge blusleiding", "Type": "DBL-A", "Status": "Actief", "Object": "Stijgleiding 1", "Type2": "Stijgleiding", "Beschrijving": "Stijgleiding trapportaal west", "Gebouw": "Toren A (730-752)", "Ruimte": "Trappenhuis"},
-    {"Voorziening": "Droge blusleiding", "Type": "DBL-A", "Status": "Actief", "Object": "Stijgleiding 2", "Type2": "Stijgleiding", "Beschrijving": "Stijgleiding trapportaal oost", "Gebouw": "Toren A (730-752)", "Ruimte": "Trappenhuis"},
-    {"Voorziening": "Droge blusleiding", "Type": "DBL-B", "Status": "Actief", "Object": "Stijgleiding 3", "Type2": "Stijgleiding", "Beschrijving": "Stijgleiding trapportaal west", "Gebouw": "Toren B (754-776)", "Ruimte": "Trappenhuis"},
-    {"Voorziening": "Droge blusleiding", "Type": "DBL-B", "Status": "Actief", "Object": "Stijgleiding 4", "Type2": "Stijgleiding", "Beschrijving": "Stijgleiding trapportaal oost", "Gebouw": "Toren B (754-776)", "Ruimte": "Trappenhuis"},
-    {"Voorziening": "BMI", "Type": "BMI-01", "Status": "Actief", "Object": "Centrale BMI", "Type2": "Brandmeldcentrale", "Beschrijving": "Notifier NFS2-3030", "Gebouw": "Toren A (730-752)", "Ruimte": "Hal BG"},
-    {"Voorziening": "BMI", "Type": "BMI-01", "Status": "Actief", "Object": "Doormelding", "Type2": "Doormelding", "Beschrijving": "KPN doormelding naar RAC Securitas", "Gebouw": "Toren A (730-752)", "Ruimte": "Hal BG"},
-    {"Voorziening": "BMI", "Type": "BMI-01", "Status": "Actief", "Object": "Lus 1", "Type2": "Detectielus", "Beschrijving": "Rookmelders trappenhuizen Toren A", "Gebouw": "Toren A (730-752)", "Ruimte": "Diverse"},
-    {"Voorziening": "BMI", "Type": "BMI-01", "Status": "Actief", "Object": "Lus 2", "Type2": "Detectielus", "Beschrijving": "Rookmelders trappenhuizen Toren B", "Gebouw": "Toren B (754-776)", "Ruimte": "Diverse"},
-    {"Voorziening": "BMI", "Type": "BMI-01", "Status": "Actief", "Object": "Lus 3", "Type2": "Detectielus", "Beschrijving": "Rookmelders galerijen + bergingen", "Gebouw": "Toren A+B", "Ruimte": "Diverse"},
-    {"Voorziening": "Sprinkler", "Type": "SPR-01", "Status": "Actief", "Object": "Sprinklerinstallatie", "Type2": "Natte installatie", "Beschrijving": "Zone parkeergarage -1 en -2", "Gebouw": "Toren A+B", "Ruimte": "Parkeergarage"},
-    {"Voorziening": "Sprinkler", "Type": "SPR-01", "Status": "Actief", "Object": "Pompunit", "Type2": "Sprinklerpomp", "Beschrijving": "Diesel Grundfos NFE 80-250", "Gebouw": "Toren A (730-752)", "Ruimte": "Techn. ruimte -1"},
-    {"Voorziening": "Sprinkler", "Type": "SPR-01", "Status": "Defect", "Object": "Flowswitch zone 2", "Type2": "Flowswitch", "Beschrijving": "Flowswitch garage -2 \u2014 storing 18-06", "Gebouw": "Toren B (754-776)", "Ruimte": "Parkeergarage -2"}
+  "sections": [
+    {
+      "title": "Locatie",
+      "level": 1,
+      "content": [
+        {
+          "type": "location_detail",
+          "client": {
+            "section_title": "Opdrachtgever",
+            "name": "Haagwonen",
+            "address": "Wielingenstraat 22",
+            "city": "2584 XZ Den Haag"
+          },
+          "location": {
+            "section_title": "Locatie van uitvoer",
+            "name": "Strandbaak Kijkduin",
+            "address": "Kijkduinsestraat 730-798",
+            "city": "2554 EB Den Haag",
+            "code": "HW-DH-0336",
+            "provision": "Droge blusleiding / BMI / Sprinkler",
+            "object": "Flatgebouw Strandbaak (730 t/m 798)"
+          },
+          "photo_path": null
+        }
+      ]
+    },
+    {
+      "title": "BIC Controles",
+      "level": 1,
+      "content": [
+        {
+          "type": "bic_table",
+          "location_name": "Strandbaak Kijkduin",
+          "sections": [
+            {
+              "title": "BIC controles",
+              "rows": [
+                { "label": "Aantal BIC controles", "ref_value": "6", "actual_value": "6" },
+                { "label": "Kosten", "ref_value": "\u20ac 1.860,00", "actual_value": "\u20ac 1.860,00" },
+                { "label": "Aantal interne inspecties", "ref_value": "3", "actual_value": "4" },
+                { "label": "Kosten", "ref_value": "\u20ac 720,00", "actual_value": "\u20ac 960,00" },
+                { "label": "Reiskosten", "ref_value": "\u20ac 270,00", "actual_value": "\u20ac 324,00" },
+                { "label": "Subtotaal", "ref_value": "\u20ac 2.850,00", "actual_value": "\u20ac 3.144,00" }
+              ]
+            },
+            {
+              "title": "Reinigen tijdens BIC",
+              "rows": [
+                { "label": "Aantal reinigingen", "ref_value": "3", "actual_value": "4" },
+                { "label": "Kosten", "ref_value": "\u20ac 525,00", "actual_value": "\u20ac 700,00" }
+              ]
+            },
+            {
+              "title": "Additioneel tijdens BIC",
+              "rows": [
+                { "label": "Aantal additionele activiteiten", "ref_value": "", "actual_value": "2" },
+                { "label": "Kosten", "ref_value": "", "actual_value": "\u20ac 430,00" }
+              ]
+            }
+          ],
+          "summary": {
+            "title": "Overzicht samenvatting",
+            "rows": [
+              { "label": "BIC controles", "ref_value": "\u20ac 2.850,00", "actual_value": "\u20ac 3.144,00" },
+              { "label": "Reinigen tijdens BIC", "ref_value": "\u20ac 525,00", "actual_value": "\u20ac 700,00" },
+              { "label": "Additioneel tijdens BIC", "ref_value": "", "actual_value": "\u20ac 430,00" }
+            ],
+            "total": {
+              "label": "Totaal",
+              "ref_value": "\u20ac 3.375,00",
+              "actual_value": "\u20ac 4.274,00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Detail weergave",
+      "level": 1,
+      "orientation": "landscape",
+      "content": [
+        {
+          "type": "table",
+          "title": "Detail weergave",
+          "headers": [
+            "BIC Controle nummer", "Type", "Datum",
+            "BIC controle", "Int. inspectie", "Reiniging", "Additioneel"
+          ],
+          "rows": [
+            ["BIC-2025-0336-001", "Droge blusleiding", "12-03-2025", "\u20ac 310,00", "", "", ""],
+            ["BIC-2025-0336-002", "BMI", "12-03-2025", "\u20ac 310,00", "\u20ac 240,00", "\u20ac 175,00", ""],
+            ["BIC-2025-0336-003", "Sprinkler", "12-03-2025", "\u20ac 310,00", "\u20ac 240,00", "", "\u20ac 245,00"],
+            ["BIC-2025-0336-004", "Droge blusleiding", "18-06-2025", "\u20ac 310,00", "", "\u20ac 175,00", ""],
+            ["BIC-2025-0336-005", "BMI", "18-06-2025", "\u20ac 310,00", "\u20ac 240,00", "\u20ac 175,00", "\u20ac 185,00"],
+            ["BIC-2025-0336-006", "Sprinkler", "18-06-2025", "\u20ac 310,00", "\u20ac 240,00", "\u20ac 175,00", ""]
+          ],
+          "footer_note": "* Detail weergave exclusief reiskosten."
+        }
+      ]
+    },
+    {
+      "title": "Voorziening en objecten beschrijving",
+      "level": 1,
+      "orientation": "landscape",
+      "content": [
+        {
+          "type": "table",
+          "title": "Voorziening en objecten beschrijving",
+          "headers": [
+            "Voorziening", "Type", "Status", "Object",
+            "Type", "Beschrijving", "Gebouw", "Ruimte"
+          ],
+          "rows": [
+            ["Droge blusleiding", "DBL-A", "Actief", "Stijgleiding 1", "Stijgleiding", "Stijgleiding trapportaal west", "Toren A (730-752)", "Trappenhuis"],
+            ["Droge blusleiding", "DBL-A", "Actief", "Stijgleiding 2", "Stijgleiding", "Stijgleiding trapportaal oost", "Toren A (730-752)", "Trappenhuis"],
+            ["Droge blusleiding", "DBL-B", "Actief", "Stijgleiding 3", "Stijgleiding", "Stijgleiding trapportaal west", "Toren B (754-776)", "Trappenhuis"],
+            ["Droge blusleiding", "DBL-B", "Actief", "Stijgleiding 4", "Stijgleiding", "Stijgleiding trapportaal oost", "Toren B (754-776)", "Trappenhuis"],
+            ["BMI", "BMI-01", "Actief", "Centrale BMI", "Brandmeldcentrale", "Notifier NFS2-3030", "Toren A (730-752)", "Hal BG"],
+            ["BMI", "BMI-01", "Actief", "Doormelding", "Doormelding", "KPN doormelding naar RAC Securitas", "Toren A (730-752)", "Hal BG"],
+            ["BMI", "BMI-01", "Actief", "Lus 1", "Detectielus", "Rookmelders trappenhuizen Toren A", "Toren A (730-752)", "Diverse"],
+            ["BMI", "BMI-01", "Actief", "Lus 2", "Detectielus", "Rookmelders trappenhuizen Toren B", "Toren B (754-776)", "Diverse"],
+            ["BMI", "BMI-01", "Actief", "Lus 3", "Detectielus", "Rookmelders galerijen + bergingen", "Toren A+B", "Diverse"],
+            ["Sprinkler", "SPR-01", "Actief", "Sprinklerinstallatie", "Natte installatie", "Zone parkeergarage -1 en -2", "Toren A+B", "Parkeergarage"],
+            ["Sprinkler", "SPR-01", "Actief", "Pompunit", "Sprinklerpomp", "Diesel Grundfos NFE 80-250", "Toren A (730-752)", "Techn. ruimte -1"],
+            ["Sprinkler", "SPR-01", "Defect", "Flowswitch zone 2", "Flowswitch", "Flowswitch garage -2 \u2014 storing 18-06", "Toren B (754-776)", "Parkeergarage -2"]
+          ]
+        }
+      ]
+    }
   ],
 
   "backcover": { "enabled": true },

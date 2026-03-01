@@ -15,7 +15,7 @@ import {
   type ApiError,
 } from "@/services/api";
 
-type AdminTab = "tenants" | "users" | "templates" | "brand" | "brand-wizard";
+type AdminTab = "tenants" | "users" | "templates" | "brand";
 
 interface AdminStore {
   // UI

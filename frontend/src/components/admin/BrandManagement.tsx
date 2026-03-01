@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAdminStore } from "@/stores/adminStore";
 import type { AssetCategory, TenantAsset } from "@/services/api";
 import { BrandExtractWizard } from "./BrandExtractWizard";
@@ -40,6 +40,8 @@ function AssetSection({ tenant, category, assets }: AssetSectionProps) {
   const uploadAsset = useAdminStore((s) => s.uploadAsset);
   const deleteAsset = useAdminStore((s) => s.deleteAsset);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const replaceInputRef = useRef<HTMLInputElement>(null);
+  const [replaceTarget, setReplaceTarget] = useState<string | null>(null);
   const info = ASSET_LABELS[category];
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -49,6 +51,20 @@ function AssetSection({ tenant, category, assets }: AssetSectionProps) {
       await uploadAsset(tenant, category, file);
     }
     e.target.value = "";
+  }
+
+  async function handleReplace(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !replaceTarget) return;
+    const renamedFile = new File([file], replaceTarget, { type: file.type });
+    await uploadAsset(tenant, category, renamedFile);
+    setReplaceTarget(null);
+    e.target.value = "";
+  }
+
+  function startReplace(filename: string) {
+    setReplaceTarget(filename);
+    setTimeout(() => replaceInputRef.current?.click(), 0);
   }
 
   async function handleDelete(filename: string) {
@@ -77,6 +93,13 @@ function AssetSection({ tenant, category, assets }: AssetSectionProps) {
           className="hidden"
           onChange={handleUpload}
         />
+        <input
+          ref={replaceInputRef}
+          type="file"
+          accept={ASSET_ACCEPT[category]}
+          className="hidden"
+          onChange={handleReplace}
+        />
       </div>
 
       {assets.length === 0 ? (
@@ -94,13 +117,22 @@ function AssetSection({ tenant, category, assets }: AssetSectionProps) {
                   {formatFileSize(asset.size)}
                 </span>
               </div>
-              <button
-                onClick={() => handleDelete(asset.filename)}
-                className="text-xs text-red-500 hover:text-red-700 shrink-0 ml-2"
-                title="Verwijderen"
-              >
-                Verwijder
-              </button>
+              <div className="flex items-center gap-2 shrink-0 ml-2">
+                <button
+                  onClick={() => startReplace(asset.filename)}
+                  className="text-xs text-purple-600 hover:text-purple-800"
+                  title="Vervangen"
+                >
+                  Vervangen
+                </button>
+                <button
+                  onClick={() => handleDelete(asset.filename)}
+                  className="text-xs text-red-500 hover:text-red-700"
+                  title="Verwijderen"
+                >
+                  Verwijder
+                </button>
+              </div>
             </li>
           ))}
         </ul>

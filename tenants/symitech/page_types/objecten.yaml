@@ -27,12 +27,12 @@ line_zones:
 
   # --- Dubbele lijn ONDER kolom headers (FULL WIDTH) ---
   - x0_mm: 20.0
-    y_mm: 44.7
+    y_mm: 43.2
     x1_mm: 286.1
     width_pt: 3.0
     color: "primary"
   - x0_mm: 20.0
-    y_mm: 45.6
+    y_mm: 44.1
     x1_mm: 286.1
     width_pt: 0.75
     color: "primary"
@@ -97,7 +97,7 @@ table:
   header_color: "secondary"
   body_font: body
   body_size: 8
-  body_color: "secondary"
+  body_color: "text"
   columns:
     - { field: "Voorziening", header: "Voorziening", width_mm: 21, align: left }
     - { field: "Type", header: "Type", width_mm: 34, align: left }

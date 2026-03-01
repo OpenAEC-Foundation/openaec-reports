@@ -38,12 +38,12 @@ line_zones:
 
   # --- Dubbele lijn ONDER kolom headers (FULL WIDTH) ---
   - x0_mm: 20.0
-    y_mm: 43.95
+    y_mm: 43.2
     x1_mm: 286.1
     width_pt: 3.0
     color: "primary"
   - x0_mm: 20.0
-    y_mm: 44.85
+    y_mm: 44.1
     x1_mm: 286.1
     width_pt: 0.75
     color: "primary"
@@ -70,13 +70,14 @@ text_zones:
     color: "primary"
     align: right
 
-  # Footnote onder tabel
+  # Footnote net onder tabel (max_y_mm + marge)
   - bind: _static.* Detail weergave exclusief reiskosten. Reiskosten zijn gebaseerd op het aantal unieke dagen met activiteiten op de locatie. Zie ook pagina 2 voor reiskosten overzicht.
     x_mm: 21.9
-    y_mm: 176.0
+    y_mm: 174.0
     font: body
     size: 8
     color: "secondary"
+    max_width_mm: 260
 
   # === Footer (NIET verschoven) ===
   - bind: client.name
@@ -120,7 +121,7 @@ table:
   header_color: "secondary"
   body_font: body
   body_size: 8
-  body_color: "secondary"
+  body_color: "text"
   columns:
     # Ref: x0=62.2pt (21.9mm), gap tot volgende: 42.5mm
     - { field: "BIC Controle nummer", header: "BIC Controle nummer", width_mm: 42, align: left }

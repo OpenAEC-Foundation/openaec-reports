@@ -2,6 +2,8 @@
   "template": "customer_bic_factuur",
   "format": "A4",
   "brand": "customer",
+  "project": "Jaarlijkse BIC controle 2025",
+  "project_number": "336.01",
 
   "meta": {
     "factuur_kop": "BIC Factuur",

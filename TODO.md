@@ -1,117 +1,107 @@
 # TODO — bm-reports
 
-> Prioriteit: 🔴 Hoog | 🟡 Middel | 🟢 Laag
-> Laatst bijgewerkt: 2026-02-28 21:30
+> Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
+> Laatst bijgewerkt: 2026-03-01
+> Volgende actie: deploy met `docker build --no-cache`
 
 ---
 
-## ✅ T-API — API Endpoint voor TemplateEngine — VOLTOOID
+## 🔴 DEPLOY — Frontend Rebuild + Deploy (BLOCKER)
 
-- [x] T-API.1 — Endpoint `/api/generate/template` in `api.py`
-- [x] T-API.2 — `data_transform.py` als production module
-- [x] T-API.3 — Frontend smart endpoint routing
-- [x] T-API.4 — Integratietests (`test_api_template.py`)
+Code fixes zijn gecommit (cfaa808). Frontend smart routing code was al correct, maar productie serveerde een gecachte bundle.
 
-## ✅ T1 — Template Engine Fase 1 — VOLTOOID
+**Stappen:**
+```bash
+# 1. Docker build ZONDER cache
+docker build --no-cache -t bm-reports:latest .
 
-- [x] T1.1–T1.8 — Compleet (102+ unit tests, 3 E2E tests, 6-pagina PDF)
+# 2. Test lokaal
+docker run --rm -p 8000:8000 bm-reports:latest
 
-## ✅ T2 — Stationery + Coördinaten — VOLTOOID
+# 3. Deploy naar VPS (git pull + rebuild)
 
-- [x] T2.1–T2.6 — Compleet (referentie-gebaseerde coördinaten)
-
-## ✅ CLEANUP — Deprecated Code Verwijderd
-
-- [x] `modules/symitech/` verwijderd (vervangen door TemplateEngine)
-- [x] `modules/yaml_module.py` verwijderd (vervangen door TemplateEngine)
-- [x] `tenants/symitech/modules/` verwijderd (vervangen door page_types/)
-- [x] `assets/templates/symitech_*.yaml` verwijderd
-- [x] Bijbehorende tests opgeruimd
-- [x] Prompt bestanden gearchiveerd naar `_archive/prompts/`
+# 4. Verificatie op productie
+# → https://report.3bm.co.nl/api/health
+# → Bundle check: fetch JS, search "generate/template"
+# → Test Symitech BIC PDF generatie via frontend
+```
 
 ---
 
-## 🔴 D-DEPLOY — Deploy Nieuwe Versie
+## 🟡 VALIDATE — Visuele Validatie na Deploy
 
-### D-DEPLOY.1 — Docker build testen
-- [ ] `docker build -t bm-reports:latest .` — moet slagen
-- [ ] Controleer dat `tenants/` correct meekomt in image
-- [ ] Test: `docker run --rm -p 8000:8000 bm-reports:latest` + health check
+Pas uitvoeren NADAT FIX-1, FIX-2, FIX-3 allemaal live staan.
 
-### D-DEPLOY.2 — VPS deployment
-- [ ] Push naar GitHub (main branch)
-- [ ] SSH naar VPS, pull + rebuild
-- [ ] Verifieer `/api/generate/template` endpoint live
-- [ ] Test met Symitech test JSON via curl
+**Test via productie frontend:**
+1. Login op report.3bm.co.nl
+2. Selecteer template "Symitech BIC Factuur"
+3. Laad test data of vul in
+4. Genereer PDF
+5. Vergelijk met referentie `Z:\50_projecten\7_3BM_bouwkunde\temp\336.01-BIC Factuur_BIC.pdf`
 
-### D-DEPLOY.3 — Frontend rebuild
-- [ ] `cd frontend && npm run build`
-- [ ] Kopieer `dist/` naar `static/` (of via Docker multi-stage)
-- [ ] Verifieer frontend op https://report.3bm.co.nl
+**Checklist per pagina:**
 
----
+| Pagina | Wat controleren |
+|--------|----------------|
+| 1 - Voorblad (portrait) | Stationery achtergrond, logo, kleurbanen, tekst op juiste positie |
+| 2 - Locatie (portrait) | Stationery, labels links, waarden rechts, footer balk |
+| 3 - BIC Controles (portrait) | Stationery, tabel met 3 kolommen, bedragen, footer |
+| 4 - Detail weergave (LANDSCAPE) | Orientatie correct, 7 kolommen, stationery |
+| 5 - Objecten (LANDSCAPE) | Orientatie correct, 8 kolommen, stationery |
+| 6 - Achterblad (portrait) | Alleen stationery, geen tekst |
 
-## 🟡 V-VALIDATE — Visuele Validatie Symitech
-
-- [ ] Genereer PDF via API met `test_336_bic_factuur.json`
-- [ ] Open in PDF viewer naast referentie 336.01
-- [ ] Controleer per pagina:
-  - [ ] Pagina 1: Cover (portrait) — logo, kleur, tekst positie
-  - [ ] Pagina 2: Location detail (portrait) — adressen, project info
-  - [ ] Pagina 3: BIC tabel (landscape) — kolommen, rijen, totalen
-  - [ ] Pagina 4: Detail items (landscape) — tabelopmaak
-  - [ ] Pagina 5: Objecten (landscape) — Type kolommen
-  - [ ] Pagina 6: Cost summary (portrait) — bedragen, layout
+**Referentie verschil (verwacht):**
+- Generated: 5 XObjects/pagina, Reference: 10 XObjects/pagina
+- Dit kan normaal zijn (reference bevat Word template artifacts)
+- Belangrijk is visueel resultaat, niet exact image count
 
 ---
 
-## 🟡 T3 — 3BM TemplateEngine Migratie
+## 🟡 T3 — 3BM TemplateEngine Migratie (na validatie)
 
-### T3.1 — 3BM page_type YAML's
-- [ ] `tenants/3bm_cooperatie/page_types/voorblad.yaml`
-- [ ] `tenants/3bm_cooperatie/page_types/colofon.yaml`
-- [ ] `tenants/3bm_cooperatie/page_types/inhoud.yaml`
-- [ ] `tenants/3bm_cooperatie/page_types/standaard.yaml`
-- [ ] `tenants/3bm_cooperatie/page_types/bijlage_scheidblad.yaml`
-- [ ] `tenants/3bm_cooperatie/page_types/achterblad.yaml`
-
-### T3.2 — 3BM template YAML's (TemplateEngine formaat)
-- [ ] `tenants/3bm_cooperatie/templates/rapport_v3.yaml`
-- [ ] `tenants/3bm_cooperatie/templates/berekening_v3.yaml`
-
-### T3.3 — Flow mode engine
-- [ ] `_build_flow_content()` integreren met block_registry
-- [ ] Regressietest: V2 output vs TemplateEngine output
-- [ ] Migratie-pad: `/api/generate/v2` → `/api/generate/template` voor 3BM
-
----
-
-## 🟡 D1 — Server & Infrastructure
-
-- [x] Monorepo deployed op VPS
-- [x] SSH key-based auth (thuis + kantoor)
-- [x] Cockpit admin panel
-- [ ] Caddyfile vereenvoudigen (reverse proxy cleanup)
-- [ ] fail2ban installeren
-- [ ] Portainer installeren
-
----
-
-## 🟢 P5 — Toekomstige Features
-
-- [ ] Symitech rapport simpel (flow mode, niet alleen BIC)
-- [ ] Tweede brand onboarding (BBL Engineering)
-- [ ] RevitAdapter: Revit model data → rapport JSON
-- [ ] PDF caching op basis van JSON hash
-- [ ] Rate limiting per tenant
-- [ ] Rich text editing in frontend
+- [ ] T3.1 — 3BM page_type YAML's aanmaken
+- [ ] T3.2 — 3BM template YAML's
+- [ ] T3.3 — Flow mode engine integreren met block_registry
 
 ---
 
 ## 🟢 Housekeeping
 
-- [x] pytest cache cleanup
-- [x] Oude PROMPT_*.md bestanden gearchiveerd
+- [ ] `_temp_analyze.py` verwijderen uit project root
+- [ ] CLAUDE.md updaten met TemplateEngine architectuur
+- [ ] README.md updaten
 - [ ] `lessons_learned.md` aanmaken
-- [ ] CLAUDE.md updaten met TemplateEngine documentatie
-- [ ] README.md updaten met nieuwe architectuur
+
+---
+
+## 🟢 Infrastructure (later)
+
+- [ ] Caddyfile vereenvoudigen
+- [ ] fail2ban installeren
+- [ ] Portainer installeren
+
+---
+
+## ✅ VOLTOOID
+
+### FIX-1 + FIX-2 — Tenant Resolution Fix (1 maart, cfaa808)
+- [x] `_resolve_tenant_and_template()` — tenant uit template naam prefix
+- [x] `_resolve_tenants_dir()` — robuust met `BM_TENANTS_ROOT` env var
+- [x] Endpoint herschreven, 888 tests passed, E2E OK
+
+### T-API — API Endpoint (28 feb)
+- [x] `/api/generate/template` endpoint
+- [x] `data_transform.py` module
+- [x] Frontend smart routing (lokaal)
+- [x] Integratietests
+
+### T1 — Template Engine Fase 1 (28 feb)
+- [x] 102+ unit tests, 3 E2E tests, 6-pagina PDF
+
+### T2 — Stationery + Coördinaten (28 feb)
+- [x] Referentie-gebaseerde coördinaten voor alle 6 page types
+
+### CLEANUP — Mega Cleanup (28 feb)
+- [x] Deprecated V1 Symitech modules verwijderd
+- [x] Prompts gearchiveerd
+- [x] pytest cache opgeruimd

@@ -49,7 +49,8 @@ def create_page_templates(
     if brand is None:
         brand = BrandLoader().load_default()
 
-    renderer = BrandRenderer(brand, assets_dir=ASSETS_DIR)
+    assets_dir = brand.brand_dir if brand.brand_dir else ASSETS_DIR
+    renderer = BrandRenderer(brand, assets_dir=assets_dir)
     stationery = StationeryRenderer(brand_dir=brand.brand_dir)
 
     page_w = config.effective_width_pt

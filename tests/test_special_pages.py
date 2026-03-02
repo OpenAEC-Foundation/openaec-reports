@@ -478,7 +478,8 @@ class TestCoverFromBrandConfig:
         draw_cover_page(canvas, None, config, brand)
 
         assert canvas.drawString.called
-        assert canvas.roundRect.called  # Default badges gerenderd
+        # Geen default badges meer — badges vereisen expliciete brand config
+        assert not canvas.roundRect.called
 
 
 class TestBackcoverFromBrandConfig:
@@ -565,8 +566,10 @@ class TestBackcoverFromBrandConfig:
 
         draw_backcover_page(canvas, None, config, brand)
 
-        assert canvas.drawPath.called
-        assert canvas.drawString.called
+        # Geen default polygonen meer — vereisen expliciete brand config
+        assert not canvas.drawPath.called
+        # Achtergrond rect wordt nog wel getekend
+        assert canvas.rect.called
 
 
 class TestIntegration:

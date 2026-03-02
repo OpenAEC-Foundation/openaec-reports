@@ -180,8 +180,13 @@ class BrandRenderer:
 
         image_path = self._assets_dir / elem.src
         if not image_path.exists():
-            logger.warning("Afbeelding niet gevonden: %s", image_path)
-            return
+            # Fallback: probeer package assets directory
+            fallback = Path(__file__).parent.parent / "assets" / elem.src
+            if fallback.exists():
+                image_path = fallback
+            else:
+                logger.warning("Logo niet gevonden: %s", image_path)
+                return
 
         suffix = image_path.suffix.lower()
 

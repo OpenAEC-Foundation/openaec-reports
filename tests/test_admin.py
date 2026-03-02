@@ -571,3 +571,133 @@ class TestAssetManagement:
             "/api/admin/tenants/test_tenant/assets/stationery/..secret.pdf"
         )
         assert r.status_code == 400
+
+
+# ============================================================
+# YAML Editor (inline content bewerken)
+# ============================================================
+
+
+class TestYamlEditor:
+    """Tests voor YAML inline editor endpoints (GET/PUT content)."""
+
+    TENANT = "test_yaml_editor"
+
+    @pytest.fixture(autouse=True)
+    def _setup_yaml_file(self, admin_client):
+        """Upload een test YAML bestand voor elke test."""
+        yaml_content = b"title: Test\ntype: structural\n"
+        admin_client.post(
+            f"/api/admin/tenants/{self.TENANT}/templates",
+            files={"file": ("editor_test.yaml", yaml_content, "application/x-yaml")},
+        )
+        yield
+        # Cleanup
+        admin_client.delete(
+            f"/api/admin/tenants/{self.TENANT}/templates/editor_test.yaml"
+        )
+
+    def test_get_content(self, admin_client):
+        """GET content retourneert filename, parsed en raw."""
+        r = admin_client.get(
+            f"/api/admin/tenants/{self.TENANT}/templates/editor_test.yaml/content"
+        )
+        assert r.status_code == 200
+        data = r.json()
+        assert data["filename"] == "editor_test.yaml"
+        assert data["parsed"]["title"] == "Test"
+        assert "title: Test" in data["raw"]
+
+    def test_put_content(self, admin_client):
+        """PUT content schrijft nieuwe YAML en retourneert filename + size."""
+        new_content = "title: Updated\ntype: daylight\n"
+        r = admin_client.put(
+            f"/api/admin/tenants/{self.TENANT}/templates/editor_test.yaml/content",
+            json={"content": new_content},
+        )
+        assert r.status_code == 200
+        assert r.json()["filename"] == "editor_test.yaml"
+        assert r.json()["size"] > 0
+
+        # Verifieer dat de content daadwerkelijk gewijzigd is
+        r2 = admin_client.get(
+            f"/api/admin/tenants/{self.TENANT}/templates/editor_test.yaml/content"
+        )
+        assert r2.json()["parsed"]["title"] == "Updated"
+
+    def test_put_invalid_yaml_returns_422(self, admin_client):
+        """PUT met ongeldige YAML → 422."""
+        r = admin_client.put(
+            f"/api/admin/tenants/{self.TENANT}/templates/editor_test.yaml/content",
+            json={"content": "{{invalid: yaml: [}"},
+        )
+        assert r.status_code == 422
+
+    def test_get_nonexistent_file_returns_404(self, admin_client):
+        """GET content voor niet-bestaand bestand → 404."""
+        r = admin_client.get(
+            f"/api/admin/tenants/{self.TENANT}/templates/nope.yaml/content"
+        )
+        assert r.status_code == 404
+
+    def test_put_nonexistent_file_returns_404(self, admin_client):
+        """PUT content voor niet-bestaand bestand → 404."""
+        r = admin_client.put(
+            f"/api/admin/tenants/{self.TENANT}/templates/nope.yaml/content",
+            json={"content": "title: X\n"},
+        )
+        assert r.status_code == 404
+
+    def test_page_type_content_endpoints(self, admin_client):
+        """GET/PUT werkt ook voor page-types categorie."""
+        # Upload page type
+        admin_client.post(
+            f"/api/admin/tenants/{self.TENANT}/page-types",
+            files={"file": ("cover.yaml", b"type: cover\n", "application/x-yaml")},
+        )
+
+        # GET content
+        r = admin_client.get(
+            f"/api/admin/tenants/{self.TENANT}/page-types/cover.yaml/content"
+        )
+        assert r.status_code == 200
+        assert r.json()["parsed"]["type"] == "cover"
+
+        # PUT content
+        r2 = admin_client.put(
+            f"/api/admin/tenants/{self.TENANT}/page-types/cover.yaml/content",
+            json={"content": "type: toc\n"},
+        )
+        assert r2.status_code == 200
+
+        # Cleanup
+        admin_client.delete(
+            f"/api/admin/tenants/{self.TENANT}/page-types/cover.yaml"
+        )
+
+    def test_module_content_endpoints(self, admin_client):
+        """GET/PUT werkt ook voor modules categorie."""
+        # Upload module
+        admin_client.post(
+            f"/api/admin/tenants/{self.TENANT}/modules",
+            files={"file": ("costs.yaml", b"name: costs\n", "application/x-yaml")},
+        )
+
+        # GET content
+        r = admin_client.get(
+            f"/api/admin/tenants/{self.TENANT}/modules/costs.yaml/content"
+        )
+        assert r.status_code == 200
+        assert r.json()["parsed"]["name"] == "costs"
+
+        # PUT content
+        r2 = admin_client.put(
+            f"/api/admin/tenants/{self.TENANT}/modules/costs.yaml/content",
+            json={"content": "name: updated_costs\n"},
+        )
+        assert r2.status_code == 200
+
+        # Cleanup
+        admin_client.delete(
+            f"/api/admin/tenants/{self.TENANT}/modules/costs.yaml"
+        )

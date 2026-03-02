@@ -6,6 +6,7 @@ import {
   type TenantTemplate,
   type TenantAsset,
   type AssetCategory,
+  type YamlCategory,
   type BrandData,
   type BrandExtractionResult,
   type BrandExtractionData,
@@ -94,6 +95,17 @@ interface AdminStore {
     category: AssetCategory,
     filename: string
   ) => Promise<boolean>;
+
+  // YAML Editor
+  editorFile: { tenant: string; category: YamlCategory; filename: string } | null;
+  editorContent: string;
+  editorOriginal: string;
+  editorLoading: boolean;
+  editorSaving: boolean;
+  openEditor: (tenant: string, category: YamlCategory, filename: string) => Promise<void>;
+  closeEditor: () => void;
+  setEditorContent: (content: string) => void;
+  saveEditorContent: () => Promise<boolean>;
 
   // Brand Extraction Wizard
   extractionStep: number; // 0=inactive, 1=upload, 2=review, 3=prompt, 4=finalize
@@ -504,6 +516,58 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
       return true;
     } catch (e) {
       set({ error: extractError(e) });
+      return false;
+    }
+  },
+
+  // YAML Editor
+  editorFile: null,
+  editorContent: "",
+  editorOriginal: "",
+  editorLoading: false,
+  editorSaving: false,
+
+  openEditor: async (tenant, category, filename) => {
+    set({ editorLoading: true, error: null });
+    try {
+      const result = await adminApi.getYamlContent(tenant, category, filename);
+      set({
+        editorFile: { tenant, category, filename },
+        editorContent: result.raw,
+        editorOriginal: result.raw,
+        editorLoading: false,
+      });
+    } catch (e) {
+      set({ editorLoading: false, error: extractError(e) });
+    }
+  },
+
+  closeEditor: () =>
+    set({
+      editorFile: null,
+      editorContent: "",
+      editorOriginal: "",
+      editorLoading: false,
+      editorSaving: false,
+    }),
+
+  setEditorContent: (content) => set({ editorContent: content }),
+
+  saveEditorContent: async () => {
+    const { editorFile, editorContent } = get();
+    if (!editorFile) return false;
+    set({ editorSaving: true, error: null });
+    try {
+      await adminApi.updateYamlContent(
+        editorFile.tenant,
+        editorFile.category,
+        editorFile.filename,
+        editorContent
+      );
+      set({ editorOriginal: editorContent, editorSaving: false });
+      return true;
+    } catch (e) {
+      set({ editorSaving: false, error: extractError(e) });
       return false;
     }
   },

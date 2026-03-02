@@ -111,6 +111,12 @@ class CreateTenantRequest(BaseModel):
     display_name: str = Field(default="")
 
 
+class UpdateYamlContentRequest(BaseModel):
+    """Request model voor het inline bewerken van een YAML bestand."""
+
+    content: str = Field(..., min_length=1)
+
+
 class CreateApiKeyRequest(BaseModel):
     """Request model voor het aanmaken van een API key."""
 
@@ -154,6 +160,111 @@ def _get_tenants_base() -> Path:
         Path naar de tenants directory.
     """
     return _resolve_tenants_base()
+
+
+# Mapping van URL-categorie naar directory naam op disk
+_YAML_CATEGORY_DIRS: dict[str, str] = {
+    "templates": "templates",
+    "page-types": "page_types",
+    "modules": "modules",
+}
+
+
+def _get_yaml_content(tenant: str, category: str, filename: str) -> dict:
+    """Lees een YAML bestand en retourneer filename, parsed en raw content.
+
+    Args:
+        tenant: Tenant naam.
+        category: URL-categorie ("templates", "page-types", "modules").
+        filename: Bestandsnaam.
+
+    Returns:
+        Dict met filename, parsed (dict/None), en raw (str) content.
+
+    Raises:
+        HTTPException: 400 bij ongeldige categorie, 404 als bestand niet bestaat.
+    """
+    dir_name = _YAML_CATEGORY_DIRS.get(category)
+    if dir_name is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Ongeldige YAML categorie: {category}",
+        )
+
+    _validate_path_segment(tenant, "tenant")
+    _validate_path_segment(filename, "bestandsnaam")
+
+    filepath = _get_tenants_base() / tenant / dir_name / filename
+    if not filepath.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Bestand '{filename}' niet gevonden in {category}",
+        )
+
+    raw = filepath.read_text(encoding="utf-8")
+    try:
+        parsed = yaml.safe_load(raw)
+    except yaml.YAMLError:
+        parsed = None
+
+    return {"filename": filename, "parsed": parsed, "raw": raw}
+
+
+def _update_yaml_content(
+    tenant: str, category: str, filename: str, content: str
+) -> dict:
+    """Valideer en schrijf YAML content naar een bestand.
+
+    Args:
+        tenant: Tenant naam.
+        category: URL-categorie ("templates", "page-types", "modules").
+        filename: Bestandsnaam.
+        content: Nieuwe YAML content als string.
+
+    Returns:
+        Dict met filename en size.
+
+    Raises:
+        HTTPException: 400 bij ongeldige categorie, 404 als bestand niet bestaat,
+                       422 bij ongeldige YAML.
+    """
+    dir_name = _YAML_CATEGORY_DIRS.get(category)
+    if dir_name is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Ongeldige YAML categorie: {category}",
+        )
+
+    _validate_path_segment(tenant, "tenant")
+    _validate_path_segment(filename, "bestandsnaam")
+
+    filepath = _get_tenants_base() / tenant / dir_name / filename
+    if not filepath.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Bestand '{filename}' niet gevonden in {category}",
+        )
+
+    # Valideer YAML
+    try:
+        yaml.safe_load(content)
+    except yaml.YAMLError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Ongeldige YAML: {e}",
+        )
+
+    # Grootte check
+    content_bytes = content.encode("utf-8")
+    if len(content_bytes) > MAX_YAML_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Content te groot (max {MAX_YAML_SIZE_BYTES // 1024} KB)",
+        )
+
+    filepath.write_text(content, encoding="utf-8")
+    logger.info("YAML bewerkt: %s/%s/%s", tenant, category, filename)
+    return {"filename": filename, "size": len(content_bytes)}
 
 
 # ============================================================
@@ -703,6 +814,37 @@ async def download_tenant_template(tenant: str, filename: str):
     )
 
 
+@admin_router.get("/tenants/{tenant}/templates/{filename}/content")
+async def get_template_content(tenant: str, filename: str):
+    """Lees de YAML content van een template bestand.
+
+    Args:
+        tenant: Tenant naam.
+        filename: Bestandsnaam.
+
+    Returns:
+        Dict met filename, parsed YAML en raw tekst.
+    """
+    return _get_yaml_content(tenant, "templates", filename)
+
+
+@admin_router.put("/tenants/{tenant}/templates/{filename}/content")
+async def update_template_content(
+    tenant: str, filename: str, payload: UpdateYamlContentRequest
+):
+    """Update de YAML content van een template bestand.
+
+    Args:
+        tenant: Tenant naam.
+        filename: Bestandsnaam.
+        payload: Nieuwe YAML content.
+
+    Returns:
+        Dict met filename en size.
+    """
+    return _update_yaml_content(tenant, "templates", filename, payload.content)
+
+
 # ============================================================
 # Page Types per tenant
 # ============================================================
@@ -838,6 +980,39 @@ async def download_tenant_page_type(tenant: str, filename: str):
     )
 
 
+@admin_router.get("/tenants/{tenant}/page-types/{filename}/content")
+async def get_page_type_content(tenant: str, filename: str):
+    """Lees de YAML content van een page type bestand.
+
+    Args:
+        tenant: Tenant naam.
+        filename: Bestandsnaam.
+
+    Returns:
+        Dict met filename, parsed YAML en raw tekst.
+    """
+    return _get_yaml_content(tenant, "page-types", filename)
+
+
+@admin_router.put("/tenants/{tenant}/page-types/{filename}/content")
+async def update_page_type_content(
+    tenant: str, filename: str, payload: UpdateYamlContentRequest
+):
+    """Update de YAML content van een page type bestand.
+
+    Args:
+        tenant: Tenant naam.
+        filename: Bestandsnaam.
+        payload: Nieuwe YAML content.
+
+    Returns:
+        Dict met filename en size.
+    """
+    return _update_yaml_content(
+        tenant, "page-types", filename, payload.content
+    )
+
+
 # ============================================================
 # Modules per tenant
 # ============================================================
@@ -970,6 +1145,39 @@ async def download_tenant_module(tenant: str, filename: str):
         filepath,
         media_type="application/x-yaml",
         filename=filename,
+    )
+
+
+@admin_router.get("/tenants/{tenant}/modules/{filename}/content")
+async def get_module_content(tenant: str, filename: str):
+    """Lees de YAML content van een module bestand.
+
+    Args:
+        tenant: Tenant naam.
+        filename: Bestandsnaam.
+
+    Returns:
+        Dict met filename, parsed YAML en raw tekst.
+    """
+    return _get_yaml_content(tenant, "modules", filename)
+
+
+@admin_router.put("/tenants/{tenant}/modules/{filename}/content")
+async def update_module_content(
+    tenant: str, filename: str, payload: UpdateYamlContentRequest
+):
+    """Update de YAML content van een module bestand.
+
+    Args:
+        tenant: Tenant naam.
+        filename: Bestandsnaam.
+        payload: Nieuwe YAML content.
+
+    Returns:
+        Dict met filename en size.
+    """
+    return _update_yaml_content(
+        tenant, "modules", filename, payload.content
     )
 
 

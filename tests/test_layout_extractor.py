@@ -8,7 +8,10 @@ import pytest
 
 fitz = pytest.importorskip("fitz", reason="pymupdf niet geinstalleerd")
 
-from openaec_reports.tools.config_generator import generate_brand_yaml, generate_pages_yaml  # noqa: E402
+from openaec_reports.tools.config_generator import (  # noqa: E402
+    generate_brand_yaml,
+    generate_pages_yaml,
+)
 from openaec_reports.tools.layout_extractor import (  # noqa: E402
     _classify_image_role,
     _detect_badges,
@@ -18,7 +21,11 @@ from openaec_reports.tools.layout_extractor import (  # noqa: E402
     _is_dynamic_text,
     extract_page_layouts,
 )
-from openaec_reports.tools.page_classifier import ClassifiedPage, PageType, classify_pages  # noqa: E402
+from openaec_reports.tools.page_classifier import (  # noqa: E402
+    ClassifiedPage,
+    PageType,
+    classify_pages,
+)
 from openaec_reports.tools.pdf_extractor import (  # noqa: E402
     ImageElement,
     PathElement,

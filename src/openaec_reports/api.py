@@ -29,7 +29,11 @@ from openaec_reports.core.engine import Report
 from openaec_reports.core.renderer_v2 import ReportGeneratorV2
 from openaec_reports.core.template_engine import TemplateEngine
 from openaec_reports.core.tenant import TenantConfig
-from openaec_reports.core.tenant_resolver import get_brand_loader, get_template_loader, get_tenant_config
+from openaec_reports.core.tenant_resolver import (
+    get_brand_loader,
+    get_template_loader,
+    get_tenant_config,
+)
 
 logger = logging.getLogger(__name__)
 

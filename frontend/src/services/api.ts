@@ -122,6 +122,12 @@ export interface BrandData {
   raw: string;
 }
 
+export interface YamlContentResponse {
+  filename: string;
+  parsed: Record<string, unknown> | null;
+  raw: string;
+}
+
 // ---------- API Key types ----------
 
 export interface ApiKeyInfo {
@@ -312,6 +318,21 @@ export const adminApi = {
   // YAML download URL helper
   getYamlDownloadUrl: (tenant: string, category: YamlCategory, filename: string): string =>
     `${API_BASE}/api/admin/tenants/${encodeURIComponent(tenant)}/${category}/${encodeURIComponent(filename)}/download`,
+
+  // YAML inline editor
+  getYamlContent: (tenant: string, category: YamlCategory, filename: string) =>
+    apiFetch<YamlContentResponse>(
+      `/api/admin/tenants/${encodeURIComponent(tenant)}/${category}/${encodeURIComponent(filename)}/content`
+    ),
+
+  updateYamlContent: (tenant: string, category: YamlCategory, filename: string, content: string) =>
+    apiFetch<{ filename: string; size: number }>(
+      `/api/admin/tenants/${encodeURIComponent(tenant)}/${category}/${encodeURIComponent(filename)}/content`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ content }),
+      }
+    ),
 
   // Brand
   getBrand: (tenant: string) =>

@@ -5,65 +5,6 @@
 
 ---
 
-## 🔴 DEPLOY — Docker Rebuild (BLOCKER)
-
-Alle code fixes zijn gecommit. Productie draait een oudere bundle. Rebuild nodig.
-
-```bash
-docker build --no-cache -t openaec-reports:latest .
-docker run --rm -p 8000:8000 openaec-reports:latest
-# Deploy naar VPS (git pull + rebuild)
-```
-
-**Verificatie na deploy:**
-- [ ] `https://report.open-aec.com/api/health` → OK
-- [ ] `/api/generate/template` endpoint werkt (Customer BIC)
-- [ ] Frontend smart routing (V2 vs TemplateEngine) actief
-- [ ] Admin panel API Keys tab zichtbaar en functioneel
-
----
-
-## 🔴 VALIDATE — Visuele Validatie na Deploy
-
-Test na deploy op productie frontend:
-
-| Pagina | Controleer |
-|--------|-----------|
-| 1 - Voorblad (portrait) | Stationery, logo, kleurbanen, tekst positie (Arial) |
-| 2 - Locatie (portrait) | Stationery, labels/waarden, footer, paginanummer |
-| 3 - BIC Controles (portrait) | Tabel 3 kolommen (10pt), bedragen, footer |
-| 4 - Detail (LANDSCAPE) | Orientatie, 7 kolommen, stationery |
-| 5 - Objecten (LANDSCAPE) | Orientatie, 8 kolommen, stationery |
-| 6 - Achterblad (portrait) | "Deze pagina is [met opzet] leeg gelaten", footer |
-
----
-
-## 🟡 T3 — OpenAEC TemplateEngine Migratie
-
-De TemplateEngine (V3) werkt voor Customer. Nu ook OpenAEC rapporten migreren.
-
-- [ ] T3.1 — OpenAEC page_type YAML's aanmaken (voorblad, content, colofon, achterblad)
-- [ ] T3.2 — OpenAEC template YAML's (structural, daylight, building_code)
-- [ ] T3.3 — Flow mode: engine integreren met block_registry voor dynamische content
-
----
-
-## 🟡 T4 — OpenAEC Rebranding (deels voltooid)
-
-Package rename (`bm_reports` → `openaec_reports`) is klaar. Resterende taken:
-
-- [x] T4.1 — Package rename: `bm_reports` → `openaec_reports`
-- [x] T4.2 — Environment variables: `BM_*` → `OPENAEC_*`
-- [x] T4.3 — Frontend: OpenAEC branding
-- [x] T4.4 — CLI: `bm-report` → `openaec-report`
-- [ ] T4.5 — Docker image tag: `openaec-reports` in CI/CD
-- [ ] T4.6 — Domain: `report.open-aec.com` → `reports.openaec.org` (of soortgelijk)
-- [ ] T4.7 — README.md volledig herschrijven voor open source publiek
-- [ ] T4.8 — LICENSE bestand toevoegen (MIT)
-- [ ] T4.9 — API key prefix: `oaec_k_` → `oaec_k_` (in `auth/api_keys.py`)
-
----
-
 ## 🟡 T5 — YAML Editor in Admin Panel
 
 Self-service YAML beheer per tenant.
@@ -180,6 +121,16 @@ Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
 - [x] Eenmalige plaintext key display + kopieer-knop
 - [x] Code review: shared.tsx geextraheerd, usersError gefixt, staleness guard, clipboard error handling
 
+### OpenAEC TemplateEngine Migratie (2 maart)
+- [x] OpenAEC templates werkend en gevalideerd
+
+### OpenAEC Rebranding — Volledig (2 maart)
+- [x] Package rename, env vars, CLI, frontend, Docker, domain, README, LICENSE, API key prefix
+
+### Deploy + Visuele Validatie (2 maart)
+- [x] Docker rebuild op Hetzner VPS
+- [x] Customer BIC rapporten visueel gevalideerd — pixel-perfect
+
 ### OpenAEC Rebranding — Package Rename (2 maart)
 - [x] `git mv src/bm_reports src/openaec_reports`
 - [x] 218 bestanden: imports, env vars, CLI, Dockerfile, docs
@@ -202,6 +153,7 @@ Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
 - [x] `_resolve_tenant_and_template()` helper
 - [x] `_resolve_tenants_dir()` robuust met env vars
 - [x] 888 tests passed
+
 
 ### TemplateEngine V3 (28 feb)
 - [x] 102+ unit tests, 3 E2E tests

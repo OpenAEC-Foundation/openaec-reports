@@ -2,8 +2,8 @@
 
 from reportlab.lib.colors import HexColor
 
-from bm_reports.core.brand import BrandConfig
-from bm_reports.core.styles import create_stylesheet
+from openaec_reports.core.brand import BrandConfig
+from openaec_reports.core.styles import create_stylesheet
 
 
 class TestCreateStylesheet:

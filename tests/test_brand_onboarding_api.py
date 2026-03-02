@@ -15,9 +15,9 @@ from fastapi.testclient import TestClient
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas as pdf_canvas
 
-from bm_reports.auth.dependencies import get_current_user
-from bm_reports.auth.models import User, UserRole
-from bm_reports.brand_api import BrandSession, brand_router
+from openaec_reports.auth.dependencies import get_current_user
+from openaec_reports.auth.models import User, UserRole
+from openaec_reports.brand_api import BrandSession, brand_router
 
 # Fake user voor auth bypass
 _FAKE_USER = User(

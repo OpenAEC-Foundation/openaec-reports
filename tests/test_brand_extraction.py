@@ -6,7 +6,7 @@ import pytest
 import yaml
 from fastapi.testclient import TestClient
 
-from bm_reports.admin.brand_extraction import (
+from openaec_reports.admin.brand_extraction import (
     _generate_modules_scaffold,
     _generate_stationery_scaffold,
     _serialize_layouts,
@@ -14,7 +14,7 @@ from bm_reports.admin.brand_extraction import (
     get_reference_pages_yaml,
     merge_brand_yaml,
 )
-from bm_reports.api import app
+from openaec_reports.api import app
 
 # ============================================================
 # Unit tests: brand_extraction.py functies
@@ -308,13 +308,13 @@ class TestSerializeLayouts:
 
     def test_serializes_basic_layout(self):
         """Layout met elementen wordt correct geserialiseerd."""
-        from bm_reports.tools.layout_extractor import (
+        from openaec_reports.tools.layout_extractor import (
             BadgeSpec,
             PageLayout,
             StaticElement,
             TextZone,
         )
-        from bm_reports.tools.page_classifier import PageType
+        from openaec_reports.tools.page_classifier import PageType
 
         layout = PageLayout(
             page_type=PageType.COVER,
@@ -403,7 +403,7 @@ class TestBrandExtractEndpoints:
 
     def test_extract_nonexistent_tenant(self, admin_client, tmp_path, monkeypatch):
         """Brand extract voor onbekende tenant → 404."""
-        monkeypatch.setenv("BM_TENANTS_DIR", str(tmp_path))
+        monkeypatch.setenv("OPENAEC_TENANTS_DIR", str(tmp_path))
 
         r = admin_client.post(
             "/api/admin/tenants/nonexistent/brand-extract",
@@ -414,7 +414,7 @@ class TestBrandExtractEndpoints:
 
     def test_analysis_page_image_not_found(self, admin_client, tmp_path, monkeypatch):
         """Niet-bestaande pagina-afbeelding → 404."""
-        monkeypatch.setenv("BM_TENANTS_DIR", str(tmp_path))
+        monkeypatch.setenv("OPENAEC_TENANTS_DIR", str(tmp_path))
         tenant_dir = tmp_path / "test-tenant"
         tenant_dir.mkdir()
 
@@ -435,7 +435,7 @@ class TestBrandExtractEndpoints:
         self, admin_client, tmp_path, monkeypatch
     ):
         """Bestaande pagina-afbeelding wordt correct geserveerd."""
-        monkeypatch.setenv("BM_TENANTS_DIR", str(tmp_path))
+        monkeypatch.setenv("OPENAEC_TENANTS_DIR", str(tmp_path))
         tenant_dir = tmp_path / "test-tenant"
         pages_dir = tenant_dir / "analysis" / "pages"
         pages_dir.mkdir(parents=True)
@@ -457,7 +457,7 @@ class TestBrandExtractEndpoints:
         self, admin_client, tmp_path, monkeypatch
     ):
         """Prompt package endpoint retourneert markdown."""
-        monkeypatch.setenv("BM_TENANTS_DIR", str(tmp_path))
+        monkeypatch.setenv("OPENAEC_TENANTS_DIR", str(tmp_path))
         tenant_dir = tmp_path / "test-tenant"
         tenant_dir.mkdir()
 
@@ -482,7 +482,7 @@ class TestBrandExtractEndpoints:
 
     def test_merge_endpoint(self, admin_client, tmp_path, monkeypatch):
         """Brand merge endpoint schrijft brand.yaml."""
-        monkeypatch.setenv("BM_TENANTS_DIR", str(tmp_path))
+        monkeypatch.setenv("OPENAEC_TENANTS_DIR", str(tmp_path))
         tenant_dir = tmp_path / "merge-test"
         tenant_dir.mkdir()
 
@@ -516,7 +516,7 @@ class TestBrandExtractEndpoints:
 
     def test_merge_invalid_pages_yaml(self, admin_client, tmp_path, monkeypatch):
         """Merge met ongeldige pages YAML → 422."""
-        monkeypatch.setenv("BM_TENANTS_DIR", str(tmp_path))
+        monkeypatch.setenv("OPENAEC_TENANTS_DIR", str(tmp_path))
         tenant_dir = tmp_path / "bad-merge"
         tenant_dir.mkdir()
 
@@ -533,7 +533,7 @@ class TestBrandExtractEndpoints:
 
     def test_merge_without_pages(self, admin_client, tmp_path, monkeypatch):
         """Merge zonder pages YAML werkt (alleen auto-generated secties)."""
-        monkeypatch.setenv("BM_TENANTS_DIR", str(tmp_path))
+        monkeypatch.setenv("OPENAEC_TENANTS_DIR", str(tmp_path))
         tenant_dir = tmp_path / "no-pages"
         tenant_dir.mkdir()
 

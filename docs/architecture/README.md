@@ -42,10 +42,10 @@ JSON → data_transform → TemplateEngine → PDF
 
 | Bestand | Functie |
 |---|---|
-| `src/bm_reports/api.py` | HTTP endpoints, tenant detectie |
-| `src/bm_reports/core/data_transform.py` | JSON genest → flat |
-| `src/bm_reports/core/template_engine.py` | PDF rendering |
-| `src/bm_reports/core/template_config.py` | YAML parsing (dataclasses) |
+| `src/openaec_reports/api.py` | HTTP endpoints, tenant detectie |
+| `src/openaec_reports/core/data_transform.py` | JSON genest → flat |
+| `src/openaec_reports/core/template_engine.py` | PDF rendering |
+| `src/openaec_reports/core/template_config.py` | YAML parsing (dataclasses) |
 | `tenants/[naam]/brand.yaml` | Huisstijl per tenant |
 | `tenants/[naam]/templates/*.yaml` | Paginavolgorde per document |
 | `tenants/[naam]/page_types/*.yaml` | Pixel-exact layout per pagina |

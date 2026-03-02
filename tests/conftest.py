@@ -6,15 +6,15 @@ import os
 import uuid
 
 # Secure cookie uitzetten voor tests (TestClient gebruikt HTTP, niet HTTPS)
-os.environ.setdefault("BM_COOKIE_SECURE", "false")
+os.environ.setdefault("OPENAEC_COOKIE_SECURE", "false")
 
 import pytest
 from fastapi.testclient import TestClient
 
-from bm_reports.api import app
-from bm_reports.auth.dependencies import get_user_db
-from bm_reports.auth.models import User, UserRole
-from bm_reports.auth.security import hash_password
+from openaec_reports.api import app
+from openaec_reports.auth.dependencies import get_user_db
+from openaec_reports.auth.models import User, UserRole
+from openaec_reports.auth.security import hash_password
 
 # Test user credentials
 TEST_USERNAME = "testuser"

@@ -35,7 +35,7 @@
 - **Conversion round-trip:** 6 tests (minimal, full, ID stripping, unique IDs, bullet_list/heading_2, content_sections)
 - **Store unit tests:** 19 tests (sections, blocks incl. bullet_list/heading_2, appendices, undo/redo, metadata, import/export)
 - **TypeScript:** 0 errors (`npx tsc -b`)
-- **Opmerking:** Tests en dev server draaien via lokale kopie (`C:\temp\bm-reports-ui`) i.v.m. netwerkpad-incompatibiliteit met Vite/Vitest
+- **Opmerking:** Tests en dev server draaien via lokale kopie (`C:\temp\openaec-reports-ui`) i.v.m. netwerkpad-incompatibiliteit met Vite/Vitest
 
 ---
 

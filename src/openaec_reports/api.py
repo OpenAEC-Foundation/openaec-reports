@@ -1,0 +1,640 @@
+"""HTTP API — FastAPI server voor PDF rapport generatie."""
+
+from __future__ import annotations
+
+import json
+import logging
+import os
+import re
+import shutil
+import uuid
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+
+from fastapi import APIRouter, Depends, FastAPI, File, HTTPException, Request, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from starlette.background import BackgroundTask
+
+from openaec_reports import __version__
+from openaec_reports.admin.routes import admin_router
+from openaec_reports.auth.api_keys import ApiKeyDB
+from openaec_reports.auth.dependencies import get_current_user, init_api_key_db, init_user_db
+from openaec_reports.auth.models import User, UserDB
+from openaec_reports.auth.routes import auth_router
+from openaec_reports.auth.security import is_default_secret
+from openaec_reports.core.data_transform import transform_json_to_engine_data
+from openaec_reports.core.engine import Report
+from openaec_reports.core.renderer_v2 import ReportGeneratorV2
+from openaec_reports.core.template_engine import TemplateEngine
+from openaec_reports.core.tenant import TenantConfig
+from openaec_reports.core.tenant_resolver import get_brand_loader, get_template_loader, get_tenant_config
+
+logger = logging.getLogger(__name__)
+
+# Default brand naam als er geen brand in de request data zit
+_DEFAULT_BRAND = "default"
+
+
+def _find_schema_path() -> Path | None:
+    """Zoek report.schema.json op meerdere locaties."""
+    candidates = [
+        # In package (na pip install via force-include)
+        Path(__file__).parent / "schemas" / "report.schema.json",
+        # In source tree (development)
+        Path(__file__).parent.parent.parent / "schemas" / "report.schema.json",
+    ]
+    for p in candidates:
+        if p.exists():
+            return p
+    return None
+
+
+SCHEMA_PATH = _find_schema_path()
+
+# Tenant configuratie — leest OPENAEC_TENANT_DIR environment variable
+tenant_config = TenantConfig()
+
+_default_stationery = str(Path(__file__).parent / "assets" / "stationery" / "default")
+STATIONERY_DIR = tenant_config.stationery_dir or Path(
+    os.environ.get("OPENAEC_STATIONERY_DIR", _default_stationery)
+)
+_default_uploads = str(Path(__file__).parent.parent.parent / "uploads")
+UPLOAD_DIR = Path(os.environ.get("OPENAEC_UPLOAD_DIR", _default_uploads))
+ASSETS_DIR = Path(__file__).parent / "assets"
+
+
+app = FastAPI(
+    title="OpenAEC Report Generator API",
+    description="HTTP API voor het genereren van professionele engineering rapporten.",
+    version=__version__,
+)
+
+# ============================================================
+# CORS
+# ============================================================
+
+_DEFAULT_CORS_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5173",
+    "https://report.open-aec.com",
+]
+_cors_env = os.environ.get("CORS_ORIGINS", "")
+_cors_origins = (
+    [o.strip() for o in _cors_env.split(",") if o.strip()] if _cors_env else _DEFAULT_CORS_ORIGINS
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ============================================================
+# Auth setup
+# ============================================================
+
+_user_db = UserDB()
+init_user_db(_user_db)
+
+_api_key_db = ApiKeyDB()
+init_api_key_db(_api_key_db)
+
+if is_default_secret():
+    logger.warning(
+        "OPENAEC_JWT_SECRET staat op de default waarde! "
+        "Stel een veilige secret in via de OPENAEC_JWT_SECRET environment variable."
+    )
+
+# Auth routes (login/logout zijn zelf open, /me checkt intern)
+app.include_router(auth_router)
+
+# Admin routes (require_admin dependency op de router zelf)
+app.include_router(admin_router)
+
+# Protected router — alle business endpoints vereisen authenticatie
+_protected = APIRouter(dependencies=[Depends(get_current_user)])
+
+
+# ============================================================
+# Helpers
+# ============================================================
+
+
+def _resolve_brand_from_template(data: dict, tenant_slug: str = "") -> str | None:
+    """Leid brand af uit het template's tenant veld.
+
+    Als de request geen ``brand`` bevat maar wel een ``template``, kijk dan
+    of het template een ``tenant`` veld heeft en gebruik dat als brand.
+    """
+    template_name = data.get("template")
+    if not template_name:
+        return None
+    try:
+        loader = get_template_loader(tenant_slug)
+        config = loader.load(template_name)
+        return config.tenant if config.tenant else None
+    except (FileNotFoundError, Exception):
+        return None
+
+
+def _generate_and_respond(
+    build_fn: callable,
+    data: dict,
+) -> FileResponse:
+    """Genereer PDF en retourneer als FileResponse met cleanup.
+
+    Args:
+        build_fn: Callable die een output_path ontvangt en de PDF genereert.
+        data: Report data dict (voor bestandsnaam).
+
+    Returns:
+        FileResponse met de gegenereerde PDF.
+    """
+    output_path: Path | None = None
+    try:
+        with NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+            output_path = Path(tmp.name)
+
+        build_fn(output_path)
+
+        filename = _safe_filename(
+            data.get("project_number", ""),
+            data.get("project", ""),
+        )
+
+        return FileResponse(
+            path=str(output_path),
+            media_type="application/pdf",
+            filename=filename,
+            background=BackgroundTask(lambda: output_path.unlink(missing_ok=True)),
+        )
+    except HTTPException:
+        if output_path and output_path.exists():
+            output_path.unlink(missing_ok=True)
+        raise
+    except Exception:
+        if output_path and output_path.exists():
+            output_path.unlink(missing_ok=True)
+        raise
+
+
+def _safe_filename(*parts: str, extension: str = ".pdf") -> str:
+    """Maak een veilige bestandsnaam van project info.
+
+    Args:
+        *parts: Onderdelen van de bestandsnaam (project_number, project, etc.).
+        extension: Bestandsextensie.
+
+    Returns:
+        Gesanitizede bestandsnaam.
+    """
+    combined = "_".join(p for p in parts if p)
+    safe = re.sub(r"[^\w\s-]", "", combined).strip()
+    safe = re.sub(r"[-\s]+", "_", safe)
+    return (safe or "rapport") + extension
+
+
+# ============================================================
+# Exception handlers
+# ============================================================
+
+
+@app.exception_handler(FileNotFoundError)
+async def file_not_found_handler(request: Request, exc: FileNotFoundError):
+    """Ontbrekende template of brand → 404."""
+    return JSONResponse(
+        status_code=404,
+        content={"detail": str(exc), "type": "FileNotFoundError"},
+    )
+
+
+@app.exception_handler(ValueError)
+async def value_error_handler(request: Request, exc: ValueError):
+    """Ongeldige data → 422."""
+    return JSONResponse(
+        status_code=422,
+        content={"detail": str(exc), "type": "ValueError"},
+    )
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Onverwachte fout → 500 met type info."""
+    logger.exception("Onverwachte fout bij %s %s", request.method, request.url.path)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Interne serverfout", "type": type(exc).__name__},
+    )
+
+
+# ============================================================
+# Endpoints
+# ============================================================
+
+
+@app.get("/api/health")
+async def health():
+    """Health check endpoint.
+
+    Returns:
+        Status en versie-informatie.
+    """
+    return {"status": "ok", "version": __version__}
+
+
+@_protected.get("/api/templates")
+async def list_templates(user: User = Depends(get_current_user)):
+    """Lijst beschikbare rapport templates.
+
+    Returns:
+        Dict met lijst van templates (naam + type).
+    """
+    loader = get_template_loader(user.tenant)
+    return {"templates": loader.list_templates()}
+
+
+@_protected.get("/api/templates/{name}/scaffold")
+async def get_template_scaffold(name: str, user: User = Depends(get_current_user)):
+    """Retourneer een leeg JSON scaffold voor een template.
+
+    De frontend kan dit laden als startpunt voor een nieuw rapport.
+
+    Args:
+        name: Template naam.
+
+    Returns:
+        Dict conform report.schema.json met defaults uit het template.
+    """
+    loader = get_template_loader(user.tenant)
+    scaffold = loader.to_scaffold(name)
+    return scaffold
+
+
+@_protected.get("/api/brands")
+async def list_brands(user: User = Depends(get_current_user)):
+    """Lijst beschikbare brand configuraties.
+
+    Returns:
+        Dict met lijst van brands (naam + slug).
+    """
+    loader = get_brand_loader(user.tenant)
+    return {"brands": loader.list_brands()}
+
+
+@_protected.post("/api/validate")
+async def validate_report(request: Request):
+    """Valideer JSON data tegen report.schema.json.
+
+    Body:
+        JSON data conform report.schema.json.
+
+    Returns:
+        {"valid": true} of {"valid": false, "errors": [...]}.
+    """
+    import jsonschema
+
+    data = await request.json()
+
+    if SCHEMA_PATH is None:
+        raise HTTPException(
+            status_code=500,
+            detail="Schema bestand niet gevonden — validatie niet beschikbaar",
+        )
+
+    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    validator = jsonschema.Draft7Validator(schema)
+    errors = [
+        {
+            "path": "/".join(str(p) for p in e.absolute_path),
+            "message": e.message,
+        }
+        for e in validator.iter_errors(data)
+    ]
+    return {"valid": len(errors) == 0, "errors": errors}
+
+
+@_protected.post("/api/generate")
+async def generate_report(request: Request, user: User = Depends(get_current_user)):
+    """Genereer PDF rapport uit JSON data.
+
+    Body:
+        JSON data conform report.schema.json.
+
+    Returns:
+        PDF bestand als binary response (application/pdf).
+    """
+    data = await request.json()
+
+    if not data.get("project"):
+        raise HTTPException(status_code=422, detail="Veld 'project' is verplicht")
+    if not data.get("template"):
+        raise HTTPException(status_code=422, detail="Veld 'template' is verplicht")
+
+    brand = (
+        data.get("brand")
+        or _resolve_brand_from_template(data, user.tenant)
+        or user.tenant
+        or _DEFAULT_BRAND
+    )
+    report = Report.from_dict(data, brand=brand)
+
+    def build(output_path: Path) -> None:
+        report.build(output_path)
+
+    return _generate_and_respond(build, data)
+
+
+# ============================================================
+# V2 Endpoints — ReportGeneratorV2
+# ============================================================
+
+
+@_protected.post("/api/generate/v2")
+async def generate_report_v2(request: Request, user: User = Depends(get_current_user)):
+    """Genereer PDF rapport via renderer_v2 (pixel-perfect huisstijl).
+
+    Body:
+        JSON data met project info, sections, appendices.
+
+    Returns:
+        PDF bestand als binary response.
+    """
+    data = await request.json()
+
+    if not data.get("project"):
+        raise HTTPException(status_code=422, detail="Veld 'project' is verplicht")
+
+    brand = (
+        data.get("brand")
+        or _resolve_brand_from_template(data, user.tenant)
+        or user.tenant
+        or _DEFAULT_BRAND
+    )
+
+    tc = get_tenant_config(user.tenant)
+    stationery_dir = tc.stationery_dir or STATIONERY_DIR
+
+    # Resolve stationery: brand_dir/stationery → tenant → package
+    brand_loader = get_brand_loader(user.tenant)
+    brand_config = brand_loader.load(brand)
+    if brand_config.brand_dir:
+        brand_stat = brand_config.brand_dir / "stationery"
+        if brand_stat.exists():
+            stationery_dir = brand_stat
+    elif tc.stationery_dir and tc.stationery_dir.exists():
+        stationery_dir = tc.stationery_dir
+    else:
+        brand_stationery = ASSETS_DIR / "stationery" / brand
+        if brand_stationery.exists():
+            stationery_dir = brand_stationery
+
+    generator = ReportGeneratorV2(brand=brand)
+
+    def build(output_path: Path) -> None:
+        generator.generate(data, stationery_dir, output_path)
+
+    return _generate_and_respond(build, data)
+
+
+# ============================================================
+# Template Engine Endpoint — YAML-driven multi-tenant
+# ============================================================
+
+
+def _resolve_tenant_and_template(
+    template_name: str,
+    tenants_dir: Path,
+    data: dict,
+    user: User,
+) -> tuple[str, str]:
+    """Leid tenant en template naam af uit de template identifier.
+
+    Strategie:
+    1. Check of template_name begint met een bekende tenant prefix
+       bijv. "customer_bic_factuur" → tenant="customer", template="bic_factuur"
+    2. Fallback naar data["brand"]
+    3. Fallback naar user.tenant
+    4. Laatste fallback: "customer"
+    """
+    # Scan bestaande tenant directories
+    if tenants_dir and tenants_dir.exists():
+        for d in sorted(tenants_dir.iterdir(), key=lambda p: len(p.name), reverse=True):
+            if not d.is_dir():
+                continue
+            prefix = d.name + "_"
+            if template_name.startswith(prefix):
+                return d.name, template_name[len(prefix):]
+
+    # Geen prefix match → probeer data["brand"] of user.tenant als tenant
+    tenant = data.get("brand") or user.tenant or "customer"
+
+    return tenant, template_name
+
+
+@_protected.post("/api/generate/template")
+async def generate_template_report(request: Request, user: User = Depends(get_current_user)):
+    """Genereer PDF rapport via TemplateEngine (YAML-driven, multi-tenant)."""
+    data = await request.json()
+
+    template_name = data.get("template")
+    if not template_name:
+        raise HTTPException(status_code=422, detail="Veld 'template' is verplicht")
+
+    # Resolve tenants directory EERST — nodig voor tenant detectie
+    tenants_dir = _resolve_tenants_dir()
+
+    if not tenants_dir or not tenants_dir.exists():
+        raise HTTPException(
+            status_code=500,
+            detail="Tenants directory niet gevonden — configureer OPENAEC_TENANTS_ROOT",
+        )
+
+    # Resolve tenant uit template naam (niet uit user sessie!)
+    tenant, template_name = _resolve_tenant_and_template(
+        template_name, tenants_dir, data, user,
+    )
+
+    logger.info("TemplateEngine: tenant=%s, template=%s", tenant, template_name)
+
+    # Brand = tenant (Customer brand.yaml zit in tenants/customer/)
+    brand = data.get("brand") or tenant or _DEFAULT_BRAND
+
+    # Transformeer JSON data naar engine formaat
+    engine_data = transform_json_to_engine_data(data)
+
+    engine = TemplateEngine(tenants_dir=tenants_dir)
+
+    def build(output_path: Path) -> None:
+        engine.build(
+            template_name=template_name,
+            tenant=tenant,
+            data=engine_data,
+            output_path=output_path,
+            brand=brand,
+        )
+
+    return _generate_and_respond(build, data)
+
+
+def _resolve_tenants_dir(tenant: str = "") -> Path | None:
+    """Resolve de tenants ROOT directory (bevat alle tenant subdirectories).
+
+    Probeert in volgorde:
+    1. OPENAEC_TENANTS_ROOT environment variable (expliciet)
+    2. Parent van OPENAEC_TENANT_DIR (als die meerdere tenant dirs bevat)
+    3. Source tree: <package>/../../tenants
+    4. Package-relatief: <package>/tenants
+    """
+    # 1. Expliciete tenants root
+    root_env = os.environ.get("OPENAEC_TENANTS_ROOT")
+    if root_env:
+        root = Path(root_env)
+        if root.exists():
+            return root
+
+    # 2. Parent van OPENAEC_TENANT_DIR
+    td_env = os.environ.get("OPENAEC_TENANT_DIR")
+    if td_env:
+        parent = Path(td_env).parent
+        # Verify: parent moet meerdere tenant dirs bevatten
+        if parent.exists() and any(
+            d.is_dir() and (d / "brand.yaml").exists()
+            for d in parent.iterdir()
+        ):
+            return parent
+
+    # 3. Source tree
+    source_tenants = Path(__file__).parent.parent.parent / "tenants"
+    if source_tenants.exists():
+        return source_tenants
+
+    # 4. Package-relatief
+    pkg_tenants = Path(__file__).parent / "tenants"
+    if pkg_tenants.exists():
+        return pkg_tenants
+
+    return None
+
+
+@_protected.post("/api/upload")
+async def upload_file(file: UploadFile = File(...)):
+    """Upload een afbeelding voor gebruik in rapporten.
+
+    Returns:
+        Dict met pad dat als `src` in JSON content gebruikt kan worden.
+    """
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Genereer unieke bestandsnaam
+    ext = Path(file.filename or "upload.png").suffix or ".png"
+    unique_name = f"{uuid.uuid4().hex}{ext}"
+    dest = UPLOAD_DIR / unique_name
+
+    with open(dest, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+
+    return {
+        "path": str(dest),
+        "filename": unique_name,
+        "size": dest.stat().st_size,
+    }
+
+
+@_protected.get("/api/stationery")
+async def list_stationery(user: User = Depends(get_current_user)):
+    """Retourneer beschikbare brands en hun stationery status.
+
+    Controleert zowel tenant stationery als package stationery.
+
+    Returns:
+        Dict met brands en per brand de beschikbare stationery bestanden.
+    """
+    required = ["colofon.pdf", "standaard.pdf", "bijlagen.pdf", "achterblad.pdf"]
+    brands = {}
+
+    def _scan_stationery_dir(sdir: Path, label: str) -> None:
+        if not sdir.exists() or not sdir.is_dir():
+            return
+        files = {f.name: True for f in sdir.iterdir() if f.is_file()}
+        if files:
+            brands[label] = {
+                "complete": all(r in files for r in required),
+                "files": list(files.keys()),
+                "missing": [r for r in required if r not in files],
+            }
+
+    # Tenant stationery
+    tc = get_tenant_config(user.tenant)
+    tenant_stat = tc.stationery_dir
+    if tenant_stat and tenant_stat.exists():
+        _scan_stationery_dir(
+            tenant_stat, tenant_stat.name if tenant_stat.name != "stationery" else "tenant"
+        )
+
+    # Package stationery (als aanvulling)
+    stationery_base = ASSETS_DIR / "stationery"
+    if stationery_base.exists():
+        for brand_dir in sorted(stationery_base.iterdir()):
+            if not brand_dir.is_dir() or brand_dir.name in brands:
+                continue
+            _scan_stationery_dir(brand_dir, brand_dir.name)
+
+    return {"brands": brands}
+
+
+# Protected router mounten op de app
+app.include_router(_protected)
+
+# Brand onboarding API (eigen auth dependency)
+from openaec_reports.brand_api import brand_router  # noqa: E402
+
+app.include_router(brand_router)
+
+# ============================================================
+# Documentation endpoint (voor admin Help tab)
+# ============================================================
+
+
+def _find_docs_dir() -> Path | None:
+    """Zoek docs/architecture op meerdere locaties."""
+    candidates = [
+        Path(__file__).parent.parent.parent / "docs" / "architecture",  # dev
+        Path("/app/docs/architecture"),                                  # Docker
+    ]
+    for p in candidates:
+        if p.exists() and (p / "architecture.html").exists():
+            return p
+    return None
+
+
+@app.get("/api/docs/architecture")
+async def serve_architecture_docs():
+    """Serve de architecture HTML documentatie voor het admin panel."""
+    docs_dir = _find_docs_dir()
+    if not docs_dir:
+        raise HTTPException(status_code=404, detail="Documentation not found")
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content=(docs_dir / "architecture.html").read_text(encoding="utf-8"))
+
+# ============================================================
+# Static frontend (moet ONDERAAN staan, na alle API routes)
+# ============================================================
+
+_static_dir = Path(__file__).parent.parent.parent / "static"
+if _static_dir.exists():
+    app.mount("/", StaticFiles(directory=str(_static_dir), html=True), name="static")
+
+
+# ============================================================
+# Entrypoint
+# ============================================================
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("openaec_reports.api:app", host="0.0.0.0", port=8000, reload=True)

@@ -9,8 +9,8 @@ from pathlib import Path
 import pytest
 from PIL import Image as PILImage
 
-from bm_reports.components.image_block import ImageBlock
-from bm_reports.core.block_registry import create_block, resolve_image_source
+from openaec_reports.components.image_block import ImageBlock
+from openaec_reports.core.block_registry import create_block, resolve_image_source
 
 
 def _make_png(tmp_path: Path, name: str = "test.png", size: tuple = (100, 100)) -> Path:

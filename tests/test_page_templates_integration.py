@@ -2,9 +2,9 @@
 
 from unittest.mock import MagicMock
 
-from bm_reports.core.brand import BrandConfig, BrandLoader
-from bm_reports.core.document import A4, DocumentConfig
-from bm_reports.core.page_templates import (
+from openaec_reports.core.brand import BrandConfig, BrandLoader
+from openaec_reports.core.document import A4, DocumentConfig
+from openaec_reports.core.page_templates import (
     _draw_text_zones,
     _resolve_binding,
     create_page_templates,

@@ -1,0 +1,64 @@
+brand:
+  name: "Default"
+  slug: "default"
+
+colors:
+  primary: "#40124A"
+  secondary: "#38BDA0"
+  accent: "#2ECC71"
+  warning: "#E74C3C"
+  text: "#45243D"
+  text_light: "#7F8C8D"
+  rule: "#BDC3C7"
+
+fonts:
+  heading: "Helvetica-Bold"
+  body: "Helvetica"
+  mono: "Courier"
+
+contact:
+  name: ""
+  address: ""
+  website: ""
+
+header:
+  height: 15
+  elements:
+    - type: text
+      content: "{project_number} | {project}"
+      x: 20
+      y: 10
+      font: "$body"
+      size: 7.5
+      color: "$text_light"
+    - type: line
+      x: 20
+      y: 8
+      width: 175
+      color: "$rule"
+      stroke_width: 0.5
+
+footer:
+  height: 12
+  elements:
+    - type: line
+      x: 20
+      y: 10
+      width: 175
+      color: "$rule"
+      stroke_width: 0.5
+    - type: text
+      content: "{author}"
+      x: 20
+      y: 3
+      font: "$body"
+      size: 7
+      color: "$text_light"
+    - type: text
+      content: "Pagina {page}"
+      x: 195
+      y: 3
+      font: "$body"
+      size: 7
+      color: "$text_light"
+      align: right

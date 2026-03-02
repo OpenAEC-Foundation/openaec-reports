@@ -8,11 +8,11 @@ from pathlib import Path
 import pytest
 from reportlab.platypus import Flowable, PageBreak, Paragraph, Spacer
 
-from bm_reports.components.calculation import CalculationBlock
-from bm_reports.components.check_block import CheckBlock
-from bm_reports.components.map_block import KadasterMap
-from bm_reports.components.table_block import TableBlock
-from bm_reports.core.block_registry import (
+from openaec_reports.components.calculation import CalculationBlock
+from openaec_reports.components.check_block import CheckBlock
+from openaec_reports.components.map_block import KadasterMap
+from openaec_reports.components.table_block import TableBlock
+from openaec_reports.core.block_registry import (
     create_block,
     resolve_image_source,
 )

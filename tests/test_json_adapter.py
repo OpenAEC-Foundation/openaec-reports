@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from bm_reports.data.json_adapter import JsonAdapter
+from openaec_reports.data.json_adapter import JsonAdapter
 
 
 class TestJsonAdapterInit:

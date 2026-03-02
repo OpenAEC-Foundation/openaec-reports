@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 from tests.conftest import TEST_PASSWORD, TEST_USERNAME
 
-from bm_reports.api import app
+from openaec_reports.api import app
 
 
 @pytest.fixture()

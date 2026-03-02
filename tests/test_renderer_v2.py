@@ -8,7 +8,7 @@ import pytest
 
 fitz = pytest.importorskip("fitz", reason="pymupdf niet geinstalleerd")
 
-from bm_reports.core.renderer_v2 import (  # noqa: E402
+from openaec_reports.core.renderer_v2 import (  # noqa: E402
     ColofonGenerator,
     ContentRenderer,
     FontManager,
@@ -20,7 +20,7 @@ from bm_reports.core.renderer_v2 import (  # noqa: E402
 )
 
 BASE = Path(__file__).parent.parent
-STATIONERY_DIR = BASE / "src" / "bm_reports" / "assets" / "stationery" / "default"
+STATIONERY_DIR = BASE / "src" / "openaec_reports" / "assets" / "stationery" / "default"
 JSON_PATH = BASE / "tests" / "test_data" / "sample_report.json"
 
 SKIP_NO_STATIONERY = pytest.mark.skipif(

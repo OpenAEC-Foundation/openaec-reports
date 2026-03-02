@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bm_reports.core.template_config import (
+from openaec_reports.core.template_config import (
     ContentFrame,
     PageDef,
     PageType,

@@ -1,4 +1,4 @@
-"""Tests voor bm_reports.utils.logo_prep — Logo preparation module."""
+"""Tests voor openaec_reports.utils.logo_prep — Logo preparation module."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from bm_reports.utils.logo_prep import (
+from openaec_reports.utils.logo_prep import (
     copy_svg,
     prepare_logos,
     process_raster,

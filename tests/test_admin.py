@@ -8,8 +8,8 @@ import pytest
 from fastapi.testclient import TestClient
 from tests.conftest import TEST_USERNAME
 
-from bm_reports.api import app
-from bm_reports.auth.dependencies import get_user_db
+from openaec_reports.api import app
+from openaec_reports.auth.dependencies import get_user_db
 
 
 @pytest.fixture()
@@ -380,8 +380,8 @@ class TestUserDBExtensions:
         """list_by_tenant retourneert alleen users van die tenant."""
         db = get_user_db()
         unique = uuid.uuid4().hex[:8]
-        from bm_reports.auth.models import User
-        from bm_reports.auth.security import hash_password
+        from openaec_reports.auth.models import User
+        from openaec_reports.auth.security import hash_password
 
         tenant_name = f"tenant_{unique}"
         db.create(User(
@@ -403,8 +403,8 @@ class TestUserDBExtensions:
         """update() wijzigt specifieke velden."""
         db = get_user_db()
         unique = uuid.uuid4().hex[:8]
-        from bm_reports.auth.models import User
-        from bm_reports.auth.security import hash_password
+        from openaec_reports.auth.models import User
+        from openaec_reports.auth.security import hash_password
 
         user = db.create(User(
             username=f"upd_{unique}",
@@ -421,8 +421,8 @@ class TestUserDBExtensions:
         """update() met ongeldig veld → ValueError."""
         db = get_user_db()
         unique = uuid.uuid4().hex[:8]
-        from bm_reports.auth.models import User
-        from bm_reports.auth.security import hash_password
+        from openaec_reports.auth.models import User
+        from openaec_reports.auth.security import hash_password
 
         user = db.create(User(
             username=f"inv_{unique}",
@@ -436,8 +436,8 @@ class TestUserDBExtensions:
         """delete() verwijdert een user."""
         db = get_user_db()
         unique = uuid.uuid4().hex[:8]
-        from bm_reports.auth.models import User
-        from bm_reports.auth.security import hash_password
+        from openaec_reports.auth.models import User
+        from openaec_reports.auth.security import hash_password
 
         user = db.create(User(
             username=f"del_{unique}",

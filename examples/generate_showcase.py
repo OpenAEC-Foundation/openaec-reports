@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from bm_reports import Report, A4
-from bm_reports.components import CalculationBlock, CheckBlock, TableBlock
+from openaec_reports import Report, A4
+from openaec_reports.components import CalculationBlock, CheckBlock, TableBlock
 
 OUTPUT_DIR = Path(__file__).parent.parent / "output"
 

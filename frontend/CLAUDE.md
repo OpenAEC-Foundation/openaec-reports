@@ -1,6 +1,6 @@
-# OpenAEC Report Editor — `bm-reports-ui`
+# OpenAEC Report Editor — `openaec-reports-ui`
 
-Web-based editor voor het samenstellen van professionele engineering rapporten. Produceert JSON conform `schemas/report.schema.json` — de backend library (`bm-reports`) consumeert dit en genereert de PDF.
+Web-based editor voor het samenstellen van professionele engineering rapporten. Produceert JSON conform `schemas/report.schema.json` — de backend library (`openaec-reports`) consumeert dit en genereert de PDF.
 
 ---
 
@@ -21,13 +21,13 @@ npm run build        # Productie build naar dist/
 Dit project is **Layer 3** van een drielaags platform, nu een **monorepo** (`openaec-reports`):
 
 ```
-Layer 1: LIBRARY (bm-reports)         ← ../src/bm_reports/ (zelfde repo)
+Layer 1: LIBRARY (openaec-reports)         ← ../src/openaec_reports/ (zelfde repo)
          Consumeert JSON → genereert PDF
 
-Layer 2: API SERVER (bm-reports-api)  ← ../src/bm_reports/api.py
+Layer 2: API SERVER (openaec-reports-api)  ← ../src/openaec_reports/api.py
          POST JSON → ontvang PDF
 
-Layer 3: FRONTEND (bm-reports-ui)     ← DIT DIRECTORY (frontend/)
+Layer 3: FRONTEND (openaec-reports-ui)     ← DIT DIRECTORY (frontend/)
          Visuele editor → produceert JSON
 ```
 
@@ -154,7 +154,7 @@ openaec-reports/                     <- Monorepo
 ├── schemas/
 │   ├── report.schema.json          <- BRON — schema wordt hier beheerd
 │   └── example_structural.json     <- Testdata
-├── src/bm_reports/                 <- Python library + API
+├── src/openaec_reports/                 <- Python library + API
 ├── frontend/                       <- DIT DIRECTORY
 │   ├── schemas/
 │   │   └── report.schema.json      <- KOPIE — niet wijzigen

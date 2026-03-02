@@ -2,7 +2,7 @@
 """
 Brand Extractor — Pixel-precieze extractie van huisstijl-elementen uit PDF.
 
-Standalone script, geen bm_reports dependencies.
+Standalone script, geen openaec_reports dependencies.
 Vereist: pip install PyMuPDF
 
 Gebruik:

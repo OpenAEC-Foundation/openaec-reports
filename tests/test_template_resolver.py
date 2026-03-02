@@ -7,8 +7,8 @@ from pathlib import Path
 import pytest
 import yaml
 
-from bm_reports.core.template_config import PageType, TemplateConfig
-from bm_reports.core.template_resolver import TemplateResolver
+from openaec_reports.core.template_config import PageType, TemplateConfig
+from openaec_reports.core.template_resolver import TemplateResolver
 
 # ============================================================
 # Fixtures — YAML bestanden in tmp_path

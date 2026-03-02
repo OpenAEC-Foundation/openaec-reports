@@ -12,7 +12,7 @@
 
 ### Deploy stappen (morgen)
 1. `npm run build` (met `.env.production` → `VITE_API_URL=https://report.open-aec.com`)
-2. Upload `dist/` naar server: `/opt/openaec/bm-reports-ui/dist/`
+2. Upload `dist/` naar server: `/opt/openaec/openaec-reports-ui/dist/`
 3. Caddy serveert static files automatisch
 
 ## Architectuur

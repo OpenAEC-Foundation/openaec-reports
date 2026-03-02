@@ -8,8 +8,8 @@ import pytest
 
 fitz = pytest.importorskip("fitz", reason="pymupdf niet geinstalleerd")
 
-from bm_reports.tools.config_generator import generate_brand_yaml, generate_pages_yaml  # noqa: E402
-from bm_reports.tools.layout_extractor import (  # noqa: E402
+from openaec_reports.tools.config_generator import generate_brand_yaml, generate_pages_yaml  # noqa: E402
+from openaec_reports.tools.layout_extractor import (  # noqa: E402
     _classify_image_role,
     _detect_badges,
     _find_clip_polygon,
@@ -18,8 +18,8 @@ from bm_reports.tools.layout_extractor import (  # noqa: E402
     _is_dynamic_text,
     extract_page_layouts,
 )
-from bm_reports.tools.page_classifier import ClassifiedPage, PageType, classify_pages  # noqa: E402
-from bm_reports.tools.pdf_extractor import (  # noqa: E402
+from openaec_reports.tools.page_classifier import ClassifiedPage, PageType, classify_pages  # noqa: E402
+from openaec_reports.tools.pdf_extractor import (  # noqa: E402
     ImageElement,
     PathElement,
     RawPageData,
@@ -420,7 +420,7 @@ class TestGeneratePagesYaml:
 
     def test_integrated_in_brand_yaml(self, sample_pdf):
         """page_layouts parameter integreert in generate_brand_yaml output."""
-        from bm_reports.tools.pattern_detector import analyze_brand
+        from openaec_reports.tools.pattern_detector import analyze_brand
 
         pages = extract_pdf(sample_pdf)
         classified = classify_pages(pages)
@@ -441,18 +441,18 @@ class TestGeneratePagesYaml:
 
 class TestVisualDiff:
     def test_import(self):
-        from bm_reports.tools.visual_diff import PageDiff
+        from openaec_reports.tools.visual_diff import PageDiff
         assert PageDiff is not None
 
     def test_page_diff_dataclass(self):
-        from bm_reports.tools.visual_diff import PageDiff
+        from openaec_reports.tools.visual_diff import PageDiff
         d = PageDiff(page_number=1, similarity_pct=95.5)
         assert d.page_number == 1
         assert d.similarity_pct == 95.5
         assert d.notes == []
 
     def test_file_not_found(self, tmp_path):
-        from bm_reports.tools.visual_diff import compare_pdfs
+        from openaec_reports.tools.visual_diff import compare_pdfs
         with pytest.raises(FileNotFoundError):
             compare_pdfs(tmp_path / "nope.pdf", tmp_path / "also_nope.pdf")
 
@@ -464,7 +464,7 @@ class TestVisualDiff:
         except ImportError:
             pytest.skip("Pillow/numpy niet geinstalleerd")
 
-        from bm_reports.tools.visual_diff import compare_pdfs
+        from openaec_reports.tools.visual_diff import compare_pdfs
         diffs = compare_pdfs(sample_pdf, sample_pdf, tmp_path / "diffs")
         assert len(diffs) == 3
         for d in diffs:
@@ -478,12 +478,12 @@ class TestVisualDiff:
         except ImportError:
             pytest.skip("Pillow/numpy niet geinstalleerd")
 
-        from bm_reports.tools.visual_diff import compare_pdfs
+        from openaec_reports.tools.visual_diff import compare_pdfs
         diffs = compare_pdfs(sample_pdf, sample_pdf, pages=[1, 3])
         assert len(diffs) == 2
 
     def test_print_diff_report(self, capsys):
-        from bm_reports.tools.visual_diff import PageDiff, print_diff_report
+        from openaec_reports.tools.visual_diff import PageDiff, print_diff_report
         diffs = [
             PageDiff(1, 98.5),
             PageDiff(2, 85.0),
@@ -509,16 +509,16 @@ class TestCLIExtractLayout:
         # Test dat parser het commando herkent
         from unittest.mock import patch
 
-        from bm_reports.cli import main
+        from openaec_reports.cli import main
         with pytest.raises(SystemExit):
-            with patch("sys.argv", ["bm-report", "extract-layout", "--help"]):
+            with patch("sys.argv", ["openaec-report", "extract-layout", "--help"]):
                 main()
 
     def test_visual_diff_parseable(self):
         """visual-diff subcommand is geregistreerd in argparse."""
         from unittest.mock import patch
 
-        from bm_reports.cli import main
+        from openaec_reports.cli import main
         with pytest.raises(SystemExit):
-            with patch("sys.argv", ["bm-report", "visual-diff", "--help"]):
+            with patch("sys.argv", ["openaec-report", "visual-diff", "--help"]):
                 main()

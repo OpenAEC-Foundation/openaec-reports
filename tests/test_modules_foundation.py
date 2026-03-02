@@ -20,8 +20,8 @@ import pytest
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-from bm_reports.modules import ModuleRegistry
-from bm_reports.modules.base import ContentModule, ModuleConfig
+from openaec_reports.modules import ModuleRegistry
+from openaec_reports.modules.base import ContentModule, ModuleConfig
 
 # ---------------------------------------------------------------------------
 # Test helpers
@@ -287,7 +287,7 @@ class TestContentModule:
 
 fitz = pytest.importorskip("fitz", reason="pymupdf niet geinstalleerd")
 
-from bm_reports.core.renderer_v2 import (  # noqa: E402
+from openaec_reports.core.renderer_v2 import (  # noqa: E402
     A4_LANDSCAPE_HEIGHT,
     A4_LANDSCAPE_WIDTH,
     A4_PORTRAIT_HEIGHT,
@@ -301,9 +301,9 @@ from bm_reports.core.renderer_v2 import (  # noqa: E402
 
 BASE = Path(__file__).parent.parent
 STATIONERY_DIR = (
-    BASE / "src" / "bm_reports" / "assets" / "stationery" / "default"
+    BASE / "src" / "openaec_reports" / "assets" / "stationery" / "default"
 )
-TEMPLATE_DIR = BASE / "src" / "bm_reports" / "assets" / "templates" / "default"
+TEMPLATE_DIR = BASE / "src" / "openaec_reports" / "assets" / "templates" / "default"
 
 SKIP_NO_ASSETS = pytest.mark.skipif(
     not TEMPLATE_DIR.exists(),

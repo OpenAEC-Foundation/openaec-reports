@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from bm_reports import A4, Report
-from bm_reports.components import CalculationBlock, CheckBlock, ImageBlock, TableBlock
+from openaec_reports import A4, Report
+from openaec_reports.components import CalculationBlock, CheckBlock, ImageBlock, TableBlock
 
 
 class TestBuildPipeline:

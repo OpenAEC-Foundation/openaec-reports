@@ -1,4 +1,4 @@
-# STATUS — bm-reports
+# STATUS — openaec-reports
 
 > Laatst bijgewerkt: 2026-03-01 (sessie: pixel fixes + admin cleanup)
 
@@ -111,6 +111,6 @@
 
 ### Tenant resolution in `/api/generate/template` — GEFIXT (cfaa808)
 - **FIX-1:** Nieuwe `_resolve_tenant_and_template()` helper leidt tenant af uit template naam prefix (bijv. `customer_bic_factuur` → tenant=`customer`). Scant bestaande tenant directories, sorted by name length (langste eerst) om ambiguïteit te voorkomen. Fallback: `data["brand"]` → `user.tenant` → `"customer"`.
-- **FIX-2:** `_resolve_tenants_dir()` herschreven: checkt `BM_TENANTS_ROOT` env var eerst, dan parent van `BM_TENANT_DIR` (met brand.yaml verificatie), dan source tree, dan package-relatief. Dockerfile had `BM_TENANTS_ROOT=/app/tenants` al.
+- **FIX-2:** `_resolve_tenants_dir()` herschreven: checkt `OPENAEC_TENANTS_ROOT` env var eerst, dan parent van `OPENAEC_TENANT_DIR` (met brand.yaml verificatie), dan source tree, dan package-relatief. Dockerfile had `OPENAEC_TENANTS_ROOT=/app/tenants` al.
 - **FIX-3:** Frontend smart routing code was al correct in broncode. Probleem was Docker cache → vereist `docker build --no-cache` bij volgende deploy.
 - **Tests:** 888 passed, 0 failures. E2E PDF generatie OK.

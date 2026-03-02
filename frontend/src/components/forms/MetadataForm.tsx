@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useReportStore } from '@/stores/reportStore';
-import brand from '@/config/brand';
 import { TemplateSelector } from './TemplateSelector';
 import type { Format, Orientation, Status } from '@/types/report';
 
@@ -142,7 +141,7 @@ export function MetadataForm() {
             value={local.author}
             onChange={(e) => handleLocalChange('author', e.target.value)}
             onBlur={() => handleBlur('author')}
-            placeholder={brand.fullName}
+            placeholder="Auteur"
           />
         </div>
       </div>

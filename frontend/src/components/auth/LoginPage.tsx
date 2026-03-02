@@ -20,11 +20,9 @@ export function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Brand header */}
         <div className="mb-8 text-center">
-          <h1
-            className="text-3xl font-bold tracking-tight"
-            style={{ color: brand.colors.secondary }}
-          >
-            {brand.name}
+          <h1 className="text-3xl font-bold tracking-tight">
+            <span style={{ color: brand.colors.headerBg }}>{brand.namePrefix}</span>
+            <span style={{ color: brand.colors.primary }}>{brand.nameAccent}</span>
           </h1>
           <p className="mt-1 text-sm text-gray-500">{brand.productName}</p>
         </div>

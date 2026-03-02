@@ -25,23 +25,6 @@ _CACHE_MAX_FILES = 200
 # DPI voor kaartafbeeldingen (pixels per inch)
 _MAP_DPI = 150
 
-# Module-level styles (voorkom naam-conflicten bij multi-pass builds)
-_STYLE_MAP_SCALE = ParagraphStyle(
-    "_map_scale",
-    parent=BM_STYLES["Caption"],
-    fontSize=BM_FONTS.caption_size,
-    textColor=HexColor(BM_COLORS.text_light),
-)
-
-_STYLE_MAP_PLACEHOLDER = ParagraphStyle(
-    "_map_placeholder",
-    parent=BM_STYLES["Normal"],
-    fontName=BM_FONTS.body,
-    fontSize=BM_FONTS.body_size,
-    textColor=HexColor(BM_COLORS.text_light),
-)
-
-
 class KadasterMap(Flowable):
     """Kadaster kaartje flowable via PDOK WMS.
 
@@ -219,11 +202,28 @@ class KadasterMap(Flowable):
         target_w = min(self.width_mm * MM_TO_PT, available_width - 2 * pad)
         target_h = self.height_mm * MM_TO_PT
 
+        # Styles met huidige (geactiveerde) brand-waarden
+        style_scale = ParagraphStyle(
+            "_map_scale",
+            parent=BM_STYLES["Caption"],
+            fontSize=BM_FONTS.caption_size,
+            textColor=HexColor(BM_COLORS.text_light),
+        )
+        style_placeholder = ParagraphStyle(
+            "_map_placeholder",
+            parent=BM_STYLES["Normal"],
+            fontName=BM_FONTS.body,
+            fontSize=BM_FONTS.body_size,
+            textColor=HexColor(BM_COLORS.text_light),
+        )
+
         data = []
 
         if self._fetch_failed or not self._layer_paths:
             # Placeholder bij fout
-            placeholder = self._make_placeholder(target_w, target_h)
+            placeholder = self._make_placeholder(
+                target_w, target_h, style_placeholder
+            )
             data.append([placeholder])
         else:
             # Kaartafbeelding — gebruik eerste laag als representatie in Table
@@ -247,7 +247,7 @@ class KadasterMap(Flowable):
             scale_text = f"~{diameter / 1000:.1f} km"
         else:
             scale_text = f"~{int(diameter)} m"
-        data.append([Paragraph(scale_text, _STYLE_MAP_SCALE)])
+        data.append([Paragraph(scale_text, style_scale)])
 
         table = Table(data, colWidths=[available_width])
 
@@ -273,20 +273,34 @@ class KadasterMap(Flowable):
         table.setStyle(TableStyle(style_cmds))
         return table
 
-    def _make_placeholder(self, width_pt: float, height_pt: float) -> Flowable:
+    def _make_placeholder(
+        self,
+        width_pt: float,
+        height_pt: float,
+        style: ParagraphStyle | None = None,
+    ) -> Flowable:
         """Maak placeholder tabel voor wanneer de kaart niet beschikbaar is.
 
         Args:
             width_pt: Breedte in points.
             height_pt: Hoogte in points.
+            style: ParagraphStyle voor de placeholder tekst.
         """
+        if style is None:
+            style = ParagraphStyle(
+                "_map_placeholder",
+                parent=BM_STYLES["Normal"],
+                fontName=BM_FONTS.body,
+                fontSize=BM_FONTS.body_size,
+                textColor=HexColor(BM_COLORS.text_light),
+            )
         lines = [
             "Kaart niet beschikbaar",
             f"Locatie: {self.latitude:.6f}, {self.longitude:.6f}",
             f"Lagen: {', '.join(self.layers)}",
         ]
         text = "<br/>".join(lines)
-        para = Paragraph(text, _STYLE_MAP_PLACEHOLDER)
+        para = Paragraph(text, style)
 
         inner = Table([[para]], colWidths=[width_pt - 12])
         inner.setStyle(

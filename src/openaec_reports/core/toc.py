@@ -44,7 +44,7 @@ class TOCBuilder:
                 leading=14,
                 leftIndent=0,
                 spaceBefore=4,
-                textColor=HexColor(BM_COLORS.secondary),
+                textColor=HexColor(BM_COLORS.text_accent),
             ),
             ParagraphStyle(
                 name="TOCLevel2",

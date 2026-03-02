@@ -27,9 +27,9 @@ def _ensure_fonts_registered() -> None:
 # ============================================================
 
 
-@dataclass(frozen=True)
+@dataclass
 class Colors:
-    """3BM Huisstijl kleurenpalet."""
+    """Huisstijl kleurenpalet (activeerbaar per brand)."""
 
     primary: str = "#40124A"  # Donkerpaars (3BM huisstijl)
     secondary: str = "#38BDA0"  # Turquoise (3BM huisstijl)
@@ -69,9 +69,9 @@ BLOCK_PADDING = 6
 # ============================================================
 
 
-@dataclass(frozen=True)
+@dataclass
 class FontConfig:
-    """Font configuratie.
+    """Font configuratie (activeerbaar per brand).
 
     Gebruikt Gotham fonts als ze beschikbaar zijn in assets/fonts/.
     Valt automatisch terug op Helvetica als Gotham niet geïnstalleerd is.
@@ -230,6 +230,117 @@ def create_stylesheet(brand: BrandConfig | None = None) -> StyleSheet1:
 
 
 BM_STYLES = create_stylesheet()
+
+
+# ============================================================
+# Brand activatie — update module globals per tenant
+# ============================================================
+
+
+def activate_brand(brand: BrandConfig) -> None:
+    """Activeer brand-specifieke kleuren, fonts en styles.
+
+    Wijzigt de module-level BM_COLORS, BM_FONTS en BM_STYLES in-place
+    zodat alle componenten automatisch de juiste brand-waarden gebruiken.
+
+    Args:
+        brand: Brand configuratie met kleuren, fonts en style overrides.
+    """
+    _ensure_fonts_registered()
+
+    # Register tenant fonts als beschikbaar
+    if brand.font_files and brand.brand_dir:
+        from openaec_reports.core.fonts import register_tenant_fonts
+
+        register_tenant_fonts(brand.font_files, brand.brand_dir)
+
+    # 1. Update BM_COLORS van brand.colors (reset naar defaults voor ontbrekende keys)
+    defaults = Colors()
+    if brand.colors:
+        for field_name in Colors.__dataclass_fields__:
+            value = brand.colors.get(field_name, getattr(defaults, field_name))
+            setattr(BM_COLORS, field_name, value)
+
+    # 2. Update BM_FONTS font names van brand.fonts
+    _font_roles: dict[str, str] = {
+        "heading": "Helvetica-Bold",
+        "body": "Helvetica",
+        "medium": "Helvetica",
+        "italic": "Helvetica-Oblique",
+    }
+    if brand.fonts:
+        for role, fallback in _font_roles.items():
+            font_ref = brand.fonts.get(role, fallback)
+            setattr(BM_FONTS, role, get_font_name(font_ref))
+
+    # 3. Update BM_STYLES paragraph styles in-place
+    _update_stylesheet_inplace(brand)
+
+
+def _update_stylesheet_inplace(brand: BrandConfig) -> None:
+    """Update bestaande BM_STYLES met huidige BM_COLORS en BM_FONTS waarden.
+
+    Args:
+        brand: Brand configuratie met optionele style overrides.
+    """
+    _style_updates = {
+        "Normal": {
+            "fontName": BM_FONTS.body,
+            "fontSize": BM_FONTS.body_size,
+            "leading": BM_FONTS.body_size * 1.4,
+            "textColor": HexColor(BM_COLORS.text),
+        },
+        "Heading1": {
+            "fontName": BM_FONTS.body,
+            "fontSize": BM_FONTS.heading1_size,
+            "leading": BM_FONTS.heading1_size * 1.3,
+            "textColor": HexColor(BM_COLORS.text),
+        },
+        "Heading2": {
+            "fontName": BM_FONTS.body,
+            "fontSize": BM_FONTS.heading2_size,
+            "leading": BM_FONTS.heading2_size * 1.3,
+            "textColor": HexColor(BM_COLORS.text_accent),
+        },
+        "Heading3": {
+            "fontName": BM_FONTS.body,
+            "fontSize": BM_FONTS.heading3_size,
+            "leading": BM_FONTS.heading3_size * 1.3,
+            "textColor": HexColor(BM_COLORS.text_accent),
+        },
+        "Caption": {
+            "textColor": HexColor(BM_COLORS.text_light),
+        },
+        "Footer": {
+            "textColor": HexColor(BM_COLORS.text_light),
+        },
+        "CoverTitle": {
+            "fontName": BM_FONTS.heading,
+            "textColor": HexColor(BM_COLORS.primary),
+        },
+        "CoverSubtitle": {
+            "fontName": BM_FONTS.body,
+            "textColor": HexColor(BM_COLORS.secondary),
+        },
+    }
+
+    for style_name, updates in _style_updates.items():
+        if style_name in BM_STYLES.byName:
+            style = BM_STYLES[style_name]
+            for attr, value in updates.items():
+                setattr(style, attr, value)
+
+    # Brand-specifieke style overrides toepassen (overschrijft base)
+    if brand.styles:
+        for style_name, overrides in brand.styles.items():
+            if style_name in BM_STYLES.byName:
+                style = BM_STYLES[style_name]
+                for attr, value in overrides.items():
+                    if attr == "textColor":
+                        value = HexColor(value)
+                    elif attr == "fontName":
+                        value = get_font_name(value)
+                    setattr(style, attr, value)
 
 
 # ============================================================

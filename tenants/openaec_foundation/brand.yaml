@@ -33,7 +33,11 @@ colors:
   table_header_bg: "#36363E"   # Deep Forge header
   table_header_text: "#FAFAF9" # Blueprint White header text
   table_footer_bg: "#D97706"   # Amber footer
-  # Separator
+  # Backgrounds (component-level)
+  background: "#FAFAF9"        # Blueprint White — page background
+  background_alt: "#F5F5F4"    # Concrete — zebra stripes, header bg
+  # Borders
+  rule: "#E7E5E4"              # Grid lines, borders
   separator: "#E7E5E4"         # Default border color
   # Gradient (for reference — rendered programmatically)
   gradient_start: "#D97706"    # Amber
@@ -80,22 +84,8 @@ contact:
 header:
   height: 38
   elements:
-    # Amber gradient strip (4px) aan onderkant van header
-    - type: line
-      x: 0
-      y: 0
-      width: 210
-      color: "$primary"
-      stroke_width: 1.4
-
-    # Logo linksboven in header
-    - type: image
-      src: "logos/openaec-logo-amber-on-dark-2x.png"
-      x: 12
-      y: 10
-      width: 40
-
-    # Project metadata rechts
+    # Stationery levert: achtergrond, blueprint pattern, logo, amber strip
+    # Hier alleen dynamische tekst (project metadata rechts)
     - type: text
       content: "{project_number}"
       x: 195
@@ -120,15 +110,8 @@ header:
 footer:
   height: 15
   elements:
-    # Amber gradient strip (3px) aan bovenkant van footer
-    - type: line
-      x: 0
-      y: 13
-      width: 210
-      color: "$primary"
-      stroke_width: 1.0
-
-    # Documenttitel + paginanummer rechts (JetBrains Mono style)
+    # Stationery levert: achtergrond, amber strip, "OpenAEC" wordmark, "openaec.org"
+    # Hier alleen dynamisch paginanummer
     - type: text
       content: "Pagina {page}"
       x: 195
@@ -137,15 +120,6 @@ footer:
       size: 7.0
       color: "$primary"
       align: right
-
-    # "OpenAEC" wordmark links
-    - type: text
-      content: "OpenAEC"
-      x: 12
-      y: 5
-      font: "$heading"
-      size: 7.5
-      color: "#FAFAF9"
 
 # ==============================================================================
 # STYLES — Paragraph styles conform design system typography
@@ -183,56 +157,17 @@ styles:
 # ==============================================================================
 pages:
   cover:
-    # Deep Forge achtergrond (bovenste ~65% van pagina)
-    bg_rect_y_ref: 280.0
-    bg_rect_h_ref: 561.89
-    bg_color: "#36363E"
+    # Stationery PDF levert alle statische visuals (achtergrond, logo,
+    # blueprint pattern, badges, tagline). Alleen titel/subtitel dynamisch.
+    stationery_only: true
 
-    # Illustration overlay (report-header-dark of hero-banner)
-    illustration: "stationery/hero-banner-dark-2x.png"
-    illustration_opacity: 0.30
-
-    # Logo
-    logo_key: "main"
-    logo_fallback: "light"
-    logo_x_ref: 62
-    logo_y_ref: 775
-    logo_w_ref: 120
-
-    # Tagline
-    tagline: "Build free. Build together."
-    tagline_font: "SpaceGrotesk-Medium"
-    tagline_size: 10.0
-    tagline_color: "#A1A1AA"
-    tagline_x_ref: 62
-    tagline_y_ref: 755
-
-    # Badges
-    badges:
-      - label: "OPEN SOURCE"
-        bg_color: "#D97706"
-        text_color: "#FAFAF9"
-        x_ref: 297
-        y_ref: 310
-        w_ref: 120
-        h_ref: 32
-      - label: "ENGINEERING"
-        bg_color: "#36363E"
-        text_color: "#FAFAF9"
-        x_ref: 430
-        y_ref: 310
-        w_ref: 108
-        h_ref: 32
-    badge_radius_ref: 8
-    badge_font_size_ref: 9.0
-
-    # Titel (dynamisch)
+    # Titel (dynamisch — gerenderd over stationery)
     title_size_ref: 28.0
     title_x_ref: 54.0
     title_y_ref: 95.0
     title_color: "#36363E"
 
-    # Subtitel (dynamisch)
+    # Subtitel (dynamisch — gerenderd over stationery)
     subtitle_size_ref: 16.0
     subtitle_x_ref: 54.0
     subtitle_y_ref: 65.0
@@ -382,14 +317,14 @@ pages:
 # ==============================================================================
 stationery:
   cover:
-    source: ""
+    source: "stationery/cover.pdf"
     text_zones: []
   colofon:
-    source: ""
-    header_footer: "colofon"
+    source: "stationery/content.pdf"
+    header_footer: "content"
     text_zones: []
   content:
-    source: ""
+    source: "stationery/content.pdf"
     header_footer: "content"
     content_frame:
       x_pt: 34.0
@@ -397,7 +332,7 @@ stationery:
       width_pt: 527.3
       height_pt: 677.0
   toc:
-    source: ""
+    source: "stationery/content.pdf"
     header_footer: "content"
   appendix_divider:
     source: ""

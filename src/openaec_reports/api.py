@@ -601,13 +601,13 @@ app.include_router(brand_router)
 
 
 def _find_docs_dir() -> Path | None:
-    """Zoek docs/architecture op meerdere locaties."""
+    """Zoek docs/ op meerdere locaties."""
     candidates = [
-        Path(__file__).parent.parent.parent / "docs" / "architecture",  # dev
-        Path("/app/docs/architecture"),                                  # Docker
+        Path(__file__).parent.parent.parent / "docs",  # dev
+        Path("/app/docs"),                              # Docker
     ]
     for p in candidates:
-        if p.exists() and (p / "architecture.html").exists():
+        if p.exists():
             return p
     return None
 
@@ -616,10 +616,22 @@ def _find_docs_dir() -> Path | None:
 async def serve_architecture_docs():
     """Serve de architecture HTML documentatie voor het admin panel."""
     docs_dir = _find_docs_dir()
-    if not docs_dir:
+    arch_dir = docs_dir / "architecture" if docs_dir else None
+    if not arch_dir or not (arch_dir / "architecture.html").exists():
         raise HTTPException(status_code=404, detail="Documentation not found")
     from fastapi.responses import HTMLResponse
-    return HTMLResponse(content=(docs_dir / "architecture.html").read_text(encoding="utf-8"))
+    return HTMLResponse(content=(arch_dir / "architecture.html").read_text(encoding="utf-8"))
+
+
+@app.get("/uitleg.html")
+async def serve_uitleg():
+    """Serve de publieke handleiding pagina."""
+    docs_dir = _find_docs_dir()
+    uitleg_path = docs_dir / "uitleg.html" if docs_dir else None
+    if not uitleg_path or not uitleg_path.exists():
+        raise HTTPException(status_code=404, detail="Handleiding niet gevonden")
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content=uitleg_path.read_text(encoding="utf-8"))
 
 # ============================================================
 # Static frontend (moet ONDERAAN staan, na alle API routes)

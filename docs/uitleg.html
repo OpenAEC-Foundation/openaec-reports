@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenAEC Reports — Handleiding</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple-50: #faf5ff;
+    --purple-100: #f3e8ff;
+    --purple-600: #9333ea;
+    --purple-700: #7e22ce;
+    --purple-800: #6b21a8;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --green-50: #f0fdf4;
+    --green-700: #15803d;
+    --blue-50: #eff6ff;
+    --blue-700: #1d4ed8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-600);
+    line-height: 1.6;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    padding: 20px 0;
+  }
+  .header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+  .header h1 span { color: var(--purple-700); }
+  .header-link {
+    color: var(--purple-700);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .header-link:hover { text-decoration: underline; }
+
+  /* Layout */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    display: flex;
+    gap: 32px;
+  }
+
+  /* Sidebar */
+  nav {
+    width: 192px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 24px;
+    align-self: flex-start;
+  }
+  nav ul { list-style: none; }
+  nav li { margin-bottom: 4px; }
+  nav a {
+    display: block;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: var(--gray-600);
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.15s;
+  }
+  nav a:hover {
+    background: var(--gray-100);
+    color: var(--gray-900);
+  }
+  nav a.active {
+    background: var(--purple-50);
+    color: var(--purple-700);
+    font-weight: 500;
+  }
+
+  /* Content */
+  main {
+    flex: 1;
+    min-width: 0;
+  }
+  .section {
+    display: none;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 24px;
+  }
+  .section.active { display: block; }
+  .section h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 12px;
+  }
+  .section h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-top: 20px;
+    margin-bottom: 6px;
+  }
+  .section p { margin-bottom: 8px; }
+  .section ul, .section ol {
+    margin: 8px 0 8px 20px;
+  }
+  .section li { margin-bottom: 4px; }
+  .section strong { color: var(--gray-800); }
+
+  code {
+    background: var(--gray-100);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 13px;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  code.purple { color: var(--purple-700); background: var(--purple-50); }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+  thead tr { border-bottom: 2px solid var(--gray-200); }
+  th {
+    text-align: left;
+    padding: 8px 12px 8px 0;
+    font-weight: 500;
+    color: var(--gray-900);
+  }
+  tbody tr { border-bottom: 1px solid var(--gray-100); }
+  td { padding: 6px 12px 6px 0; }
+
+  .badge {
+    display: inline-block;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: monospace;
+  }
+  .badge-get { background: var(--green-50); color: var(--green-700); }
+  .badge-post { background: var(--blue-50); color: var(--blue-700); }
+  .mono { font-family: monospace; font-size: 13px; }
+
+  /* Pre blocks */
+  pre {
+    background: var(--gray-800);
+    color: #e5e7eb;
+    border-radius: 6px;
+    padding: 16px;
+    overflow-x: auto;
+    font-size: 13px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    margin: 8px 0;
+    line-height: 1.5;
+  }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    .container { flex-direction: column; gap: 16px; }
+    nav { width: 100%; position: static; }
+    nav ul { display: flex; flex-wrap: wrap; gap: 4px; }
+    nav li { margin: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1><span>OpenAEC</span> Reports — Handleiding</h1>
+    <a class="header-link" href="/">Terug naar de editor</a>
+  </div>
+</div>
+
+<div class="container">
+  <nav>
+    <ul>
+      <li><a href="#overzicht" class="active" data-section="overzicht">Overzicht</a></li>
+      <li><a href="#tenants" data-section="tenants">Tenants</a></li>
+      <li><a href="#gebruikers" data-section="gebruikers">Gebruikers</a></li>
+      <li><a href="#templates" data-section="templates">Templates</a></li>
+      <li><a href="#brand" data-section="brand">Brand &amp; Huisstijl</a></li>
+      <li><a href="#api" data-section="api">API &amp; Integratie</a></li>
+      <li><a href="#json-schema" data-section="json-schema">JSON Schema</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <!-- Overzicht -->
+    <div class="section active" id="overzicht">
+      <h2>Overzicht</h2>
+      <p>
+        OpenAEC Reports is een platform voor het genereren van professionele engineering rapporten.
+        Hieronder vind je uitleg per onderdeel.
+      </p>
+
+      <h3>Architectuur</h3>
+      <p>Het platform bestaat uit drie lagen:</p>
+      <ul>
+        <li><strong>Library</strong> (openaec-reports) &mdash; Python package dat PDF rapporten genereert op basis van JSON input en YAML templates.</li>
+        <li><strong>API Server</strong> &mdash; FastAPI backend die JSON ontvangt en PDF&rsquo;s retourneert. Biedt ook tenant- en gebruikersbeheer.</li>
+        <li><strong>Frontend</strong> &mdash; De web-UI. Visuele editor die JSON produceert conform het rapport-schema.</li>
+      </ul>
+
+      <h3>Multi-tenant</h3>
+      <p>
+        Het systeem ondersteunt meerdere organisaties (tenants). Elke tenant heeft eigen templates,
+        brand-configuratie, stationery, logo&rsquo;s en fonts. De engine is generiek, de look &amp; feel
+        per tenant configureerbaar.
+      </p>
+
+      <h3>Data flow</h3>
+<pre>Gebruiker &rarr; Editor (frontend)
+            &rarr; JSON (rapport-schema)
+            &rarr; API (/api/generate)
+            &rarr; PDF (openaec-reports library)</pre>
+    </div>
+
+    <!-- Tenants -->
+    <div class="section" id="tenants">
+      <h2>Tenants</h2>
+      <p>
+        Een <strong>tenant</strong> is een organisatie met eigen huisstijl en templates.
+        Elke tenant heeft een unieke slug (bijv. <code>mijn_organisatie</code>).
+      </p>
+
+      <h3>Tenant aanmaken</h3>
+      <ol>
+        <li>Ga naar het tabblad <strong>Tenants</strong> in het admin-panel.</li>
+        <li>Klik op <strong>Nieuwe tenant</strong> en vul een naam en slug in.</li>
+        <li>De slug wordt gebruikt als mapnaam en moet uniek zijn (lowercase, underscores toegestaan).</li>
+      </ol>
+
+      <h3>Tenant structuur</h3>
+      <p>Na aanmaken bevat een tenant-map:</p>
+<pre>tenants/mijn_organisatie/
+  brand.yaml        &larr; Huisstijl configuratie
+  templates/        &larr; YAML rapport-templates
+  stationery/       &larr; PDF/PNG achtergrondpagina's
+  logos/            &larr; Logo's (SVG, PNG)
+  fonts/            &larr; Lettertypen (TTF, OTF)</pre>
+
+      <h3>Environment variable</h3>
+      <p>De actieve tenant wordt bepaald door:</p>
+<pre>OPENAEC_TENANT_DIR=tenants/mijn_organisatie</pre>
+      <p>Meerdere tenants beschikbaar maken:</p>
+<pre>OPENAEC_TENANTS_ROOT=tenants/</pre>
+    </div>
+
+    <!-- Gebruikers -->
+    <div class="section" id="gebruikers">
+      <h2>Gebruikers</h2>
+      <p>Gebruikersbeheer regelt wie toegang heeft tot het platform en met welke rechten.</p>
+
+      <h3>Rollen</h3>
+      <ul>
+        <li><strong>admin</strong> &mdash; Volledige toegang tot alle beheerfuncties, tenants en gebruikers.</li>
+        <li><strong>user</strong> &mdash; Kan rapporten aanmaken en genereren, maar geen beheertaken uitvoeren.</li>
+      </ul>
+
+      <h3>Acties</h3>
+      <ul>
+        <li><strong>Aanmaken</strong> &mdash; Vul gebruikersnaam, wachtwoord, rol en optioneel een tenant-koppeling in.</li>
+        <li><strong>Wachtwoord resetten</strong> &mdash; Stel een nieuw wachtwoord in voor een bestaande gebruiker.</li>
+        <li><strong>Verwijderen</strong> &mdash; Verwijdert het account permanent.</li>
+      </ul>
+
+      <h3>CLI aanmaken</h3>
+<pre>openaec-report create-user --username admin --password geheim --admin
+openaec-report create-api-key --username admin --name "CI/CD"</pre>
+    </div>
+
+    <!-- Templates -->
+    <div class="section" id="templates">
+      <h2>Templates</h2>
+      <p>
+        Templates zijn YAML-bestanden die de structuur en opmaak van een rapporttype defini&euml;ren.
+        Elke tenant kan eigen templates hebben.
+      </p>
+
+      <h3>Template structuur</h3>
+      <p>Een template YAML bevat:</p>
+      <ul>
+        <li><strong>Metadata</strong> &mdash; Naam, beschrijving, tenant, papierformaat.</li>
+        <li><strong>Page types</strong> &mdash; Definities van paginatypen (cover, content, colofon) met stationery-referenties.</li>
+        <li><strong>Content styles</strong> &mdash; Typografie, kleuren, spacing per bloktype.</li>
+        <li><strong>Secties</strong> &mdash; Voorgedefinieerde secties met placeholder-content.</li>
+      </ul>
+
+      <h3>Template uploaden</h3>
+      <ol>
+        <li>Selecteer een tenant in het Tenants-tabblad.</li>
+        <li>Ga naar <strong>Templates</strong> en klik op <strong>Upload template</strong>.</li>
+        <li>Selecteer een <code>.yaml</code> bestand.</li>
+      </ol>
+
+      <h3>Content block types</h3>
+      <table>
+        <thead>
+          <tr><th>Type</th><th>Beschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="purple">paragraph</code></td><td>Tekst met opmaak (bold, italic, sub, sup)</td></tr>
+          <tr><td><code class="purple">calculation</code></td><td>Berekening met formule, eenheid en resultaat</td></tr>
+          <tr><td><code class="purple">check</code></td><td>Unity check met required/calculated waarden</td></tr>
+          <tr><td><code class="purple">table</code></td><td>Tabel met headers en rijen</td></tr>
+          <tr><td><code class="purple">image</code></td><td>Afbeelding (pad, URL of base64)</td></tr>
+          <tr><td><code class="purple">map</code></td><td>Kadasterkaart via PDOK WMS</td></tr>
+          <tr><td><code class="purple">bullet_list</code></td><td>Opsomming met bullet points</td></tr>
+          <tr><td><code class="purple">heading_2</code></td><td>Subkop binnen een sectie</td></tr>
+          <tr><td><code class="purple">spacer</code></td><td>Verticale witruimte (in mm)</td></tr>
+          <tr><td><code class="purple">page_break</code></td><td>Pagina-einde forceren</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Brand & Huisstijl -->
+    <div class="section" id="brand">
+      <h2>Brand &amp; Huisstijl</h2>
+      <p>
+        De Brand-configuratie bepaalt de visuele identiteit van een tenant: kleuren, lettertypen,
+        logo&rsquo;s en achtergrondpagina&rsquo;s (stationery).
+      </p>
+
+      <h3>brand.yaml</h3>
+      <p>Het centrale configuratiebestand bevat:</p>
+      <ul>
+        <li><strong>Kleuren</strong> &mdash; Primary, secondary, text, accent kleuren (hex).</li>
+        <li><strong>Fonts</strong> &mdash; Font-families met paden naar TTF/OTF bestanden.</li>
+        <li><strong>Logo&rsquo;s</strong> &mdash; Paden naar logo-varianten (kleur, wit, compact).</li>
+        <li><strong>Stationery</strong> &mdash; Referenties naar PDF/PNG achtergrondpagina&rsquo;s per paginatype.</li>
+      </ul>
+
+      <h3>Voorbeeld brand.yaml</h3>
+<pre>name: Mijn Organisatie
+slug: mijn_organisatie
+colors:
+  primary: "#40124A"
+  secondary: "#38BDA0"
+  text: "#45243D"
+fonts:
+  heading: fonts/Gotham-Bold.ttf
+  body: fonts/Gotham-Book.ttf
+logos:
+  default: logos/logo.svg
+  white: logos/logo-wit.svg
+stationery:
+  content: stationery/content.png</pre>
+
+      <h3>Brand Extraction Wizard</h3>
+      <p>Automatisch een brand-configuratie opbouwen vanuit een bestaande PDF:</p>
+      <ol>
+        <li>Upload een referentie-PDF (bijv. een bestaand rapport in de gewenste huisstijl).</li>
+        <li>De extractor analyseert kleuren, lettertypen en layout.</li>
+        <li>Review en pas de ge&euml;xtraheerde waarden aan.</li>
+        <li>Genereer een prompt-package voor verdere configuratie.</li>
+        <li>Merge de resultaten naar de tenant brand.yaml.</li>
+      </ol>
+
+      <h3>Assets uploaden</h3>
+      <ul>
+        <li><strong>Stationery</strong> &mdash; PDF of PNG bestanden voor pagina-achtergronden.</li>
+        <li><strong>Logo&rsquo;s</strong> &mdash; SVG (voorkeur) of PNG, in verschillende varianten.</li>
+        <li><strong>Fonts</strong> &mdash; TTF of OTF bestanden. Zorg dat de bestandsnamen overeenkomen met de referenties in brand.yaml.</li>
+      </ul>
+    </div>
+
+    <!-- API & Integratie -->
+    <div class="section" id="api">
+      <h2>API &amp; Integratie</h2>
+      <p>Het platform biedt een REST API voor integratie met externe systemen (bijv. pyRevit, scripts, CI/CD).</p>
+
+      <h3>Endpoints</h3>
+      <table>
+        <thead>
+          <tr><th>Methode</th><th>Pad</th><th>Beschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="badge badge-get">GET</span></td><td class="mono">/api/health</td><td>Status en versie</td></tr>
+          <tr><td><span class="badge badge-get">GET</span></td><td class="mono">/api/templates</td><td>Beschikbare templates</td></tr>
+          <tr><td><span class="badge badge-get">GET</span></td><td class="mono">/api/brands</td><td>Beschikbare brands</td></tr>
+          <tr><td><span class="badge badge-get">GET</span></td><td class="mono">/api/templates/{name}/scaffold</td><td>Leeg rapport-JSON als startpunt</td></tr>
+          <tr><td><span class="badge badge-post">POST</span></td><td class="mono">/api/validate</td><td>Rapport-JSON valideren</td></tr>
+          <tr><td><span class="badge badge-post">POST</span></td><td class="mono">/api/generate</td><td>PDF genereren uit JSON</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Authenticatie</h3>
+      <p>
+        De API gebruikt JWT-tokens. Log in via <code>POST /api/auth/login</code> om een token te
+        ontvangen. Stuur het token mee als <code>Authorization: Bearer &lt;token&gt;</code> header
+        bij alle beveiligde endpoints.
+      </p>
+
+      <h3>Voorbeeld: rapport genereren via CLI</h3>
+<pre># Login en token opslaan
+TOKEN=$(curl -s -X POST https://report.3bm.co.nl/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"user","password":"pass"}' | jq -r .access_token)
+
+# PDF genereren
+curl -X POST https://report.3bm.co.nl/api/generate \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d @rapport.json \
+  --output rapport.pdf</pre>
+
+      <h3>Voorbeeld: Python</h3>
+<pre>from openaec_reports import Report
+
+report = Report.from_json("rapport.json")
+report.build("output/rapport.pdf")</pre>
+    </div>
+
+    <!-- JSON Schema -->
+    <div class="section" id="json-schema">
+      <h2>JSON Schema</h2>
+      <p>
+        Het bestand <code>schemas/report.schema.json</code> definieert het volledige datamodel voor een rapport.
+        Dit is het <strong>single source of truth</strong> voor frontend, API en library.
+      </p>
+
+      <h3>Structuur</h3>
+<pre>{
+  "template": "structural",
+  "project": "Mijn Project",
+  "project_number": "2026-001",
+  "client": "Opdrachtgever",
+  "cover": { ... },
+  "colofon": { ... },
+  "toc": true,
+  "sections": [
+    {
+      "title": "Uitgangspunten",
+      "content": [
+        { "type": "paragraph", "text": "..." },
+        { "type": "calculation", ... },
+        { "type": "check", ... }
+      ]
+    }
+  ]
+}</pre>
+
+      <h3>Scaffold gebruiken</h3>
+      <p>
+        Gebruik <code>GET /api/templates/{name}/scaffold</code> om een geldig startpunt te krijgen
+        voor een specifiek rapporttype. Dit bevat alle verplichte velden met placeholder-waarden.
+      </p>
+
+      <h3>Validatie</h3>
+      <p>
+        Stuur je JSON naar <code>POST /api/validate</code> om te controleren of het voldoet aan het
+        schema voordat je een PDF genereert.
+      </p>
+    </div>
+  </main>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const links = document.querySelectorAll('nav a[data-section]');
+  const sections = document.querySelectorAll('.section');
+
+  function activate(id) {
+    links.forEach(l => l.classList.toggle('active', l.dataset.section === id));
+    sections.forEach(s => s.classList.toggle('active', s.id === id));
+  }
+
+  links.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      activate(link.dataset.section);
+      history.replaceState(null, '', '#' + link.dataset.section);
+    });
+  });
+
+  // Activeer sectie uit URL hash
+  const hash = location.hash.slice(1);
+  if (hash && document.getElementById(hash)) {
+    activate(hash);
+  }
+});
+</script>
+
+</body>
+</html>

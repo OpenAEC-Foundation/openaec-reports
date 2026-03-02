@@ -1,0 +1,58 @@
+# ==============================================================================
+# OpenAEC Foundation — Appendix divider page
+# ==============================================================================
+# Full Deep Forge background with background pattern illustration
+# Amber accent bar bottom-left
+# Appendix number in amber, title in white
+# Tagline "Build free. Build together." in warm gold
+# ==============================================================================
+
+page_type: appendix_divider
+background: null
+
+# Full page background
+bg_color: "#36363E"      # Deep Forge
+
+# Background pattern illustration
+illustration:
+  source: "stationery/background-pattern-dark-2x.png"
+  opacity: 0.20
+  x: 0
+  y: 200
+  width: 595.28
+
+# Amber accent bar bottom-left
+accent_bar:
+  x: 0
+  y: 0
+  width: 282
+  height: 70.3
+  color: "#D97706"
+
+# Dynamic: appendix number
+number:
+  bind: "appendix.label"
+  font: "SpaceGrotesk-Bold"
+  size: 41.4
+  color: "#D97706"       # Amber
+  x: 103.0
+  y: 602.3
+
+# Dynamic: appendix title (supports 2 lines)
+title:
+  bind: "appendix.title_line1"
+  font: "Inter-Regular"
+  size: 41.4
+  color: "#FAFAF9"       # Blueprint White
+  x: 136.1
+  y: 535.2
+  line_spacing: 66.4
+
+# Tagline
+tagline:
+  text: "Build free. Build together."
+  font: "SpaceGrotesk-Bold"
+  size: 17.9
+  color: "#F59E0B"       # Warm Gold
+  x: 330.5
+  y: 36.9

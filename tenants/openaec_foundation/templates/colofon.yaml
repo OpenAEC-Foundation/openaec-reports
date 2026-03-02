@@ -1,0 +1,75 @@
+# ==============================================================================
+# OpenAEC Foundation — Colophon page configuration
+# ==============================================================================
+# Header zone with logo + illustration
+# Title + subtitle
+# Metadata table (project, client, author, norms, dates, status)
+# Footer bar (amber left, dark right)
+# ==============================================================================
+
+page_type: colofon
+background: null
+
+# Dynamic fields
+title:
+  bind: "project"
+  font: "SpaceGrotesk-Bold"
+  size: 22.0
+  color: "#36363E"
+  x: 70.9
+  y: 695.0
+
+subtitle:
+  bind: "cover.subtitle"
+  font: "Inter-Regular"
+  size: 14.0
+  color: "#A1A1AA"
+  x: 70.9
+  y: 672.0
+
+# Metadata table columns
+table:
+  label_x: 103.0
+  value_x: 229.0
+  row_height: 24.0
+  label_font: "SpaceGrotesk-Bold"
+  label_size: 10.0
+  value_font: "Inter-Regular"
+  value_size: 10.0
+  separator:
+    x_start: 102
+    x_end: 420
+    stroke: 0.25
+    color: "#E7E5E4"
+
+# Project info section (Deep Forge labels)
+project_info:
+  y_start: 521.1
+  label_color: "#36363E"
+  value_color: "#36363E"
+  fields:
+    - {label: "Project", bind: "colofon.project_description"}
+    - {label: "Client", bind: "colofon.client_block"}
+
+# Author section (Amber labels)
+author_info:
+  y_start: 353.1
+  label_color: "#D97706"
+  value_color: "#36363E"
+  fields:
+    - {label: "Author", bind: "colofon.advisor"}
+    - {label: "Applicable norms", bind: "colofon.norms"}
+    - {label: "Document description", bind: "colofon.document_info"}
+    - {label: "Report date", bind: "colofon.date"}
+    - {label: "Phase", bind: "colofon.phase"}
+    - {label: "Status", bind: "colofon.status"}
+    - {label: "Document code", bind: "colofon.document_code"}
+
+# Page number
+page_number:
+  x: 538.6
+  y: 18.0
+  font: "Inter-Regular"
+  size: 9.5
+  color: "#D97706"
+  align: right

@@ -1,0 +1,26 @@
+# ==============================================================================
+# OpenAEC Foundation — Standard content page
+# ==============================================================================
+# Uses programmatic header/footer (no stationery PDF)
+# Header: Deep Forge, logo, project info, amber gradient strip
+# Footer: Deep Forge, OpenAEC wordmark, page number, amber gradient strip
+# ==============================================================================
+
+page_type: content
+background: null   # No stationery PDF — rendered programmatically
+
+# Content area (between header and footer)
+content_area:
+  x: 34.0          # 12mm from left
+  y_start: 57.0    # Above footer zone
+  width: 527.3     # Page width minus margins
+  height: 677.0    # Available content height
+
+# Page number
+page_number:
+  x: 561.0
+  y: 18.0
+  font: "Inter-Regular"
+  size: 8.0
+  color: "#D97706"
+  align: right

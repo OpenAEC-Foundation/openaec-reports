@@ -1,0 +1,700 @@
+# ==============================================================================
+# OpenAEC Foundation — Pixel-perfect template
+# ==============================================================================
+# Gebaseerd op: DESIGN-SYSTEM.md v0.3, sectie 4.3 (A4 Report)
+# Alle coördinaten in PDF y-up systeem (origin = linksonder, A4 = 595.28 x 841.89 pt)
+# ==============================================================================
+
+template:
+  name: "OpenAEC Foundation"
+  version: "1.0"
+  source_pdf: null
+  brand: "openaec_foundation"
+
+colors:
+  primary: "#D97706"           # Construction Amber
+  secondary: "#36363E"         # Deep Forge
+  text_dark: "#36363E"         # Deep Forge text
+  text_light: "#A1A1AA"        # Scaffold Gray
+  warm_gold: "#F59E0B"         # Warm Gold
+  signal_orange: "#EA580C"     # Signal Orange
+  blueprint_white: "#FAFAF9"   # Light background
+  concrete: "#F5F5F4"          # Card/section background
+  night_build: "#2A2A32"       # Darkest background
+  separator: "#E7E5E4"         # Border color
+
+fonts:
+  heading: "SpaceGrotesk-Bold"
+  subheading: "SpaceGrotesk-Medium"
+  body: "Inter-Regular"
+  medium: "Inter-Medium"
+  semibold: "Inter-SemiBold"
+  bold: "Inter-Bold"
+  heading_fb: "Helvetica-Bold"
+  body_fb: "Helvetica"
+
+# ==============================================================================
+# PAGE TYPES
+# ==============================================================================
+
+pages:
+
+  # ============================================================
+  # COVER — Deep Forge header + hero illustration
+  # ============================================================
+  cover:
+    source_page: null
+    layers:
+      # 1. Deep Forge achtergrond (bovenste ~67% van pagina)
+      - type: rect
+        role: background
+        static: true
+        x: 0
+        y: 280.0
+        w: 595.28
+        h: 561.89
+        fill: "$colors.secondary"
+
+      # 2. Amber gradient strip aan onderkant van header zone
+      # linear-gradient(90deg, #D97706 0%, #F59E0B 40%, #EA580C 100%)
+      - type: rect
+        role: gradient_strip
+        static: true
+        x: 0
+        y: 277.0
+        w: 595.28
+        h: 3.0
+        fill: "$colors.primary"
+
+      # 3. Hero illustratie (report-header of hero-banner, 30% opacity)
+      - type: image
+        role: illustration
+        static: true
+        source: "stationery/hero-banner-dark-2x.png"
+        x: 0
+        y: 441.89
+        w: 595.28
+        opacity: 0.30
+
+      # 4. Logo linksboven op dark achtergrond
+      - type: image
+        role: logo
+        static: true
+        source: "logos/openaec-logo-amber-on-dark-2x.png"
+        x: 56
+        y: 770
+        w: 140
+
+      # 5. Tagline onder logo
+      - type: text
+        role: tagline
+        static: true
+        content: "Build free. Build together."
+        font: "$fonts.subheading"
+        size: 10.0
+        color: "$colors.text_light"
+        x: 56
+        y: 750
+
+      # 6. Website URL rechtsboven
+      - type: text
+        role: website_label
+        static: true
+        content: "openaec.org"
+        font: "$fonts.medium"
+        size: 11.0
+        color: "$colors.primary"
+        x: 490
+        y: 785
+        align: right
+
+      # 7. Keyword badges
+      - type: badge_group
+        role: keywords
+        static: true
+        badges:
+          - text: "OPEN SOURCE"
+            fill: "$colors.primary"
+            text_color: "$colors.blueprint_white"
+            rect: [300, 310, 120, 32]
+            radius: 8
+            font: "$fonts.semibold"
+            font_size: 9.0
+          - text: "ENGINEERING"
+            fill: "$colors.night_build"
+            text_color: "$colors.blueprint_white"
+            rect: [432, 310, 108, 32]
+            radius: 8
+            font: "$fonts.semibold"
+            font_size: 9.0
+
+      # 8. Rapport titel (dynamisch)
+      - type: text
+        role: title
+        static: false
+        bind: "project"
+        font: "$fonts.heading"
+        size: 28.0
+        color: "$colors.secondary"
+        x: 54.0
+        y: 95.0
+
+      # 9. Subtitel (dynamisch)
+      - type: text
+        role: subtitle
+        static: false
+        bind: "cover.subtitle"
+        font: "$fonts.body"
+        size: 16.0
+        color: "$colors.text_light"
+        x: 54.0
+        y: 65.0
+
+  # ============================================================
+  # COLOFON — Project information page
+  # ============================================================
+  colofon:
+    source_page: null
+    layers:
+      # 1. Header zone — Deep Forge strip bovenaan
+      - type: rect
+        role: header_bg
+        static: true
+        x: 0
+        y: 734.2
+        w: 595.28
+        h: 107.7
+        fill: "$colors.secondary"
+
+      # 2. Report header illustratie
+      - type: image
+        role: illustration
+        static: true
+        source: "stationery/report-header-dark-2x.png"
+        x: 200
+        y: 734.2
+        w: 395
+        opacity: 0.35
+
+      # 3. Logo in header
+      - type: image
+        role: logo
+        static: true
+        source: "logos/openaec-logo-amber-on-dark-2x.png"
+        x: 34
+        y: 766
+        w: 100
+
+      # 4. Amber gradient strip onder header
+      - type: rect
+        role: gradient_strip
+        static: true
+        x: 0
+        y: 731.0
+        w: 595.28
+        h: 3.2
+        fill: "$colors.primary"
+
+      # 5. Rapport titel
+      - type: text
+        role: title
+        static: false
+        bind: "project"
+        font: "$fonts.heading"
+        size: 22.0
+        color: "$colors.secondary"
+        x: 70.9
+        y: 695.0
+
+      # 6. Subtitel
+      - type: text
+        role: subtitle
+        static: false
+        bind: "cover.subtitle"
+        font: "$fonts.body"
+        size: 14.0
+        color: "$colors.text_light"
+        x: 70.9
+        y: 672.0
+
+      # 7. Metadata tabel — project info
+      - type: table
+        role: project_info
+        static: false
+        y_start: 521.1
+        col1_x: 103.0
+        col2_x: 229.1
+        row_height: 24.0
+        label_font: "$fonts.heading"
+        label_size: 10.0
+        label_color: "$colors.secondary"
+        value_font: "$fonts.body"
+        value_size: 10.0
+        value_color: "$colors.secondary"
+        separator_color: "$colors.separator"
+        separator_width: 0.3
+        separator_x_end: 419.8
+        rows:
+          - label: "Project"
+            bind: "colofon.project_description"
+          - label: "Client"
+            bind: "colofon.client_block"
+
+      # 8. Auteur sectie (amber labels)
+      - type: table
+        role: advisor_info
+        static: false
+        y_start: 353.1
+        col1_x: 103.0
+        col2_x: 229.1
+        row_height: 24.0
+        label_font: "$fonts.heading"
+        label_size: 10.0
+        label_color: "$colors.primary"
+        value_font: "$fonts.body"
+        value_size: 10.0
+        value_color: "$colors.secondary"
+        separator_color: "$colors.separator"
+        separator_width: 0.3
+        separator_x_end: 419.8
+        rows:
+          - label: "Author"
+            bind: "colofon.advisor"
+          - label: "Applicable norms"
+            bind: "colofon.norms"
+          - label: "Document description"
+            bind: "colofon.document_info"
+          - label: "Report date"
+            bind: "colofon.date"
+          - label: "Phase"
+            bind: "colofon.phase"
+          - label: "Status"
+            bind: "colofon.status"
+          - label: "Document code"
+            bind: "colofon.document_code"
+
+      # 9. Footer — amber strip linksonder
+      - type: rect
+        role: footer_bar
+        static: true
+        x: 0
+        y: 0
+        w: 282
+        h: 42.5
+        fill: "$colors.primary"
+
+      # 10. Footer — Deep Forge strip rechtsonder
+      - type: rect
+        role: footer_dark
+        static: true
+        x: 282
+        y: 0
+        w: 313.28
+        h: 42.5
+        fill: "$colors.secondary"
+
+      # 11. Paginanummer
+      - type: page_number
+        role: page_number
+        static: false
+        x: 538.6
+        y: 18.0
+        font: "$fonts.body"
+        size: 9.5
+        color: "$colors.primary"
+        align: right
+
+  # ============================================================
+  # CONTENT — Standard content pages with header/footer
+  # ============================================================
+  content:
+    source_page: null
+    content_frame:
+      x: 34.0
+      y: 57.0
+      w: 527.3
+      h: 677.0
+    layers:
+      # 1. Header zone — Deep Forge
+      - type: rect
+        role: header_bg
+        static: true
+        x: 0
+        y: 734.2
+        w: 595.28
+        h: 107.7
+        fill: "$colors.secondary"
+
+      # 2. Report header illustratie (rechts)
+      - type: image
+        role: illustration
+        static: true
+        source: "stationery/report-header-dark-2x.png"
+        x: 200
+        y: 734.2
+        w: 395
+        opacity: 0.35
+
+      # 3. Logo in header
+      - type: image
+        role: logo
+        static: true
+        source: "logos/openaec-logo-amber-on-dark-2x.png"
+        x: 34
+        y: 766
+        w: 100
+
+      # 4. Project info in header rechts
+      - type: text
+        role: project_number
+        static: false
+        bind: "project_number"
+        font: "$fonts.semibold"
+        size: 7.5
+        color: "$colors.blueprint_white"
+        x: 561
+        y: 800
+        align: right
+
+      - type: text
+        role: project_name
+        static: false
+        bind: "project"
+        font: "$fonts.body"
+        size: 7.0
+        color: "$colors.text_light"
+        x: 561
+        y: 790
+        align: right
+
+      # 5. Amber gradient strip onder header
+      - type: rect
+        role: gradient_strip
+        static: true
+        x: 0
+        y: 731.0
+        w: 595.28
+        h: 3.2
+        fill: "$colors.primary"
+
+      # 6. Footer zone — Deep Forge
+      - type: rect
+        role: footer_bg
+        static: true
+        x: 0
+        y: 0
+        w: 595.28
+        h: 42.5
+        fill: "$colors.secondary"
+
+      # 7. Amber gradient strip boven footer
+      - type: rect
+        role: footer_gradient
+        static: true
+        x: 0
+        y: 42.5
+        w: 595.28
+        h: 2.1
+        fill: "$colors.primary"
+
+      # 8. OpenAEC wordmark links in footer
+      - type: text
+        role: footer_brand
+        static: true
+        content: "OpenAEC"
+        font: "$fonts.heading"
+        size: 7.5
+        color: "$colors.blueprint_white"
+        x: 34
+        y: 18
+
+      # 9. Paginanummer rechts in footer
+      - type: page_number
+        role: page_number
+        static: false
+        x: 561
+        y: 18
+        font: "$fonts.body"
+        size: 8.0
+        color: "$colors.primary"
+        align: right
+
+  # ============================================================
+  # TOC — Table of Contents
+  # ============================================================
+  toc:
+    source_page: null
+    content_frame:
+      x: 34.0
+      y: 57.0
+      w: 527.3
+      h: 640.0
+    layers:
+      # 1. Header zone (same as content)
+      - type: rect
+        role: header_bg
+        static: true
+        x: 0
+        y: 734.2
+        w: 595.28
+        h: 107.7
+        fill: "$colors.secondary"
+
+      - type: image
+        role: illustration
+        static: true
+        source: "stationery/report-header-dark-2x.png"
+        x: 200
+        y: 734.2
+        w: 395
+        opacity: 0.35
+
+      - type: image
+        role: logo
+        static: true
+        source: "logos/openaec-logo-amber-on-dark-2x.png"
+        x: 34
+        y: 766
+        w: 100
+
+      - type: rect
+        role: gradient_strip
+        static: true
+        x: 0
+        y: 731.0
+        w: 595.28
+        h: 3.2
+        fill: "$colors.primary"
+
+      # 2. TOC titel
+      - type: text
+        role: toc_title
+        static: true
+        content: "Table of contents"
+        font: "$fonts.heading"
+        size: 18.0
+        color: "$colors.secondary"
+        x: 56.0
+        y: 705.0
+
+      # 3. Footer zone (same as content)
+      - type: rect
+        role: footer_bg
+        static: true
+        x: 0
+        y: 0
+        w: 595.28
+        h: 42.5
+        fill: "$colors.secondary"
+
+      - type: rect
+        role: footer_gradient
+        static: true
+        x: 0
+        y: 42.5
+        w: 595.28
+        h: 2.1
+        fill: "$colors.primary"
+
+      - type: text
+        role: footer_brand
+        static: true
+        content: "OpenAEC"
+        font: "$fonts.heading"
+        size: 7.5
+        color: "$colors.blueprint_white"
+        x: 34
+        y: 18
+
+      - type: page_number
+        role: page_number
+        static: false
+        x: 561
+        y: 18
+        font: "$fonts.body"
+        size: 8.0
+        color: "$colors.primary"
+        align: right
+
+  # ============================================================
+  # APPENDIX DIVIDER — Appendix separator page
+  # ============================================================
+  appendix_divider:
+    source_page: null
+    layers:
+      # 1. Deep Forge achtergrond (hele pagina)
+      - type: rect
+        role: background
+        static: true
+        x: 0
+        y: 0
+        w: 595.28
+        h: 841.89
+        fill: "$colors.secondary"
+
+      # 2. Background pattern illustratie
+      - type: image
+        role: illustration
+        static: true
+        source: "stationery/background-pattern-dark-2x.png"
+        x: 0
+        y: 200
+        w: 595.28
+        opacity: 0.20
+
+      # 3. Appendix nummer (dynamisch, groot amber)
+      - type: text
+        role: appendix_label
+        static: false
+        bind: "appendix.label"
+        font: "$fonts.heading"
+        size: 41.4
+        color: "$colors.primary"
+        x: 103.0
+        y: 602.3
+
+      # 4. Appendix titel (dynamisch, groot wit)
+      - type: text
+        role: appendix_title
+        static: false
+        bind: "appendix.title_line1"
+        font: "$fonts.body"
+        size: 41.4
+        color: "$colors.blueprint_white"
+        x: 136.1
+        y: 535.2
+
+      # 5. Appendix titel regel 2
+      - type: text
+        role: appendix_title_2
+        static: false
+        bind: "appendix.title_line2"
+        font: "$fonts.body"
+        size: 41.4
+        color: "$colors.blueprint_white"
+        x: 136.1
+        y: 469.0
+
+      # 6. Amber accent bar linksonder
+      - type: rect
+        role: accent_bar
+        static: true
+        x: 0
+        y: 0
+        w: 282
+        h: 70.3
+        fill: "$colors.primary"
+
+      # 7. Tagline rechtsonder
+      - type: text
+        role: tagline
+        static: true
+        content: "Build free. Build together."
+        font: "$fonts.heading"
+        size: 17.9
+        color: "$colors.warm_gold"
+        x: 330.5
+        y: 36.9
+
+  # ============================================================
+  # BACKCOVER — Back page
+  # ============================================================
+  backcover:
+    source_page: null
+    layers:
+      # 1. Deep Forge achtergrond
+      - type: rect
+        role: background
+        static: true
+        x: 0
+        y: 0
+        w: 595.28
+        h: 841.89
+        fill: "$colors.secondary"
+
+      # 2. Background pattern
+      - type: image
+        role: illustration
+        static: true
+        source: "stationery/background-pattern-dark-2x.png"
+        x: 0
+        y: 200
+        w: 595.28
+        opacity: 0.15
+
+      # 3. Night Build accent zone onderaan
+      - type: rect
+        role: accent_zone
+        static: true
+        x: 0
+        y: 0
+        w: 595.28
+        h: 140
+        fill: "$colors.night_build"
+
+      # 4. Amber gradient strip boven accent zone
+      - type: rect
+        role: gradient_strip
+        static: true
+        x: 0
+        y: 140
+        w: 595.28
+        h: 3.0
+        fill: "$colors.primary"
+
+      # 5. Logo (amber-on-dark) gecentreerd
+      - type: image
+        role: logo
+        static: true
+        source: "logos/openaec-logo-amber-on-dark-3x.png"
+        x: 168
+        y: 440
+        w: 260
+
+      # 6. Tagline
+      - type: text
+        role: tagline
+        static: true
+        content: "Build free. Build together."
+        font: "$fonts.heading"
+        size: 14.0
+        color: "$colors.primary"
+        x: 298
+        y: 400
+        align: center
+
+      # 7. Organisatienaam
+      - type: text
+        role: org_name
+        static: true
+        content: "Stichting OpenAEC Foundation"
+        font: "$fonts.heading"
+        size: 9.0
+        color: "$colors.blueprint_white"
+        x: 298
+        y: 100
+        align: center
+
+      # 8. Website
+      - type: text
+        role: website
+        static: true
+        content: "openaec.org"
+        font: "$fonts.medium"
+        size: 11.0
+        color: "$colors.primary"
+        x: 298
+        y: 80
+        align: center
+
+      # 9. Secondary tagline
+      - type: text
+        role: secondary_tagline
+        static: true
+        content: "Free and open-source tools for the built environment."
+        font: "$fonts.body"
+        size: 8.5
+        color: "$colors.text_light"
+        x: 298
+        y: 60
+        align: center

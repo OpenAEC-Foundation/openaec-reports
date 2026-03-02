@@ -1,0 +1,65 @@
+# ==============================================================================
+# OpenAEC Foundation — Shared layout definitions
+# ==============================================================================
+# Conform DESIGN-SYSTEM.md sectie 12 (Print Dimensions Reference)
+# Coördinaten in PDF points (1pt = 1/72 inch)
+# ==============================================================================
+
+page:
+  width: 595.28    # A4 (210mm)
+  height: 841.89   # A4 (297mm)
+
+# Header zone: 38mm = 107.7pt
+header:
+  height_pt: 107.7
+  y_bottom_pt: 734.2    # 841.89 - 107.7
+  bg_color: "#36363E"   # Deep Forge
+  gradient_height_pt: 3.2
+  gradient_color: "#D97706"
+
+# Footer zone: 15mm = 42.5pt
+footer:
+  height_pt: 42.5
+  y_top_pt: 42.5
+  bg_color: "#36363E"   # Deep Forge
+  gradient_height_pt: 2.1
+  gradient_color: "#D97706"
+
+# Content area: between header and footer with padding
+# 12mm horizontal = 34.0pt
+# 10mm below header = 28.3pt
+# 15mm above footer area = ~14.5pt gap
+margins:
+  left_pt: 34.0
+  right_pt: 34.0
+  top_pt: 28.3          # Below header bottom
+  bottom_pt: 14.5       # Above footer top
+
+content:
+  x_pt: 34.0
+  y_start_pt: 57.0      # footer.height + bottom margin
+  width_pt: 527.3       # page.width - left - right
+  height_pt: 677.0      # header.y_bottom - top_margin - y_start
+
+# Page number position
+page_number:
+  x_pt: 561.0
+  y_pt: 18.0
+  font: "Inter-Regular"
+  size: 8.0
+  color: "#D97706"
+  align: right
+
+# TOC specific
+toc:
+  title_x_pt: 56.0
+  title_y_pt: 705.0
+  number_x_pt: 56.0
+  title_text_x_pt: 120.0
+  page_x_pt: 540.0
+  chapter_font: "SpaceGrotesk-Bold"
+  chapter_size: 12.0
+  chapter_color: "#D97706"
+  section_font: "Inter-Regular"
+  section_size: 9.5
+  section_color: "#36363E"

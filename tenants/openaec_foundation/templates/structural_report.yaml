@@ -1,0 +1,137 @@
+# ==============================================================================
+# OpenAEC Foundation — Structural Calculation Report Template
+# ==============================================================================
+# Template for structural engineering reports.
+# Uses OpenAEC brand: Deep Forge + Amber, Space Grotesk + Inter fonts.
+# ==============================================================================
+
+report_type: structural
+format: A4
+orientation: portrait
+
+margins:
+  top: 48       # mm (header 38mm + 10mm padding)
+  bottom: 20
+  left: 12
+  right: 12
+
+# Header (on every content page)
+header:
+  height: 38    # mm
+  show_rule: false
+  elements:
+    - type: text
+      content: "{project_number} | {project}"
+      position: right
+      style: header_text
+
+# Footer (on every content page)
+footer:
+  height: 15    # mm
+  show_rule: false
+  elements:
+    - type: text
+      content: "OpenAEC"
+      position: left
+      style: footer_text
+    - type: text
+      content: "Page {page}"
+      position: right
+      style: footer_text
+
+# Cover page
+cover:
+  background_color: "#36363E"
+  elements:
+    - type: color_bar
+      color: "#D97706"
+      position: bottom
+      height: 3
+    - type: image
+      src: "{cover_image}"
+      position: top
+      width: 170
+      offset_y: 10
+    - type: logo
+      src: logos/openaec-logo-amber-on-dark-2x.png
+      position: top-left
+      width: 50
+    - type: title
+      content: "{project}"
+      style: cover_title
+      position: center-left
+      offset_y: -40
+    - type: subtitle
+      content: "{subtitle}"
+      style: cover_subtitle
+      position: center-left
+      offset_y: -60
+    - type: info_block
+      position: bottom-right
+      fields:
+        - label: "Project number"
+          value: "{project_number}"
+        - label: "Client"
+          value: "{client}"
+        - label: "Date"
+          value: "{date}"
+        - label: "Status"
+          value: "{status}"
+
+# Colophon (page 2)
+colofon:
+  enabled: true
+  fields:
+    - label: "Document"
+      value: "{subtitle}"
+    - label: "Project number"
+      value: "{project_number}"
+    - label: "Client"
+      value: "{client}"
+    - label: "Author"
+      value: "{author}"
+    - label: "Date"
+      value: "{date}"
+    - label: "Version"
+      value: "{version}"
+    - label: "Status"
+      value: "{status}"
+  disclaimer: |
+    This report has been prepared by OpenAEC Foundation contributors.
+    It is intended solely for the client. Distribution to third parties
+    is not permitted without written consent.
+
+# Table of contents
+toc:
+  enabled: true
+  title: "Table of contents"
+  max_depth: 3
+
+# Back cover
+backcover:
+  background_color: "#36363E"
+  elements:
+    - type: logo
+      src: logos/openaec-logo-amber-on-dark-2x.png
+      position: center
+      width: 80
+    - type: text
+      content: "OpenAEC Foundation"
+      style: backcover_title
+      position: center
+    - type: text
+      content: "Build free. Build together."
+      style: backcover_tagline
+      position: center
+    - type: contact_block
+      position: center
+      fields:
+        - "openaec.org"
+
+# Structure — section order
+structure:
+  - cover
+  - colofon
+  - toc
+  - sections
+  - backcover

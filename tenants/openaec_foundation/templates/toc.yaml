@@ -1,0 +1,60 @@
+# ==============================================================================
+# OpenAEC Foundation — Table of contents page
+# ==============================================================================
+# Same header/footer as content pages
+# Title: "Table of contents" in Space Grotesk Bold
+# Chapters in amber, sections in Deep Forge
+# ==============================================================================
+
+page_type: toc
+background: null
+
+# Content area (slightly smaller to account for TOC title)
+content_area:
+  x: 34.0
+  y_start: 57.0
+  width: 527.3
+  height: 640.0
+
+# TOC title
+title:
+  text: "Table of contents"
+  font: "SpaceGrotesk-Bold"
+  size: 18.0
+  color: "#36363E"
+  x: 56.0
+  y: 705.0
+
+# TOC column positions
+columns:
+  number_x: 56.0
+  title_x: 120.0
+  page_x: 540.0
+
+# Chapter entries (level 1)
+chapter:
+  font: "SpaceGrotesk-Bold"
+  size: 12.0
+  color: "#D97706"       # Amber
+  spacing: 39.0          # Space between chapters
+
+# Section entries (level 2)
+section:
+  font: "Inter-Regular"
+  size: 9.5
+  color: "#36363E"       # Deep Forge
+  spacing: 17.0          # Space between items
+
+# Dot leader
+leader:
+  char: "."
+  color: "#E7E5E4"       # Separator color
+
+# Page number
+page_number:
+  x: 561.0
+  y: 18.0
+  font: "Inter-Regular"
+  size: 8.0
+  color: "#D97706"
+  align: right

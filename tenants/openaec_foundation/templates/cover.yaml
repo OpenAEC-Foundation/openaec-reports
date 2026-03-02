@@ -1,0 +1,91 @@
+# ==============================================================================
+# OpenAEC Foundation — Cover page configuration
+# ==============================================================================
+# Deep Forge top zone (67%) + light bottom zone (33%)
+# Hero illustration at 30% opacity
+# Logo + tagline top-left, website top-right
+# Badges, title + subtitle below illustration
+# ==============================================================================
+
+page_type: cover
+background: null
+
+# Deep Forge zone
+dark_zone:
+  y: 280.0
+  height: 561.89
+  color: "#36363E"
+
+# Amber gradient strip
+gradient_strip:
+  y: 277.0
+  height: 3.0
+  color: "#D97706"
+
+# Hero illustration
+illustration:
+  source: "stationery/hero-banner-dark-2x.png"
+  opacity: 0.30
+  x: 0
+  y: 441.89
+  width: 595.28
+
+# Logo
+logo:
+  source: "logos/openaec-logo-amber-on-dark-2x.png"
+  x: 56
+  y: 770
+  width: 140
+
+# Tagline
+tagline:
+  text: "Build free. Build together."
+  font: "SpaceGrotesk-Medium"
+  size: 10.0
+  color: "#A1A1AA"
+  x: 56
+  y: 750
+
+# Website
+website:
+  text: "openaec.org"
+  font: "Inter-Medium"
+  size: 11.0
+  color: "#D97706"
+  x: 490
+  y: 785
+  align: right
+
+# Badges
+badges:
+  - text: "OPEN SOURCE"
+    fill: "#D97706"
+    text_color: "#FAFAF9"
+    rect: [300, 310, 120, 32]
+    radius: 8
+    font: "Inter-SemiBold"
+    font_size: 9.0
+  - text: "ENGINEERING"
+    fill: "#2A2A32"
+    text_color: "#FAFAF9"
+    rect: [432, 310, 108, 32]
+    radius: 8
+    font: "Inter-SemiBold"
+    font_size: 9.0
+
+# Dynamic fields
+title:
+  bind: "project"
+  font: "SpaceGrotesk-Bold"
+  size: 28.0
+  color: "#36363E"
+  x: 54.0
+  y: 95.0
+
+subtitle:
+  bind: "cover.subtitle"
+  font: "Inter-Regular"
+  size: 16.0
+  color: "#A1A1AA"
+  x: 54.0
+  y: 65.0

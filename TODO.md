@@ -1,155 +1,209 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-01 (pixel fixes + admin cleanup)
-> Volgende actie: deploy met `docker build --no-cache`
+> Laatst bijgewerkt: 2026-03-02
 
 ---
 
-## 🔴 DEPLOY — Frontend Rebuild + Deploy (BLOCKER)
+## 🔴 DEPLOY — Docker Rebuild (BLOCKER)
 
-Alle code fixes zijn gecommit (cfaa808, f3b8228, ab93b13). Frontend smart routing + replace button + BrandWizard cleanup klaar. Productie serveerde een gecachte bundle.
+Alle code fixes zijn gecommit. Productie draait een oudere bundle. Rebuild nodig.
 
-**Stappen:**
 ```bash
-# 1. Docker build ZONDER cache
 docker build --no-cache -t openaec-reports:latest .
-
-# 2. Test lokaal
 docker run --rm -p 8000:8000 openaec-reports:latest
-
-# 3. Deploy naar VPS (git pull + rebuild)
-
-# 4. Verificatie op productie
-# → https://report.open-aec.com/api/health
-# → Bundle check: fetch JS, search "generate/template"
-# → Test Customer BIC PDF generatie via frontend
+# Deploy naar VPS (git pull + rebuild)
 ```
 
----
-
-## 🟡 VALIDATE — Visuele Validatie na Deploy
-
-Pas uitvoeren NADAT FIX-1, FIX-2, FIX-3 allemaal live staan.
-
-**Test via productie frontend:**
-1. Login op report.open-aec.com
-2. Selecteer template "Customer BIC Factuur"
-3. Laad test data of vul in
-4. Genereer PDF
-5. Vergelijk met referentie `Z:\50_projecten\7_OpenAEC_bouwkunde\temp\336.01-BIC Factuur_BIC.pdf`
-
-**Checklist per pagina:**
-
-| Pagina | Wat controleren |
-|--------|----------------|
-| 1 - Voorblad (portrait) | Stationery achtergrond, logo, kleurbanen, tekst op juiste positie (Arial) |
-| 2 - Locatie (portrait) | Stationery, labels links, waarden rechts, footer balk, paginanummer |
-| 3 - BIC Controles (portrait) | Stationery, tabel met 3 kolommen (fontsize 10pt), bedragen, footer |
-| 4 - Detail weergave (LANDSCAPE) | Orientatie correct, 7 kolommen, stationery |
-| 5 - Objecten (LANDSCAPE) | Orientatie correct, 8 kolommen, stationery |
-| 6 - Achterblad (portrait) | Stationery + tekst "Deze pagina is [met opzet] leeg gelaten", footer, paginanummer |
-
-**Referentie verschil (verwacht):**
-- Generated: 5 XObjects/pagina, Reference: 10 XObjects/pagina
-- Dit kan normaal zijn (reference bevat Word template artifacts)
-- Belangrijk is visueel resultaat, niet exact image count
+**Verificatie na deploy:**
+- [ ] `https://report.open-aec.com/api/health` → OK
+- [ ] `/api/generate/template` endpoint werkt (Customer BIC)
+- [ ] Frontend smart routing (V2 vs TemplateEngine) actief
+- [ ] Admin panel API Keys tab zichtbaar en functioneel
 
 ---
 
-## 🟡 T3 — OpenAEC TemplateEngine Migratie (na validatie)
+## 🔴 VALIDATE — Visuele Validatie na Deploy
 
-- [ ] T3.1 — OpenAEC page_type YAML's aanmaken
-- [ ] T3.2 — OpenAEC template YAML's
-- [ ] T3.3 — Flow mode engine integreren met block_registry
+Test na deploy op productie frontend:
+
+| Pagina | Controleer |
+|--------|-----------|
+| 1 - Voorblad (portrait) | Stationery, logo, kleurbanen, tekst positie (Arial) |
+| 2 - Locatie (portrait) | Stationery, labels/waarden, footer, paginanummer |
+| 3 - BIC Controles (portrait) | Tabel 3 kolommen (10pt), bedragen, footer |
+| 4 - Detail (LANDSCAPE) | Orientatie, 7 kolommen, stationery |
+| 5 - Objecten (LANDSCAPE) | Orientatie, 8 kolommen, stationery |
+| 6 - Achterblad (portrait) | "Deze pagina is [met opzet] leeg gelaten", footer |
 
 ---
 
-## 🟡 T4 — OpenAEC Rebranding
+## 🟡 T3 — OpenAEC TemplateEngine Migratie
 
-Alle OpenAEC-specifieke referenties uit de codebase halen (package naam, API endpoints, Docker labels, README, etc.). OpenAEC blijft alleen bestaan als tenant data (`tenants/default/`).
+De TemplateEngine (V3) werkt voor Customer. Nu ook OpenAEC rapporten migreren.
 
-- [ ] T4.1 — Package rename: `openaec_reports` → `openaec_reports`
-- [ ] T4.2 — API prefix: `/api/` → blijft, maar branding aanpassen
-- [ ] T4.3 — Docker image: `openaec-reports` → `openaec-reports`
-- [ ] T4.4 — Frontend: OpenAEC logo/naam → OpenAEC branding
-- [ ] T4.5 — README, LICENSE, docs bijwerken
+- [ ] T3.1 — OpenAEC page_type YAML's aanmaken (voorblad, content, colofon, achterblad)
+- [ ] T3.2 — OpenAEC template YAML's (structural, daylight, building_code)
+- [ ] T3.3 — Flow mode: engine integreren met block_registry voor dynamische content
+
+---
+
+## 🟡 T4 — OpenAEC Rebranding (deels voltooid)
+
+Package rename (`bm_reports` → `openaec_reports`) is klaar. Resterende taken:
+
+- [x] T4.1 — Package rename: `bm_reports` → `openaec_reports`
+- [x] T4.2 — Environment variables: `BM_*` → `OPENAEC_*`
+- [x] T4.3 — Frontend: OpenAEC branding
+- [x] T4.4 — CLI: `bm-report` → `openaec-report`
+- [ ] T4.5 — Docker image tag: `openaec-reports` in CI/CD
 - [ ] T4.6 — Domain: `report.open-aec.com` → `reports.openaec.org` (of soortgelijk)
+- [ ] T4.7 — README.md volledig herschrijven voor open source publiek
+- [ ] T4.8 — LICENSE bestand toevoegen (MIT)
+- [ ] T4.9 — API key prefix: `oaec_k_` → `oaec_k_` (in `auth/api_keys.py`)
 
 ---
 
 ## 🟡 T5 — YAML Editor in Admin Panel
 
-Self-service YAML beheer per tenant — geen git push nodig voor positioneering/styling.
+Self-service YAML beheer per tenant.
 
 **Fase 1 — Upload & beheer (quick win):**
-- [ ] T5.1 — API: `/api/tenants/{tenant}/page_types/` CRUD endpoints
+- [ ] T5.1 — API: `/api/admin/tenants/{tenant}/page_types/` CRUD
 - [ ] T5.2 — Frontend: YAML file browser per tenant
 - [ ] T5.3 — Upload/download YAML's + brand.yaml
 - [ ] T5.4 — Preview: upload → render test-PDF → bekijk resultaat
 
 **Fase 2 — Visuele editor:**
-- [ ] T5.5 — YAML als formulier: text_zones bewerkbare rijen (x, y, font, size, color)
+- [ ] T5.5 — YAML als formulier: text_zones als bewerkbare rijen
 - [ ] T5.6 — Live preview bij wijziging
 - [ ] T5.7 — Kleurenpicker uit brand.yaml
 
-**Fase 3 — Brand onboarding wizard:**
-- [ ] T5.8 — Upload brand guidelines PDF → auto-extractie kleuren/fonts
-- [ ] T5.9 — Upload referentie PDF → coördinaten-extractie naar YAML
+**Fase 3 — Brand onboarding wizard (deels klaar):**
+- [x] T5.8 — BrandExtractWizard (4-stap, paars) in admin panel
+- [ ] T5.9 — Upload referentie PDF → coordinaten-extractie naar YAML
 - [ ] T5.10 — Stationery PDF generator vanuit guidelines
+
+---
+
+## 🟡 T6 — Report Type Stubs Implementeren
+
+Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
+
+- [ ] T6.1 — `reports/structural.py` — Constructief rapport sectie-opbouw
+- [ ] T6.2 — `reports/daylight.py` — Daglichtsecties
+- [ ] T6.3 — `reports/building_code.py` — Bouwbesluit toetsingssecties
+
+---
+
+## 🟡 T7 — Revit Adapter
+
+`data/revit_adapter.py` is een stub. Alle methoden zijn `# TODO`.
+
+- [ ] T7.1 — `get_project_info()` — ProjectInfo uitlezing via pyRevit
+- [ ] T7.2 — `get_elements()` — FilteredElementCollector
+- [ ] T7.3 — `get_rooms()` — Room ophaling
+- [ ] T7.4 — `build_report_data()` — Element data mapping naar report JSON
+- [ ] T7.5 — WebSocket bridge voor live Revit → frontend push
+
+---
+
+## 🟡 T8 — Kadaster/PDOK Verbetering
+
+- [ ] T8.1 — `data/kadaster.py` RD ↔ WGS84 conversie verbeteren (pyproj of RDNAPTRANS i.p.v. huidige benadering)
+
+---
+
+## 🟢 Frontend — Geavanceerde Features
+
+- [ ] F1 — Block copy/paste (Ctrl+C/V)
+- [ ] F2 — Section templates (standaard secties met pre-filled blocks)
+- [ ] F3 — Multi-rapport beheer (lijst, dupliceren, verwijderen)
+- [ ] F4 — Visuele template editor (drag & drop sectie volgorde)
+- [ ] F5 — Revit bridge: WebSocket listener + auto-fill berekening blocks
+
+---
+
+## 🟢 Admin Panel — Verbeteringen
+
+- [ ] A1 — Shared sub-components verder consolideren (TenantManagement, TemplateManagement, BrandManagement gebruiken nog eigen spinners)
+- [ ] A2 — API key expiry datumpicker in create form
+- [ ] A3 — Bulk operaties (meerdere keys tegelijk intrekken)
 
 ---
 
 ## 🟢 Housekeeping
 
-- [ ] `_temp_analyze.py` verwijderen uit project root
-- [ ] CLAUDE.md updaten met TemplateEngine architectuur
-- [ ] README.md updaten
-- [ ] `lessons_learned.md` aanmaken
+- [ ] H1 — `_temp_analyze.py` verwijderen uit project root
+- [ ] H2 — CLAUDE.md updaten (nog verwijzingen naar `src/bm_reports` in architectuur sectie)
+- [ ] H3 — `lessons_learned.md` aanmaken
+- [ ] H4 — `Inter-Bold.ttf` etc. instructies in fonts.py updaten (verwijst naar oude pad)
+- [ ] H5 — STATUS.md en frontend/STATUS.md actualiseren
 
 ---
 
-## 🟢 Infrastructure (later)
+## 🟢 Infrastructure
 
-- [ ] Caddyfile vereenvoudigen
-- [ ] fail2ban installeren
-- [ ] Portainer installeren
+- [ ] I1 — Caddyfile vereenvoudigen
+- [ ] I2 — fail2ban installeren
+- [ ] I3 — Portainer installeren
+- [ ] I4 — CI/CD pipeline (GitHub Actions: lint, test, build, deploy)
+
+---
+
+## 🟢 Code Quality
+
+- [ ] Q1 — `usersError` was dead state — nu gefixt, maar review alle store slices voor vergelijkbare patronen
+- [ ] Q2 — Stringly-typed user roles → `UserRole` union type
+- [ ] Q3 — `formatDate` verplaatsen naar `frontend/src/utils/` als gedeelde utility
+
+---
+
+## Inline TODO's in Code
+
+| Bestand | Regel | TODO |
+|---------|-------|------|
+| `core/fonts.py` | 13 | Inter TTF pad instructies updaten |
+| `data/kadaster.py` | 60 | RD↔WGS84 conversie met pyproj/RDNAPTRANS |
+| `data/revit_adapter.py` | 42, 64, 69, 89 | Volledige Revit integratie (4 methoden) |
+| `reports/building_code.py` | 33 | Bouwbesluit toetsingssecties |
+| `reports/daylight.py` | 27 | Daglichtsecties |
+| `reports/structural.py` | 28 | Sectie-opbouw vanuit data |
 
 ---
 
 ## ✅ VOLTOOID
 
-### Pixel Precision Fixes — 6 issues (1 maart, f3b8228)
-- [x] Arial fonts: per-tenant font registratie via `font_files` in brand.yaml
-- [x] Page numbering: "Pagina X van Y" met cover exclusion
-- [x] Y-offset: font ascent correctie, delta <0.7pt
-- [x] Image zones: `ImageZone` dataclass + `_draw_image_zones()` + locatie.yaml
-- [x] Achterblad: text zones (leeg-gelaten tekst, footer, paginanummer)
-- [x] BIC controles: table body fontsize → 10pt
+### API Key Management UI (2 maart)
+- [x] Frontend: ApiKeyManagement component + admin tab
+- [x] API types + store actions (list, create, revoke, delete)
+- [x] Eenmalige plaintext key display + kopieer-knop
+- [x] Code review: shared.tsx geextraheerd, usersError gefixt, staleness guard, clipboard error handling
 
-### Admin Panel Cleanup (1 maart, ab93b13)
-- [x] "Vervangen" knop per asset bestand in BrandManagement
-- [x] Standalone BrandWizard (blauw, 3-stap) verwijderd (8 bestanden)
-- [x] AdminTab type opgeschoond
+### OpenAEC Rebranding — Package Rename (2 maart)
+- [x] `git mv src/bm_reports src/openaec_reports`
+- [x] 218 bestanden: imports, env vars, CLI, Dockerfile, docs
+- [x] 1035 tests passed
 
-### FIX-1 + FIX-2 — Tenant Resolution Fix (1 maart, cfaa808)
-- [x] `_resolve_tenant_and_template()` — tenant uit template naam prefix
-- [x] `_resolve_tenants_dir()` — robuust met `OPENAEC_TENANTS_ROOT` env var
-- [x] Endpoint herschreven, 888 tests passed, E2E OK
+### Pixel Precision Fixes (1 maart)
+- [x] Arial per-tenant font registratie
+- [x] Page numbering "Pagina X van Y"
+- [x] Font ascent Y-offset correctie (<0.7pt)
+- [x] ImageZone support
+- [x] Achterblad text zones
+- [x] BIC tabel fontsize 10pt
 
-### T-API — API Endpoint (28 feb)
-- [x] `/api/generate/template` endpoint
-- [x] `data_transform.py` module
-- [x] Frontend smart routing (lokaal)
-- [x] Integratietests
+### Admin Panel Cleanup (1 maart)
+- [x] Replace button per asset
+- [x] BrandWizard (blauw, 3-stap) verwijderd
+- [x] BrandExtractWizard (paars, 4-stap) operationeel
 
-### T1 — Template Engine Fase 1 (28 feb)
-- [x] 102+ unit tests, 3 E2E tests, 6-pagina PDF
+### Tenant Resolution Fix (1 maart)
+- [x] `_resolve_tenant_and_template()` helper
+- [x] `_resolve_tenants_dir()` robuust met env vars
+- [x] 888 tests passed
 
-### T2 — Stationery + Coördinaten (28 feb)
-- [x] Referentie-gebaseerde coördinaten voor alle 6 page types
-
-### CLEANUP — Mega Cleanup (28 feb)
-- [x] Deprecated V1 Customer modules verwijderd
-- [x] Prompts gearchiveerd
-- [x] pytest cache opgeruimd
+### TemplateEngine V3 (28 feb)
+- [x] 102+ unit tests, 3 E2E tests
+- [x] 6-pagina PDF mixed orientation + stationery
+- [x] Customer BIC factuur template compleet

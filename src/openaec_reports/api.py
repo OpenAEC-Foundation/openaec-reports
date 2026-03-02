@@ -623,7 +623,7 @@ async def serve_architecture_docs():
     return HTMLResponse(content=(arch_dir / "architecture.html").read_text(encoding="utf-8"))
 
 
-@app.get("/uitleg.html")
+@app.get("/api/uitleg")
 async def serve_uitleg():
     """Serve de publieke handleiding pagina."""
     docs_dir = _find_docs_dir()
@@ -639,6 +639,10 @@ async def serve_uitleg():
 
 _static_dir = Path(__file__).parent.parent.parent / "static"
 if _static_dir.exists():
+    # Kopieer uitleg.html naar static dir zodat /uitleg.html direct werkt
+    _docs_dir = _find_docs_dir()
+    if _docs_dir and (_docs_dir / "uitleg.html").exists():
+        shutil.copy2(_docs_dir / "uitleg.html", _static_dir / "uitleg.html")
     app.mount("/", StaticFiles(directory=str(_static_dir), html=True), name="static")
 
 

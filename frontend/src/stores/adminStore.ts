@@ -27,7 +27,6 @@ interface AdminStore {
   // Users
   users: AdminUser[];
   usersLoading: boolean;
-  usersError: string | null;
   loadUsers: () => Promise<void>;
   createUser: (payload: CreateUserPayload) => Promise<AdminUser | null>;
   updateUser: (id: string, payload: UpdateUserPayload) => Promise<AdminUser | null>;
@@ -37,7 +36,7 @@ interface AdminStore {
   // API Keys
   apiKeys: ApiKeyInfo[];
   apiKeysLoading: boolean;
-  loadApiKeys: () => Promise<void>;
+  loadApiKeys: (force?: boolean) => Promise<void>;
   createApiKey: (payload: CreateApiKeyPayload) => Promise<string | null>;
   revokeApiKey: (keyId: string) => Promise<boolean>;
   deleteApiKey: (keyId: string) => Promise<boolean>;
@@ -127,15 +126,14 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
   // Users
   users: [],
   usersLoading: false,
-  usersError: null,
 
   loadUsers: async () => {
-    set({ usersLoading: true, usersError: null });
+    set({ usersLoading: true });
     try {
       const users = await adminApi.listUsers();
       set({ users, usersLoading: false });
     } catch (e) {
-      set({ usersLoading: false, usersError: extractError(e) });
+      set({ usersLoading: false, error: extractError(e) });
     }
   },
 
@@ -193,7 +191,8 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
   apiKeys: [],
   apiKeysLoading: false,
 
-  loadApiKeys: async () => {
+  loadApiKeys: async (force = false) => {
+    if (!force && get().apiKeys.length > 0) return;
     set({ apiKeysLoading: true });
     try {
       const apiKeys = await adminApi.listApiKeys();

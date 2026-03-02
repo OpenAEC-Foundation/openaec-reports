@@ -1,0 +1,939 @@
+{
+  "template": "structural",
+  "format": "A4",
+  "project": "Rotterdam Maashaven — Warehouse Conversion",
+  "project_number": "OA-2026-003",
+  "client": "Havenbedrijf Rotterdam N.V.",
+  "author": "OpenAEC Foundation",
+  "date": "2026-03-02",
+  "version": "1.0",
+  "status": "CONCEPT",
+  "report_type": "Structural Calculation Report",
+
+  "cover": {
+    "subtitle": "Structural assessment — adaptive reuse of existing warehouse"
+  },
+
+  "colofon": {
+    "enabled": true,
+    "normen": "NEN-EN 1990, NEN-EN 1991, NEN-EN 1992, NEN-EN 1993, NEN-EN 1996, NEN-EN 1998",
+    "fase": "Detailed design",
+    "status_colofon": "DRAFT",
+    "kenmerk": "OA-2026-003-R01",
+    "revision_history": [
+      {
+        "version": "0.1",
+        "date": "2026-01-20",
+        "author": "OpenAEC Contributors",
+        "description": "Preliminary assessment — existing structure"
+      },
+      {
+        "version": "0.2",
+        "date": "2026-02-10",
+        "author": "OpenAEC Contributors",
+        "description": "Updated loading — new function programme"
+      },
+      {
+        "version": "1.0",
+        "date": "2026-03-02",
+        "author": "OpenAEC Contributors",
+        "description": "Final calculation — all elements verified"
+      }
+    ]
+  },
+
+  "toc": {
+    "enabled": true,
+    "title": "Table of contents",
+    "max_depth": 3
+  },
+
+  "sections": [
+    {
+      "title": "Introduction",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "This report presents the structural assessment for the adaptive reuse of an existing warehouse at the Maashaven district in Rotterdam. The former industrial building (built 1962) is being converted into a mixed-use development comprising offices, co-working spaces, and a ground floor food hall."
+        },
+        {
+          "type": "paragraph",
+          "text": "The existing structure consists of a reinforced concrete frame with precast floor slabs, supported on driven precast concrete piles. A new steel mezzanine floor is introduced at level +4.50 m to create additional usable area within the existing double-height ground floor."
+        },
+        {
+          "type": "paragraph",
+          "text": "• Gross floor area (existing): 4,200 m²<br/>• Gross floor area (new mezzanine): 1,850 m²<br/>• Number of floors: 3 (ground + 2 upper) + new mezzanine<br/>• Building height: 14.8 m (existing, unchanged)<br/>• Structural system: RC frame with new steel insertions<br/>• Foundation: existing driven precast piles (350×350 mm)"
+        }
+      ]
+    },
+
+    {
+      "title": "Scope and limitations",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "This report covers the following structural elements:"
+        },
+        {
+          "type": "paragraph",
+          "text": "• Assessment of existing RC frame capacity for the new loading regime<br/>• Design of new steel mezzanine floor (beams + columns)<br/>• Verification of existing foundation for increased loads<br/>• Local reinforcement details at new openings<br/>• Stability check of the overall structure"
+        },
+        {
+          "type": "paragraph",
+          "text": "<b>Excluded from scope:</b> MEP penetrations, facade connections, temporary works during construction, and seismic assessment (not required per NEN-EN 1998 NA for consequence class CC2 in the Netherlands)."
+        }
+      ]
+    },
+
+    {
+      "title": "Reference documents",
+      "level": 2,
+      "content": [
+        {
+          "type": "table",
+          "title": "Reference documents",
+          "headers": ["Code", "Document", "Date"],
+          "rows": [
+            ["D-001", "Architectural drawings — van Dongen Koschuch", "2026-01-15"],
+            ["D-002", "Geotechnical survey — Fugro report 2025-R-4421", "2025-11-22"],
+            ["D-003", "Original structural drawings (1962) — archive Gemeentewerken", "1962-04-10"],
+            ["D-004", "Concrete core test results — SGS Intron", "2025-12-05"],
+            ["D-005", "Steel condition survey — Nebest", "2025-12-18"],
+            ["D-006", "Asbestos inventory — Search", "2025-10-30"]
+          ]
+        }
+      ]
+    },
+
+    {
+      "title": "Design basis",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "All calculations are performed in accordance with the Eurocodes (NEN-EN 1990 through 1999) including the Dutch National Annexes. The consequence class is CC2 (office/commercial use) with a design working life of 50 years."
+        }
+      ]
+    },
+
+    {
+      "title": "Applicable standards",
+      "level": 2,
+      "content": [
+        {
+          "type": "table",
+          "title": "Normative references",
+          "headers": ["Standard", "Title", "Edition"],
+          "rows": [
+            ["NEN-EN 1990+A1+A1/C2:2019", "Basis of structural design", "2019"],
+            ["NEN-EN 1991-1-1+C1+C11:2019", "Actions — densities, self-weight, imposed loads", "2019"],
+            ["NEN-EN 1991-1-3+C1:2019", "Actions — snow loads", "2019"],
+            ["NEN-EN 1991-1-4+A1+C2:2011", "Actions — wind loads", "2011"],
+            ["NEN-EN 1992-1-1+C2:2011", "Design of concrete structures", "2011"],
+            ["NEN-EN 1993-1-1+C2+A1:2016", "Design of steel structures", "2016"],
+            ["NEN-EN 1993-1-8+C2:2011", "Design of joints", "2011"],
+            ["NEN 8700+C1:2020", "Assessment of existing structures", "2020"]
+          ]
+        }
+      ]
+    },
+
+    {
+      "title": "Materials — existing structure",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Material properties of the existing structure have been determined through a combination of archive drawings, destructive testing (core samples) and non-destructive testing (Schmidt hammer, cover meter). The assessment follows NEN 8700 for existing structures."
+        },
+        {
+          "type": "table",
+          "title": "Existing concrete properties (from core tests)",
+          "headers": ["Element", "Cores tested", "f_ck,is [MPa]", "Design class"],
+          "rows": [
+            ["Columns ground floor", "6", "28.5", "C25/30 (assessed)"],
+            ["Columns upper floors", "4", "24.2", "C20/25 (assessed)"],
+            ["Beams all floors", "8", "26.8", "C25/30 (assessed)"],
+            ["Precast floor slabs", "4", "32.1", "C28/35 (assessed)"],
+            ["Foundation pile caps", "3", "22.5", "C20/25 (assessed)"]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Reinforcement: QR24 (FeB 240) confirmed from exposed bars. Design yield strength f_yd = 240 / 1.15 = 209 MPa."
+        }
+      ]
+    },
+
+    {
+      "title": "Materials — new steel structure",
+      "level": 2,
+      "content": [
+        {
+          "type": "table",
+          "title": "New steel materials",
+          "headers": ["Element", "Material", "Grade", "f_y [MPa]"],
+          "rows": [
+            ["Mezzanine main beams", "Hot-rolled sections", "S355", "355"],
+            ["Mezzanine secondary beams", "Hot-rolled sections", "S235", "235"],
+            ["Mezzanine columns", "Hot-rolled sections", "S355", "355"],
+            ["Composite floor deck", "Galvanised steel deck", "S350GD", "350"],
+            ["Connections — bolts", "Grade 10.9 / 8.8", "—", "—"],
+            ["Connections — welds", "Matching electrodes", "—", "—"]
+          ]
+        }
+      ]
+    },
+
+    {
+      "title": "Loading",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Loads are determined in accordance with NEN-EN 1991. The existing structure is assessed for the new loading regime resulting from the change of function from warehouse (category E) to office/commercial (category B/D)."
+        }
+      ]
+    },
+
+    {
+      "title": "Permanent loads",
+      "level": 2,
+      "content": [
+        {
+          "type": "table",
+          "title": "Permanent loads (characteristic)",
+          "headers": ["Load component", "Value", "Unit", "Reference"],
+          "rows": [
+            ["RC slab self-weight (200 mm)", "5.00", "kN/m²", "NEN-EN 1991-1-1"],
+            ["Composite floor deck (new mezzanine)", "2.80", "kN/m²", "Supplier datasheet"],
+            ["Floor finish — raised access floor", "0.40", "kN/m²", "NEN-EN 1991-1-1 A.2"],
+            ["Floor finish — screed (40 mm)", "0.80", "kN/m²", "NEN-EN 1991-1-1 A.2"],
+            ["Suspended ceiling + services", "0.25", "kN/m²", "Estimate"],
+            ["MEP installations (allowance)", "0.50", "kN/m²", "MEP engineer"],
+            ["Lightweight partitions (moveable)", "0.50", "kN/m²", "NEN-EN 1991-1-1 §6.3.1.2"],
+            ["Facade cladding (curtain wall)", "0.80", "kN/m", "Facade consultant"]
+          ]
+        }
+      ]
+    },
+
+    {
+      "title": "Variable loads",
+      "level": 2,
+      "content": [
+        {
+          "type": "table",
+          "title": "Variable loads (characteristic)",
+          "headers": ["Category", "Description", "q_k [kN/m²]", "Q_k [kN]"],
+          "rows": [
+            ["B", "Office areas", "2.50", "3.0"],
+            ["C1", "Co-working / meeting rooms", "3.00", "4.0"],
+            ["D1", "Food hall (ground floor)", "5.00", "7.0"],
+            ["H", "Roofs — maintenance only", "1.00", "1.5"],
+            ["—", "Mezzanine (office use)", "2.50", "3.0"]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "<b>Note:</b> The original warehouse was designed for category E1 (q_k = 7.5 kN/m²). The new function reduces the imposed floor load on the upper floors, but the ground floor food hall load exceeds the original residential-adjacent zones."
+        }
+      ]
+    },
+
+    {
+      "title": "Wind loads",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Wind loads are determined per NEN-EN 1991-1-4 with Dutch National Annex. The building is located in wind area II (coastal zone), terrain category II (harbour area with limited obstructions)."
+        },
+        {
+          "type": "calculation",
+          "title": "Basic wind velocity",
+          "formula": "v_b = c_dir × c_season × v_b,0",
+          "substitution": "v_b = 1.0 × 1.0 × 27.0",
+          "result": "27.0",
+          "unit": "m/s",
+          "reference": "NEN-EN 1991-1-4 §4.2"
+        },
+        {
+          "type": "calculation",
+          "title": "Peak velocity pressure at building height",
+          "formula": "q_p(z) = c_e(z) × q_b",
+          "substitution": "q_p(14.8) = 2.95 × 0.456",
+          "result": "1.35",
+          "unit": "kN/m²",
+          "reference": "NEN-EN 1991-1-4 §4.5"
+        }
+      ]
+    },
+
+    {
+      "title": "Snow loads",
+      "level": 2,
+      "content": [
+        {
+          "type": "calculation",
+          "title": "Snow load on roof",
+          "formula": "s = μ_i × C_e × C_t × s_k",
+          "substitution": "s = 0.8 × 1.0 × 1.0 × 0.70",
+          "result": "0.56",
+          "unit": "kN/m²",
+          "reference": "NEN-EN 1991-1-3 §5.2"
+        },
+        {
+          "type": "paragraph",
+          "text": "Roof shape coefficient μ_1 = 0.8 for flat roof (0° ≤ α ≤ 30°). Ground snow load s_k = 0.70 kN/m² (zone 3, Netherlands)."
+        }
+      ]
+    },
+
+    {
+      "title": "Load combinations",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Load combinations are determined per NEN-EN 1990 §6.4.3, using partial factors from Table A1.2(B) — set B for STR/GEO design situations."
+        },
+        {
+          "type": "table",
+          "title": "ULS load combinations (STR/GEO)",
+          "headers": ["Comb.", "Permanent", "Imposed", "Wind", "Snow", "Governing"],
+          "rows": [
+            ["LC1", "1.35 G", "1.50 Q", "0.90 W", "0.75 S", "Floors"],
+            ["LC2", "1.35 G", "1.05 Q", "1.50 W", "0.75 S", "Stability"],
+            ["LC3", "1.35 G", "1.05 Q", "0.90 W", "1.50 S", "Roof"],
+            ["LC4", "1.20 G", "—", "1.50 W", "—", "Uplift"],
+            ["LC5", "1.35 G", "1.50 Q", "—", "—", "Settlement"]
+          ]
+        },
+        {
+          "type": "table",
+          "title": "SLS load combinations (characteristic)",
+          "headers": ["Comb.", "Permanent", "Imposed", "Wind", "Snow"],
+          "rows": [
+            ["SLS1", "1.0 G", "1.0 Q", "0.6 W", "0.5 S"],
+            ["SLS2", "1.0 G", "0.7 Q", "1.0 W", "0.5 S"],
+            ["SLS3", "1.0 G", "0.7 Q", "0.6 W", "1.0 S"]
+          ]
+        }
+      ]
+    },
+
+    {
+      "title": "Existing structure — assessment",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "The existing RC frame is assessed according to NEN 8700 for the new loading conditions. The assessment uses reduced reliability levels appropriate for existing structures (β = 3.3 for CC2, remaining life > 15 years)."
+        }
+      ]
+    },
+
+    {
+      "title": "Existing beam B2.1 — 400×600 mm",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Primary beam B2.1 spans 8.40 m on the second floor. Cross-section: 400×600 mm, reinforcement 4Ø25 bottom + 2Ø20 top (confirmed by scan and local exposure). Concrete cover c_nom = 30 mm."
+        },
+        {
+          "type": "calculation",
+          "title": "Design bending moment (new loading)",
+          "formula": "M_Ed = q_Ed × L² / 8",
+          "substitution": "M_Ed = 18.2 × 8.40² / 8",
+          "result": "160.5",
+          "unit": "kNm",
+          "reference": "NEN-EN 1992-1-1 §6.1"
+        },
+        {
+          "type": "calculation",
+          "title": "Bending resistance existing beam",
+          "formula": "M_Rd = A_s × f_yd × (d − 0.4x)",
+          "substitution": "M_Rd = 1963 × 209 × (555 − 0.4 × 48.3) × 10⁻⁶",
+          "result": "219.3",
+          "unit": "kNm",
+          "reference": "NEN-EN 1992-1-1 §6.1"
+        },
+        {
+          "type": "check",
+          "description": "Unity check — bending existing beam B2.1",
+          "required_value": "UC ≤ 1.0",
+          "calculated_value": "M_Ed / M_Rd = 160.5 / 219.3",
+          "unity_check": 0.73,
+          "limit": 1.0,
+          "reference": "NEN-EN 1992-1-1 §6.1"
+        },
+        {
+          "type": "spacer",
+          "height_mm": 4
+        },
+        {
+          "type": "calculation",
+          "title": "Design shear force",
+          "formula": "V_Ed = q_Ed × L / 2",
+          "substitution": "V_Ed = 18.2 × 8.40 / 2",
+          "result": "76.4",
+          "unit": "kN",
+          "reference": "NEN-EN 1992-1-1 §6.2"
+        },
+        {
+          "type": "calculation",
+          "title": "Shear resistance (without shear reinforcement)",
+          "formula": "V_Rd,c = [C_Rd,c × k × (100 × ρ_l × f_ck)^(1/3)] × b_w × d",
+          "substitution": "V_Rd,c = [0.12 × 1.60 × (100 × 0.0089 × 28.5)^(1/3)] × 400 × 555 × 10⁻³",
+          "result": "112.8",
+          "unit": "kN",
+          "reference": "NEN-EN 1992-1-1 §6.2.2"
+        },
+        {
+          "type": "check",
+          "description": "Unity check — shear existing beam B2.1",
+          "required_value": "V_Ed ≤ V_Rd,c (no shear reinforcement required)",
+          "calculated_value": "V_Ed / V_Rd,c = 76.4 / 112.8",
+          "unity_check": 0.68,
+          "limit": 1.0,
+          "reference": "NEN-EN 1992-1-1 §6.2.2"
+        }
+      ]
+    },
+
+    {
+      "title": "Existing column K.A3 — 400×400 mm",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Interior column K.A3 at grid intersection A-3. Cross-section: 400×400 mm, reinforcement 4Ø25 (confirmed). Free height: 3.60 m (ground floor). Buckling length factor β = 0.7 (restrained both ends)."
+        },
+        {
+          "type": "calculation",
+          "title": "Design axial load",
+          "formula": "N_Ed = ΣR_beams + G_column",
+          "substitution": "N_Ed = 842 + 24",
+          "result": "866",
+          "unit": "kN",
+          "reference": "NEN-EN 1992-1-1 §6.1"
+        },
+        {
+          "type": "calculation",
+          "title": "Axial capacity existing column",
+          "formula": "N_Rd = A_c × f_cd + A_s × f_yd",
+          "substitution": "N_Rd = 160000 × 18.7 + 1963 × 209",
+          "result": "3403",
+          "unit": "kN",
+          "reference": "NEN-EN 1992-1-1 §6.1"
+        },
+        {
+          "type": "check",
+          "description": "Unity check — axial capacity column K.A3",
+          "required_value": "UC ≤ 1.0",
+          "calculated_value": "N_Ed / N_Rd = 866 / 3403",
+          "unity_check": 0.25,
+          "limit": 1.0,
+          "reference": "NEN-EN 1992-1-1 §6.1"
+        },
+        {
+          "type": "paragraph",
+          "text": "<b>Conclusion:</b> Existing column K.A3 has significant reserve capacity (UC = 0.25). The reduced imposed load from office use (vs. original warehouse use) results in lower axial forces than the original design."
+        }
+      ]
+    },
+
+    {
+      "title": "New mezzanine structure",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "A new steel mezzanine floor is introduced at level +4.50 m within the existing double-height ground floor. The mezzanine spans between new steel columns, which transfer loads directly to the existing pile caps. The mezzanine is structurally independent from the existing RC frame to avoid load redistribution."
+        },
+        {
+          "type": "paragraph",
+          "text": "• Main beams: HEB 360, S355 — spanning 10.20 m<br/>• Secondary beams: IPE 270, S235 — spanning 5.10 m at 2.55 m c/c<br/>• Columns: HEB 200, S355 — height 4.50 m<br/>• Floor: Composite steel deck with 120 mm concrete topping<br/>• Connection to existing structure: lateral restraint only (no vertical load transfer)"
+        }
+      ]
+    },
+
+    {
+      "title": "Main beam MB1 — HEB 360",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Main beam MB1 spans 10.20 m, supporting 4 secondary beams at 2.55 m spacing. Profile: HEB 360, steel S355. The beam is laterally restrained at secondary beam connections."
+        },
+        {
+          "type": "paragraph",
+          "text": "<b>Bending verification</b>",
+          "style": "Heading3"
+        },
+        {
+          "type": "calculation",
+          "title": "Line load on main beam",
+          "formula": "q_Ed = (g_k × γ_G + q_k × γ_Q) × tributary width",
+          "substitution": "q_Ed = (4.45 × 1.35 + 2.50 × 1.50) × 5.10",
+          "result": "49.7",
+          "unit": "kN/m",
+          "reference": "NEN-EN 1990 §6.4.3"
+        },
+        {
+          "type": "calculation",
+          "title": "Design bending moment",
+          "formula": "M_Ed = q_Ed × L² / 8",
+          "substitution": "M_Ed = 49.7 × 10.20² / 8",
+          "result": "646.1",
+          "unit": "kNm",
+          "reference": "NEN-EN 1993-1-1"
+        },
+        {
+          "type": "calculation",
+          "title": "Plastic moment resistance",
+          "formula": "M_pl,Rd = W_pl,y × f_y / γ_M0",
+          "substitution": "M_pl,Rd = 2683e3 × 355 / 1.0",
+          "result": "952.5",
+          "unit": "kNm",
+          "reference": "NEN-EN 1993-1-1 §6.2.5"
+        },
+        {
+          "type": "check",
+          "description": "Unity check — bending main beam MB1",
+          "required_value": "UC ≤ 1.0",
+          "calculated_value": "M_Ed / M_pl,Rd = 646.1 / 952.5",
+          "unity_check": 0.68,
+          "limit": 1.0,
+          "reference": "NEN-EN 1993-1-1 §6.2.5"
+        },
+        {
+          "type": "paragraph",
+          "text": "<b>Shear verification</b>",
+          "style": "Heading3"
+        },
+        {
+          "type": "calculation",
+          "title": "Design shear force",
+          "formula": "V_Ed = q_Ed × L / 2",
+          "substitution": "V_Ed = 49.7 × 10.20 / 2",
+          "result": "253.5",
+          "unit": "kN",
+          "reference": "NEN-EN 1993-1-1 §6.2.6"
+        },
+        {
+          "type": "calculation",
+          "title": "Plastic shear resistance",
+          "formula": "V_pl,Rd = A_v × (f_y / √3) / γ_M0",
+          "substitution": "V_pl,Rd = 5765 × (355 / 1.732) / 1.0",
+          "result": "1181.3",
+          "unit": "kN",
+          "reference": "NEN-EN 1993-1-1 §6.2.6"
+        },
+        {
+          "type": "check",
+          "description": "Unity check — shear main beam MB1",
+          "required_value": "V_Ed ≤ 0.5 V_pl,Rd (low shear — no interaction required)",
+          "calculated_value": "V_Ed / V_pl,Rd = 253.5 / 1181.3",
+          "unity_check": 0.21,
+          "limit": 1.0,
+          "reference": "NEN-EN 1993-1-1 §6.2.6"
+        },
+        {
+          "type": "paragraph",
+          "text": "<b>Deflection verification</b>",
+          "style": "Heading3"
+        },
+        {
+          "type": "calculation",
+          "title": "Maximum deflection (SLS)",
+          "formula": "δ = 5 × q_sls × L⁴ / (384 × E × I)",
+          "substitution": "δ = 5 × 35.8 × 10200⁴ / (384 × 210000 × 43190e4)",
+          "result": "33.8",
+          "unit": "mm",
+          "reference": "NEN-EN 1993-1-1 §7.2"
+        },
+        {
+          "type": "check",
+          "description": "Unity check — deflection main beam MB1",
+          "required_value": "δ ≤ L/250 = 40.8 mm",
+          "calculated_value": "δ / δ_max = 33.8 / 40.8",
+          "unity_check": 0.83,
+          "limit": 1.0,
+          "reference": "NEN-EN 1993-1-1 §7.2"
+        }
+      ]
+    },
+
+    {
+      "title": "Secondary beam SB1 — IPE 270",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Secondary beam SB1 spans 5.10 m between main beams. Profile: IPE 270, steel S235. Simply supported, laterally restrained by the composite floor deck."
+        },
+        {
+          "type": "calculation",
+          "title": "Design bending moment",
+          "formula": "M_Ed = q_Ed × L² / 8",
+          "substitution": "M_Ed = 25.0 × 5.10² / 8",
+          "result": "81.3",
+          "unit": "kNm",
+          "reference": "NEN-EN 1993-1-1"
+        },
+        {
+          "type": "calculation",
+          "title": "Plastic moment resistance",
+          "formula": "M_pl,Rd = W_pl,y × f_y / γ_M0",
+          "substitution": "M_pl,Rd = 484e3 × 235 / 1.0",
+          "result": "113.7",
+          "unit": "kNm",
+          "reference": "NEN-EN 1993-1-1 §6.2.5"
+        },
+        {
+          "type": "check",
+          "description": "Unity check — bending secondary beam SB1",
+          "required_value": "UC ≤ 1.0",
+          "calculated_value": "M_Ed / M_pl,Rd = 81.3 / 113.7",
+          "unity_check": 0.72,
+          "limit": 1.0,
+          "reference": "NEN-EN 1993-1-1 §6.2.5"
+        },
+        {
+          "type": "check",
+          "description": "Unity check — deflection secondary beam SB1",
+          "required_value": "δ ≤ L/250 = 20.4 mm",
+          "calculated_value": "δ = 14.1 mm",
+          "unity_check": 0.69,
+          "limit": 1.0,
+          "reference": "NEN-EN 1993-1-1 §7.2"
+        }
+      ]
+    },
+
+    {
+      "title": "Mezzanine column MC1 — HEB 200",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Mezzanine column MC1 supports two main beams. Height: 4.50 m. Profile: HEB 200, steel S355. Buckling length: 1.0L in both directions (pinned-pinned, no sway frame)."
+        },
+        {
+          "type": "calculation",
+          "title": "Design axial load",
+          "formula": "N_Ed = 2 × V_MB1 + G_column",
+          "substitution": "N_Ed = 2 × 253.5 + 3.4",
+          "result": "510.4",
+          "unit": "kN",
+          "reference": "NEN-EN 1993-1-1 §6.3.1"
+        },
+        {
+          "type": "calculation",
+          "title": "Flexural buckling resistance",
+          "formula": "N_b,Rd = χ × A × f_y / γ_M1",
+          "substitution": "N_b,Rd = 0.72 × 7808 × 355 / 1.0",
+          "result": "1997",
+          "unit": "kN",
+          "reference": "NEN-EN 1993-1-1 §6.3.1"
+        },
+        {
+          "type": "check",
+          "description": "Unity check — buckling mezzanine column MC1",
+          "required_value": "UC ≤ 1.0",
+          "calculated_value": "N_Ed / N_b,Rd = 510.4 / 1997",
+          "unity_check": 0.26,
+          "limit": 1.0,
+          "reference": "NEN-EN 1993-1-1 §6.3.1"
+        }
+      ]
+    },
+
+    {
+      "title": "Foundation verification",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "The existing foundation consists of driven precast concrete piles (350×350 mm), confirmed by the original drawings and a ground-penetrating radar survey. Pile capacity is derived from the geotechnical report (Fugro 2025-R-4421) using the Dutch national method (NEN 9997-1)."
+        }
+      ]
+    },
+
+    {
+      "title": "Pile capacity",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "From the geotechnical report, the following pile capacities have been established for the existing 350×350 mm driven concrete piles (pile length approximately 18 m to the Pleistocene sand layer):"
+        },
+        {
+          "type": "table",
+          "title": "Pile bearing capacity (from geotechnical report)",
+          "headers": ["Parameter", "Value", "Unit"],
+          "rows": [
+            ["Shaft resistance (R_s,cal)", "580", "kN"],
+            ["Base resistance (R_b,cal)", "920", "kN"],
+            ["Total resistance (R_c,cal)", "1500", "kN"],
+            ["Design resistance (R_c,d) — ξ₃=1.39, γ_b=1.2, γ_s=1.2", "900", "kN"],
+            ["Allowable SLS load", "750", "kN"]
+          ]
+        }
+      ]
+    },
+
+    {
+      "title": "Pile group at mezzanine column MC1",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "The mezzanine column MC1 is positioned on the existing pile cap at grid A-3 which contains 4 piles. The existing column K.A3 also bears on this pile cap."
+        },
+        {
+          "type": "calculation",
+          "title": "Total design load on pile cap A-3",
+          "formula": "F_Ed = N_Ed,existing + N_Ed,mezzanine",
+          "substitution": "F_Ed = 866 + 510",
+          "result": "1376",
+          "unit": "kN",
+          "reference": "—"
+        },
+        {
+          "type": "calculation",
+          "title": "Load per pile",
+          "formula": "F_pile = F_Ed / n_piles",
+          "substitution": "F_pile = 1376 / 4",
+          "result": "344",
+          "unit": "kN",
+          "reference": "—"
+        },
+        {
+          "type": "check",
+          "description": "Unity check — pile capacity at pile cap A-3",
+          "required_value": "F_pile ≤ R_c,d = 900 kN",
+          "calculated_value": "F_pile / R_c,d = 344 / 900",
+          "unity_check": 0.38,
+          "limit": 1.0,
+          "reference": "NEN 9997-1 §7.6"
+        },
+        {
+          "type": "paragraph",
+          "text": "<b>Conclusion:</b> The existing pile foundation has ample capacity for the combined loading from the existing column and the new mezzanine column. UC = 0.38 — no foundation strengthening required."
+        }
+      ]
+    },
+
+    {
+      "title": "Stability",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Global stability of the building is provided by the existing RC shear walls (stair cores and elevator shaft). The new mezzanine structure is laterally restrained by connections to the existing RC frame. Wind loads are transferred from the facade to the floor diaphragms and into the shear walls."
+        }
+      ]
+    },
+
+    {
+      "title": "Horizontal wind force",
+      "level": 2,
+      "content": [
+        {
+          "type": "calculation",
+          "title": "Total horizontal wind force (X-direction)",
+          "formula": "F_w,x = c_s × c_d × c_f × q_p(z_e) × A_ref",
+          "substitution": "F_w,x = 1.0 × 0.9 × 1.35 × (42.0 × 14.8)",
+          "result": "755",
+          "unit": "kN",
+          "reference": "NEN-EN 1991-1-4 §5.3"
+        },
+        {
+          "type": "paragraph",
+          "text": "This force is distributed to two RC shear walls (core 1 and core 2) in proportion to their stiffness."
+        }
+      ]
+    },
+
+    {
+      "title": "Shear wall verification",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "The existing shear walls (250 mm thick, C25/30) are verified for the combined bending and shear from wind loading. Wall length: 6.0 m (core 1) and 4.5 m (core 2)."
+        },
+        {
+          "type": "check",
+          "description": "Unity check — shear wall core 1 (bending + normal force)",
+          "required_value": "UC ≤ 1.0",
+          "calculated_value": "Combined UC (M-N interaction)",
+          "unity_check": 0.58,
+          "limit": 1.0,
+          "reference": "NEN-EN 1992-1-1 §6.1"
+        },
+        {
+          "type": "check",
+          "description": "Unity check — shear wall core 2 (bending + normal force)",
+          "required_value": "UC ≤ 1.0",
+          "calculated_value": "Combined UC (M-N interaction)",
+          "unity_check": 0.71,
+          "limit": 1.0,
+          "reference": "NEN-EN 1992-1-1 §6.1"
+        },
+        {
+          "type": "paragraph",
+          "text": "Both shear wall cores have sufficient capacity for the wind loading. The existing stability system is adequate for the new function — no additional bracing required."
+        }
+      ]
+    },
+
+    {
+      "title": "Fire resistance",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "The required fire resistance for the new office function is determined per Bouwbesluit 2012 (Building Decree). For a building with floor levels above 5 m: WBDBO ≥ 60 minutes for the main load-bearing structure."
+        }
+      ]
+    },
+
+    {
+      "title": "Existing RC structure",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "The existing reinforced concrete structure inherently provides fire resistance. With a minimum concrete cover of 30 mm (confirmed) and member dimensions exceeding tabulated minimum values in NEN-EN 1992-1-2, the following fire ratings are achieved:"
+        },
+        {
+          "type": "table",
+          "title": "Fire resistance existing elements (tabulated method)",
+          "headers": ["Element", "Dimensions", "Cover", "Rating", "Required"],
+          "rows": [
+            ["Columns", "400×400 mm", "30 mm", "R120", "R60"],
+            ["Beams", "400×600 mm", "30 mm", "R90", "R60"],
+            ["Slabs", "200 mm", "30 mm", "REI90", "REI60"]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "<b>Conclusion:</b> All existing RC elements satisfy the required 60-minute fire resistance without additional protection."
+        }
+      ]
+    },
+
+    {
+      "title": "New steel mezzanine",
+      "level": 2,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Unprotected steel sections do not achieve 60-minute fire resistance. Fire protection is required for the mezzanine structure:"
+        },
+        {
+          "type": "paragraph",
+          "text": "• Main beams HEB 360: intumescent coating (DFT 1.2 mm) for R60<br/>• Secondary beams IPE 270: intumescent coating (DFT 1.5 mm) for R60<br/>• Columns HEB 200: board encasement (2×12.5 mm Promatect) for R60<br/>• Composite floor deck: inherent fire resistance REI60 per composite action"
+        },
+        {
+          "type": "paragraph",
+          "text": "Fire protection thicknesses are indicative and must be confirmed by the fire protection specialist based on the critical temperature method per NEN-EN 1993-1-2."
+        }
+      ]
+    },
+
+    {
+      "title": "Summary and conclusions",
+      "level": 1,
+      "page_break_before": true,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "The structural assessment demonstrates that the existing warehouse at Maashaven can be safely converted to a mixed-use office building with a new mezzanine floor. All structural elements — both existing and new — satisfy the requirements of the Eurocodes."
+        },
+        {
+          "type": "paragraph",
+          "text": "Key findings:"
+        },
+        {
+          "type": "paragraph",
+          "text": "• The existing RC frame has sufficient capacity for the new loading regime (office use is lighter than original warehouse use on upper floors)<br/>• A new steel mezzanine (HEB 360 + IPE 270 + HEB 200) is feasible within the existing double-height ground floor<br/>• The existing pile foundation has ample reserve capacity — no strengthening required<br/>• The existing stability system (RC shear walls) is adequate for the new function<br/>• Fire protection is required for the new steel mezzanine elements"
+        },
+        {
+          "type": "table",
+          "title": "Unity check summary — existing elements",
+          "headers": ["Element", "Check", "UC", "Status"],
+          "rows": [
+            ["Beam B2.1", "Bending", "0.73", "OK"],
+            ["Beam B2.1", "Shear", "0.68", "OK"],
+            ["Column K.A3", "Axial compression", "0.25", "OK"],
+            ["Shear wall core 1", "Bending + normal", "0.58", "OK"],
+            ["Shear wall core 2", "Bending + normal", "0.71", "OK"]
+          ]
+        },
+        {
+          "type": "spacer",
+          "height_mm": 6
+        },
+        {
+          "type": "table",
+          "title": "Unity check summary — new mezzanine elements",
+          "headers": ["Element", "Check", "UC", "Status"],
+          "rows": [
+            ["Main beam MB1", "Bending", "0.68", "OK"],
+            ["Main beam MB1", "Shear", "0.21", "OK"],
+            ["Main beam MB1", "Deflection", "0.83", "OK"],
+            ["Secondary beam SB1", "Bending", "0.72", "OK"],
+            ["Secondary beam SB1", "Deflection", "0.69", "OK"],
+            ["Column MC1", "Buckling", "0.26", "OK"]
+          ]
+        },
+        {
+          "type": "spacer",
+          "height_mm": 6
+        },
+        {
+          "type": "table",
+          "title": "Unity check summary — foundation",
+          "headers": ["Element", "Check", "UC", "Status"],
+          "rows": [
+            ["Pile cap A-3", "Pile bearing capacity", "0.38", "OK"]
+          ]
+        },
+        {
+          "type": "spacer",
+          "height_mm": 8
+        },
+        {
+          "type": "paragraph",
+          "text": "The maximum governing unity check is <b>0.83</b> (deflection of main beam MB1), which is within acceptable limits. The structure is adequate for the proposed conversion."
+        }
+      ]
+    }
+  ],
+
+  "backcover": {
+    "enabled": true
+  },
+
+  "metadata": {
+    "software": "OpenAEC Report Generator v1.0",
+    "calculation_software": "OpenAEC Structural v0.1 + hand calculations",
+    "fem_model": "N/A (analytical verification)",
+    "geotechnical_report": "Fugro 2025-R-4421"
+  }
+}

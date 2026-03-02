@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useAdminStore } from "@/stores/adminStore";
 import { TenantManagement } from "./TenantManagement";
 import { UserManagement } from "./UserManagement";
+import { ApiKeyManagement } from "./ApiKeyManagement";
 import { TemplateManagement } from "./TemplateManagement";
 import { BrandManagement } from "./BrandManagement";
 import { HelpPanel } from "./HelpPanel";
@@ -9,6 +10,7 @@ import { HelpPanel } from "./HelpPanel";
 const TABS = [
   { key: "tenants" as const, label: "Tenants" },
   { key: "users" as const, label: "Gebruikers" },
+  { key: "api-keys" as const, label: "API Keys" },
   { key: "templates" as const, label: "Templates" },
   { key: "brand" as const, label: "Brand" },
   { key: "help" as const, label: "📖 Help" },
@@ -71,6 +73,7 @@ export function AdminPanel() {
       {/* Active panel */}
       {activeTab === "tenants" && <TenantManagement />}
       {activeTab === "users" && <UserManagement />}
+      {activeTab === "api-keys" && <ApiKeyManagement />}
       {activeTab === "templates" && <TemplateManagement />}
       {activeTab === "brand" && <BrandManagement />}
       {activeTab === "help" && <HelpPanel />}

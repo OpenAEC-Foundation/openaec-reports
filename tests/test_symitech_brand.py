@@ -3,7 +3,7 @@
 
 import yaml
 
-from bm_reports.core.brand import BRANDS_DIR, BrandConfig, BrandLoader
+from openaec_reports.core.brand import BRANDS_DIR, BrandConfig, BrandLoader
 
 SYMITECH_BRAND_DIR = BRANDS_DIR / "symitech"
 SYMITECH_BRAND_YAML = SYMITECH_BRAND_DIR / "brand.yaml"

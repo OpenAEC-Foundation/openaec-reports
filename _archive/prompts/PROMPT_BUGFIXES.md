@@ -181,7 +181,7 @@ python -m pytest tests/ -v
 
 Genereer daarna een test-PDF met alle special pages om visueel te verifiëren:
 ```python
-from bm_reports import A4, Report
+from openaec_reports import A4, Report
 
 report = Report(
     format=A4,

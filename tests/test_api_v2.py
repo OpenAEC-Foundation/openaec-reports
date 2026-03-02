@@ -12,11 +12,11 @@ httpx = pytest.importorskip("httpx", reason="httpx niet geinstalleerd")
 
 from fastapi.testclient import TestClient  # noqa: E402
 
-from bm_reports.api import app  # noqa: E402
+from openaec_reports.api import app  # noqa: E402
 
 BASE = Path(__file__).parent.parent
 JSON_PATH = BASE / "tests" / "test_data" / "sample_report.json"
-STATIONERY_DIR = BASE / "src" / "bm_reports" / "assets" / "stationery" / "3bm_cooperatie"
+STATIONERY_DIR = BASE / "src" / "openaec_reports" / "assets" / "stationery" / "3bm_cooperatie"
 
 SKIP_NO_STATIONERY = pytest.mark.skipif(
     not STATIONERY_DIR.exists() or not (STATIONERY_DIR / "standaard.pdf").exists(),

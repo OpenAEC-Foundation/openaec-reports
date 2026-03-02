@@ -1,4 +1,4 @@
-# Deployment Guide — bm-reports
+# Deployment Guide — openaec-reports
 
 > Laatst bijgewerkt: 2026-02-20
 
@@ -16,7 +16,7 @@
 
 | Domein | Service |
 |--------|---------|
-| `report.3bm.co.nl` | bm-reports (API + frontend) |
+| `report.3bm.co.nl` | openaec-reports (API + frontend) |
 | `zaagplan.3bm.co.nl` | cutlist-optimizer |
 
 DNS: A-records wijzen naar 46.224.215.142
@@ -31,11 +31,11 @@ DNS: A-records wijzen naar 46.224.215.142
 │   └── logs/access.log         # Caddy access log (CrowdSec input)
 ├── crowdsec/
 │   └── acquis.yaml             # Log bronnen config
-├── bm-reports-api/             # Git clone van openaec-reports
+├── openaec-reports-api/             # Git clone van openaec-reports
 │   ├── Dockerfile
-│   ├── src/bm_reports/
+│   ├── src/openaec_reports/
 │   └── ...
-└── bm-reports-ui/
+└── openaec-reports-ui/
     └── dist/                   # Vite production build (static files)
         ├── index.html
         └── assets/
@@ -46,17 +46,17 @@ DNS: A-records wijzen naar 46.224.215.142
 ### Caddy (reverse proxy + auto-SSL)
 - Poorten: 80, 443, 443/udp
 - SSL: automatisch via Let's Encrypt
-- `report.3bm.co.nl/api/*` → `bm-reports-api:8000`
+- `report.3bm.co.nl/api/*` → `openaec-reports-api:8000`
 - `report.3bm.co.nl/*` → static files uit `/srv/reports`
 - `zaagplan.3bm.co.nl/api/*` → `cutlist-backend:8000`
 - `zaagplan.3bm.co.nl/*` → `cutlist-frontend:80`
 
-### bm-reports-api
-- Image: gebuild vanuit `/opt/3bm/bm-reports-api/Dockerfile`
+### openaec-reports-api
+- Image: gebuild vanuit `/opt/3bm/openaec-reports-api/Dockerfile`
 - Python 3.12-slim, uvicorn, 2 workers
 - Port: 8000 (intern)
 - Healthcheck: `GET /api/health`
-- Env: `BM_TENANT_DIR=/app/tenants/3bm_cooperatie`
+- Env: `OPENAEC_TENANT_DIR=/app/tenants/3bm_cooperatie`
 - Volume: `reports_uploads:/app/uploads`
 
 ### CrowdSec
@@ -71,19 +71,19 @@ DNS: A-records wijzen naar 46.224.215.142
 cd /opt/3bm && docker compose ps
 
 # Logs
-docker logs bm-reports-api --tail 50
+docker logs openaec-reports-api --tail 50
 docker logs caddy --tail 50
 
 # Restart
-docker compose restart bm-reports-api
+docker compose restart openaec-reports-api
 
 # Update API (na git push)
-cd /opt/3bm/bm-reports-api && git pull
-cd /opt/3bm && docker compose build bm-reports-api
-docker compose up -d bm-reports-api
+cd /opt/3bm/openaec-reports-api && git pull
+cd /opt/3bm && docker compose build openaec-reports-api
+docker compose up -d openaec-reports-api
 
 # Update frontend
-# Upload nieuwe dist/ bestanden naar /opt/3bm/bm-reports-ui/dist/
+# Upload nieuwe dist/ bestanden naar /opt/3bm/openaec-reports-ui/dist/
 # Caddy serveert automatisch (geen restart nodig)
 
 # CrowdSec
@@ -108,7 +108,7 @@ docker exec crowdsec cscli decisions list
    ```
 2. Upload `dist/` naar server (scp of rsync):
    ```
-   scp -r dist/* root@46.224.215.142:/opt/3bm/bm-reports-ui/dist/
+   scp -r dist/* root@46.224.215.142:/opt/3bm/openaec-reports-ui/dist/
    ```
 3. Geen restart nodig — Caddy serveert direct
 

@@ -2,7 +2,7 @@
 
 ## Context
 
-Dit is `bm-reports-ui`, Fase 4. Fase 1-3 zijn compleet: AppShell, Sidebar met drag & drop secties, MainPanel met block editors voor alle 8 block types, JSON export/import. Lees `CLAUDE.md` voor de volledige architectuur.
+Dit is `openaec-reports-ui`, Fase 4. Fase 1-3 zijn compleet: AppShell, Sidebar met drag & drop secties, MainPanel met block editors voor alle 8 block types, JSON export/import. Lees `CLAUDE.md` voor de volledige architectuur.
 
 De Zustand store heeft al alle benodigde actions: `setMetadata()`, `setCover()`, `setColofon()`, `setToc()`, `loadTemplate()`, `reset()`. Deze hoeven NIET aangepast te worden.
 

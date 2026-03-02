@@ -18,9 +18,9 @@ Colofon en appendix divider zijn al goed aangesloten op `brand.pages.*`.
 ## Stap 0: Oriëntatie
 
 Lees voordat je begint:
-- `src/bm_reports/core/special_pages.py` — alle render functies
-- `src/bm_reports/assets/brands/3bm_cooperatie.yaml` — huidige `pages:` en `stationery:` secties
-- `src/bm_reports/core/toc.py` — TOC rendering
+- `src/openaec_reports/core/special_pages.py` — alle render functies
+- `src/openaec_reports/assets/brands/3bm_cooperatie.yaml` — huidige `pages:` en `stationery:` secties
+- `src/openaec_reports/core/toc.py` — TOC rendering
 - `tests/test_special_pages.py` — bestaande tests (28 tests)
 
 ## Stap 1: Inventariseer Hardcoded Waarden
@@ -293,8 +293,8 @@ python -m pytest tests/ -v --tb=short
 
 ## Verwachte output
 
-- `src/bm_reports/core/special_pages.py` — refactored, alle waarden uit brand spec
-- `src/bm_reports/assets/brands/3bm_cooperatie.yaml` — uitgebreid met `pages.cover` en `pages.backcover`
+- `src/openaec_reports/core/special_pages.py` — refactored, alle waarden uit brand spec
+- `src/openaec_reports/assets/brands/3bm_cooperatie.yaml` — uitgebreid met `pages.cover` en `pages.backcover`
 - `tests/test_special_pages.py` — uitgebreid met brand YAML tests
 - Alle tests groen
 

@@ -6,7 +6,7 @@ from datetime import date
 
 import pytest
 
-from bm_reports.core.template_loader import TemplateLoader
+from openaec_reports.core.template_loader import TemplateLoader
 
 
 class TestScaffoldStructuralReport:

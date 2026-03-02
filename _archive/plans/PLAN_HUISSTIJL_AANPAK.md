@@ -225,9 +225,9 @@ Output: per pagina een similarity score + verschil-overlay afbeelding.
 ```
 NIEUW BUREAU TOEVOEGEN:
 1. Verzamel referentie-rapport + logo's + fonts
-2. Run: python -m bm_reports.tools extract-stationery rapport.pdf --output brands/nieuw-bureau/
+2. Run: python -m openaec_reports.tools extract-stationery rapport.pdf --output brands/nieuw-bureau/
 3. Definieer tekst-zones in YAML (alleen dynamische velden)
-4. Run: python -m bm_reports.tools visual-diff --reference rapport.pdf --generated test.pdf
+4. Run: python -m openaec_reports.tools visual-diff --reference rapport.pdf --generated test.pdf
 5. Itereer tot similarity > 95% per pagina
 ```
 

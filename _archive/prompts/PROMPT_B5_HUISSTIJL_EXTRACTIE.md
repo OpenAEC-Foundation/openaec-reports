@@ -2,7 +2,7 @@
 
 ## Context
 
-De bm-reports library genereert PDF-rapporten op basis van een brand YAML die de volledige visuele layout beschrijft. De huidige YAML voor 3BM Coöperatie bevat 200+ regels handmatig geschreven coördinaten die niet kloppen — de gegenereerde PDF's wijken sterk af van het referentiedocument.
+De openaec-reports library genereert PDF-rapporten op basis van een brand YAML die de volledige visuele layout beschrijft. De huidige YAML voor 3BM Coöperatie bevat 200+ regels handmatig geschreven coördinaten die niet kloppen — de gegenereerde PDF's wijken sterk af van het referentiedocument.
 
 **Oorzaak:** De bestaande extractie-tools (`tools/pdf_extractor.py`, `tools/pattern_detector.py`, `tools/config_generator.py`) extraheren wél kleuren, fonts, marges en tekststijlen, maar missen:
 1. **Drawing paths** — polygonen, clip-paths, bezier curves (PyMuPDF kan dit via `page.get_drawings()` maar de huidige code haalt alleen rects eruit)
@@ -736,9 +736,9 @@ def extract_layout(
     output: Path = typer.Option("./extracted", help="Output directory"),
 ):
     """Extraheer volledige layout uit een referentie-PDF."""
-    from bm_reports.tools.pdf_extractor import extract_pdf
-    from bm_reports.tools.page_classifier import classify_pages
-    from bm_reports.tools.layout_extractor import extract_page_layouts
+    from openaec_reports.tools.pdf_extractor import extract_pdf
+    from openaec_reports.tools.page_classifier import classify_pages
+    from openaec_reports.tools.layout_extractor import extract_page_layouts
     
     pages = extract_pdf(pdf, output / "pages", dpi=150)
     classified = classify_pages(pages)
@@ -761,7 +761,7 @@ def visual_diff(
     output: Path = typer.Option("./diffs"),
 ):
     """Vergelijk gegenereerde PDF met referentie."""
-    from bm_reports.tools.visual_diff import compare_pdfs, print_diff_report
+    from openaec_reports.tools.visual_diff import compare_pdfs, print_diff_report
     diffs = compare_pdfs(generated, reference, output)
     print_diff_report(diffs)
 ```

@@ -6,7 +6,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from bm_reports.api import app
+from openaec_reports.api import app
 
 # Ongeauthenticeerde client voor health checks en helper tests
 _unauth_client = TestClient(app)
@@ -228,20 +228,20 @@ class TestSafeFilename:
     """Tests voor _safe_filename helper."""
 
     def test_basic_filename(self):
-        from bm_reports.api import _safe_filename
+        from openaec_reports.api import _safe_filename
 
         result = _safe_filename("2026-001", "Mijn Project")
         assert result.endswith(".pdf")
         assert " " not in result
 
     def test_empty_parts(self):
-        from bm_reports.api import _safe_filename
+        from openaec_reports.api import _safe_filename
 
         result = _safe_filename("", "")
         assert result == "rapport.pdf"
 
     def test_special_chars_removed(self):
-        from bm_reports.api import _safe_filename
+        from openaec_reports.api import _safe_filename
 
         result = _safe_filename("Test/Project<>|")
         assert "/" not in result
@@ -249,7 +249,7 @@ class TestSafeFilename:
         assert ">" not in result
 
     def test_custom_extension(self):
-        from bm_reports.api import _safe_filename
+        from openaec_reports.api import _safe_filename
 
         result = _safe_filename("Test", extension=".xlsx")
         assert result.endswith(".xlsx")

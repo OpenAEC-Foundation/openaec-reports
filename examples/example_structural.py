@@ -1,7 +1,7 @@
 """Voorbeeld: Constructief rapport genereren vanuit JSON data."""
 
 from pathlib import Path
-from bm_reports import Report, A4
+from openaec_reports import Report, A4
 
 # Pad naar voorbeeld data
 DATA_FILE = Path(__file__).parent / "example_data.json"

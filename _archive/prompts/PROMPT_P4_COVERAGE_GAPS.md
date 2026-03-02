@@ -20,7 +20,7 @@ Daarnaast: de bestaande test bestanden `test_stationery.py`, `test_stationery_ex
 ```bash
 cd "X:\10_3BM_bouwkunde\50_Claude-Code-Projects\Report_generator"
 pip install -e ".[dev,brand-tools]" --quiet
-python -m pytest tests/ --cov=bm_reports --cov-report=term-missing -v 2>&1 | tee coverage_baseline.txt
+python -m pytest tests/ --cov=openaec_reports --cov-report=term-missing -v 2>&1 | tee coverage_baseline.txt
 ```
 
 Analyseer het coverage rapport. Identificeer per module:
@@ -30,13 +30,13 @@ Analyseer het coverage rapport. Identificeer per module:
 
 ## Stap 1: Triageer template_renderer.py
 
-Bekijk `src/bm_reports/core/template_renderer.py`:
+Bekijk `src/openaec_reports/core/template_renderer.py`:
 - Wordt het ergens geïmporteerd? Zoek naar imports in andere modules
 - Zo niet: het is waarschijnlijk dead code uit een eerdere iteratie → documenteer dit, voeg geen tests toe voor dode code
 - Zo ja: schrijf tests voor de gebruikte functies
 
 ```bash
-grep -r "template_renderer" src/bm_reports/ --include="*.py"
+grep -r "template_renderer" src/openaec_reports/ --include="*.py"
 ```
 
 ## Stap 2: CLI tests toevoegen
@@ -51,7 +51,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 import pytest
 
-from bm_reports.cli import main, _cmd_generate, _cmd_templates, _cmd_validate, _cmd_serve
+from openaec_reports.cli import main, _cmd_generate, _cmd_templates, _cmd_validate, _cmd_serve
 
 
 class TestMainDispatch:
@@ -167,7 +167,7 @@ class TestBuildBrandCommand:
 
 ## Stap 3: Image block coverage verhogen
 
-Bekijk `tests/test_block_registry.py` en `src/bm_reports/components/image_block.py`. Voeg tests toe voor:
+Bekijk `tests/test_block_registry.py` en `src/openaec_reports/components/image_block.py`. Voeg tests toe voor:
 
 - Base64 encoded afbeelding (data URI string)
 - Ontbrekend bestand (fallback/placeholder)
@@ -227,7 +227,7 @@ from pathlib import Path
 import json
 import pytest
 
-from bm_reports.data.json_adapter import JsonAdapter
+from openaec_reports.data.json_adapter import JsonAdapter
 
 
 class TestJsonAdapterInit:
@@ -271,12 +271,12 @@ Bekijk deze modules. Als het stubs zijn (lege functies of `pass`), voeg dan mini
 ```python
 class TestKadasterStub:
     def test_module_importable(self):
-        from bm_reports.data.kadaster import KadasterClient  # of wat de class heet
+        from openaec_reports.data.kadaster import KadasterClient  # of wat de class heet
         assert KadasterClient is not None
 
 class TestRevitAdapterStub:
     def test_module_importable(self):
-        from bm_reports.data.revit_adapter import RevitAdapter
+        from openaec_reports.data.revit_adapter import RevitAdapter
         assert RevitAdapter is not None
 ```
 
@@ -298,7 +298,7 @@ Als een test te veel mockt: refactor naar een integratietest met een tijdelijke 
 ## Stap 6: Coverage rapport genereren
 
 ```bash
-python -m pytest tests/ --cov=bm_reports --cov-report=term-missing --cov-report=html:htmlcov -v 2>&1 | tee coverage_final.txt
+python -m pytest tests/ --cov=openaec_reports --cov-report=term-missing --cov-report=html:htmlcov -v 2>&1 | tee coverage_final.txt
 ```
 
 Vergelijk met baseline:

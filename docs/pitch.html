@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenAEC Reports — Platform Overview &amp; Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --amber: #D97706;
+    --deep-forge: #36363E;
+    --signal-orange: #EA580C;
+    --warm-gold: #F59E0B;
+    --scaffold-gray: #A1A1AA;
+    --blueprint-white: #FAFAF9;
+    --concrete: #F5F5F4;
+    --night-build: #2A2A32;
+    --success: #16A34A;
+    --error: #DC2626;
+    --info: #2563EB;
+    --gradient: linear-gradient(90deg, #D97706 0%, #F59E0B 40%, #EA580C 100%);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Inter", system-ui, sans-serif;
+    color: var(--deep-forge);
+    line-height: 1.6;
+    background: var(--blueprint-white);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, h5 {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  code, pre, .mono {
+    font-family: "JetBrains Mono", monospace;
+  }
+  a { color: var(--amber); text-decoration: none; }
+  a:hover { color: var(--signal-orange); }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  /* ─── NAV ─── */
+  .topnav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--deep-forge);
+    border-bottom: 1px solid #27272A;
+    padding: 12px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topnav .brand { font-family: "Space Grotesk", system-ui, sans-serif; font-size: 1.1rem; font-weight: 700; }
+  .topnav .brand .w { color: var(--blueprint-white); }
+  .topnav .brand .a { color: var(--amber); }
+  .topnav nav { display: flex; gap: 24px; }
+  .topnav nav a { color: var(--scaffold-gray); font-size: 0.85rem; font-weight: 500; }
+  .topnav nav a:hover { color: white; }
+  @media (max-width: 768px) { .topnav nav { display: none; } }
+
+  /* ─── HERO ─── */
+  .hero {
+    background: var(--night-build);
+    padding: 96px 24px 80px;
+    text-align: center;
+    position: relative; overflow: hidden;
+    border-bottom: 4px solid; border-image: var(--gradient) 1;
+  }
+  .hero::before {
+    content: "{ }"; position: absolute;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 280px; font-weight: 700;
+    color: var(--amber); opacity: 0.04;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .hero-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.75rem; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--warm-gold); margin-bottom: 16px;
+  }
+  .hero h1 { font-size: clamp(2rem, 5vw, 3.25rem); font-weight: 700; color: var(--blueprint-white); margin-bottom: 16px; }
+  .hero h1 .accent { color: var(--amber); }
+  .hero .tagline { font-size: 1.15rem; color: var(--scaffold-gray); max-width: 600px; margin: 0 auto 40px; }
+  .hero-badges { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; padding: 6px 14px; border-radius: 9999px;
+    border: 1px solid rgba(250,250,249,0.15); color: var(--scaffold-gray);
+  }
+  .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+
+  /* ─── SECTIONS ─── */
+  section { padding: 80px 24px; }
+  section:nth-child(even of :not(.dark-section)) { background: var(--concrete); }
+  .section-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.7rem; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--amber); margin-bottom: 12px;
+  }
+  section h2 { font-size: 2rem; font-weight: 700; margin-bottom: 12px; }
+  section .lead { font-size: 1.05rem; color: #57534E; max-width: 700px; margin-bottom: 40px; }
+
+  /* ─── CARDS ─── */
+  .layers { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 32px; }
+  .layer-card {
+    background: white; border: 1px solid #E7E5E4; border-radius: 12px;
+    padding: 28px; transition: box-shadow 0.2s, border-color 0.2s; position: relative;
+  }
+  .layer-card:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border-color: #D6D3D1; }
+  .layer-card.featured { border: 2px solid var(--amber); }
+  .layer-num {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.65rem; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--scaffold-gray); margin-bottom: 8px;
+  }
+  .layer-card h3 { font-size: 1.25rem; margin-bottom: 8px; }
+  .layer-card p { font-size: 0.9rem; color: #57534E; line-height: 1.6; }
+  .layer-tag {
+    display: inline-block; font-size: 0.7rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 3px 10px; border-radius: 9999px; margin-top: 12px;
+  }
+  .tag-python { background: #DBEAFE; color: #1E40AF; }
+  .tag-api { background: #DCFCE7; color: #166534; }
+  .tag-react { background: #FEF3C7; color: #92400E; }
+
+  /* ─── FLOW ─── */
+  .flow { display: flex; align-items: center; justify-content: center; gap: 0; margin: 40px 0; flex-wrap: wrap; }
+  .flow-step { background: white; border: 1px solid #E7E5E4; border-radius: 12px; padding: 20px 24px; text-align: center; min-width: 160px; }
+  .flow-step .icon { font-size: 1.75rem; margin-bottom: 8px; }
+  .flow-step h4 { font-size: 0.95rem; margin-bottom: 4px; }
+  .flow-step p { font-size: 0.8rem; color: var(--scaffold-gray); }
+  .flow-arrow { font-size: 1.5rem; color: var(--amber); padding: 0 8px; flex-shrink: 0; }
+
+  /* ─── FEATURE GRID ─── */
+  .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+  .feature {
+    background: white; border: 1px solid #E7E5E4; border-radius: 12px;
+    padding: 24px; transition: box-shadow 0.2s;
+  }
+  .feature:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+  .feature-icon {
+    width: 40px; height: 40px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; margin-bottom: 12px;
+  }
+  .feature h4 { font-size: 1rem; margin-bottom: 6px; }
+  .feature p { font-size: 0.875rem; color: #57534E; line-height: 1.5; }
+
+  /* ─── CODE ─── */
+  .code-block {
+    background: var(--night-build); border-radius: 8px;
+    padding: 24px; overflow-x: auto; margin: 20px 0;
+    position: relative;
+  }
+  .code-block pre { color: var(--blueprint-white); font-size: 0.82rem; line-height: 1.65; white-space: pre; }
+  .code-block .cm { color: var(--scaffold-gray); }
+  .code-block .kw { color: var(--warm-gold); }
+  .code-block .s { color: #34D399; }
+  .code-block .fn { color: var(--amber); }
+  .code-block .m { color: #22D3EE; }
+  .code-block .url { color: #A78BFA; }
+  .code-block .n { color: #F87171; }
+  .code-label {
+    position: absolute; top: 8px; right: 12px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.6rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--scaffold-gray); opacity: 0.6;
+  }
+
+  /* ─── TABLE ─── */
+  .block-table {
+    width: 100%; border: 1px solid #E7E5E4; border-radius: 8px;
+    overflow: hidden; border-spacing: 0; margin: 20px 0;
+  }
+  .block-table thead { background: var(--concrete); border-bottom: 2px solid #E7E5E4; }
+  .block-table th {
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
+    color: #57534E; font-weight: 600; padding: 12px 16px; text-align: left;
+  }
+  .block-table td { padding: 12px 16px; border-bottom: 1px solid #F5F5F4; font-size: 0.875rem; }
+  .block-table tr:last-child td { border-bottom: none; }
+  .block-table tr:hover { background: var(--blueprint-white); }
+  .block-table code {
+    background: var(--concrete); padding: 2px 8px; border-radius: 4px;
+    font-size: 0.8rem; color: var(--amber); font-weight: 500;
+  }
+
+  /* ─── ENDPOINTS ─── */
+  .endpoint-group { margin-bottom: 32px; }
+  .endpoint-group h4 { font-size: 1rem; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #E7E5E4; }
+  .endpoint { display: flex; align-items: baseline; gap: 12px; padding: 8px 0; font-size: 0.875rem; }
+  .endpoint + .endpoint { border-top: 1px solid #F5F5F4; }
+  .http-method {
+    font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 600;
+    padding: 3px 8px; border-radius: 4px; min-width: 52px; text-align: center; flex-shrink: 0;
+  }
+  .http-get { background: #DCFCE7; color: #166534; }
+  .http-post { background: #DBEAFE; color: #1E40AF; }
+  .http-patch { background: #FEF3C7; color: #92400E; }
+  .http-delete { background: #FEE2E2; color: #991B1B; }
+  .endpoint-path {
+    font-family: "JetBrains Mono", monospace; font-size: 0.8rem;
+    color: var(--deep-forge); min-width: 280px; flex-shrink: 0;
+  }
+  .endpoint-desc { color: #57534E; }
+
+  /* ─── TWO-COL ─── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+  @media (max-width: 768px) {
+    .two-col { grid-template-columns: 1fr; }
+    .endpoint { flex-direction: column; gap: 4px; }
+    .endpoint-path { min-width: 0; }
+  }
+
+  /* ─── DARK SECTION ─── */
+  .dark-section {
+    background: var(--deep-forge); color: var(--blueprint-white);
+    border-top: 4px solid; border-image: var(--gradient) 1;
+  }
+  .dark-section .section-label { color: var(--warm-gold); }
+  .dark-section h2, .dark-section h3, .dark-section h4 { color: var(--blueprint-white); }
+  .dark-section .lead { color: var(--scaffold-gray); }
+  .dark-section .feature { background: var(--night-build); border-color: #27272A; }
+  .dark-section .feature:hover { border-color: #3f3f46; }
+  .dark-section .feature p { color: var(--scaffold-gray); }
+  .dark-section .feature h4 { color: var(--blueprint-white); }
+
+  /* ─── CALLOUT ─── */
+  .callout {
+    border-left: 4px solid var(--amber); padding: 16px 24px;
+    background: var(--concrete); border-radius: 0 8px 8px 0;
+    font-size: 0.9rem; margin: 24px 0;
+  }
+  .callout strong { color: var(--deep-forge); }
+  .callout code { background: white; padding: 1px 6px; border-radius: 3px; font-size: 0.82rem; }
+
+  /* ─── TREE ─── */
+  .tree {
+    font-family: "JetBrains Mono", monospace; font-size: 0.8rem; line-height: 1.8;
+    background: var(--night-build); color: var(--blueprint-white);
+    padding: 24px; border-radius: 8px;
+  }
+  .tree .dir { color: var(--warm-gold); font-weight: 500; }
+  .tree .file { color: var(--scaffold-gray); }
+  .tree .cmt { color: #57534E; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--deep-forge); border-top: 3px solid; border-image: var(--gradient) 1;
+    padding: 40px 24px; text-align: center;
+  }
+  footer .brand { font-family: "Space Grotesk", system-ui, sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+  footer .brand .white { color: var(--blueprint-white); }
+  footer .brand .amber { color: var(--amber); }
+  footer p { font-size: 0.8rem; color: var(--scaffold-gray); }
+
+  /* ─── UI MOCK ─── */
+  .ui-mock {
+    background: white; border: 2px solid #E7E5E4; border-radius: 12px;
+    overflow: hidden; font-size: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.08);
+  }
+  .ui-header {
+    background: var(--deep-forge); color: white; padding: 10px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.72rem;
+  }
+  .ui-header .logo { font-family: "Space Grotesk"; font-weight: 700; font-size: 0.9rem; }
+  .ui-header .logo .w { color: white; }
+  .ui-header .logo .a { color: var(--amber); }
+  .ui-header .tabs { display: flex; gap: 4px; }
+  .ui-header .tab {
+    padding: 4px 10px; border-radius: 6px; color: rgba(255,255,255,0.5);
+    font-weight: 500; font-size: 0.68rem;
+  }
+  .ui-header .tab.active { background: rgba(255,255,255,0.15); color: white; }
+  .ui-body { display: flex; min-height: 280px; }
+  .ui-sidebar {
+    width: 200px; border-right: 1px solid #E7E5E4;
+    padding: 12px; background: var(--blueprint-white); flex-shrink: 0;
+  }
+  .ui-sidebar .section-item {
+    padding: 6px 10px; border-radius: 6px; margin-bottom: 4px;
+    font-size: 0.7rem; color: #57534E;
+  }
+  .ui-sidebar .section-item.active { background: var(--amber); color: white; }
+  .ui-sidebar .section-item .badge-sm {
+    display: inline-block; font-size: 0.55rem; background: #E7E5E4;
+    padding: 1px 5px; border-radius: 9999px; margin-left: 4px; color: #57534E;
+  }
+  .ui-sidebar .section-item.active .badge-sm { background: rgba(255,255,255,0.3); color: white; }
+  .ui-main { flex: 1; padding: 16px; }
+  .ui-block {
+    border: 1px solid #E7E5E4; border-radius: 8px; padding: 10px 12px;
+    margin-bottom: 8px; font-size: 0.7rem;
+  }
+  .ui-block .block-type {
+    display: inline-block; font-size: 0.55rem; font-weight: 600;
+    padding: 2px 6px; border-radius: 4px; margin-bottom: 4px; text-transform: uppercase;
+  }
+  .ui-block.active { border-color: var(--amber); box-shadow: 0 0 0 2px rgba(217,119,6,0.2); }
+  .ui-block .block-content { color: #57534E; font-size: 0.68rem; line-height: 1.4; }
+
+  /* ─── SCHEMA TREE ─── */
+  .schema-tree {
+    font-family: "JetBrains Mono", monospace; font-size: 0.78rem;
+    line-height: 1.9; padding: 24px; background: white;
+    border: 1px solid #E7E5E4; border-radius: 8px;
+  }
+  .schema-tree .req { color: var(--amber); font-weight: 600; }
+  .schema-tree .opt { color: var(--scaffold-gray); }
+  .schema-tree .type { color: var(--info); font-size: 0.68rem; }
+  .schema-tree .desc { color: #57534E; font-size: 0.68rem; font-style: italic; }
+
+  /* ─── DIVIDER ─── */
+  .section-divider {
+    background: var(--night-build); padding: 40px 24px; text-align: center;
+    border-top: 4px solid; border-image: var(--gradient) 1;
+  }
+  .section-divider h2 { color: var(--blueprint-white); font-size: 1.75rem; margin-bottom: 8px; }
+  .section-divider p { color: var(--scaffold-gray); font-size: 0.95rem; }
+  .section-divider .label {
+    font-family: "JetBrains Mono", monospace; font-size: 0.7rem;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--warm-gold); margin-bottom: 12px;
+  }
+
+  /* ─── JSON FIELD CARD ─── */
+  .field-card {
+    background: white; border: 1px solid #E7E5E4; border-radius: 8px;
+    padding: 16px 20px; margin-bottom: 12px;
+  }
+  .field-card h5 { font-size: 0.9rem; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .field-card h5 code { font-size: 0.82rem; color: var(--amber); background: #FEF3C7; padding: 2px 8px; border-radius: 4px; }
+  .field-card .required-badge {
+    font-size: 0.6rem; font-weight: 600; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 9999px; background: #FEE2E2; color: #991B1B;
+  }
+  .field-card .optional-badge {
+    font-size: 0.6rem; font-weight: 600; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 9999px; background: #F4F4F5; color: #3F3F46;
+  }
+  .field-card p { font-size: 0.85rem; color: #57534E; margin-top: 4px; }
+
+  /* utils */
+  .mt-0 { margin-top: 0; }
+  .mb-sm { margin-bottom: 12px; }
+  .mb-md { margin-bottom: 24px; }
+  .mb-lg { margin-bottom: 40px; }
+  .mt-lg { margin-top: 48px; }
+  .gap-sm { gap: 12px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ NAV ═══════════ -->
+<div class="topnav">
+  <div class="brand"><span class="w">Open</span><span class="a">AEC</span> Reports</div>
+  <nav>
+    <a href="#architecture">Architecture</a>
+    <a href="#editor">Web Editor</a>
+    <a href="#api-guide">API</a>
+    <a href="#python-guide">Python</a>
+    <a href="#schema">JSON Schema</a>
+    <a href="#multi-tenant">Multi-Tenant</a>
+  </nav>
+</div>
+
+<!-- ═══════════ HERO ═══════════ -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-label">Platform Overview &amp; Guide</div>
+    <h1><span class="accent">Open</span>AEC Reports</h1>
+    <p class="tagline">
+      A complete platform for generating professional engineering reports.
+      JSON in, pixel-perfect PDF out. Multi-tenant, API-first, open architecture.
+    </p>
+    <div class="hero-badges">
+      <span class="badge"><span class="dot"></span> Python Library</span>
+      <span class="badge"><span class="dot"></span> REST API</span>
+      <span class="badge"><span class="dot"></span> Web Editor</span>
+      <span class="badge"><span class="dot"></span> Multi-Tenant</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ARCHITECTURE ═══════════ -->
+<section id="architecture">
+  <div class="container">
+    <div class="section-label">01 &mdash; Architecture</div>
+    <h2>Three layers, one goal</h2>
+    <p class="lead">
+      The platform is built as a monorepo with three independent layers.
+      Each layer can be used on its own, or they work together as a full stack.
+    </p>
+    <div class="layers">
+      <div class="layer-card">
+        <div class="layer-num">Layer 1 &mdash; Library</div>
+        <h3>Python Package</h3>
+        <p>Import directly in any Python script. Pass a dict, get a PDF. Works with pyRevit, Jupyter, CI/CD, or any Python environment.</p>
+        <span class="layer-tag tag-python">Python 3.10+</span>
+      </div>
+      <div class="layer-card featured">
+        <div class="layer-num">Layer 2 &mdash; API Server</div>
+        <h3>REST API</h3>
+        <p>FastAPI server that accepts JSON and returns PDF files. Handles authentication, validation, template management, and multi-tenant brand resolution.</p>
+        <span class="layer-tag tag-api">FastAPI + Docker</span>
+      </div>
+      <div class="layer-card">
+        <div class="layer-num">Layer 3 &mdash; Web Editor</div>
+        <h3>Browser UI</h3>
+        <p>Visual report editor built with React. Drag-and-drop blocks, live PDF preview, template scaffolding, undo/redo. Produces JSON &mdash; the API handles the rest.</p>
+        <span class="layer-tag tag-react">React + TypeScript</span>
+      </div>
+    </div>
+
+    <div class="flow" style="margin-top:48px;">
+      <div class="flow-step"><div class="icon">&#9998;</div><h4>Author</h4><p>Web editor, script,<br>or raw JSON</p></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step"><div class="icon">{ }</div><h4>JSON</h4><p>Conforms to<br>report.schema.json</p></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step"><div class="icon">&#9881;</div><h4>API</h4><p>Validates, resolves<br>brand &amp; template</p></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step" style="border:2px solid var(--amber);"><div class="icon">&#128196;</div><h4>PDF</h4><p>Pixel-perfect,<br>branded output</p></div>
+    </div>
+    <div class="callout">
+      <strong>Key principle:</strong> The frontend produces JSON, not PDFs.
+      The JSON schema (<code>report.schema.json</code>) is the single source of truth.
+      Any system that can produce valid JSON can generate reports &mdash; no UI required.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--              PART 2 — WEB EDITOR GUIDE             -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section-divider" id="editor">
+  <div class="container">
+    <div class="label">Guide</div>
+    <h2>Web Editor</h2>
+    <p>A visual interface for composing reports from modular content blocks.</p>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="section-label">02 &mdash; Editor Layout</div>
+    <h2>What you see when you open the editor</h2>
+    <p class="lead">The editor has a header bar, a sidebar for navigation, and a main content area. Here is the layout:</p>
+
+    <!-- UI Mock -->
+    <div class="ui-mock">
+      <div class="ui-header">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div class="logo"><span class="w">Open</span><span class="a">AEC</span></div>
+          <div class="tabs">
+            <div class="tab active">Editor</div>
+            <div class="tab">Split</div>
+            <div class="tab">JSON</div>
+            <div class="tab">Preview</div>
+            <div class="tab" style="border-left:1px solid rgba(255,255,255,0.1);padding-left:12px;">Admin</div>
+          </div>
+          <span style="color:rgba(255,255,255,0.3);font-size:0.65rem;">Saved</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="color:rgba(255,255,255,0.4);">?</span>
+          <span style="color:rgba(255,255,255,0.4);">&#8634; &#8635;</span>
+          <span style="border:1px solid rgba(255,255,255,0.2);padding:3px 10px;border-radius:6px;color:rgba(255,255,255,0.7);">Import</span>
+          <span style="border:1px solid rgba(255,255,255,0.2);padding:3px 10px;border-radius:6px;color:rgba(255,255,255,0.7);">Export</span>
+          <span style="border:1px solid rgba(255,255,255,0.2);padding:3px 10px;border-radius:6px;color:rgba(255,255,255,0.7);">Validate</span>
+          <span style="background:var(--amber);padding:3px 10px;border-radius:6px;color:white;font-weight:600;">Generate PDF</span>
+        </div>
+      </div>
+      <div class="ui-body">
+        <div class="ui-sidebar">
+          <div style="font-size:0.6rem;color:var(--scaffold-gray);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;font-weight:600;">Sections</div>
+          <div class="section-item">1. Inleiding <span class="badge-sm">2</span></div>
+          <div class="section-item active">2. Uitgangspunten <span class="badge-sm">5</span></div>
+          <div class="section-item">3. Belastingen <span class="badge-sm">3</span></div>
+          <div class="section-item">4. Staalligger L1 <span class="badge-sm">8</span></div>
+          <div class="section-item">5. Conclusie <span class="badge-sm">1</span></div>
+          <div style="margin-top:12px;font-size:0.6rem;color:var(--scaffold-gray);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;font-weight:600;">Appendices</div>
+          <div class="section-item">A. Berekeningen</div>
+          <div style="margin-top:16px;">
+            <div style="font-size:0.65rem;color:var(--amber);cursor:pointer;">+ Sectie toevoegen</div>
+          </div>
+        </div>
+        <div class="ui-main">
+          <div style="font-size:0.85rem;font-weight:600;margin-bottom:12px;font-family:'Space Grotesk';">2. Uitgangspunten</div>
+          <div class="ui-block">
+            <div class="block-type" style="background:#DBEAFE;color:#1E40AF;">paragraph</div>
+            <div class="block-content">Het ontwerp is gebaseerd op de volgende normen en uitgangspunten...</div>
+          </div>
+          <div class="ui-block active">
+            <div class="block-type" style="background:#FEF3C7;color:#92400E;">calculation</div>
+            <div class="block-content">
+              <strong>Veldmoment</strong><br>
+              <span style="font-family:'JetBrains Mono';font-size:0.65rem;">M_Ed = q &times; l&sup2; / 8 = 8.7 &times; 6.0&sup2; / 8 = <strong>39.1 kNm</strong></span>
+            </div>
+          </div>
+          <div class="ui-block">
+            <div class="block-type" style="background:#DCFCE7;color:#166534;">check</div>
+            <div class="block-content">
+              Unity check buiging &mdash; <span style="background:#DCFCE7;padding:1px 6px;border-radius:4px;font-size:0.6rem;font-weight:600;color:#166534;">UC = 0.39 &bull; PASS</span>
+            </div>
+          </div>
+          <div class="ui-block">
+            <div class="block-type" style="background:#F3E8FF;color:#6B21A8;">table</div>
+            <div class="block-content">Materiaaloverzicht &mdash; 3 columns &times; 4 rows</div>
+          </div>
+          <div style="text-align:center;margin-top:12px;font-size:0.65rem;color:var(--scaffold-gray);border:1px dashed #E7E5E4;padding:8px;border-radius:8px;cursor:pointer;">+ Block toevoegen</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top:40px;">
+      <div>
+        <h3 class="mb-sm">View modes</h3>
+        <table class="block-table">
+          <thead><tr><th>Mode</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Editor</strong></td><td>Full-width block editor with sidebar navigation. This is where you build your report.</td></tr>
+            <tr><td><strong>Split</strong></td><td>Editor on the left, live PDF preview on the right. See changes as you make them.</td></tr>
+            <tr><td><strong>JSON</strong></td><td>Raw JSON editor with syntax validation. Edit the data directly, apply with one click.</td></tr>
+            <tr><td><strong>Preview</strong></td><td>Full-width PDF preview with auto-refresh. See exactly what the final document looks like.</td></tr>
+            <tr><td><strong>Admin</strong></td><td>Tenant, user, template, and brand management. Only visible to admin users.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3 class="mb-sm">Keyboard shortcuts</h3>
+        <table class="block-table">
+          <thead><tr><th>Shortcut</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td><code>Ctrl+S</code></td><td>Export JSON to file</td></tr>
+            <tr><td><code>Ctrl+Enter</code></td><td>Generate PDF</td></tr>
+            <tr><td><code>Ctrl+Z</code> / <code>Ctrl+Y</code></td><td>Undo / Redo</td></tr>
+            <tr><td><code>Ctrl+1</code> &ndash; <code>4</code></td><td>Switch view mode</td></tr>
+            <tr><td><code>Ctrl+Shift+P</code></td><td>Add paragraph block</td></tr>
+            <tr><td><code>Ctrl+Shift+K</code></td><td>Add calculation block</td></tr>
+            <tr><td><code>Ctrl+Shift+T</code></td><td>Add table block</td></tr>
+            <tr><td><code>Escape</code></td><td>Deselect active block</td></tr>
+            <tr><td><code>?</code></td><td>Show shortcut reference</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-label">03 &mdash; Content Blocks</div>
+    <h2>10 block types for any engineering report</h2>
+    <p class="lead">Each block is a self-contained content unit. Drag them to reorder, click to edit, duplicate or delete.</p>
+
+    <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+      <div class="feature">
+        <div class="feature-icon" style="background:#DBEAFE;color:#1E40AF;">&#182;</div>
+        <h4>Paragraph</h4>
+        <p>Rich text with <strong>bold</strong>, <em>italic</em>, subscript, superscript. Supports ReportLab XML markup.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:#FEF3C7;color:#92400E;">&#402;</div>
+        <h4>Calculation</h4>
+        <p>Structured formula display: title, formula, substitution, result + unit, and norm reference.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:#DCFCE7;color:#166534;">&#10003;</div>
+        <h4>Check</h4>
+        <p>Unity check with pass/fail. UC &le; 1.0 = green "VOLDOET", UC > 1.0 = red "VOLDOET NIET".</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:#F3E8FF;color:#6B21A8;">&#9638;</div>
+        <h4>Table</h4>
+        <p>Spreadsheet grid with configurable column widths. Add/remove rows and columns inline.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:#FCE7F3;color:#9D174D;">&#128247;</div>
+        <h4>Image</h4>
+        <p>Upload, paste a URL, or use base64. Caption, alignment (L/C/R), width control in mm.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:#ECFDF5;color:#065F46;">&#127758;</div>
+        <h4>Map</h4>
+        <p>PDOK/Kadaster integration. Address search, 4 WMS layers (parcels, buildings, aerial, zoning).</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:#EFF6FF;color:#1E40AF;">&#8226;</div>
+        <h4>Bullet List</h4>
+        <p>Dynamic item list. Add/remove points with one click.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:#F5F5F4;color:#57534E;">H2</div>
+        <h4>Heading 2</h4>
+        <p>Subheading with optional numbering (e.g. "1.1 Details").</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:#F5F5F4;color:#57534E;">&#8597;</div>
+        <h4>Spacer</h4>
+        <p>Vertical whitespace, configurable height in mm.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" style="background:#F5F5F4;color:#57534E;">&#8629;</div>
+        <h4>Page Break</h4>
+        <p>Forces a new page at this position.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--              PART 3 — REST API GUIDE               -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section-divider" id="api-guide">
+  <div class="container">
+    <div class="label">Guide</div>
+    <h2>REST API</h2>
+    <p>Automate report generation from any language or system.</p>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="section-label">04 &mdash; API Endpoints</div>
+    <h2>Complete endpoint reference</h2>
+    <p class="lead">Every action the web editor performs goes through the API. Anything the UI can do, your code can do too.</p>
+
+    <h3 class="mb-sm">Authentication</h3>
+    <div class="endpoint-group">
+      <div class="endpoint"><span class="http-method http-post">POST</span><span class="endpoint-path">/api/auth/login</span><span class="endpoint-desc">Login with username + password &rarr; JWT token</span></div>
+      <div class="endpoint"><span class="http-method http-post">POST</span><span class="endpoint-path">/api/auth/logout</span><span class="endpoint-desc">Clear session</span></div>
+      <div class="endpoint"><span class="http-method http-get">GET</span><span class="endpoint-path">/api/auth/me</span><span class="endpoint-desc">Get current user info</span></div>
+    </div>
+
+    <h3 class="mb-sm mt-lg">Report generation</h3>
+    <div class="endpoint-group">
+      <div class="endpoint"><span class="http-method http-get">GET</span><span class="endpoint-path">/api/health</span><span class="endpoint-desc">Status &amp; version check</span></div>
+      <div class="endpoint"><span class="http-method http-get">GET</span><span class="endpoint-path">/api/templates</span><span class="endpoint-desc">List available templates</span></div>
+      <div class="endpoint"><span class="http-method http-get">GET</span><span class="endpoint-path">/api/templates/{name}/scaffold</span><span class="endpoint-desc">Get empty JSON scaffold for a template</span></div>
+      <div class="endpoint"><span class="http-method http-get">GET</span><span class="endpoint-path">/api/brands</span><span class="endpoint-desc">List brand configurations</span></div>
+      <div class="endpoint"><span class="http-method http-post">POST</span><span class="endpoint-path">/api/validate</span><span class="endpoint-desc">Validate report JSON against schema</span></div>
+      <div class="endpoint"><span class="http-method http-post">POST</span><span class="endpoint-path">/api/generate</span><span class="endpoint-desc">Generate PDF (ReportLab engine)</span></div>
+      <div class="endpoint"><span class="http-method http-post">POST</span><span class="endpoint-path">/api/generate/v2</span><span class="endpoint-desc">Generate PDF (pixel-perfect PyMuPDF renderer)</span></div>
+      <div class="endpoint"><span class="http-method http-post">POST</span><span class="endpoint-path">/api/generate/template</span><span class="endpoint-desc">Generate PDF (YAML template engine)</span></div>
+      <div class="endpoint"><span class="http-method http-post">POST</span><span class="endpoint-path">/api/upload</span><span class="endpoint-desc">Upload image for use in reports</span></div>
+    </div>
+
+    <h3 class="mb-sm mt-lg">Admin &mdash; tenant &amp; user management</h3>
+    <div class="endpoint-group">
+      <div class="endpoint"><span class="http-method http-get">GET</span><span class="endpoint-path">/api/admin/tenants</span><span class="endpoint-desc">List tenants with asset counts</span></div>
+      <div class="endpoint"><span class="http-method http-post">POST</span><span class="endpoint-path">/api/admin/tenants</span><span class="endpoint-desc">Create tenant</span></div>
+      <div class="endpoint"><span class="http-method http-delete">DEL</span><span class="endpoint-path">/api/admin/tenants/{tenant}</span><span class="endpoint-desc">Delete tenant</span></div>
+      <div class="endpoint"><span class="http-method http-get">GET</span><span class="endpoint-path">/api/admin/users</span><span class="endpoint-desc">List users</span></div>
+      <div class="endpoint"><span class="http-method http-post">POST</span><span class="endpoint-path">/api/admin/users</span><span class="endpoint-desc">Create user</span></div>
+      <div class="endpoint"><span class="http-method http-patch">PATCH</span><span class="endpoint-path">/api/admin/users/{id}</span><span class="endpoint-desc">Update user</span></div>
+      <div class="endpoint"><span class="http-method http-post">POST</span><span class="endpoint-path">/api/admin/tenants/{t}/templates</span><span class="endpoint-desc">Upload YAML template</span></div>
+      <div class="endpoint"><span class="http-method http-post">POST</span><span class="endpoint-path">/api/admin/tenants/{t}/assets/{cat}</span><span class="endpoint-desc">Upload stationery, logos, or fonts</span></div>
+      <div class="endpoint"><span class="http-method http-post">POST</span><span class="endpoint-path">/api/admin/tenants/{t}/brand-extract</span><span class="endpoint-desc">AI-powered brand extraction from PDF</span></div>
+      <div class="endpoint"><span class="http-method http-post">POST</span><span class="endpoint-path">/api/admin/api-keys</span><span class="endpoint-desc">Create API key for machine access</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-label">05 &mdash; API Examples</div>
+    <h2>Generate a PDF in three calls</h2>
+    <p class="lead">Authenticate, get a scaffold, fill in your data, generate. Here are working examples.</p>
+
+    <h3 class="mb-sm">Step 1 &mdash; Authenticate</h3>
+    <div class="code-block"><span class="code-label">cURL</span>
+<pre><span class="cm"># Login and get a JWT token</span>
+curl -X POST <span class="url">https://report.example.com/api/auth/login</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{"username": "admin", "password": "secret"}'</span>
+
+<span class="cm"># Response:</span>
+<span class="cm"># {"user": {"id": "...", "role": "admin"}, "token": "eyJhbG..."}</span></pre>
+    </div>
+
+    <h3 class="mb-sm mt-lg">Step 2 &mdash; Get a template scaffold</h3>
+    <div class="code-block"><span class="code-label">cURL</span>
+<pre><span class="cm"># Get a pre-filled starting point for a "structural" report</span>
+curl <span class="url">https://report.example.com/api/templates/structural/scaffold</span> \
+  -H <span class="s">"Authorization: Bearer eyJhbG..."</span>
+
+<span class="cm"># Response: a complete JSON object you can fill in</span>
+<span class="cm"># {"template": "structural", "project": "", "sections": [...], ...}</span></pre>
+    </div>
+
+    <h3 class="mb-sm mt-lg">Step 3 &mdash; Generate PDF</h3>
+    <div class="two-col">
+      <div>
+        <div class="code-block"><span class="code-label">cURL</span>
+<pre><span class="cm"># Send your report JSON, receive a PDF</span>
+curl -X POST <span class="url">https://report.example.com/api/generate</span> \
+  -H <span class="s">"Authorization: Bearer eyJhbG..."</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">@my_report.json</span> \
+  --output report.pdf</pre>
+        </div>
+      </div>
+      <div>
+        <div class="code-block"><span class="code-label">JavaScript</span>
+<pre><span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="s">"/api/generate"</span>, {
+  <span class="fn">method</span>: <span class="s">"POST"</span>,
+  <span class="fn">headers</span>: {
+    <span class="s">"Content-Type"</span>: <span class="s">"application/json"</span>,
+    <span class="s">"Authorization"</span>: <span class="s">`Bearer ${token}`</span>,
+  },
+  <span class="fn">body</span>: JSON.<span class="fn">stringify</span>(reportData),
+});
+<span class="kw">const</span> pdf = <span class="kw">await</span> res.<span class="fn">blob</span>();
+<span class="cm">// Save or display the PDF</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Three render engines:</strong>
+      <code>/api/generate</code> uses the ReportLab engine (general purpose).
+      <code>/api/generate/v2</code> uses PyMuPDF for pixel-perfect stationery overlay.
+      <code>/api/generate/template</code> uses the YAML template engine for tenant-specific layouts.
+      The web editor automatically routes to the correct engine based on the selected template.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--              PART 4 — PYTHON LIBRARY GUIDE         -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section-divider" id="python-guide">
+  <div class="container">
+    <div class="label">Guide</div>
+    <h2>Python Library</h2>
+    <p>Import the package and generate PDFs from any Python environment.</p>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="section-label">06 &mdash; Quick Start</div>
+    <h2>From code to PDF in seconds</h2>
+    <p class="lead">Install the package, create a Report, add content, call build(). That's it.</p>
+
+    <div class="code-block"><span class="code-label">Shell</span>
+<pre><span class="cm"># Install the package</span>
+pip install -e <span class="s">".[dev]"</span>
+
+<span class="cm"># Or install from the repo</span>
+pip install git+https://github.com/OpenAEC-Foundation/openaec-reports.git</pre>
+    </div>
+
+    <h3 class="mb-sm mt-lg">Option A &mdash; Build from code</h3>
+    <div class="code-block"><span class="code-label">Python</span>
+<pre><span class="kw">from</span> openaec_reports <span class="kw">import</span> Report, A4
+
+<span class="cm"># Create report with metadata</span>
+report = Report(
+    format=A4,
+    project=<span class="s">"Kijkduin Reddingspost"</span>,
+    project_number=<span class="s">"2026-031"</span>,
+    client=<span class="s">"Gemeente Den Haag"</span>,
+    brand=<span class="s">"3bm_cooperatie"</span>,
+)
+
+<span class="cm"># Add pages</span>
+report.<span class="fn">add_cover</span>(subtitle=<span class="s">"Constructieve berekening"</span>)
+report.<span class="fn">add_colofon</span>()
+
+<span class="cm"># Add content</span>
+report.<span class="fn">add_section</span>(title=<span class="s">"Staalligger L1"</span>, level=<span class="n">1</span>)
+report.<span class="fn">add_calculation</span>(
+    title=<span class="s">"Veldmoment"</span>,
+    formula=<span class="s">"M_Ed = q &times; l&sup2; / 8"</span>,
+    substitution=<span class="s">"M_Ed = 8.7 &times; 6.0&sup2; / 8"</span>,
+    result=<span class="s">"39.1"</span>,
+    unit=<span class="s">"kNm"</span>,
+)
+report.<span class="fn">add_check</span>(
+    description=<span class="s">"Unity check buiging"</span>,
+    required=<span class="s">"UC &le; 1.0"</span>,
+    calculated=<span class="s">"M_Ed / M_Rd = 39.1 / 100.9"</span>,
+    unity_check=<span class="n">0.39</span>,
+)
+
+<span class="cm"># Generate PDF</span>
+report.<span class="fn">build</span>(<span class="s">"output/rapport.pdf"</span>)</pre>
+    </div>
+
+    <h3 class="mb-sm mt-lg">Option B &mdash; Build from JSON</h3>
+    <div class="code-block"><span class="code-label">Python</span>
+<pre><span class="kw">from</span> openaec_reports <span class="kw">import</span> Report
+
+<span class="cm"># Load from a JSON file</span>
+report = Report.<span class="fn">from_json</span>(<span class="s">"schemas/example_structural.json"</span>)
+report.<span class="fn">build</span>(<span class="s">"output/rapport.pdf"</span>)
+
+<span class="cm"># Or from a Python dict</span>
+data = {
+    <span class="s">"template"</span>: <span class="s">"structural"</span>,
+    <span class="s">"project"</span>: <span class="s">"My Project"</span>,
+    <span class="s">"sections"</span>: [{
+        <span class="s">"title"</span>: <span class="s">"Chapter 1"</span>,
+        <span class="s">"content"</span>: [
+            {<span class="s">"type"</span>: <span class="s">"paragraph"</span>, <span class="s">"text"</span>: <span class="s">"Hello world."</span>}
+        ]
+    }]
+}
+report = Report.<span class="fn">from_dict</span>(data)
+report.<span class="fn">build</span>(<span class="s">"output/rapport.pdf"</span>)</pre>
+    </div>
+
+    <h3 class="mb-sm mt-lg">Option C &mdash; CLI</h3>
+    <div class="code-block"><span class="code-label">Shell</span>
+<pre><span class="cm"># Generate from JSON file</span>
+bm-report generate --data my_report.json --output rapport.pdf
+
+<span class="cm"># Start the API server</span>
+bm-report serve --port <span class="n">8000</span> --reload
+
+<span class="cm"># List available templates</span>
+bm-report templates --list
+
+<span class="cm"># Validate a JSON file</span>
+bm-report validate --data my_report.json</pre>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-label">07 &mdash; Components</div>
+    <h2>Individual block components</h2>
+    <p class="lead">Each content block is also available as a standalone Python class for programmatic use.</p>
+
+    <div class="two-col">
+      <div>
+        <h3 class="mb-sm">Available components</h3>
+        <table class="block-table">
+          <thead><tr><th>Class</th><th>Import path</th></tr></thead>
+          <tbody>
+            <tr><td><code>CalculationBlock</code></td><td>openaec_reports.components.calculation</td></tr>
+            <tr><td><code>CheckBlock</code></td><td>openaec_reports.components.check_block</td></tr>
+            <tr><td><code>TableBlock</code></td><td>openaec_reports.components.table_block</td></tr>
+            <tr><td><code>ImageBlock</code></td><td>openaec_reports.components.image_block</td></tr>
+            <tr><td><code>KadasterMap</code></td><td>openaec_reports.components.map_block</td></tr>
+          </tbody>
+        </table>
+
+        <h3 class="mb-sm mt-lg">Block registry</h3>
+        <p style="font-size:0.9rem;color:#57534E;margin-bottom:12px;">
+          The <code>create_block()</code> factory creates any block from a dict &mdash; this is what
+          <code>from_dict()</code> and the API use internally.
+        </p>
+        <div class="code-block"><span class="code-label">Python</span>
+<pre><span class="kw">from</span> openaec_reports.core.block_registry <span class="kw">import</span> (
+    create_block,
+    resolve_image_source,
+)
+
+<span class="cm"># Create a block from a dict</span>
+block = <span class="fn">create_block</span>({
+    <span class="s">"type"</span>: <span class="s">"calculation"</span>,
+    <span class="s">"title"</span>: <span class="s">"Moment"</span>,
+    <span class="s">"result"</span>: <span class="s">"50"</span>,
+    <span class="s">"unit"</span>: <span class="s">"kNm"</span>,
+})
+
+<span class="cm"># Resolve image: path, URL, or base64</span>
+path = <span class="fn">resolve_image_source</span>(
+    <span class="s">"photo.png"</span>,
+    base_dir=Path(<span class="s">"data/"</span>),
+)</pre>
+        </div>
+      </div>
+      <div>
+        <h3 class="mb-sm">Example: standalone CheckBlock</h3>
+        <div class="code-block"><span class="code-label">Python</span>
+<pre><span class="kw">from</span> openaec_reports.components.check_block <span class="kw">import</span> (
+    CheckBlock,
+)
+
+check = CheckBlock(
+    description=<span class="s">"Unity check buiging"</span>,
+    required=<span class="s">"UC &le; 1.0"</span>,
+    calculated=<span class="s">"M_Ed / M_Rd = 39.1 / 100.9"</span>,
+    unity_check=<span class="n">0.39</span>,
+    limit=<span class="n">1.0</span>,
+    reference=<span class="s">"NEN-EN 1993-1-1 &sect;6.2.5"</span>,
+)
+
+<span class="cm"># Auto-calculated properties</span>
+check.passes     <span class="cm"># True (0.39 &le; 1.0)</span>
+check.result     <span class="cm"># "VOLDOET"</span></pre>
+        </div>
+
+        <h3 class="mb-sm mt-lg">Example: KadasterMap</h3>
+        <div class="code-block"><span class="code-label">Python</span>
+<pre><span class="kw">from</span> openaec_reports.components.map_block <span class="kw">import</span> (
+    KadasterMap,
+)
+
+map_block = KadasterMap(
+    latitude=<span class="n">52.0755</span>,
+    longitude=<span class="n">4.2959</span>,
+    radius_m=<span class="n">200</span>,
+    layers=[<span class="s">"percelen"</span>, <span class="s">"bebouwing"</span>],
+    caption=<span class="s">"Situering"</span>,
+)
+<span class="cm"># Fetches WMS tiles from PDOK (free, no API key)</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--              PART 5 — JSON SCHEMA GUIDE            -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section-divider" id="schema">
+  <div class="container">
+    <div class="label">Guide</div>
+    <h2>JSON Schema</h2>
+    <p>The contract between all three layers. Understand it, and you understand the system.</p>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="section-label">08 &mdash; Schema Structure</div>
+    <h2>What a report JSON looks like</h2>
+    <p class="lead">
+      The file <code>schemas/report.schema.json</code> defines every field, type, and constraint.
+      Here is the top-level structure &mdash; required fields in amber, optional in gray.
+    </p>
+
+    <div class="two-col">
+      <div>
+        <div class="schema-tree">
+<span class="req">template</span> <span class="type">string</span> <span class="desc">&mdash; which template to use</span>
+<span class="req">project</span> <span class="type">string</span> <span class="desc">&mdash; project name</span>
+<span class="opt">project_number</span> <span class="type">string</span>
+<span class="opt">client</span> <span class="type">string</span>
+<span class="opt">author</span> <span class="type">string</span>
+<span class="opt">date</span> <span class="type">ISO 8601</span> <span class="desc">&mdash; e.g. "2026-03-01"</span>
+<span class="opt">version</span> <span class="type">string</span> <span class="desc">&mdash; default "1.0"</span>
+<span class="opt">status</span> <span class="type">enum</span> <span class="desc">&mdash; CONCEPT | DEFINITIEF | REVISIE</span>
+<span class="opt">format</span> <span class="type">enum</span> <span class="desc">&mdash; A4 | A3</span>
+<span class="opt">orientation</span> <span class="type">enum</span> <span class="desc">&mdash; portrait | landscape</span>
+<span class="opt">cover</span> <span class="type">object</span> <span class="desc">&mdash; cover page config</span>
+<span class="opt">colofon</span> <span class="type">object</span> <span class="desc">&mdash; document info page</span>
+<span class="opt">toc</span> <span class="type">object</span> <span class="desc">&mdash; table of contents</span>
+<span class="opt">sections</span> <span class="type">array</span> <span class="desc">&mdash; main content</span>
+<span class="opt">backcover</span> <span class="type">object</span>
+<span class="opt">metadata</span> <span class="type">object</span> <span class="desc">&mdash; free-form custom data</span>
+        </div>
+      </div>
+      <div>
+        <h3 class="mb-sm">Minimal valid report</h3>
+        <div class="code-block"><span class="code-label">JSON</span>
+<pre>{
+  <span class="s">"template"</span>: <span class="s">"structural"</span>,
+  <span class="s">"project"</span>: <span class="s">"My first report"</span>,
+  <span class="s">"sections"</span>: [
+    {
+      <span class="s">"title"</span>: <span class="s">"Introduction"</span>,
+      <span class="s">"content"</span>: [
+        {
+          <span class="s">"type"</span>: <span class="s">"paragraph"</span>,
+          <span class="s">"text"</span>: <span class="s">"Hello, world."</span>
+        }
+      ]
+    }
+  ]
+}</pre>
+        </div>
+        <div class="callout mt-0">
+          Only <code>template</code> and <code>project</code> are required.
+          Everything else has sensible defaults. Start minimal and add fields as needed.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-label">09 &mdash; Block Reference</div>
+    <h2>Every content block type, with examples</h2>
+    <p class="lead">Copy-paste these JSON snippets into the <code>content</code> array of any section.</p>
+
+    <h3 class="mb-sm">Paragraph</h3>
+    <div class="code-block"><span class="code-label">JSON</span>
+<pre>{
+  <span class="s">"type"</span>: <span class="s">"paragraph"</span>,
+  <span class="s">"text"</span>: <span class="s">"Regular text. Supports &lt;b&gt;bold&lt;/b&gt;, &lt;i&gt;italic&lt;/i&gt;, &lt;sub&gt;sub&lt;/sub&gt;, &lt;sup&gt;sup&lt;/sup&gt;."</span>
+}</pre>
+    </div>
+
+    <h3 class="mb-sm mt-lg">Calculation</h3>
+    <div class="code-block"><span class="code-label">JSON</span>
+<pre>{
+  <span class="s">"type"</span>: <span class="s">"calculation"</span>,
+  <span class="s">"title"</span>: <span class="s">"Veldmoment"</span>,
+  <span class="s">"formula"</span>: <span class="s">"M_Ed = q &times; l&sup2; / 8"</span>,
+  <span class="s">"substitution"</span>: <span class="s">"M_Ed = 8.7 &times; 6.0&sup2; / 8"</span>,
+  <span class="s">"result"</span>: <span class="s">"39.1"</span>,
+  <span class="s">"unit"</span>: <span class="s">"kNm"</span>,
+  <span class="s">"reference"</span>: <span class="s">"NEN-EN 1993-1-1"</span>
+}</pre>
+    </div>
+
+    <h3 class="mb-sm mt-lg">Check (unity check)</h3>
+    <div class="code-block"><span class="code-label">JSON</span>
+<pre>{
+  <span class="s">"type"</span>: <span class="s">"check"</span>,
+  <span class="s">"description"</span>: <span class="s">"Unity check buiging ligger L1"</span>,
+  <span class="s">"required_value"</span>: <span class="s">"UC &le; 1.0"</span>,
+  <span class="s">"calculated_value"</span>: <span class="s">"M_Ed / M_Rd = 39.1 / 100.9"</span>,
+  <span class="s">"unity_check"</span>: <span class="n">0.39</span>,           <span class="cm">// 0.0 = 0%, 1.0 = 100%</span>
+  <span class="s">"limit"</span>: <span class="n">1.0</span>,                   <span class="cm">// threshold</span>
+  <span class="s">"reference"</span>: <span class="s">"NEN-EN 1993-1-1 &sect;6.2.5"</span>
+}
+<span class="cm">// result is auto-calculated: "VOLDOET" (pass) or "VOLDOET NIET" (fail)</span></pre>
+    </div>
+
+    <h3 class="mb-sm mt-lg">Table</h3>
+    <div class="code-block"><span class="code-label">JSON</span>
+<pre>{
+  <span class="s">"type"</span>: <span class="s">"table"</span>,
+  <span class="s">"title"</span>: <span class="s">"Materiaaloverzicht"</span>,
+  <span class="s">"headers"</span>: [<span class="s">"Onderdeel"</span>, <span class="s">"Materiaal"</span>, <span class="s">"Sterkteklasse"</span>],
+  <span class="s">"rows"</span>: [
+    [<span class="s">"Fundering"</span>, <span class="s">"Beton"</span>, <span class="s">"C20/25"</span>],
+    [<span class="s">"Vloer"</span>, <span class="s">"Beton"</span>, <span class="s">"C28/35"</span>],
+    [<span class="s">"Liggers"</span>, <span class="s">"Staal"</span>, <span class="s">"S235"</span>]
+  ],
+  <span class="s">"column_widths"</span>: [<span class="n">60</span>, <span class="n">70</span>, <span class="n">60</span>],  <span class="cm">// mm, optional</span>
+  <span class="s">"style"</span>: <span class="s">"default"</span>                 <span class="cm">// "default" | "minimal" | "striped"</span>
+}</pre>
+    </div>
+
+    <div class="two-col" style="margin-top:40px;">
+      <div>
+        <h3 class="mb-sm">Image</h3>
+        <div class="code-block"><span class="code-label">JSON</span>
+<pre><span class="cm">// From file path or URL</span>
+{
+  <span class="s">"type"</span>: <span class="s">"image"</span>,
+  <span class="s">"src"</span>: <span class="s">"photos/gevel.png"</span>,
+  <span class="s">"caption"</span>: <span class="s">"West elevation"</span>,
+  <span class="s">"width_mm"</span>: <span class="n">150</span>,
+  <span class="s">"alignment"</span>: <span class="s">"center"</span>
+}
+
+<span class="cm">// From base64 (API / browser upload)</span>
+{
+  <span class="s">"type"</span>: <span class="s">"image"</span>,
+  <span class="s">"src"</span>: {
+    <span class="s">"data"</span>: <span class="s">"iVBORw0KGgo..."</span>,
+    <span class="s">"media_type"</span>: <span class="s">"image/png"</span>
+  },
+  <span class="s">"caption"</span>: <span class="s">"Uploaded photo"</span>
+}</pre>
+        </div>
+      </div>
+      <div>
+        <h3 class="mb-sm">Map (Kadaster/PDOK)</h3>
+        <div class="code-block"><span class="code-label">JSON</span>
+<pre>{
+  <span class="s">"type"</span>: <span class="s">"map"</span>,
+  <span class="s">"center"</span>: {
+    <span class="s">"lat"</span>: <span class="n">52.0755</span>,
+    <span class="s">"lon"</span>: <span class="n">4.2959</span>
+  },
+  <span class="s">"radius_m"</span>: <span class="n">200</span>,
+  <span class="s">"layers"</span>: [
+    <span class="s">"percelen"</span>,
+    <span class="s">"bebouwing"</span>,
+    <span class="s">"luchtfoto"</span>
+  ],
+  <span class="s">"width_mm"</span>: <span class="n">170</span>,
+  <span class="s">"caption"</span>: <span class="s">"Site location"</span>
+}
+<span class="cm">// Available layers:</span>
+<span class="cm">//   percelen, bebouwing,</span>
+<span class="cm">//   luchtfoto, bestemmingsplan</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="mb-sm mt-lg">Cover &amp; Colofon</h3>
+    <div class="two-col">
+      <div>
+        <div class="code-block"><span class="code-label">Cover</span>
+<pre>{
+  <span class="s">"cover"</span>: {
+    <span class="s">"subtitle"</span>: <span class="s">"Structural analysis"</span>,
+    <span class="s">"image"</span>: {
+      <span class="s">"src"</span>: <span class="s">"cover_photo.jpg"</span>
+    },
+    <span class="s">"extra_fields"</span>: {
+      <span class="s">"Kenmerk"</span>: <span class="s">"OA-2026-031-R01"</span>
+    }
+  }
+}</pre>
+        </div>
+      </div>
+      <div>
+        <div class="code-block"><span class="code-label">Colofon</span>
+<pre>{
+  <span class="s">"colofon"</span>: {
+    <span class="s">"enabled"</span>: <span class="kw">true</span>,
+    <span class="s">"adviseur_bedrijf"</span>: <span class="s">"ACME Eng."</span>,
+    <span class="s">"adviseur_naam"</span>: <span class="s">"J. Smith"</span>,
+    <span class="s">"revision_history"</span>: [
+      {
+        <span class="s">"version"</span>: <span class="s">"1.0"</span>,
+        <span class="s">"date"</span>: <span class="s">"2026-03-01"</span>,
+        <span class="s">"author"</span>: <span class="s">"J. Smith"</span>,
+        <span class="s">"description"</span>: <span class="s">"Initial release"</span>
+      }
+    ]
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--              PART 6 — MULTI-TENANT                 -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section-divider" id="multi-tenant">
+  <div class="container">
+    <div class="label">Guide</div>
+    <h2>Multi-Tenant System</h2>
+    <p>One platform, many organizations. Each with their own brand and templates.</p>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="section-label">10 &mdash; Tenants</div>
+    <h2>How tenant isolation works</h2>
+    <p class="lead">
+      Each tenant gets a directory with their own brand.yaml, templates, stationery, logos, and fonts.
+      The engine is generic. The look and feel is per tenant.
+    </p>
+
+    <div class="two-col">
+      <div>
+        <div class="tree">
+<span class="dir">tenants/</span>
+├── <span class="dir">acme_engineering/</span>
+│   ├── <span class="file">brand.yaml</span>         <span class="cmt"># colors, fonts, logos</span>
+│   ├── <span class="dir">templates/</span>
+│   │   ├── <span class="file">structural.yaml</span>
+│   │   └── <span class="file">inspection.yaml</span>
+│   ├── <span class="dir">stationery/</span>
+│   │   ├── <span class="file">cover.pdf</span>       <span class="cmt"># page backgrounds</span>
+│   │   ├── <span class="file">content.pdf</span>
+│   │   └── <span class="file">colofon.pdf</span>
+│   ├── <span class="dir">logos/</span>
+│   │   └── <span class="file">logo.svg</span>
+│   └── <span class="dir">fonts/</span>
+│       ├── <span class="file">Brand-Bold.ttf</span>
+│       └── <span class="file">Brand-Regular.ttf</span>
+│
+└── <span class="dir">other_company/</span>
+    ├── <span class="file">brand.yaml</span>
+    └── ...
+        </div>
+      </div>
+      <div>
+        <h3 class="mb-sm">brand.yaml example</h3>
+        <div class="code-block"><span class="code-label">YAML</span>
+<pre><span class="fn">name</span>: <span class="s">"ACME Engineering"</span>
+<span class="fn">slug</span>: <span class="s">"acme_engineering"</span>
+
+<span class="fn">colors</span>:
+  <span class="fn">primary</span>: <span class="s">"#1E3A5F"</span>
+  <span class="fn">secondary</span>: <span class="s">"#4A90D9"</span>
+  <span class="fn">text</span>: <span class="s">"#2C3E50"</span>
+
+<span class="fn">fonts</span>:
+  <span class="fn">heading</span>: <span class="s">"Brand-Bold"</span>
+  <span class="fn">body</span>: <span class="s">"Brand-Regular"</span>
+
+<span class="fn">logos</span>:
+  <span class="fn">main</span>: <span class="s">"logos/logo.svg"</span>
+
+<span class="fn">stationery</span>:
+  <span class="fn">standard</span>:
+    <span class="fn">source</span>: <span class="s">"stationery/content.pdf"</span>
+  <span class="fn">cover</span>:
+    <span class="fn">source</span>: <span class="s">"stationery/cover.pdf"</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="mb-sm mt-lg">Resolution chain</h3>
+    <p style="font-size:0.9rem;color:#57534E;margin-bottom:16px;">
+      When the system needs an asset (template, font, stationery), it checks in this order:
+    </p>
+    <div class="flow">
+      <div class="flow-step" style="border-color:var(--amber);"><h4>Tenant dir</h4><p>tenants/acme/</p></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step"><h4>Package assets</h4><p>openaec_reports/assets/</p></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step"><h4>Defaults</h4><p>Helvetica, generic layout</p></div>
+    </div>
+    <div class="callout">
+      <strong>Zero-config start:</strong> Without any tenant directory, the system generates valid PDFs
+      using built-in defaults. Adding a tenant is additive &mdash; you only override what you want to customize.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--              PART 7 — TECH STACK & SECURITY        -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<section class="dark-section">
+  <div class="container">
+    <div class="section-label">11 &mdash; Security &amp; Deployment</div>
+    <h2>Production-ready from day one</h2>
+    <p class="lead">JWT auth, role-based access, API keys, Docker deployment &mdash; all built in.</p>
+
+    <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+      <div class="feature"><h4>JWT Authentication</h4><p>Login with username + password. Tokens stored as httpOnly cookies. Configurable secret via environment variable.</p></div>
+      <div class="feature"><h4>Role-Based Access</h4><p><strong>admin</strong> = full access. <strong>user</strong> = report editing only. Tenant scoping for multi-org deployments.</p></div>
+      <div class="feature"><h4>API Key Auth</h4><p>Machine-to-machine authentication for scripts, CI/CD, and external integrations. Create via admin panel, set expiry dates.</p></div>
+      <div class="feature"><h4>Docker Deployment</h4><p>Multi-stage Dockerfile: Node.js builds the frontend, Python serves everything. One container, one port, health check included.</p></div>
+    </div>
+
+    <h3 style="color:var(--blueprint-white);margin-top:48px;margin-bottom:16px;">Tech stack</h3>
+    <div class="two-col">
+      <div>
+        <h4 style="color:var(--warm-gold);margin-bottom:12px;">Backend</h4>
+        <table class="block-table" style="background:var(--night-build);border-color:#27272A;">
+          <tbody>
+            <tr style="border-color:#27272A;"><td style="color:var(--blueprint-white);border-color:#27272A;"><strong>Python 3.10+</strong></td><td style="color:var(--scaffold-gray);border-color:#27272A;">Runtime</td></tr>
+            <tr><td style="color:var(--blueprint-white);border-color:#27272A;"><strong>FastAPI</strong></td><td style="color:var(--scaffold-gray);border-color:#27272A;">API framework</td></tr>
+            <tr><td style="color:var(--blueprint-white);border-color:#27272A;"><strong>ReportLab</strong></td><td style="color:var(--scaffold-gray);border-color:#27272A;">PDF engine (BSD)</td></tr>
+            <tr><td style="color:var(--blueprint-white);border-color:#27272A;"><strong>PyMuPDF</strong></td><td style="color:var(--scaffold-gray);border-color:#27272A;">Pixel-perfect renderer</td></tr>
+            <tr><td style="color:var(--blueprint-white);border-color:#27272A;"><strong>PyYAML</strong></td><td style="color:var(--scaffold-gray);border-color:#27272A;">Template config</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h4 style="color:var(--warm-gold);margin-bottom:12px;">Frontend</h4>
+        <table class="block-table" style="background:var(--night-build);border-color:#27272A;">
+          <tbody>
+            <tr><td style="color:var(--blueprint-white);border-color:#27272A;"><strong>React 18</strong></td><td style="color:var(--scaffold-gray);border-color:#27272A;">UI framework</td></tr>
+            <tr><td style="color:var(--blueprint-white);border-color:#27272A;"><strong>TypeScript</strong></td><td style="color:var(--scaffold-gray);border-color:#27272A;">Type safety</td></tr>
+            <tr><td style="color:var(--blueprint-white);border-color:#27272A;"><strong>Zustand</strong></td><td style="color:var(--scaffold-gray);border-color:#27272A;">State management</td></tr>
+            <tr><td style="color:var(--blueprint-white);border-color:#27272A;"><strong>Tailwind CSS</strong></td><td style="color:var(--scaffold-gray);border-color:#27272A;">Styling</td></tr>
+            <tr><td style="color:var(--blueprint-white);border-color:#27272A;"><strong>dnd-kit</strong></td><td style="color:var(--scaffold-gray);border-color:#27272A;">Drag &amp; drop</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--              FOOTER                                 -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<footer>
+  <div class="container">
+    <div class="brand">
+      <span class="white">Open</span><span class="amber">AEC</span>
+    </div>
+    <p>Build free. Build together.</p>
+    <p style="margin-top:16px;font-size:0.7rem;">
+      Free and open-source tools for the built environment.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

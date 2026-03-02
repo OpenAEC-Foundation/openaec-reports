@@ -463,7 +463,7 @@ def resolve_data_bind(data: dict, path: str):
 
 ## 7. Wat wordt VERWIJDERD
 
-### Uit src/bm_reports/ (engine package)
+### Uit src/openaec_reports/ (engine package)
 - `modules/symitech/` — volledig (4 Python modules + __init__.py)
 - `modules/yaml_module.py` — niet meer nodig voor fixed pages
 - `modules/base.py` — ContentModule base class niet meer nodig voor fixed
@@ -509,8 +509,8 @@ def resolve_data_bind(data: dict, path: str):
 4. Bestaande 3BM rapporten werken ongewijzigd
 
 ### Fase 4: Cleanup
-1. Verwijder `src/bm_reports/modules/symitech/`
-2. Verwijder `src/bm_reports/assets/templates/symitech_*.yaml`
+1. Verwijder `src/openaec_reports/modules/symitech/`
+2. Verwijder `src/openaec_reports/assets/templates/symitech_*.yaml`
 3. Verplaats 3BM templates naar tenant dir
 4. Update tests + CI
 

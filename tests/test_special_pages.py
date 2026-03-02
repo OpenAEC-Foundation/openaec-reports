@@ -5,10 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from bm_reports import A4, Report
-from bm_reports.core.brand import BrandConfig, BrandLoader
-from bm_reports.core.document import DocumentConfig
-from bm_reports.core.special_pages import (
+from openaec_reports import A4, Report
+from openaec_reports.core.brand import BrandConfig, BrandLoader
+from openaec_reports.core.document import DocumentConfig
+from openaec_reports.core.special_pages import (
     _brand_color,
     _resolve_logo_path,
     draw_appendix_divider_page,

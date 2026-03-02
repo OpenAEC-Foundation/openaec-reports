@@ -337,26 +337,26 @@ class BrandBuilder:
 
 ```bash
 # Volledige brand extractie (aanbevolen)
-bm-report build-brand \
+openaec-report build-brand \
   --rapport huisstijl/2707_BBLrapportage_v01.pdf \
   --stamkaart huisstijl/3BM-Stamkaart.pdf \
   --briefpapier huisstijl/3BM-Briefpapier-Digitaal.pdf \
   --logos huisstijl/logo\'s/RGB/SVG/ \
   --name "3BM Coöperatie" \
   --slug "3bm-cooperatie" \
-  --output src/bm_reports/assets/brands/3bm-cooperatie/
+  --output src/openaec_reports/assets/brands/3bm-cooperatie/
 
 # Minimaal (alleen referentie-rapport)
-bm-report build-brand \
+openaec-report build-brand \
   --rapport huisstijl/2707_BBLrapportage_v01.pdf \
   --name "3BM BBL" \
   --slug "3bm-bbl" \
   --output brands/3bm-bbl/
 
 # Variant voor ander rapporttype (hergebruikt base brand)
-bm-report build-brand \
+openaec-report build-brand \
   --rapport huisstijl/3BM-250206-Constructierapport.pdf \
-  --base-brand src/bm_reports/assets/brands/3bm-cooperatie/ \
+  --base-brand src/openaec_reports/assets/brands/3bm-cooperatie/ \
   --name "3BM Constructie" \
   --slug "3bm-constructie" \
   --output brands/3bm-constructie/

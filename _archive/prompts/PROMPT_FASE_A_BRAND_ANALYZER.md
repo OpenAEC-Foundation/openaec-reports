@@ -2,27 +2,27 @@
 
 ## Context
 
-Je werkt in het `bm-reports` project: een modulaire PDF report generator voor 3BM Bouwkunde.
-Project root: huidige directory (bevat `pyproject.toml`, `src/bm_reports/`, `tests/`).
+Je werkt in het `openaec-reports` project: een modulaire PDF report generator voor 3BM Bouwkunde.
+Project root: huidige directory (bevat `pyproject.toml`, `src/openaec_reports/`, `tests/`).
 
-Het bestaande brand systeem (`src/bm_reports/core/brand.py`) laadt YAML configs met kleuren, fonts, header/footer zones. Wat ontbreekt is **automatische extractie** van deze config uit een referentie-PDF. Dat bouwen we nu.
+Het bestaande brand systeem (`src/openaec_reports/core/brand.py`) laadt YAML configs met kleuren, fonts, header/footer zones. Wat ontbreekt is **automatische extractie** van deze config uit een referentie-PDF. Dat bouwen we nu.
 
 ## Referentiebestanden
 
 - **Ground truth specificatie:** `huisstijl/HUISSTIJL_SPEC.md` — handmatig geëxtraheerde layout specs uit de referentie-PDF. Gebruik dit als validatie-target voor je extractie.
 - **Referentie PDF:** `huisstijl/2707_BBLrapportage_v01.pdf` — 36 pagina's, A4 portrait (595.3×841.9 pt). Pagina's 1-21 en 36 zijn A4, pagina's 22-35 zijn US Letter bijlagen.
-- **Bestaande brand YAML:** `src/bm_reports/assets/brands/3bm_cooperatie.yaml` — huidige (deels incorrecte) config.
-- **Bestaande brand code:** `src/bm_reports/core/brand.py` — `BrandConfig`, `ZoneConfig`, `ElementConfig` dataclasses + `BrandLoader`.
-- **Bestaande styles:** `src/bm_reports/core/styles.py`
-- **Bestaande CLI:** `src/bm_reports/cli.py` — heeft al generate/templates/validate/serve commands.
+- **Bestaande brand YAML:** `src/openaec_reports/assets/brands/3bm_cooperatie.yaml` — huidige (deels incorrecte) config.
+- **Bestaande brand code:** `src/openaec_reports/core/brand.py` — `BrandConfig`, `ZoneConfig`, `ElementConfig` dataclasses + `BrandLoader`.
+- **Bestaande styles:** `src/openaec_reports/core/styles.py`
+- **Bestaande CLI:** `src/openaec_reports/cli.py` — heeft al generate/templates/validate/serve commands.
 
 ## Opdracht
 
-Bouw een `src/bm_reports/tools/` package met 4 modules die samen een referentie-PDF analyseren en een brand config genereren. Plus een CLI command en tests.
+Bouw een `src/openaec_reports/tools/` package met 4 modules die samen een referentie-PDF analyseren en een brand config genereren. Plus een CLI command en tests.
 
 ---
 
-## Module 1: `src/bm_reports/tools/pdf_extractor.py`
+## Module 1: `src/openaec_reports/tools/pdf_extractor.py`
 
 Extraheert alle visuele elementen uit een PDF met PyMuPDF.
 
@@ -88,7 +88,7 @@ def extract_pdf(pdf_path: Path, output_dir: Path | None = None, dpi: int = 150) 
 
 ---
 
-## Module 2: `src/bm_reports/tools/page_classifier.py`
+## Module 2: `src/openaec_reports/tools/page_classifier.py`
 
 Classificeert pagina's op type.
 
@@ -128,7 +128,7 @@ Heuristieken (in volgorde):
 
 ---
 
-## Module 3: `src/bm_reports/tools/pattern_detector.py`
+## Module 3: `src/openaec_reports/tools/pattern_detector.py`
 
 Detecteert herhalende patronen over geclassificeerde pagina's.
 
@@ -219,7 +219,7 @@ Roept alle sub-functies aan, vult BrandAnalysis in. De `*_spec` velden (cover_sp
 
 ---
 
-## Module 4: `src/bm_reports/tools/config_generator.py`
+## Module 4: `src/openaec_reports/tools/config_generator.py`
 
 Converteert BrandAnalysis naar concrete output.
 
@@ -290,7 +290,7 @@ Dit is handig voor debugging en review.
 
 ---
 
-## Module 5: `src/bm_reports/tools/__init__.py`
+## Module 5: `src/openaec_reports/tools/__init__.py`
 
 ```python
 """Brand analysis tools — extracteer huisstijl uit referentie-PDF's."""
@@ -303,12 +303,12 @@ from .config_generator import generate_brand_yaml, generate_style_overrides, gen
 
 ---
 
-## CLI Command: `bm-report analyze-brand`
+## CLI Command: `openaec-report analyze-brand`
 
-Voeg toe aan `src/bm_reports/cli.py`:
+Voeg toe aan `src/openaec_reports/cli.py`:
 
 ```
-bm-report analyze-brand input.pdf [--output-dir ./output] [--brand-name "3BM Coöperatie"] [--brand-slug "3bm-cooperatie"] [--dpi 150]
+openaec-report analyze-brand input.pdf [--output-dir ./output] [--brand-name "3BM Coöperatie"] [--brand-slug "3bm-cooperatie"] [--dpi 150]
 ```
 
 Stappen:
@@ -339,7 +339,7 @@ except ImportError:
 
 def extract_pdf(...):
     if fitz is None:
-        raise ImportError("PyMuPDF is vereist voor brand analyse. Installeer met: pip install bm-reports[brand-tools]")
+        raise ImportError("PyMuPDF is vereist voor brand analyse. Installeer met: pip install openaec-reports[brand-tools]")
 ```
 
 ---

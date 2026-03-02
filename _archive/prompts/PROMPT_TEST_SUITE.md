@@ -9,10 +9,10 @@ De backend codebase is feature-complete voor de huidige scope. Er zijn 14 testbe
 Bekijk voor je begint:
 - `pyproject.toml` — dependencies en test configuratie (`[tool.pytest.ini_options]`)
 - `tests/` directory — alle bestaande testbestanden
-- `src/bm_reports/core/stationery.py` — StationeryRenderer (GEEN tests)
-- `src/bm_reports/tools/stationery_extractor.py` — StationeryExtractor (GEEN tests)
-- `src/bm_reports/tools/brand_builder.py` — BrandBuilder (GEEN tests)
-- `src/bm_reports/core/page_templates.py` — stationery-first callbacks + `_draw_text_zones()` + `_resolve_binding()` (NIET getest)
+- `src/openaec_reports/core/stationery.py` — StationeryRenderer (GEEN tests)
+- `src/openaec_reports/tools/stationery_extractor.py` — StationeryExtractor (GEEN tests)
+- `src/openaec_reports/tools/brand_builder.py` — BrandBuilder (GEEN tests)
+- `src/openaec_reports/core/page_templates.py` — stationery-first callbacks + `_draw_text_zones()` + `_resolve_binding()` (NIET getest)
 
 ## Stap 1: Draai de volledige bestaande suite
 
@@ -54,7 +54,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch, PropertyMock
 import pytest
 
-from bm_reports.core.stationery import StationeryRenderer
+from openaec_reports.core.stationery import StationeryRenderer
 
 
 class TestStationeryRendererInit:
@@ -221,7 +221,7 @@ import pytest
 # Skip als pymupdf niet geïnstalleerd
 fitz = pytest.importorskip("fitz", reason="pymupdf niet geïnstalleerd")
 
-from bm_reports.tools.stationery_extractor import StationeryExtractor
+from openaec_reports.tools.stationery_extractor import StationeryExtractor
 
 
 @pytest.fixture
@@ -359,7 +359,7 @@ import pytest
 
 fitz = pytest.importorskip("fitz", reason="pymupdf niet geïnstalleerd")
 
-from bm_reports.tools.brand_builder import BrandBuilder
+from openaec_reports.tools.brand_builder import BrandBuilder
 
 
 @pytest.fixture
@@ -479,7 +479,7 @@ class TestBrandBuilderBuild:
 
 class TestHelperMethods:
     def test_detect_cover_strip_zones_returns_list(self, sample_pdf, tmp_path):
-        from bm_reports.tools.pdf_extractor import extract_pdf
+        from openaec_reports.tools.pdf_extractor import extract_pdf
         pages = extract_pdf(sample_pdf)
 
         bb = BrandBuilder(output_dir=tmp_path, brand_name="T", brand_slug="t")
@@ -488,7 +488,7 @@ class TestHelperMethods:
 
     def test_extract_stamkaart_colors_empty(self, tmp_path):
         """Pagina's zonder kleurcodes retourneren lege dict."""
-        from bm_reports.tools.pdf_extractor import extract_pdf
+        from openaec_reports.tools.pdf_extractor import extract_pdf
 
         # Maak simpele PDF zonder kleurcodes
         doc = fitz.open()
@@ -518,9 +518,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bm_reports.core.brand import BrandConfig, BrandLoader, StationeryPageConfig, ZoneConfig
-from bm_reports.core.document import A4, DocumentConfig
-from bm_reports.core.page_templates import (
+from openaec_reports.core.brand import BrandConfig, BrandLoader, StationeryPageConfig, ZoneConfig
+from openaec_reports.core.document import A4, DocumentConfig
+from openaec_reports.core.page_templates import (
     _draw_text_zones,
     _resolve_binding,
     create_page_templates,
@@ -762,7 +762,7 @@ python -m pytest tests/ -v --tb=short 2>&1 | tee test_results_final.txt
 ## Stap 5: Coverage rapport (optioneel maar gewenst)
 
 ```bash
-python -m pytest tests/ --cov=bm_reports --cov-report=term-missing -v 2>&1 | tee coverage_report.txt
+python -m pytest tests/ --cov=openaec_reports --cov-report=term-missing -v 2>&1 | tee coverage_report.txt
 ```
 
 Noteer welke modules nog <50% coverage hebben. Dat hoeft nu niet gefixed te worden, maar het geeft richting voor een volgende ronde.

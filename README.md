@@ -1,4 +1,4 @@
-# bm-reports
+# openaec-reports
 
 Modulaire Python library voor het genereren van professionele A4/A3 engineering rapporten.
 
@@ -28,7 +28,7 @@ pip install -e ".[dev]"
 ## Snel starten
 
 ```python
-from bm_reports import Report, A4
+from openaec_reports import Report, A4
 
 report = Report(
     format=A4,
@@ -47,7 +47,7 @@ report.build("output/rapport.pdf")
 ## Projectstructuur
 
 ```
-src/bm_reports/
+src/openaec_reports/
 ├── core/         # Engine, document, templates, styles, TOC
 ├── components/   # Herbruikbare bouwblokken
 ├── reports/      # Rapporttype definities

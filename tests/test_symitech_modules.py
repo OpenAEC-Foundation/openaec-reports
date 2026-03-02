@@ -16,14 +16,14 @@ import pytest
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-from bm_reports.modules.base import ContentModule, ModuleConfig
-from bm_reports.modules.symitech.bic_table import BicTableModule
-from bm_reports.modules.symitech.cost_summary import (
+from openaec_reports.modules.base import ContentModule, ModuleConfig
+from openaec_reports.modules.symitech.bic_table import BicTableModule
+from openaec_reports.modules.symitech.cost_summary import (
     CostSummaryModule,
     _format_currency_nl,
 )
-from bm_reports.modules.symitech.location_detail import LocationDetailModule
-from bm_reports.modules.symitech.object_description import ObjectDescriptionModule
+from openaec_reports.modules.symitech.location_detail import LocationDetailModule
+from openaec_reports.modules.symitech.object_description import ObjectDescriptionModule
 
 # ---------------------------------------------------------------------------
 # Test helpers
@@ -452,8 +452,8 @@ class TestSymitechRegistration:
 
     def test_register_all_modules(self) -> None:
         """register_symitech_modules registreert alle 4 modules."""
-        from bm_reports.modules import ModuleRegistry
-        from bm_reports.modules.symitech import register_symitech_modules
+        from openaec_reports.modules import ModuleRegistry
+        from openaec_reports.modules.symitech import register_symitech_modules
 
         register_symitech_modules()
 
@@ -465,8 +465,8 @@ class TestSymitechRegistration:
 
     def test_list_symitech_modules(self) -> None:
         """Symitech modules zijn vindbaar via list_modules."""
-        from bm_reports.modules import ModuleRegistry
-        from bm_reports.modules.symitech import register_symitech_modules
+        from openaec_reports.modules import ModuleRegistry
+        from openaec_reports.modules.symitech import register_symitech_modules
 
         register_symitech_modules()
         modules = ModuleRegistry.available(tenant="symitech")

@@ -8,7 +8,7 @@ Er zijn **6 concrete bugs** die samen verklaren waarom de PDF output niet overee
 
 ## Bug 1: Brand YAML gebruikt Helvetica i.p.v. Gotham fonts [KRITIEK]
 
-**Bestand:** `src/bm_reports/assets/brands/3bm_cooperatie.yaml`
+**Bestand:** `src/openaec_reports/assets/brands/3bm_cooperatie.yaml`
 
 **Probleem:** De `fonts:` sectie verwijst naar Helvetica-fallbacks, terwijl Gotham fonts WEL beschikbaar zijn in `assets/fonts/`.
 
@@ -34,7 +34,7 @@ fonts:
 
 ## Bug 2: Stylesheet defaults matchen niet met huisstijl [KRITIEK]
 
-**Bestand:** `src/bm_reports/core/styles.py`
+**Bestand:** `src/openaec_reports/core/styles.py`
 
 **Probleem:** `FontConfig` en de `create_stylesheet()` gebruiken verkeerde font sizes en font names.
 
@@ -102,7 +102,7 @@ Zelfde patroon: Heading3 moet ook `BM_FONTS.body` gebruiken, niet `BM_FONTS.head
 
 ## Bug 3: Brand style overrides worden nooit toegepast [KRITIEK]
 
-**Bestand:** `src/bm_reports/core/styles.py`
+**Bestand:** `src/openaec_reports/core/styles.py`
 
 **Probleem:** De globale `BM_STYLES` wordt aangemaakt zonder brand:
 ```python
@@ -120,11 +120,11 @@ Als de FontConfig en create_stylesheet defaults al correct zijn (na Bug 2 fixes)
 In de `Report` class (of waar de stylesheet wordt geconsumeerd), vervang:
 ```python
 # Huidig
-from bm_reports.core.styles import BM_STYLES
+from openaec_reports.core.styles import BM_STYLES
 stylesheet = BM_STYLES
 
 # Nieuw
-from bm_reports.core.styles import create_stylesheet
+from openaec_reports.core.styles import create_stylesheet
 stylesheet = create_stylesheet(brand=self.brand)
 ```
 
@@ -134,7 +134,7 @@ stylesheet = create_stylesheet(brand=self.brand)
 
 ## Bug 4: Hardcoded kleuren in special_pages.py wijken af van YAML [MEDIUM]
 
-**Bestand:** `src/bm_reports/core/special_pages.py`
+**Bestand:** `src/openaec_reports/core/special_pages.py`
 
 **Probleem:** Bovenaan staan hardcoded kleuren die NIET overeenkomen met de brand YAML:
 
@@ -167,7 +167,7 @@ De `draw_cover_page()` doet dit al deels met `_brand_color(brand, "primary", "#4
 
 ## Bug 5: Cover logo positie en grootte [MEDIUM]
 
-**Bestand:** `src/bm_reports/core/special_pages.py` → `draw_cover_page()`
+**Bestand:** `src/openaec_reports/core/special_pages.py` → `draw_cover_page()`
 
 **Probleem:** De logo rendering gebruikt alleen `width` maar niet `height`. ReportLab's `preserveAspectRatio` is impliciet True maar het anker (x,y) is de linkeronderhoek. Als het logo te groot/klein is of verkeerd gepositioneerd, ligt het aan:
 
@@ -181,7 +181,7 @@ De `draw_cover_page()` doet dit al deels met `_brand_color(brand, "primary", "#4
 
 ## Bug 6: Backcover geometrie wijkt af [LOW]
 
-**Bestand:** `src/bm_reports/core/special_pages.py` → `draw_backcover_page()`
+**Bestand:** `src/openaec_reports/core/special_pages.py` → `draw_backcover_page()`
 
 **Probleem:** De backcover gebruikt een vereenvoudigd wit polygon en paars driehoek. Het referentiedocument heeft een complexer geometrisch patroon met schuine lijnen. 
 
@@ -198,13 +198,13 @@ Dit is een visueel verschil maar minder kritiek dan fonts/kleuren. Kan later geo
 ## Uitvoeringsplan
 
 ### Stap 1: Brand YAML fonts fixen (Bug 1)
-Wijzig `src/bm_reports/assets/brands/3bm_cooperatie.yaml`:
+Wijzig `src/openaec_reports/assets/brands/3bm_cooperatie.yaml`:
 - `fonts.heading` → `"GothamBold"`
 - `fonts.body` → `"GothamBook"`
 - Voeg `medium: "GothamMedium"` en `italic: "GothamBookItalic"` toe
 
 ### Stap 2: styles.py defaults fixen (Bug 2)
-Wijzig `src/bm_reports/core/styles.py`:
+Wijzig `src/openaec_reports/core/styles.py`:
 - `body_size` → 9.5
 - `heading1_size` → 18.0
 - Heading1: `fontName=BM_FONTS.body`, `textColor=HexColor(BM_COLORS.text)`
@@ -212,12 +212,12 @@ Wijzig `src/bm_reports/core/styles.py`:
 - Heading3: `fontName=BM_FONTS.body`
 
 ### Stap 3: Brand-aware stylesheet (Bug 3)
-- Zoek alle `from bm_reports.core.styles import BM_STYLES` usages
+- Zoek alle `from openaec_reports.core.styles import BM_STYLES` usages
 - Vervang met `create_stylesheet(brand=...)` waar brand beschikbaar is
 - Houd `BM_STYLES` als fallback voor code zonder brand context
 
 ### Stap 4: Hardcoded kleuren fixen (Bug 4)
-Wijzig `src/bm_reports/core/special_pages.py`:
+Wijzig `src/openaec_reports/core/special_pages.py`:
 - Corrigeer `_COLOR_PRIMARY` → `#401246`
 - Corrigeer `_COLOR_SECONDARY` → `#38BDAB`
 - Geef `brand` parameter mee aan `_draw_badges()` en andere helpers

@@ -43,7 +43,7 @@ huisstijl/
 ## Bestaande code
 
 ```
-src/bm_reports/
+src/openaec_reports/
 ├── core/
 │   ├── engine.py           # Report class — build pipeline
 │   ├── page_templates.py   # PageTemplate registratie + onPage callbacks
@@ -666,23 +666,23 @@ class BrandBuilder:
 Voeg `build-brand` command toe:
 
 ```bash
-bm-report build-brand \
+openaec-report build-brand \
   --rapport huisstijl/2707_BBLrapportage_v01.pdf \
   --stamkaart huisstijl/3BM-Stamkaart.pdf \
   --briefpapier huisstijl/3BM-Briefpapier-Digitaal.pdf \
   --logos "huisstijl/logo's/RGB/SVG/" \
-  --fonts src/bm_reports/assets/fonts/ \
+  --fonts src/openaec_reports/assets/fonts/ \
   --name "3BM Coöperatie" \
   --slug "3bm-cooperatie" \
-  --output src/bm_reports/assets/brands/3bm-cooperatie/
+  --output src/openaec_reports/assets/brands/3bm-cooperatie/
 
 # Variant met overerving
-bm-report build-brand \
+openaec-report build-brand \
   --rapport huisstijl/3BM-250206-Constructierapport.pdf \
-  --base-brand src/bm_reports/assets/brands/3bm-cooperatie/ \
+  --base-brand src/openaec_reports/assets/brands/3bm-cooperatie/ \
   --name "3BM Constructie" \
   --slug "3bm-constructie" \
-  --output src/bm_reports/assets/brands/3bm-constructie/
+  --output src/openaec_reports/assets/brands/3bm-constructie/
 ```
 
 ---
@@ -738,7 +738,7 @@ Na elke fase: genereer een test-PDF en vergelijk met `huisstijl/pages/page_XX.pn
 - [ ] Fase 1: Fonts zijn Gotham (niet Helvetica), kleuren kloppen exact
 - [ ] Fase 2+3: Backcover is pixel-perfect identiek aan referentie
 - [ ] Fase 4: brand.yaml v2 laadt correct, backward compatible met v1
-- [ ] Fase 5: `bm-report build-brand` genereert werkende brand directory
+- [ ] Fase 5: `openaec-report build-brand` genereert werkende brand directory
 - [ ] Fase 6: Content pagina marges matchen referentie (links=90pt)
 
 ## Dependencies toevoegen

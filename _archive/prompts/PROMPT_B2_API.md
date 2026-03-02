@@ -2,19 +2,19 @@
 
 ## Context
 
-De report generator heeft een werkende Python library (`bm_reports`) met `Report.from_dict()` en `Report.build()`. Er is een CLI (`cli.py`), maar geen HTTP API. De React frontend genereert JSON en heeft een endpoint nodig om PDF's te genereren en te downloaden.
+De report generator heeft een werkende Python library (`openaec_reports`) met `Report.from_dict()` en `Report.build()`. Er is een CLI (`cli.py`), maar geen HTTP API. De React frontend genereert JSON en heeft een endpoint nodig om PDF's te genereren en te downloaden.
 
 Bekijk voor je begint:
-- `src/bm_reports/core/engine.py` — `Report.from_dict()` en `Report.from_json()`
-- `src/bm_reports/core/template_loader.py` — `TemplateLoader.list_templates()`
-- `src/bm_reports/core/brand.py` — `BrandLoader.list_brands()`
-- `src/bm_reports/data/json_adapter.py` — `JsonAdapter.validate()`
+- `src/openaec_reports/core/engine.py` — `Report.from_dict()` en `Report.from_json()`
+- `src/openaec_reports/core/template_loader.py` — `TemplateLoader.list_templates()`
+- `src/openaec_reports/core/brand.py` — `BrandLoader.list_brands()`
+- `src/openaec_reports/data/json_adapter.py` — `JsonAdapter.validate()`
 - `schemas/report.schema.json` — het JSON schema (single source of truth)
-- `src/bm_reports/cli.py` — bestaande CLI (niet wijzigen, de API is een apart entrypoint)
+- `src/openaec_reports/cli.py` — bestaande CLI (niet wijzigen, de API is een apart entrypoint)
 
 ## Wat er moet komen
 
-### 1. FastAPI applicatie — `src/bm_reports/api.py`
+### 1. FastAPI applicatie — `src/openaec_reports/api.py`
 
 Eén bestand met alle endpoints. Gebruik FastAPI + uvicorn.
 
@@ -180,7 +180,7 @@ Voeg een `__main__` block toe aan `api.py`:
 ```python
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("bm_reports.api:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("openaec_reports.api:app", host="0.0.0.0", port=8000, reload=True)
 ```
 
 En voeg een CLI commando toe aan `cli.py`:
@@ -200,7 +200,7 @@ def _cmd_serve(args):
     import uvicorn
     print(f"3BM Report API server op http://{args.host}:{args.port}")
     print("  Docs: http://localhost:{args.port}/docs")
-    uvicorn.run("bm_reports.api:app", host=args.host, port=args.port, reload=args.reload)
+    uvicorn.run("openaec_reports.api:app", host=args.host, port=args.port, reload=args.reload)
 ```
 
 ### 6. Filename sanitization
@@ -223,7 +223,7 @@ Gebruik: `filename=_safe_filename(data.get("project_number"), data.get("project"
 ## File structuur na implementatie
 
 ```
-src/bm_reports/
+src/openaec_reports/
 ├── api.py              # NIEUW — FastAPI app
 ├── cli.py              # AANGEPAST — serve commando toegevoegd
 ├── __init__.py
@@ -239,7 +239,7 @@ Maak `tests/test_api.py`:
 
 ```python
 from fastapi.testclient import TestClient
-from bm_reports.api import app
+from openaec_reports.api import app
 
 client = TestClient(app)
 
@@ -312,7 +312,7 @@ python -m pytest tests/test_api.py -v
 python -m pytest tests/ -v  # regressie
 
 # Handmatige test:
-python -m bm_reports.api
+python -m openaec_reports.api
 # Open http://localhost:8000/docs → Swagger UI
 # Test /api/generate met een JSON body
 ```

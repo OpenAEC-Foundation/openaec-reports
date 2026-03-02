@@ -5,11 +5,11 @@
 `TemplateLoader` kan YAML templates lezen (`structural_report.yaml`, `3bm_cooperatie.yaml`), maar er is geen mechanisme om een template om te zetten naar een **leeg JSON scaffold** dat de frontend kan laden als startpunt. Daarnaast wordt `orientation: landscape` in `DocumentConfig` niet doorvertaald naar de page size.
 
 Bekijk voor je begint:
-- `src/bm_reports/core/template_loader.py` — `TemplateLoader`, `TemplateConfig`
-- `src/bm_reports/core/engine.py` — `Report.from_dict()`
-- `src/bm_reports/core/document.py` — `DocumentConfig`, `PageFormat`, `A4`, `A3`
-- `src/bm_reports/api.py` — (na Fase B2) het scaffold endpoint placeholder
-- `src/bm_reports/assets/templates/structural_report.yaml` — voorbeeld template
+- `src/openaec_reports/core/template_loader.py` — `TemplateLoader`, `TemplateConfig`
+- `src/openaec_reports/core/engine.py` — `Report.from_dict()`
+- `src/openaec_reports/core/document.py` — `DocumentConfig`, `PageFormat`, `A4`, `A3`
+- `src/openaec_reports/api.py` — (na Fase B2) het scaffold endpoint placeholder
+- `src/openaec_reports/assets/templates/structural_report.yaml` — voorbeeld template
 - `schemas/report.schema.json` — het JSON schema
 
 ## Deel 1: Template Scaffold Generator
@@ -416,7 +416,7 @@ python -m pytest tests/ -v  # volledige regressie
 
 # Handmatig:
 python -c "
-from bm_reports.core.template_loader import TemplateLoader
+from openaec_reports.core.template_loader import TemplateLoader
 import json
 loader = TemplateLoader()
 for name in ['structural_report', 'daylight', 'building_code', 'blank']:

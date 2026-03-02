@@ -95,10 +95,10 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
-CMD ["uvicorn", "bm_reports.api:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+CMD ["uvicorn", "openaec_reports.api:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
 ```
 
-### Stap 5: Voeg static file serving toe aan `src/bm_reports/api.py`
+### Stap 5: Voeg static file serving toe aan `src/openaec_reports/api.py`
 
 Voeg ONDERAAN het bestand toe, NA alle API route definities:
 
@@ -149,7 +149,7 @@ Na uitvoering, controleer:
 - [ ] `frontend/package.json` bestaat
 - [ ] `frontend/src/` bevat React componenten
 - [ ] `Dockerfile` heeft twee FROM stages
-- [ ] `src/bm_reports/api.py` heeft StaticFiles mount onderaan
+- [ ] `src/openaec_reports/api.py` heeft StaticFiles mount onderaan
 - [ ] `.gitignore` bevat `frontend/node_modules/`
 - [ ] Geen `frontend/node_modules/` of `frontend/dist/` in git
 
@@ -159,9 +159,9 @@ Na uitvoering, controleer:
 git push
 
 # Op server:
-cd /opt/3bm/bm-reports-api && git pull
-cd /opt/3bm && docker compose build --no-cache bm-reports-api
-docker compose up -d bm-reports-api
+cd /opt/3bm/openaec-reports-api && git pull
+cd /opt/3bm && docker compose build --no-cache openaec-reports-api
+docker compose up -d openaec-reports-api
 
 # Test:
 curl https://report.3bm.co.nl/api/health
@@ -174,7 +174,7 @@ Na succesvolle deploy kan de Caddyfile vereenvoudigd worden. Nu serveert Caddy s
 
 ```
 report.3bm.co.nl {
-    reverse_proxy bm-reports-api:8000
+    reverse_proxy openaec-reports-api:8000
 
     header {
         X-Content-Type-Options nosniff
@@ -189,7 +189,7 @@ report.3bm.co.nl {
 }
 ```
 
-En verwijder de `bm-reports-ui/dist` volume mount uit docker-compose.yml.
+En verwijder de `openaec-reports-ui/dist` volume mount uit docker-compose.yml.
 
 ## Wat NIET verandert
 

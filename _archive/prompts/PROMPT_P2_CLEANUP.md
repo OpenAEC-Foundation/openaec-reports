@@ -85,10 +85,10 @@ pip install -e ".[dev,brand-tools]"
 python -m pytest tests/ -v
 
 # API starten
-bm-report serve --port 8000 --reload
+openaec-report serve --port 8000 --reload
 
 # Rapport genereren
-bm-report generate --template structural --data schemas/example_structural.json --output output/test.pdf
+openaec-report generate --template structural --data schemas/example_structural.json --output output/test.pdf
 ```
 ```
 

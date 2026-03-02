@@ -2,7 +2,7 @@
 
 import pytest
 
-from bm_reports.core.document import A3, A4, MM_TO_PT, Document, DocumentConfig, Margins
+from openaec_reports.core.document import A3, A4, MM_TO_PT, Document, DocumentConfig, Margins
 
 
 class TestPageFormat:
@@ -56,14 +56,14 @@ class TestDocument:
 
 class TestPageTemplates:
     def test_create_page_templates_returns_five(self):
-        from bm_reports.core.page_templates import create_page_templates
+        from openaec_reports.core.page_templates import create_page_templates
 
         config = DocumentConfig()
         templates = create_page_templates(config)
         assert len(templates) == 5
 
     def test_template_ids(self):
-        from bm_reports.core.page_templates import create_page_templates
+        from openaec_reports.core.page_templates import create_page_templates
 
         config = DocumentConfig()
         templates = create_page_templates(config)
@@ -71,7 +71,7 @@ class TestPageTemplates:
         assert ids == ["cover", "colofon", "content", "appendix_divider", "backcover"]
 
     def test_content_template_has_onpage(self):
-        from bm_reports.core.page_templates import create_page_templates
+        from openaec_reports.core.page_templates import create_page_templates
 
         config = DocumentConfig()
         templates = create_page_templates(config)
@@ -84,7 +84,7 @@ class TestPageTemplates:
 
 class TestStyles:
     def test_bm_colors(self):
-        from bm_reports.core.styles import BM_COLORS
+        from openaec_reports.core.styles import BM_COLORS
 
         assert BM_COLORS.primary == "#40124A"
         assert BM_COLORS.secondary == "#38BDA0"
@@ -94,7 +94,7 @@ class TestStyles:
     def test_bm_colors_as_hex(self):
         from reportlab.lib.colors import Color
 
-        from bm_reports.core.styles import BM_COLORS
+        from openaec_reports.core.styles import BM_COLORS
 
         color = BM_COLORS.as_hex("primary")
         assert isinstance(color, Color)
@@ -102,13 +102,13 @@ class TestStyles:
     def test_bm_colors_hex_shortcut(self):
         from reportlab.lib.colors import Color
 
-        from bm_reports.core.styles import BM_COLORS
+        from openaec_reports.core.styles import BM_COLORS
 
         color = BM_COLORS.hex("primary")
         assert isinstance(color, Color)
 
     def test_create_stylesheet_has_expected_styles(self):
-        from bm_reports.core.styles import create_stylesheet
+        from openaec_reports.core.styles import create_stylesheet
 
         styles = create_stylesheet()
         expected_names = [
@@ -122,8 +122,8 @@ class TestStyles:
 class TestSmokeImports:
     """Smoke tests: controleer dat imports werken na architectuur opschoning."""
 
-    def test_import_bm_reports(self):
-        from bm_reports import A3, A4, Document, Report
+    def test_import_openaec_reports(self):
+        from openaec_reports import A3, A4, Document, Report
 
         assert Report is not None
         assert A4 is not None
@@ -132,7 +132,7 @@ class TestSmokeImports:
 
     def test_no_header_footer_in_components(self):
         try:
-            import bm_reports.components as comp
+            import openaec_reports.components as comp
         except ImportError:
             pytest.skip("Optional dependency (svglib) not installed")
 
@@ -141,7 +141,7 @@ class TestSmokeImports:
 
     def test_components_exports(self):
         try:
-            from bm_reports.components import (
+            from openaec_reports.components import (
                 CalculationBlock,
                 CheckBlock,  # noqa: F401
                 ImageBlock,  # noqa: F401
@@ -156,6 +156,6 @@ class TestSmokeImports:
         assert CalculationBlock is not None
 
     def test_bm_doc_template_exists(self):
-        from bm_reports.core.engine import BMDocTemplate
+        from openaec_reports.core.engine import BMDocTemplate
 
         assert BMDocTemplate is not None

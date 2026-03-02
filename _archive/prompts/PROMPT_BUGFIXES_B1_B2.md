@@ -1,8 +1,8 @@
 # Bugfixes B1 (map_block.py) en B2 (api.py)
 
 Bekijk voor je begint:
-- `src/bm_reports/components/map_block.py`
-- `src/bm_reports/api.py`
+- `src/openaec_reports/components/map_block.py`
+- `src/openaec_reports/api.py`
 - `pyproject.toml`
 - `tests/test_map_block.py`
 - `tests/test_api.py`
@@ -187,7 +187,7 @@ async def generate_report(request: Request):
 ```python
 SCHEMA_PATH = Path(__file__).parent.parent.parent / "schemas" / "report.schema.json"
 ```
-Dit pad (`src/bm_reports/../../schemas/`) werkt alleen in de development source tree. Na `pip install` zit `api.py` in `site-packages/bm_reports/` en het `schemas/` directory is niet meegeïnstalleerd.
+Dit pad (`src/openaec_reports/../../schemas/`) werkt alleen in de development source tree. Na `pip install` zit `api.py` in `site-packages/openaec_reports/` en het `schemas/` directory is niet meegeïnstalleerd.
 
 **Fix (twee stappen):**
 
@@ -195,7 +195,7 @@ Dit pad (`src/bm_reports/../../schemas/`) werkt alleen in de development source 
 
 Voeg in `pyproject.toml` toe aan de `[tool.hatch.build.targets.wheel.force-include]` sectie:
 ```toml
-"schemas" = "bm_reports/schemas"
+"schemas" = "openaec_reports/schemas"
 ```
 
 ### Stap 2: SCHEMA_PATH robuust resolven

@@ -2,8 +2,8 @@
 
 ## Context
 
-Je werkt in het `bm-reports` project (root = huidige directory met `pyproject.toml`).
-De Brand Analyzer (Fase A) is compleet: `src/bm_reports/tools/` bevat pdf_extractor, page_classifier, pattern_detector en config_generator.
+Je werkt in het `openaec-reports` project (root = huidige directory met `pyproject.toml`).
+De Brand Analyzer (Fase A) is compleet: `src/openaec_reports/tools/` bevat pdf_extractor, page_classifier, pattern_detector en config_generator.
 
 Nu moeten we:
 1. De analyzer draaien op de referentie-PDF om de automatische output te verifiëren
@@ -16,13 +16,13 @@ Nu moeten we:
 Lees deze bestanden **eerst** voordat je begint:
 
 - **`huisstijl/HUISSTIJL_SPEC.md`** — De ground truth. Alle pixel-exacte metingen uit de referentie-PDF. Dit is de bron voor alle correcties.
-- **`src/bm_reports/assets/brands/3bm_cooperatie.yaml`** — Huidige (incorrecte) brand YAML
-- **`src/bm_reports/core/styles.py`** — Huidige styles met verkeerde waarden
-- **`src/bm_reports/core/special_pages.py`** — Cover (OK), colofon (moet herschreven), backcover (OK)
-- **`src/bm_reports/core/brand.py`** — BrandConfig dataclass (moet uitgebreid)
-- **`src/bm_reports/core/brand_renderer.py`** — Footer/header renderer (werkt al generiek)
-- **`src/bm_reports/core/page_templates.py`** — PageTemplate registratie (moet appendix_divider krijgen)
-- **`src/bm_reports/core/engine.py`** — Report class (moet appendix ondersteunen)
+- **`src/openaec_reports/assets/brands/3bm_cooperatie.yaml`** — Huidige (incorrecte) brand YAML
+- **`src/openaec_reports/core/styles.py`** — Huidige styles met verkeerde waarden
+- **`src/openaec_reports/core/special_pages.py`** — Cover (OK), colofon (moet herschreven), backcover (OK)
+- **`src/openaec_reports/core/brand.py`** — BrandConfig dataclass (moet uitgebreid)
+- **`src/openaec_reports/core/brand_renderer.py`** — Footer/header renderer (werkt al generiek)
+- **`src/openaec_reports/core/page_templates.py`** — PageTemplate registratie (moet appendix_divider krijgen)
+- **`src/openaec_reports/core/engine.py`** — Report class (moet appendix ondersteunen)
 
 ---
 
@@ -33,7 +33,7 @@ Run de analyzer op de referentie-PDF en bewaar de output:
 ```bash
 cd <project_root>
 pip install pymupdf --break-system-packages 2>/dev/null || pip install pymupdf
-python -m bm_reports.cli analyze-brand huisstijl/2707_BBLrapportage_v01.pdf \
+python -m openaec_reports.cli analyze-brand huisstijl/2707_BBLrapportage_v01.pdf \
     --output-dir huisstijl/brand_analysis \
     --brand-name "3BM Coöperatie" \
     --brand-slug "3bm-cooperatie" \
@@ -46,7 +46,7 @@ Controleer de output in `huisstijl/brand_analysis/analysis_report.md` en vergeli
 
 ## Stap 2: BrandConfig uitbreiden met `styles` en `pages`
 
-### `src/bm_reports/core/brand.py`
+### `src/openaec_reports/core/brand.py`
 
 Voeg twee nieuwe velden toe aan `BrandConfig`:
 
@@ -579,7 +579,7 @@ import sys
 sys.path.insert(0, "src")
 
 from pathlib import Path
-from bm_reports.core.engine import Report
+from openaec_reports.core.engine import Report
 
 json_path = Path("huisstijl/voorbeeld_rapport.json")
 output_path = Path("huisstijl/voorbeeld_rapport_v2.pdf")
@@ -657,22 +657,22 @@ Update bestaande tests voor de nieuwe colofon layout en voeg tests toe voor de a
 
 | Bestand | Wijziging |
 |---------|-----------|
-| `src/bm_reports/core/brand.py` | +`styles` en `pages` velden op BrandConfig + parsing in BrandLoader |
-| `src/bm_reports/assets/brands/3bm_cooperatie.yaml` | Volledig herschreven: footer, styles, pages, colors correctie |
-| `src/bm_reports/core/styles.py` | `create_stylesheet(brand=None)` met override logica |
-| `src/bm_reports/core/special_pages.py` | Colofon herschreven + nieuwe `draw_appendix_divider_page()` |
-| `src/bm_reports/core/page_templates.py` | +appendix_divider template |
-| `src/bm_reports/core/engine.py` | +`add_appendix()`, brand-aware stylesheet, appendix in elements |
-| `src/bm_reports/core/block_registry.py` | `create_block()` accepteert optionele `styles` parameter |
+| `src/openaec_reports/core/brand.py` | +`styles` en `pages` velden op BrandConfig + parsing in BrandLoader |
+| `src/openaec_reports/assets/brands/3bm_cooperatie.yaml` | Volledig herschreven: footer, styles, pages, colors correctie |
+| `src/openaec_reports/core/styles.py` | `create_stylesheet(brand=None)` met override logica |
+| `src/openaec_reports/core/special_pages.py` | Colofon herschreven + nieuwe `draw_appendix_divider_page()` |
+| `src/openaec_reports/core/page_templates.py` | +appendix_divider template |
+| `src/openaec_reports/core/engine.py` | +`add_appendix()`, brand-aware stylesheet, appendix in elements |
+| `src/openaec_reports/core/block_registry.py` | `create_block()` accepteert optionele `styles` parameter |
 | `tests/test_brand.py` | +tests voor styles/pages velden |
 | `tests/test_styles.py` | Nieuw: stylesheet override tests |
 | `tests/test_special_pages.py` | Update colofon + appendix divider tests |
 
 ## Niet wijzigen
 
-- `src/bm_reports/core/brand_renderer.py` — werkt al correct generiek
-- `src/bm_reports/tools/*` — Fase A is compleet
-- `src/bm_reports/core/document.py` — geen wijzigingen nodig
+- `src/openaec_reports/core/brand_renderer.py` — werkt al correct generiek
+- `src/openaec_reports/tools/*` — Fase A is compleet
+- `src/openaec_reports/core/document.py` — geen wijzigingen nodig
 - Cover en backcover in `special_pages.py` — deze zijn al correct
 
 ## Prioriteit

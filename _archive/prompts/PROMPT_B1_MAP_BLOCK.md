@@ -2,14 +2,14 @@
 
 ## Context
 
-De `KadasterMap` flowable in `src/bm_reports/components/map_block.py` is een lege shell — alle methoden gooien `NotImplementedError`. Maar de benodigde logica staat al grotendeels in `src/bm_reports/data/kadaster.py` (`KadasterClient`). De map_block moet de KadasterClient **gebruiken**, niet dupliceren.
+De `KadasterMap` flowable in `src/openaec_reports/components/map_block.py` is een lege shell — alle methoden gooien `NotImplementedError`. Maar de benodigde logica staat al grotendeels in `src/openaec_reports/data/kadaster.py` (`KadasterClient`). De map_block moet de KadasterClient **gebruiken**, niet dupliceren.
 
 Bekijk voor je begint:
-- `src/bm_reports/data/kadaster.py` — WMS client met `wgs84_to_rd()` en `get_map()`
-- `src/bm_reports/components/image_block.py` — referentie voor het Flowable patroon (wrap/draw via intern Table)
-- `src/bm_reports/components/calculation.py` — referentie voor styling (BM_COLORS, BM_FONTS)
-- `src/bm_reports/core/styles.py` — BM_COLORS, BM_STYLES
-- `src/bm_reports/core/block_registry.py` — factory functie `create_map()` (al geregistreerd)
+- `src/openaec_reports/data/kadaster.py` — WMS client met `wgs84_to_rd()` en `get_map()`
+- `src/openaec_reports/components/image_block.py` — referentie voor het Flowable patroon (wrap/draw via intern Table)
+- `src/openaec_reports/components/calculation.py` — referentie voor styling (BM_COLORS, BM_FONTS)
+- `src/openaec_reports/core/styles.py` — BM_COLORS, BM_STYLES
+- `src/openaec_reports/core/block_registry.py` — factory functie `create_map()` (al geregistreerd)
 
 ## Wat er moet gebeuren
 
@@ -134,7 +134,7 @@ python -m pytest tests/ -v  # regressie check
 
 Optioneel (handmatig, met internet):
 ```python
-from bm_reports import A4, Report
+from openaec_reports import A4, Report
 report = Report(format=A4, project="Map Test", brand="3bm_cooperatie")
 report.add_cover(subtitle="Kadaster test")
 report.add_section("Locatie", content=[])

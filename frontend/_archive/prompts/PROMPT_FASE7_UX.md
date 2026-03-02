@@ -2,7 +2,7 @@
 
 ## Context
 
-Dit is de Report Editor frontend (`bm-reports-ui`) — React 18 + TypeScript + Tailwind + Zustand + dnd-kit.
+Dit is de Report Editor frontend (`openaec-reports-ui`) — React 18 + TypeScript + Tailwind + Zustand + dnd-kit.
 De editor produceert JSON conform `schemas/report.schema.json` en stuurt dat naar de backend API (`POST /api/generate`) voor PDF generatie.
 
 Backend API draait op `http://localhost:8000`. De frontend communiceert via `src/services/api.ts`.
@@ -182,7 +182,7 @@ In `reportStore.ts`, voeg localStorage persistentie toe.
 **Aanpak:** Gebruik een `subscribe()` handler op de store die bij elke `report` wijziging de staat naar localStorage schrijft.
 
 ```typescript
-const STORAGE_KEY = 'bm-reports-editor-state';
+const STORAGE_KEY = 'openaec-reports-editor-state';
 const SAVE_DEBOUNCE_MS = 1000;
 
 // Na store creatie:

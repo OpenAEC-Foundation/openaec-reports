@@ -1,4 +1,4 @@
-# TODO — bm-reports
+# TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
 > Laatst bijgewerkt: 2026-03-01 (pixel fixes + admin cleanup)
@@ -13,10 +13,10 @@ Alle code fixes zijn gecommit (cfaa808, f3b8228, ab93b13). Frontend smart routin
 **Stappen:**
 ```bash
 # 1. Docker build ZONDER cache
-docker build --no-cache -t bm-reports:latest .
+docker build --no-cache -t openaec-reports:latest .
 
 # 2. Test lokaal
-docker run --rm -p 8000:8000 bm-reports:latest
+docker run --rm -p 8000:8000 openaec-reports:latest
 
 # 3. Deploy naar VPS (git pull + rebuild)
 
@@ -69,9 +69,9 @@ Pas uitvoeren NADAT FIX-1, FIX-2, FIX-3 allemaal live staan.
 
 Alle 3BM-specifieke referenties uit de codebase halen (package naam, API endpoints, Docker labels, README, etc.). 3BM blijft alleen bestaan als tenant data (`tenants/3bm_cooperatie/`).
 
-- [ ] T4.1 — Package rename: `bm_reports` → `openaec_reports`
+- [ ] T4.1 — Package rename: `openaec_reports` → `openaec_reports`
 - [ ] T4.2 — API prefix: `/api/` → blijft, maar branding aanpassen
-- [ ] T4.3 — Docker image: `bm-reports` → `openaec-reports`
+- [ ] T4.3 — Docker image: `openaec-reports` → `openaec-reports`
 - [ ] T4.4 — Frontend: 3BM logo/naam → OpenAEC branding
 - [ ] T4.5 — README, LICENSE, docs bijwerken
 - [ ] T4.6 — Domain: `report.3bm.co.nl` → `reports.openaec.org` (of soortgelijk)
@@ -134,7 +134,7 @@ Self-service YAML beheer per tenant — geen git push nodig voor positioneering/
 
 ### FIX-1 + FIX-2 — Tenant Resolution Fix (1 maart, cfaa808)
 - [x] `_resolve_tenant_and_template()` — tenant uit template naam prefix
-- [x] `_resolve_tenants_dir()` — robuust met `BM_TENANTS_ROOT` env var
+- [x] `_resolve_tenants_dir()` — robuust met `OPENAEC_TENANTS_ROOT` env var
 - [x] Endpoint herschreven, 888 tests passed, E2E OK
 
 ### T-API — API Endpoint (28 feb)

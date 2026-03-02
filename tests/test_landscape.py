@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from bm_reports import A3, A4, Report
-from bm_reports.core.document import DocumentConfig
+from openaec_reports import A3, A4, Report
+from openaec_reports.core.document import DocumentConfig
 
 
 class TestEffectivePagesize:

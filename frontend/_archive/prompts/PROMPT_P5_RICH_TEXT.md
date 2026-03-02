@@ -20,7 +20,7 @@ Lees voordat je begint:
 - `src/components/blocks/ParagraphEditor.tsx` — huidige textarea implementatie
 - `src/stores/reportStore.ts` — hoe block data wordt opgeslagen
 - `src/types/report.ts` — Block type definitie
-- Backend: `src/bm_reports/components/calculation.py` — hoe tekst nu in PDF komt (als referentie)
+- Backend: `src/openaec_reports/components/calculation.py` — hoe tekst nu in PDF komt (als referentie)
 
 ## Stap 1: Installeer Tiptap
 
@@ -274,7 +274,7 @@ Dit is een **aparte backend taak** die later kan. ReportLab's `Paragraph` onders
 
 **Minimale backend wijziging** (alleen als je dit in dezelfde sessie wilt doen):
 
-In `src/bm_reports/core/block_registry.py`, zoek waar paragraph blocks worden aangemaakt en pas de tekst processing aan:
+In `src/openaec_reports/core/block_registry.py`, zoek waar paragraph blocks worden aangemaakt en pas de tekst processing aan:
 
 ```python
 from reportlab.platypus import Paragraph as RLParagraph
@@ -346,7 +346,7 @@ npm run build
 - `src/components/blocks/ParagraphEditor.tsx` — GEWIJZIGD (textarea → RichTextEditor)
 - `src/index.css` — UITGEBREID (Tiptap styles)
 - `package.json` — UITGEBREID (Tiptap dependencies)
-- Optioneel backend: `src/bm_reports/core/block_registry.py` — HTML sanitization
+- Optioneel backend: `src/openaec_reports/core/block_registry.py` — HTML sanitization
 
 ## Update na afloop
 

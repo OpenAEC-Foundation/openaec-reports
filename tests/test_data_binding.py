@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bm_reports.core.template_engine import format_value, resolve_bind
+from openaec_reports.core.template_engine import format_value, resolve_bind
 
 # ============================================================
 # resolve_bind — diep nested + arrays + mixed types

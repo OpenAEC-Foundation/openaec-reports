@@ -174,7 +174,7 @@ class BrandConfig:
 
 #### 2c. StationeryRenderer (nieuw bestand)
 
-`src/bm_reports/core/stationery.py`:
+`src/openaec_reports/core/stationery.py`:
 
 ```python
 """Stationery renderer — Tekent achtergrond-templates op de ReportLab canvas."""
@@ -326,21 +326,21 @@ def strip_text_from_page(source_pdf, page_num, output_pdf):
 python tools/extract_stationery.py \
   --source huisstijl/2707_BBLrapportage_v01.pdf \
   --page 35 \
-  --output src/bm_reports/assets/graphics/3bm-backcover.pdf \
+  --output src/openaec_reports/assets/graphics/3bm-backcover.pdf \
   --mode full
 
 # Appendix divider: pagina 21 (index 20) — strip dynamische tekst
 python tools/extract_stationery.py \
   --source huisstijl/2707_BBLrapportage_v01.pdf \
   --page 20 \
-  --output src/bm_reports/assets/graphics/3bm-appendix-divider.pdf \
+  --output src/openaec_reports/assets/graphics/3bm-appendix-divider.pdf \
   --mode strip-text
 
 # Optioneel: Cover pagina zonder foto en titels (voor referentie)
 python tools/extract_stationery.py \
   --source huisstijl/2707_BBLrapportage_v01.pdf \
   --page 0 \
-  --output src/bm_reports/assets/graphics/3bm-cover-reference.png \
+  --output src/openaec_reports/assets/graphics/3bm-cover-reference.png \
   --mode png --dpi 300
 ```
 

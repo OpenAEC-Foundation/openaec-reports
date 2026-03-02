@@ -2,7 +2,7 @@
 
 ## Context
 
-Dit is `bm-reports-ui`, een React + TypeScript + Tailwind frontend die JSON produceert voor een PDF report generator. De shell staat er: AppShell, Sidebar met drag & drop secties, MainPanel met block-overzicht en BlockToolbox. Blocks zijn momenteel **read-only** (BlockSummary in MainPanel.tsx). De volgende stap is **inline editing** — als je op een block klikt, wordt het bewerkbaar.
+Dit is `openaec-reports-ui`, een React + TypeScript + Tailwind frontend die JSON produceert voor een PDF report generator. De shell staat er: AppShell, Sidebar met drag & drop secties, MainPanel met block-overzicht en BlockToolbox. Blocks zijn momenteel **read-only** (BlockSummary in MainPanel.tsx). De volgende stap is **inline editing** — als je op een block klikt, wordt het bewerkbaar.
 
 Lees eerst `CLAUDE.md` voor de volledige architectuur en conventies.
 

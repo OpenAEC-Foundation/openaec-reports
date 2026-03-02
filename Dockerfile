@@ -29,12 +29,12 @@ COPY --from=frontend-build /app/frontend/dist /app/static
 RUN mkdir -p /app/uploads /app/data
 
 # Multi-tenant: alle tenant directories beschikbaar voor brand resolution
-ENV BM_TENANTS_ROOT=/app/tenants
-ENV BM_TENANT_DIR=/app/tenants/3bm_cooperatie
+ENV OPENAEC_TENANTS_ROOT=/app/tenants
+ENV OPENAEC_TENANT_DIR=/app/tenants/3bm_cooperatie
 
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
-CMD ["uvicorn", "bm_reports.api:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+CMD ["uvicorn", "openaec_reports.api:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

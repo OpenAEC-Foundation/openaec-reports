@@ -6,9 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from bm_reports.core.brand import BrandLoader
-from bm_reports.core.template_loader import TemplateLoader
-from bm_reports.core.tenant import _PACKAGE_ASSETS, TenantConfig
+from openaec_reports.core.brand import BrandLoader
+from openaec_reports.core.template_loader import TemplateLoader
+from openaec_reports.core.tenant import _PACKAGE_ASSETS, TenantConfig
 
 PROJECT_ROOT = Path(__file__).parent.parent
 TENANT_DIR = PROJECT_ROOT / "tenants" / "3bm_cooperatie"
@@ -26,8 +26,8 @@ SKIP_NO_TENANT = pytest.mark.skipif(
 
 class TestTenantConfigBasics:
     def test_no_env_no_arg(self, monkeypatch):
-        """Zonder BM_TENANT_DIR en zonder argument → geen tenant."""
-        monkeypatch.delenv("BM_TENANT_DIR", raising=False)
+        """Zonder OPENAEC_TENANT_DIR en zonder argument → geen tenant."""
+        monkeypatch.delenv("OPENAEC_TENANT_DIR", raising=False)
         config = TenantConfig()
         assert config.tenant_dir is None
 
@@ -37,8 +37,8 @@ class TestTenantConfigBasics:
         assert config.tenant_dir == tmp_path
 
     def test_env_var(self, monkeypatch, tmp_path):
-        """Met BM_TENANT_DIR env var → tenant dir gezet."""
-        monkeypatch.setenv("BM_TENANT_DIR", str(tmp_path))
+        """Met OPENAEC_TENANT_DIR env var → tenant dir gezet."""
+        monkeypatch.setenv("OPENAEC_TENANT_DIR", str(tmp_path))
         config = TenantConfig()
         assert config.tenant_dir == tmp_path
 
@@ -46,7 +46,7 @@ class TestTenantConfigBasics:
         """Expliciete dir heeft voorrang op env var."""
         other = tmp_path / "other"
         other.mkdir()
-        monkeypatch.setenv("BM_TENANT_DIR", str(tmp_path))
+        monkeypatch.setenv("OPENAEC_TENANT_DIR", str(tmp_path))
         config = TenantConfig(other)
         assert config.tenant_dir == other
 
@@ -59,7 +59,7 @@ class TestTenantConfigBasics:
 class TestTenantConfigFallback:
     def test_templates_dirs_no_tenant(self, monkeypatch):
         """Zonder tenant → alleen package templates dir."""
-        monkeypatch.delenv("BM_TENANT_DIR", raising=False)
+        monkeypatch.delenv("OPENAEC_TENANT_DIR", raising=False)
         config = TenantConfig()
         dirs = config.templates_dirs
         assert len(dirs) == 1
@@ -83,7 +83,7 @@ class TestTenantConfigFallback:
 
     def test_brand_path_no_tenant(self, monkeypatch):
         """Zonder tenant → package default.yaml."""
-        monkeypatch.delenv("BM_TENANT_DIR", raising=False)
+        monkeypatch.delenv("OPENAEC_TENANT_DIR", raising=False)
         config = TenantConfig()
         assert config.brand_path == _PACKAGE_ASSETS / "brands" / "default.yaml"
 
@@ -101,7 +101,7 @@ class TestTenantConfigFallback:
 
     def test_stationery_dir_no_tenant(self, monkeypatch):
         """Zonder tenant → package stationery fallback (als aanwezig)."""
-        monkeypatch.delenv("BM_TENANT_DIR", raising=False)
+        monkeypatch.delenv("OPENAEC_TENANT_DIR", raising=False)
         config = TenantConfig()
         # Package stationery kan aanwezig zijn of niet
         result = config.stationery_dir
@@ -116,7 +116,7 @@ class TestTenantConfigFallback:
 
     def test_logos_dir_no_tenant_no_package(self, monkeypatch, tmp_path):
         """Zonder tenant en zonder package logos → None."""
-        monkeypatch.delenv("BM_TENANT_DIR", raising=False)
+        monkeypatch.delenv("OPENAEC_TENANT_DIR", raising=False)
         # We kunnen de package logos niet verwijderen, maar testen dat de logica werkt
         config = TenantConfig()
         result = config.logos_dir
@@ -242,7 +242,7 @@ class TestBrandLoaderTenant:
 
     def test_load_default_without_tenant(self, monkeypatch):
         """Zonder tenant → load_default() retourneert package default."""
-        monkeypatch.delenv("BM_TENANT_DIR", raising=False)
+        monkeypatch.delenv("OPENAEC_TENANT_DIR", raising=False)
         loader = BrandLoader()
         brand = loader.load_default()
         assert brand.slug == "default"

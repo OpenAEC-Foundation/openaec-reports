@@ -7,7 +7,7 @@ import yaml
 
 fitz = pytest.importorskip("fitz", reason="pymupdf niet geïnstalleerd")
 
-from bm_reports.tools.brand_builder import BrandBuilder  # noqa: E402
+from openaec_reports.tools.brand_builder import BrandBuilder  # noqa: E402
 
 
 @pytest.fixture
@@ -125,7 +125,7 @@ class TestBrandBuilderBuild:
 
 class TestHelperMethods:
     def test_detect_cover_strip_zones_returns_list(self, sample_pdf, tmp_path):
-        from bm_reports.tools.pdf_extractor import extract_pdf
+        from openaec_reports.tools.pdf_extractor import extract_pdf
 
         pages = extract_pdf(sample_pdf)
 
@@ -135,7 +135,7 @@ class TestHelperMethods:
 
     def test_extract_stamkaart_colors_empty(self, tmp_path):
         """Pagina's zonder kleurcodes retourneren lege dict."""
-        from bm_reports.tools.pdf_extractor import extract_pdf
+        from openaec_reports.tools.pdf_extractor import extract_pdf
 
         # Maak simpele PDF zonder kleurcodes
         doc = fitz.open()

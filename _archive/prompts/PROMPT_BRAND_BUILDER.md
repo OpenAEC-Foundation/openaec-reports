@@ -49,7 +49,7 @@ Referentie PDF
 
 ---
 
-## Stap 1: PDF Extractor — `src/bm_reports/tools/pdf_extractor.py`
+## Stap 1: PDF Extractor — `src/openaec_reports/tools/pdf_extractor.py`
 
 ### Dependencies
 
@@ -143,7 +143,7 @@ def extract_pdf(pdf_path: Path, output_dir: Path, dpi: int = 150) -> list[RawPag
 
 ---
 
-## Stap 2: Page Classifier — `src/bm_reports/tools/page_classifier.py`
+## Stap 2: Page Classifier — `src/openaec_reports/tools/page_classifier.py`
 
 ### Pagina-types
 
@@ -199,7 +199,7 @@ class ClassifiedPage:
 
 ---
 
-## Stap 3: Pattern Detector — `src/bm_reports/tools/pattern_detector.py`
+## Stap 3: Pattern Detector — `src/openaec_reports/tools/pattern_detector.py`
 
 Analyseert de geclassificeerde pagina's en detecteert herhalende patronen.
 
@@ -371,7 +371,7 @@ class BrandAnalysis:
 
 ---
 
-## Stap 4: Config Generator — `src/bm_reports/tools/config_generator.py`
+## Stap 4: Config Generator — `src/openaec_reports/tools/config_generator.py`
 
 Converteert `BrandAnalysis` naar concrete configuratiebestanden.
 
@@ -445,7 +445,7 @@ def generate_page_specs(analysis: BrandAnalysis) -> dict:
 
 ---
 
-## Stap 5: API Endpoint — `src/bm_reports/api.py` uitbreiding
+## Stap 5: API Endpoint — `src/openaec_reports/api.py` uitbreiding
 
 ### POST /api/analyze-brand
 
@@ -663,11 +663,11 @@ def draw_colofon_page(canvas, doc, config, brand, data):
 
 | Bestand | Doel |
 |---------|------|
-| `src/bm_reports/tools/__init__.py` | Package init |
-| `src/bm_reports/tools/pdf_extractor.py` | PDF → RawPageData[] |
-| `src/bm_reports/tools/page_classifier.py` | RawPageData → ClassifiedPage |
-| `src/bm_reports/tools/pattern_detector.py` | Kleuren, fonts, marges, zones, styles |
-| `src/bm_reports/tools/config_generator.py` | Analysis → YAML + overrides |
+| `src/openaec_reports/tools/__init__.py` | Package init |
+| `src/openaec_reports/tools/pdf_extractor.py` | PDF → RawPageData[] |
+| `src/openaec_reports/tools/page_classifier.py` | RawPageData → ClassifiedPage |
+| `src/openaec_reports/tools/pattern_detector.py` | Kleuren, fonts, marges, zones, styles |
+| `src/openaec_reports/tools/config_generator.py` | Analysis → YAML + overrides |
 | `tests/test_pdf_extractor.py` | Unit tests |
 | `tests/test_page_classifier.py` | Unit tests |
 | `tests/test_pattern_detector.py` | Unit tests |
@@ -677,10 +677,10 @@ def draw_colofon_page(canvas, doc, config, brand, data):
 
 | Bestand | Wijziging |
 |---------|-----------|
-| `src/bm_reports/api.py` | +3 endpoints (analyze-brand, pages, save) |
-| `src/bm_reports/core/brand.py` | BrandConfig uitbreiden met `styles` en `pages` |
-| `src/bm_reports/core/styles.py` | `create_stylesheet()` accepteert brand overrides |
-| `src/bm_reports/core/special_pages.py` | Gebruik brand.pages specs i.p.v. hardcoded waarden |
+| `src/openaec_reports/api.py` | +3 endpoints (analyze-brand, pages, save) |
+| `src/openaec_reports/core/brand.py` | BrandConfig uitbreiden met `styles` en `pages` |
+| `src/openaec_reports/core/styles.py` | `create_stylesheet()` accepteert brand overrides |
+| `src/openaec_reports/core/special_pages.py` | Gebruik brand.pages specs i.p.v. hardcoded waarden |
 | `pyproject.toml` | PyMuPDF dependency |
 
 ### Frontend (nieuw)
@@ -707,7 +707,7 @@ def draw_colofon_page(canvas, doc, config, brand, data):
 2. `page_classifier.py` + tests
 3. `pattern_detector.py` + tests
 4. `config_generator.py` + tests
-5. CLI command: `bm-report analyze-brand input.pdf --output brand.yaml`
+5. CLI command: `openaec-report analyze-brand input.pdf --output brand.yaml`
 
 ### Fase B: API Integratie
 1. Nieuwe endpoints in `api.py`

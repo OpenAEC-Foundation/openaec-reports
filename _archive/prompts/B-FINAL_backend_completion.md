@@ -4,7 +4,7 @@
 
 Je werkt in `X:\10_3BM_bouwkunde\50_Claude-Code-Projects\Report_generator`.
 
-Er is een werkende **Proof of Concept** in `src/bm_reports/core/renderer_v2.py` die JSON → PDF genereert via PyMuPDF + ReportLab. Deze module genereert pixel-perfect 3BM huisstijl rapporten (bewezen met 10-pagina integratietest). 
+Er is een werkende **Proof of Concept** in `src/openaec_reports/core/renderer_v2.py` die JSON → PDF genereert via PyMuPDF + ReportLab. Deze module genereert pixel-perfect 3BM huisstijl rapporten (bewezen met 10-pagina integratietest). 
 
 De oude engine (`engine.py`) is volledig ReportLab-based en wordt NIET meer gebruikt. De nieuwe renderer_v2 is de productie-engine.
 
@@ -98,11 +98,11 @@ De `ContentRenderer` class in `renderer_v2.py` ondersteunt nu:
 - De stationery directory moet configureerbaar zijn via environment variable:
   ```python
   STATIONERY_DIR = Path(os.environ.get(
-      "BM_STATIONERY_DIR",
+      "OPENAEC_STATIONERY_DIR",
       str(Path(__file__).parent / "assets" / "stationery" / "3bm_cooperatie")
   ))
   ```
-- Kopieer de stationery bestanden (colofon.pdf, standaard.pdf, bijlagen.pdf, achterblad.pdf, cover PNG) naar `src/bm_reports/assets/stationery/3bm_cooperatie/`
+- Kopieer de stationery bestanden (colofon.pdf, standaard.pdf, bijlagen.pdf, achterblad.pdf, cover PNG) naar `src/openaec_reports/assets/stationery/3bm_cooperatie/`
 - JSON body gaat direct naar `generator.generate(data, stationery_dir, tmp_path)`
 
 **2b. `/api/generate/v2` nieuw endpoint (naast bestaand):**
@@ -122,7 +122,7 @@ De `ContentRenderer` class in `renderer_v2.py` ondersteunt nu:
 
 ### Code structuur:
 ```python
-from bm_reports.core.renderer_v2 import ReportGeneratorV2
+from openaec_reports.core.renderer_v2 import ReportGeneratorV2
 
 @app.post("/api/generate/v2")
 async def generate_report_v2(request: Request):
@@ -169,11 +169,11 @@ Voeg aan `tests/test_data/sample_report.json` toe:
 - Verwijder `pdfrw` (niet meer nodig)
 
 ### Font paden
-Fonts staan in: `src/bm_reports/assets/fonts/` (Gotham-Bold.ttf, Gotham-Book.ttf, Gotham-Medium.ttf)
+Fonts staan in: `src/openaec_reports/assets/fonts/` (Gotham-Bold.ttf, Gotham-Book.ttf, Gotham-Medium.ttf)
 De `FontManager` class in renderer_v2.py resolved dit automatisch via `FONT_DIR = ASSETS_DIR / "fonts"`
 
 ### Stationery bestanden
-Kopieer van `huisstijl/paginas/` naar `src/bm_reports/assets/stationery/3bm_cooperatie/`:
+Kopieer van `huisstijl/paginas/` naar `src/openaec_reports/assets/stationery/3bm_cooperatie/`:
 - `colofon.pdf`
 - `standaard.pdf`  
 - `bijlagen.pdf`
@@ -181,13 +181,13 @@ Kopieer van `huisstijl/paginas/` naar `src/bm_reports/assets/stationery/3bm_coop
 - `2707_BBLrapportage_v01_1.png` (cover overlay)
 
 ### YAML templates
-Staan al op de juiste plek: `src/bm_reports/assets/templates/3bm_cooperatie/`
+Staan al op de juiste plek: `src/openaec_reports/assets/templates/3bm_cooperatie/`
 - cover.yaml, colofon.yaml, toc.yaml, standaard.yaml, content_styles.yaml, bijlage.yaml
 
 ### Exports
-Update `src/bm_reports/__init__.py`:
+Update `src/openaec_reports/__init__.py`:
 ```python
-from bm_reports.core.renderer_v2 import ReportGeneratorV2
+from openaec_reports.core.renderer_v2 import ReportGeneratorV2
 __all__ = [..., "ReportGeneratorV2"]
 ```
 
@@ -215,6 +215,6 @@ Na afloop moet dit werken:
 cd X:\10_3BM_bouwkunde\50_Claude-Code-Projects\Report_generator
 python tests/test_renderer_v2.py          # Genereert PDF met alle block types
 python -m pytest tests/ -v                 # Alle tests groen
-python -m bm_reports.api                   # Server start op :8000
+python -m openaec_reports.api                   # Server start op :8000
 # POST naar http://localhost:8000/api/generate/v2 met sample JSON → PDF response
 ```

@@ -3,7 +3,7 @@
 
 import pytest
 
-from bm_reports.core.template_loader import TEMPLATES_DIR, TemplateConfig, TemplateLoader
+from openaec_reports.core.template_loader import TEMPLATES_DIR, TemplateConfig, TemplateLoader
 
 
 class TestTemplateLoader:

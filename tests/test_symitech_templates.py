@@ -6,7 +6,7 @@ import pytest
 import yaml
 
 TEMPLATES_DIR = (
-    Path(__file__).parent.parent / "src" / "bm_reports" / "assets" / "templates"
+    Path(__file__).parent.parent / "src" / "openaec_reports" / "assets" / "templates"
 )
 
 

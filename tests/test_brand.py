@@ -5,15 +5,15 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bm_reports.core.brand import (
+from openaec_reports.core.brand import (
     BRANDS_DIR,
     BrandConfig,
     BrandLoader,
     ElementConfig,
     ZoneConfig,
 )
-from bm_reports.core.brand_renderer import BrandRenderer
-from bm_reports.core.document import A4, MM_TO_PT, DocumentConfig
+from openaec_reports.core.brand_renderer import BrandRenderer
+from openaec_reports.core.document import A4, MM_TO_PT, DocumentConfig
 
 # ============================================================
 # TestBrandConfig — dataclass creatie en defaults
@@ -456,7 +456,7 @@ class TestIntegration:
 
     def test_build_with_default_brand(self, tmp_path):
         """Report zonder brand parameter gebruikt default brand."""
-        from bm_reports import A4, Report
+        from openaec_reports import A4, Report
 
         report = Report(
             format=A4,
@@ -475,7 +475,7 @@ class TestIntegration:
 
     def test_build_with_named_brand(self, tmp_path):
         """Report met brand='3bm_cooperatie' bouwt correct."""
-        from bm_reports import A4, Report
+        from openaec_reports import A4, Report
 
         report = Report(
             format=A4,
@@ -495,7 +495,7 @@ class TestIntegration:
 
     def test_build_with_brand_config_object(self, tmp_path):
         """Report accepteert een BrandConfig object direct."""
-        from bm_reports import A4, BrandConfig, Report
+        from openaec_reports import A4, BrandConfig, Report
 
         brand = BrandConfig(
             name="Custom",
@@ -527,7 +527,7 @@ class TestIntegration:
 
     def test_backward_compatible_no_brand(self, tmp_path):
         """Bestaande code zonder brand parameter blijft werken."""
-        from bm_reports import A4, Report
+        from openaec_reports import A4, Report
 
         report = Report(format=A4, project="Backward Compat")
         report.add_section("Test", content=["Oude API blijft werken."])
@@ -539,7 +539,7 @@ class TestIntegration:
 
     def test_build_with_cover_and_brand(self, tmp_path):
         """Volledige report met cover, secties, backcover en brand."""
-        from bm_reports import A4, Report
+        from openaec_reports import A4, Report
 
         report = Report(
             format=A4,

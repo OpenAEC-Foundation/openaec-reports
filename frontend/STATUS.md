@@ -12,7 +12,7 @@
 
 ### Deploy stappen (morgen)
 1. `npm run build` (met `.env.production` → `VITE_API_URL=https://report.3bm.co.nl`)
-2. Upload `dist/` naar server: `/opt/3bm/bm-reports-ui/dist/`
+2. Upload `dist/` naar server: `/opt/3bm/openaec-reports-ui/dist/`
 3. Caddy serveert static files automatisch
 
 ## Architectuur

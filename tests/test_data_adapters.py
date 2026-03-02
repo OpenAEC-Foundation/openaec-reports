@@ -7,8 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bm_reports.data.kadaster import KadasterClient
-from bm_reports.data.revit_adapter import RevitAdapter
+from openaec_reports.data.kadaster import KadasterClient
+from openaec_reports.data.revit_adapter import RevitAdapter
 
 
 class TestKadasterClient:
@@ -47,7 +47,7 @@ class TestKadasterClient:
         assert "luchtfoto" in KadasterClient.WMS_SERVICES
         assert "bag" in KadasterClient.WMS_SERVICES
 
-    @patch("bm_reports.data.kadaster.requests.Session")
+    @patch("openaec_reports.data.kadaster.requests.Session")
     def test_get_map_builds_correct_params(self, mock_session_cls):
         """get_map() bouwt correcte WMS parameters."""
         mock_session = MagicMock()
@@ -69,7 +69,7 @@ class TestKadasterClient:
         assert params["crs"] == "EPSG:28992"
         assert result == b"PNG_DATA"
 
-    @patch("bm_reports.data.kadaster.requests.Session")
+    @patch("openaec_reports.data.kadaster.requests.Session")
     def test_save_map(self, mock_session_cls, tmp_path):
         """save_map() slaat PNG op als bestand."""
         mock_session = MagicMock()

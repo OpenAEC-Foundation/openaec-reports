@@ -14,11 +14,11 @@ Valideert de volledige pipeline:
 
 from pathlib import Path
 
-from bm_reports import Report, A4
-from bm_reports.components import CalculationBlock, CheckBlock, ImageBlock, TableBlock
+from openaec_reports import Report, A4
+from openaec_reports.components import CalculationBlock, CheckBlock, ImageBlock, TableBlock
 
 OUTPUT_DIR = Path(__file__).parent.parent / "output"
-LOGO_PATH = Path(__file__).parent.parent / "src" / "bm_reports" / "assets" / "logos" / "3bm-cooperatie.png"
+LOGO_PATH = Path(__file__).parent.parent / "src" / "openaec_reports" / "assets" / "logos" / "3bm-cooperatie.png"
 
 
 def main():

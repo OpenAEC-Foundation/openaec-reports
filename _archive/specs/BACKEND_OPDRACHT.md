@@ -72,7 +72,7 @@ aan de huidige sectie (of een nieuwe sectie als er geen is).
 Voorbeeld voor add_calculation:
 ```python
 def add_calculation(self, title, formula="", substitution="", result="", unit="", reference="", **kwargs):
-    from bm_reports.components.calculation import CalculationBlock
+    from openaec_reports.components.calculation import CalculationBlock
     block = CalculationBlock(
         title=title, formula=formula, substitution=substitution,
         result=result, unit=unit, reference=reference,
@@ -211,7 +211,7 @@ getekend worden.
 
 ### Implementatie aanpak
 
-Maak een nieuw bestand: `src/bm_reports/core/special_pages.py`
+Maak een nieuw bestand: `src/openaec_reports/core/special_pages.py`
 
 Met drie functies:
 1. `draw_cover_page(canvas, doc, config: DocumentConfig, brand: BrandConfig)`

@@ -17,13 +17,13 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Flowable, SimpleDocTemplate, Spacer
 
-from bm_reports.core.block_registry import create_block
-from bm_reports.core.brand import BrandConfig, BrandLoader
-from bm_reports.modules import ModuleRegistry
-from bm_reports.modules.base import ModuleConfig
-from bm_reports.modules.symitech import register_symitech_modules
-from bm_reports.modules.symitech.bic_table import BicTableModule
-from bm_reports.modules.symitech.location_detail import LocationDetailModule
+from openaec_reports.core.block_registry import create_block
+from openaec_reports.core.brand import BrandConfig, BrandLoader
+from openaec_reports.modules import ModuleRegistry
+from openaec_reports.modules.base import ModuleConfig
+from openaec_reports.modules.symitech import register_symitech_modules
+from openaec_reports.modules.symitech.bic_table import BicTableModule
+from openaec_reports.modules.symitech.location_detail import LocationDetailModule
 
 
 @pytest.fixture(autouse=True)

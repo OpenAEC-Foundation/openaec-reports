@@ -29,10 +29,10 @@ Upload het JSON bestand op report.3bm.co.nl → "Rapport data laden".
 ### Lokaal testen
 ```bash
 python -c "
-from bm_reports.core.renderer_v2 import ReportGeneratorV2
+from openaec_reports.core.renderer_v2 import ReportGeneratorV2
 import json
 data = json.loads(open('schemas/examples/voorbeeld_adviesbrief.json').read())
 gen = ReportGeneratorV2(brand='3bm_cooperatie')
-gen.generate(data, 'src/bm_reports/assets/stationery/3bm_cooperatie', 'output/test.pdf')
+gen.generate(data, 'src/openaec_reports/assets/stationery/3bm_cooperatie', 'output/test.pdf')
 "
 ```

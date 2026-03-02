@@ -22,21 +22,21 @@ def raw_pages():
     """Extraheer alle pagina's uit de referentie-PDF (zonder renders)."""
     if not REFERENCE_PDF.exists():
         pytest.skip("Referentie PDF niet aanwezig")
-    from bm_reports.tools import extract_pdf
+    from openaec_reports.tools import extract_pdf
     return extract_pdf(REFERENCE_PDF)
 
 
 @pytest.fixture(scope="module")
 def classified(raw_pages):
     """Classificeer alle pagina's."""
-    from bm_reports.tools import classify_pages
+    from openaec_reports.tools import classify_pages
     return classify_pages(raw_pages)
 
 
 @pytest.fixture(scope="module")
 def analysis(classified):
     """Voer volledige brand analyse uit."""
-    from bm_reports.tools import analyze_brand
+    from openaec_reports.tools import analyze_brand
     return analyze_brand(classified, str(REFERENCE_PDF))
 
 
@@ -117,28 +117,28 @@ class TestPageClassifier:
     """Tests voor pagina classificatie."""
 
     def test_classify_cover(self, classified):
-        from bm_reports.tools import PageType
+        from openaec_reports.tools import PageType
         assert classified[0].page_type == PageType.COVER
 
     def test_classify_backcover(self, classified):
-        from bm_reports.tools import PageType
+        from openaec_reports.tools import PageType
         assert classified[-1].page_type == PageType.BACKCOVER
 
     def test_classify_colofon(self, classified):
-        from bm_reports.tools import PageType
+        from openaec_reports.tools import PageType
         assert classified[1].page_type == PageType.COLOFON
 
     def test_classify_toc(self, classified):
-        from bm_reports.tools import PageType
+        from openaec_reports.tools import PageType
         assert classified[2].page_type == PageType.TOC
 
     def test_classify_appendix_divider(self, classified):
-        from bm_reports.tools import PageType
+        from openaec_reports.tools import PageType
         # Pagina 21 (index 20) zou APPENDIX_DIVIDER moeten zijn
         assert classified[20].page_type == PageType.APPENDIX_DIVIDER
 
     def test_classify_content(self, classified):
-        from bm_reports.tools import PageType
+        from openaec_reports.tools import PageType
         # Pagina 4-20 zouden CONTENT moeten zijn
         for i in [3, 4, 5, 10, 15, 19]:
             assert classified[i].page_type == PageType.CONTENT, (
@@ -146,7 +146,7 @@ class TestPageClassifier:
             )
 
     def test_all_pages_classified(self, classified):
-        from bm_reports.tools import PageType
+        from openaec_reports.tools import PageType
         for cp in classified:
             assert cp.page_type != PageType.UNKNOWN, (
                 f"Pagina {cp.page.page_number} is UNKNOWN"
@@ -168,14 +168,14 @@ class TestPatternDetector:
     def test_color_palette_secondary(self, analysis):
         assert "secondary" in analysis.colors
         # Turquoise/groen-achtig
-        from bm_reports.tools.pattern_detector import _hex_to_rgb
+        from openaec_reports.tools.pattern_detector import _hex_to_rgb
         r, g, b = _hex_to_rgb(analysis.colors["secondary"])
         assert g > r, f"Secondary {analysis.colors['secondary']} is niet groen/turquoise"
 
     def test_color_palette_text(self, analysis):
         assert "text" in analysis.colors
         # Donkerpaurs ~#45243D
-        from bm_reports.tools.pattern_detector import _hex_to_rgb
+        from openaec_reports.tools.pattern_detector import _hex_to_rgb
         r, g, b = _hex_to_rgb(analysis.colors["text"])
         assert r + g + b < 300, f"Text kleur {analysis.colors['text']} is niet donker"
 
@@ -230,7 +230,7 @@ class TestPatternDetector:
     def test_table_style_detected(self, analysis):
         assert analysis.table_style is not None
         assert "header_bg" in analysis.table_style
-        from bm_reports.tools.pattern_detector import _hex_to_rgb
+        from openaec_reports.tools.pattern_detector import _hex_to_rgb
         r, g, b = _hex_to_rgb(analysis.table_style["header_bg"])
         assert r + g + b < 500, "Table header_bg zou donker moeten zijn"
 
@@ -244,13 +244,13 @@ class TestConfigGenerator:
     """Tests voor config generatie."""
 
     def test_generate_yaml_parseable(self, analysis):
-        from bm_reports.tools import generate_brand_yaml
+        from openaec_reports.tools import generate_brand_yaml
         yaml_str = generate_brand_yaml(analysis, "Test Brand", "test-brand")
         data = yaml.safe_load(yaml_str)
         assert isinstance(data, dict)
 
     def test_generate_yaml_has_brand_section(self, analysis):
-        from bm_reports.tools import generate_brand_yaml
+        from openaec_reports.tools import generate_brand_yaml
         yaml_str = generate_brand_yaml(analysis, "Test Brand", "test-brand")
         data = yaml.safe_load(yaml_str)
         assert "brand" in data
@@ -258,14 +258,14 @@ class TestConfigGenerator:
         assert data["brand"]["slug"] == "test-brand"
 
     def test_generate_yaml_has_colors(self, analysis):
-        from bm_reports.tools import generate_brand_yaml
+        from openaec_reports.tools import generate_brand_yaml
         yaml_str = generate_brand_yaml(analysis, "Test", "test")
         data = yaml.safe_load(yaml_str)
         assert "colors" in data
         assert "primary" in data["colors"]
 
     def test_generate_yaml_has_footer(self, analysis):
-        from bm_reports.tools import generate_brand_yaml
+        from openaec_reports.tools import generate_brand_yaml
         yaml_str = generate_brand_yaml(analysis, "Test", "test")
         data = yaml.safe_load(yaml_str)
         assert "footer" in data
@@ -273,7 +273,7 @@ class TestConfigGenerator:
         assert "elements" in data["footer"]
 
     def test_generate_yaml_has_styles(self, analysis):
-        from bm_reports.tools import generate_brand_yaml
+        from openaec_reports.tools import generate_brand_yaml
         yaml_str = generate_brand_yaml(analysis, "Test", "test")
         data = yaml.safe_load(yaml_str)
         assert "styles" in data
@@ -281,12 +281,12 @@ class TestConfigGenerator:
         assert "Heading1" in data["styles"]
 
     def test_generate_report_is_markdown(self, analysis):
-        from bm_reports.tools import generate_analysis_report
+        from openaec_reports.tools import generate_analysis_report
         report = generate_analysis_report(analysis)
         assert "# " in report
 
     def test_generate_report_contains_colors(self, analysis):
-        from bm_reports.tools import generate_analysis_report
+        from openaec_reports.tools import generate_analysis_report
         report = generate_analysis_report(analysis)
         assert "primary" in report
         assert "#" in report
@@ -301,7 +301,7 @@ class TestCLI:
     """Tests voor CLI command."""
 
     def test_cli_analyze_brand_creates_files(self, tmp_path):
-        from bm_reports.tools import (
+        from openaec_reports.tools import (
             analyze_brand,
             classify_pages,
             extract_pdf,

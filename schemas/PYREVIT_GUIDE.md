@@ -518,7 +518,7 @@ Voor lokaal testen zonder de productieserver:
 
 ```bash
 pip install -e ".[dev]"
-bm-report serve --port 8000 --reload
+openaec-report serve --port 8000 --reload
 ```
 
 Pas dan `API_URL` aan naar `http://localhost:8000/api/generate/v2`.

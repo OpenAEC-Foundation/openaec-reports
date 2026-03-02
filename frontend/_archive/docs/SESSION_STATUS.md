@@ -4,7 +4,7 @@
 
 ## Samenvatting
 
-Fase 1-7 + P5-P8 + F-FINAL van de Report Editor frontend (`bm-reports-ui`) zijn volledig geimplementeerd. De editor is volledig aligned met de renderer_v2 backend: nieuwe block types (bullet_list, heading_2), specifieke colofon velden, appendix content_sections, section auto-nummering, en bijgewerkte API endpoints. 25 unit tests passing.
+Fase 1-7 + P5-P8 + F-FINAL van de Report Editor frontend (`openaec-reports-ui`) zijn volledig geimplementeerd. De editor is volledig aligned met de renderer_v2 backend: nieuwe block types (bullet_list, heading_2), specifieke colofon velden, appendix content_sections, section auto-nummering, en bijgewerkte API endpoints. 25 unit tests passing.
 
 ## Voltooide fases
 
@@ -49,7 +49,7 @@ Fase 1-7 + P5-P8 + F-FINAL van de Report Editor frontend (`bm-reports-ui`) zijn 
 
 ## Huidige staat
 
-Frontend produceert JSON dat volledig compatibel is met de renderer_v2 backend. Dev server draait op `http://localhost:5173` (lokale kopie `C:\temp\bm-reports-ui`).
+Frontend produceert JSON dat volledig compatibel is met de renderer_v2 backend. Dev server draait op `http://localhost:5173` (lokale kopie `C:\temp\openaec-reports-ui`).
 
 ## Blokkades
 

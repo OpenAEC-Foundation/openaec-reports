@@ -2,25 +2,25 @@
 
 ## Context
 
-De bm-reports backend is feature-complete. De `StationeryExtractor`, `BrandBuilder`, en `page_templates.py` (stationery-first callbacks) werken. Maar de **data ontbreekt**: in `3bm_cooperatie.yaml` staan alle `source:` velden leeg en alle `text_zones:` zijn `[]`.
+De openaec-reports backend is feature-complete. De `StationeryExtractor`, `BrandBuilder`, en `page_templates.py` (stationery-first callbacks) werken. Maar de **data ontbreekt**: in `3bm_cooperatie.yaml` staan alle `source:` velden leeg en alle `text_zones:` zijn `[]`.
 
 Zonder stationery PDFs valt het systeem terug op programmatische rendering (`special_pages.py`). Die werkt, maar is niet pixel-perfect gelijk aan de originele huisstijl. Het doel van deze prompt is de stationery PDFs te extraheren, in te pluggen, en de text zones te mappen.
 
 ## Referentie-bestanden
 
 - **Referentie-rapport:** `huisstijl/2707_BBLrapportage_v01.pdf` — het originele BBL rapport
-- **Brand YAML:** `src/bm_reports/assets/brands/3bm_cooperatie.yaml`
-- **Stationery tools:** `src/bm_reports/tools/stationery_extractor.py` en `tools/brand_builder.py`
-- **Page templates:** `src/bm_reports/core/page_templates.py`
+- **Brand YAML:** `src/openaec_reports/assets/brands/3bm_cooperatie.yaml`
+- **Stationery tools:** `src/openaec_reports/tools/stationery_extractor.py` en `tools/brand_builder.py`
+- **Page templates:** `src/openaec_reports/core/page_templates.py`
 - **Cover spec:** `COVER_SPEC.md`
 
 ## Stap 0: Oriëntatie
 
 Lees deze bestanden voordat je begint:
-- `src/bm_reports/tools/stationery_extractor.py` — de 4 extractie-modi
-- `src/bm_reports/tools/brand_builder.py` — de build pipeline
-- `src/bm_reports/core/page_templates.py` — hoe stationery wordt gerenderd
-- `src/bm_reports/assets/brands/3bm_cooperatie.yaml` — wat ingevuld moet worden
+- `src/openaec_reports/tools/stationery_extractor.py` — de 4 extractie-modi
+- `src/openaec_reports/tools/brand_builder.py` — de build pipeline
+- `src/openaec_reports/core/page_templates.py` — hoe stationery wordt gerenderd
+- `src/openaec_reports/assets/brands/3bm_cooperatie.yaml` — wat ingevuld moet worden
 - `COVER_SPEC.md` — pixel-precieze cover layout
 
 ## Stap 1: Analyseer het referentie-rapport
@@ -50,10 +50,10 @@ Maak de output directory en extraheer per paginatype:
 
 ```python
 from pathlib import Path
-from bm_reports.tools.stationery_extractor import StationeryExtractor
+from openaec_reports.tools.stationery_extractor import StationeryExtractor
 
 source = Path("huisstijl/2707_BBLrapportage_v01.pdf")
-out_dir = Path("src/bm_reports/assets/brands/3bm-cooperatie/stationery")
+out_dir = Path("src/openaec_reports/assets/brands/3bm-cooperatie/stationery")
 out_dir.mkdir(parents=True, exist_ok=True)
 
 extractor = StationeryExtractor(source)
@@ -101,7 +101,7 @@ Open elke geëxtraheerde PDF en vergelijk met de originele pagina in het referen
 import fitz
 
 for name in ["cover", "colofon", "appendix_divider", "backcover"]:
-    path = f"src/bm_reports/assets/brands/3bm-cooperatie/stationery/{name}.pdf"
+    path = f"src/openaec_reports/assets/brands/3bm-cooperatie/stationery/{name}.pdf"
     doc = fitz.open(path)
     page = doc[0]
     # Render naar PNG voor visuele inspectie
@@ -233,7 +233,7 @@ stationery:
 Genereer een test-rapport met de stationery achtergronden:
 
 ```python
-from bm_reports.core.engine import Report
+from openaec_reports.core.engine import Report
 
 report = Report.from_json("schemas/example_structural.json", brand="3bm_cooperatie")
 output = report.build("output/test_met_stationery.pdf")
@@ -279,11 +279,11 @@ Als text zones niet op de juiste plek staan:
 ## Verwachte output
 
 Na afloop moeten bestaan:
-- `src/bm_reports/assets/brands/3bm-cooperatie/stationery/cover.pdf`
-- `src/bm_reports/assets/brands/3bm-cooperatie/stationery/colofon.pdf` (indien relevant)
-- `src/bm_reports/assets/brands/3bm-cooperatie/stationery/appendix_divider.pdf`
-- `src/bm_reports/assets/brands/3bm-cooperatie/stationery/backcover.pdf`
-- `src/bm_reports/assets/brands/3bm_cooperatie.yaml` — bijgewerkt met `source:` en `text_zones:`
+- `src/openaec_reports/assets/brands/3bm-cooperatie/stationery/cover.pdf`
+- `src/openaec_reports/assets/brands/3bm-cooperatie/stationery/colofon.pdf` (indien relevant)
+- `src/openaec_reports/assets/brands/3bm-cooperatie/stationery/appendix_divider.pdf`
+- `src/openaec_reports/assets/brands/3bm-cooperatie/stationery/backcover.pdf`
+- `src/openaec_reports/assets/brands/3bm_cooperatie.yaml` — bijgewerkt met `source:` en `text_zones:`
 - `output/test_met_stationery.pdf` — werkend test-rapport
 - `output/_review/stationery_*.png` — visuele review van geëxtraheerde stationery
 - `output/_review/result_page_*.png` — visuele review van gegenereerd rapport

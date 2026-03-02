@@ -19,14 +19,14 @@ import yaml
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-from bm_reports.modules.base import ContentModule
+from openaec_reports.modules.base import ContentModule
 
 # Originele Python modules (voor vergelijking)
-from bm_reports.modules.symitech.bic_table import BicTableModule
-from bm_reports.modules.symitech.cost_summary import CostSummaryModule
-from bm_reports.modules.symitech.location_detail import LocationDetailModule
-from bm_reports.modules.symitech.object_description import ObjectDescriptionModule
-from bm_reports.modules.yaml_module import (
+from openaec_reports.modules.symitech.bic_table import BicTableModule
+from openaec_reports.modules.symitech.cost_summary import CostSummaryModule
+from openaec_reports.modules.symitech.location_detail import LocationDetailModule
+from openaec_reports.modules.symitech.object_description import ObjectDescriptionModule
+from openaec_reports.modules.yaml_module import (
     YamlModule,
     create_yaml_module_class,
     load_yaml_modules_from_dir,
@@ -639,8 +639,8 @@ class TestSymitechYamlRegistration:
 
     def test_register_yaml_only(self) -> None:
         """register_symitech_yaml_modules registreert YAML versies."""
-        from bm_reports.modules import ModuleRegistry
-        from bm_reports.modules.symitech import register_symitech_yaml_modules
+        from openaec_reports.modules import ModuleRegistry
+        from openaec_reports.modules.symitech import register_symitech_yaml_modules
 
         ModuleRegistry.reset()
         register_symitech_yaml_modules(modules_dir=YAML_DEFS_DIR)
@@ -652,8 +652,8 @@ class TestSymitechYamlRegistration:
 
     def test_python_modules_have_priority(self) -> None:
         """Bij register_symitech_modules() hebben Python modules prioriteit."""
-        from bm_reports.modules import ModuleRegistry
-        from bm_reports.modules.symitech import register_symitech_modules
+        from openaec_reports.modules import ModuleRegistry
+        from openaec_reports.modules.symitech import register_symitech_modules
 
         ModuleRegistry.reset()
         register_symitech_modules(modules_dir=YAML_DEFS_DIR)

@@ -19,7 +19,7 @@ Na afloop: genereer een test-PDF en vergelijk visueel met `huisstijl/pages/page_
 
 ## Deel A: Font/kleur fixes
 
-### A1. `src/bm_reports/core/styles.py` — Colors dataclass
+### A1. `src/openaec_reports/core/styles.py` — Colors dataclass
 
 Wijzig de defaults:
 
@@ -42,7 +42,7 @@ class Colors:
     separator: str = "#E0D0E8"        # NIEUW — scheidingslijnen
 ```
 
-### A2. `src/bm_reports/core/styles.py` — FontConfig
+### A2. `src/openaec_reports/core/styles.py` — FontConfig
 
 Wijzig de size defaults:
 
@@ -62,7 +62,7 @@ class FontConfig:
     footer_size: float = 7.5          # Ongewijzigd
 ```
 
-### A3. `src/bm_reports/core/styles.py` — create_stylesheet()
+### A3. `src/openaec_reports/core/styles.py` — create_stylesheet()
 
 Wijzig de Heading styles:
 
@@ -106,7 +106,7 @@ styles.add(ParagraphStyle(
 
 Rebuild `BM_STYLES` en `BM_COLORS` onderaan het bestand na de fixes.
 
-### A4. `src/bm_reports/assets/brands/3bm_cooperatie.yaml`
+### A4. `src/openaec_reports/assets/brands/3bm_cooperatie.yaml`
 
 Zorg dat de fonts sectie naar Gotham verwijst (niet Helvetica):
 
@@ -131,7 +131,7 @@ colors:
   separator: "#E0D0E8"
 ```
 
-### A5. `src/bm_reports/core/special_pages.py`
+### A5. `src/openaec_reports/core/special_pages.py`
 
 Zoek ALLE hardcoded kleurwaarden bovenaan het bestand en vervang ze:
 
@@ -182,7 +182,7 @@ dependencies = [
 
 Installeer: `pip install pdfrw`
 
-### B2. Stationery extractor — `src/bm_reports/tools/stationery_extractor.py`
+### B2. Stationery extractor — `src/openaec_reports/tools/stationery_extractor.py`
 
 Nieuw bestand. Extraheert achtergrond-pagina's uit een referentie-PDF met PyMuPDF.
 
@@ -318,7 +318,7 @@ class StationeryExtractor:
         return output_path
 ```
 
-### B3. Stationery renderer — `src/bm_reports/core/stationery.py`
+### B3. Stationery renderer — `src/openaec_reports/core/stationery.py`
 
 Nieuw bestand. Tekent stationery PDF's als achtergrond op het ReportLab canvas.
 
@@ -429,7 +429,7 @@ class StationeryRenderer:
             return False
 ```
 
-### B4. Brand config uitbreiden — `src/bm_reports/core/brand.py`
+### B4. Brand config uitbreiden — `src/openaec_reports/core/brand.py`
 
 Voeg stationery configuratie toe aan BrandConfig:
 
@@ -500,12 +500,12 @@ def _resolve_path(self, name: str) -> Path:
     return self.brands_dir / f"{name}.yaml"
 ```
 
-### B5. Stationery integratie in page rendering — `src/bm_reports/core/page_templates.py`
+### B5. Stationery integratie in page rendering — `src/openaec_reports/core/page_templates.py`
 
 Wijzig `create_page_templates()` zodat elke onPage callback stationery-first werkt:
 
 ```python
-from bm_reports.core.stationery import StationeryRenderer
+from openaec_reports.core.stationery import StationeryRenderer
 
 def create_page_templates(config, brand=None, colofon_data=None, cover_image=None):
     if brand is None:
@@ -587,7 +587,7 @@ def _draw_text_zones(canvas, text_zones, config, brand, pw, ph):
     Text zones zijn gedefinieerd met y_pt in top-down coördinaten.
     ReportLab canvas gebruikt bottom-up. Converteer: rl_y = ph - y_pt
     """
-    from bm_reports.core.fonts import get_font_name
+    from openaec_reports.core.fonts import get_font_name
     
     for zone in text_zones:
         role = zone.get("role", "")
@@ -733,10 +733,10 @@ Maak een helper script `scripts/extract_3bm_stationery.py` dat de StationeryExtr
 ```python
 """Eenmalig script: extraheer stationery voor 3BM Coöperatie."""
 from pathlib import Path
-from bm_reports.tools.stationery_extractor import StationeryExtractor
+from openaec_reports.tools.stationery_extractor import StationeryExtractor
 
 SOURCE = Path("huisstijl/2707_BBLrapportage_v01.pdf")
-OUTPUT = Path("src/bm_reports/assets/graphics")
+OUTPUT = Path("src/openaec_reports/assets/graphics")
 
 ext = StationeryExtractor(SOURCE)
 
@@ -800,11 +800,11 @@ import logging
 import shutil
 from pathlib import Path
 
-from bm_reports.tools.pdf_extractor import extract_pdf
-from bm_reports.tools.page_classifier import classify_pages, PageType
-from bm_reports.tools.pattern_detector import analyze_brand
-from bm_reports.tools.config_generator import generate_brand_yaml, generate_analysis_report
-from bm_reports.tools.stationery_extractor import StationeryExtractor
+from openaec_reports.tools.pdf_extractor import extract_pdf
+from openaec_reports.tools.page_classifier import classify_pages, PageType
+from openaec_reports.tools.pattern_detector import analyze_brand
+from openaec_reports.tools.config_generator import generate_brand_yaml, generate_analysis_report
+from openaec_reports.tools.stationery_extractor import StationeryExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -1025,7 +1025,7 @@ class BrandBuilder:
         return None
 ```
 
-### D2. CLI command — `src/bm_reports/cli.py`
+### D2. CLI command — `src/openaec_reports/cli.py`
 
 Voeg `build-brand` toe onder de bestaande `analyze-brand`:
 
@@ -1050,7 +1050,7 @@ elif args.command == "build-brand":
 
 def _cmd_build_brand(args):
     """Genereer complete brand directory."""
-    from bm_reports.tools.brand_builder import BrandBuilder
+    from openaec_reports.tools.brand_builder import BrandBuilder
     
     builder = BrandBuilder(
         output_dir=Path(args.output),
@@ -1075,17 +1075,17 @@ def _cmd_build_brand(args):
 
 ## Deel E: Registreer tools exports
 
-### E1. `src/bm_reports/tools/__init__.py`
+### E1. `src/openaec_reports/tools/__init__.py`
 
 Voeg de nieuwe exports toe:
 
 ```python
-from bm_reports.tools.pdf_extractor import extract_pdf, RawPageData, TextElement, RectElement, ImageElement
-from bm_reports.tools.page_classifier import classify_pages, ClassifiedPage, PageType
-from bm_reports.tools.pattern_detector import analyze_brand, BrandAnalysis
-from bm_reports.tools.config_generator import generate_brand_yaml, generate_analysis_report
-from bm_reports.tools.stationery_extractor import StationeryExtractor
-from bm_reports.tools.brand_builder import BrandBuilder
+from openaec_reports.tools.pdf_extractor import extract_pdf, RawPageData, TextElement, RectElement, ImageElement
+from openaec_reports.tools.page_classifier import classify_pages, ClassifiedPage, PageType
+from openaec_reports.tools.pattern_detector import analyze_brand, BrandAnalysis
+from openaec_reports.tools.config_generator import generate_brand_yaml, generate_analysis_report
+from openaec_reports.tools.stationery_extractor import StationeryExtractor
+from openaec_reports.tools.brand_builder import BrandBuilder
 
 __all__ = [
     "extract_pdf", "RawPageData", "TextElement", "RectElement", "ImageElement",
@@ -1104,7 +1104,7 @@ __all__ = [
 ### Test 1: Font/kleur fixes
 
 ```bash
-cd src/bm_reports
+cd src/openaec_reports
 python -c "
 from core.styles import BM_COLORS, BM_FONTS, BM_STYLES
 print('Colors:')
@@ -1132,7 +1132,7 @@ print(f'  H2 color: {h2.textColor}') # Moet: #56b49b (text_accent)
 ```bash
 python -c "
 from pathlib import Path
-from bm_reports.tools.stationery_extractor import StationeryExtractor
+from openaec_reports.tools.stationery_extractor import StationeryExtractor
 
 ext = StationeryExtractor(Path('huisstijl/2707_BBLrapportage_v01.pdf'))
 ext.extract_full_page(35, Path('test_backcover.pdf'))
@@ -1146,7 +1146,7 @@ print('Open en vergelijk met huisstijl/pages/page_36.png')
 ```bash
 python -c "
 from pathlib import Path
-from bm_reports.core.stationery import StationeryRenderer
+from openaec_reports.core.stationery import StationeryRenderer
 
 renderer = StationeryRenderer()
 # Gebruik het briefpapier als test
@@ -1164,7 +1164,7 @@ print('Open test_stationery.pdf — moet briefpapier tonen')
 
 ```bash
 python -c "
-from bm_reports import Report, A4
+from openaec_reports import Report, A4
 report = Report(format=A4, project='Stationery Test', project_number='2026-TEST', 
                 client='Test Client', brand='3bm_cooperatie')
 report.add_cover(subtitle='Test rapport stationery-architectuur')
@@ -1181,11 +1181,11 @@ print('Vergelijk met huisstijl/pages/')
 ### Test 5: Brand Builder CLI
 
 ```bash
-bm-report build-brand \
+openaec-report build-brand \
   --rapport huisstijl/2707_BBLrapportage_v01.pdf \
   --stamkaart huisstijl/3BM-Stamkaart.pdf \
   --briefpapier huisstijl/3BM-Briefpapier-Digitaal.pdf \
-  --fonts src/bm_reports/assets/fonts/ \
+  --fonts src/openaec_reports/assets/fonts/ \
   --name "3BM Coöperatie" \
   --slug "3bm-cooperatie" \
   --output test_brand_output/

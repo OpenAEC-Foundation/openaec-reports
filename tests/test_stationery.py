@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock
 
-from bm_reports.core.stationery import StationeryRenderer
+from openaec_reports.core.stationery import StationeryRenderer
 
 
 class TestStationeryRendererInit:

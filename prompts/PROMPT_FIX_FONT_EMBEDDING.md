@@ -6,13 +6,13 @@ De gegenereerde PDF's tonen tekst alleen als Gotham lokaal geïnstalleerd is. Vo
 
 ## Root cause
 
-In `src/bm_reports/core/renderer_v2.py` wordt overal `page.insert_text()` gebruikt met `fontname="GothamBook"` / `"GothamBold"`. PyMuPDF's `insert_text()` met een string fontname embed het font NIET betrouwbaar als subset in de output PDF — het maakt alleen een referentie aan. Als de font niet op het systeem van de lezer staat, is de tekst onzichtbaar.
+In `src/openaec_reports/core/renderer_v2.py` wordt overal `page.insert_text()` gebruikt met `fontname="GothamBook"` / `"GothamBold"`. PyMuPDF's `insert_text()` met een string fontname embed het font NIET betrouwbaar als subset in de output PDF — het maakt alleen een referentie aan. Als de font niet op het systeem van de lezer staat, is de tekst onzichtbaar.
 
 De juiste aanpak is `fitz.TextWriter` + `page.write_text()` met een `fitz.Font` object. Dit embed WEL een font subset.
 
 ## Scope
 
-Alleen `src/bm_reports/core/renderer_v2.py` moet aangepast worden. De overige files (special_pages.py, engine.py) gebruiken ReportLab dat fonts WEL correct embed via `pdfmetrics.registerFont(TTFont(...))`.
+Alleen `src/openaec_reports/core/renderer_v2.py` moet aangepast worden. De overige files (special_pages.py, engine.py) gebruiken ReportLab dat fonts WEL correct embed via `pdfmetrics.registerFont(TTFont(...))`.
 
 ## Exacte wijzigingen
 

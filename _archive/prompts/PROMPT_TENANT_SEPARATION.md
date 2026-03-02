@@ -2,17 +2,17 @@
 
 ## Context
 
-De library bundelt nu alle klantspecifieke assets (templates, brands, stationery, logo's, fonts) in `src/bm_reports/assets/`. Dit is een probleem voor multi-tenant deployment: elke klant ziet elkaars templates en huisstijl. De engine moet generiek zijn, de look & feel moet per tenant configureerbaar zijn.
+De library bundelt nu alle klantspecifieke assets (templates, brands, stationery, logo's, fonts) in `src/openaec_reports/assets/`. Dit is een probleem voor multi-tenant deployment: elke klant ziet elkaars templates en huisstijl. De engine moet generiek zijn, de look & feel moet per tenant configureerbaar zijn.
 
 ## Doel
 
-Eén environment variable `BM_TENANT_DIR` bepaalt waar klantspecifieke assets staan. De library bevat alleen generieke defaults. Fallback-chain: tenant → package defaults.
+Eén environment variable `OPENAEC_TENANT_DIR` bepaalt waar klantspecifieke assets staan. De library bevat alleen generieke defaults. Fallback-chain: tenant → package defaults.
 
 ## Gewenste structuur
 
 ```
 # LIBRARY (package) — alleen generieke defaults
-src/bm_reports/assets/
+src/openaec_reports/assets/
 ├── templates/
 │   └── blank.yaml              ← enige ingebouwde template
 ├── brands/
@@ -21,7 +21,7 @@ src/bm_reports/assets/
 ├── logos/                      ← LEEG
 └── stationery/                 ← LEEG
 
-# TENANT (extern, via BM_TENANT_DIR)
+# TENANT (extern, via OPENAEC_TENANT_DIR)
 # Voorbeeld: /data/tenants/3bm_cooperatie/
 ├── templates/
 │   ├── structural_report.yaml
@@ -48,7 +48,7 @@ src/bm_reports/assets/
 
 ### Stap 1: TenantConfig class
 
-Maak `src/bm_reports/core/tenant.py`:
+Maak `src/openaec_reports/core/tenant.py`:
 
 ```python
 """Tenant configuratie — centraliseert alle asset-paden."""
@@ -67,7 +67,7 @@ class TenantConfig:
     Volgorde: tenant_dir → package assets.
     
     Usage:
-        config = TenantConfig()  # leest BM_TENANT_DIR
+        config = TenantConfig()  # leest OPENAEC_TENANT_DIR
         config = TenantConfig("/data/tenants/3bm_cooperatie")
         
         config.templates_dir   # → tenant templates + package templates
@@ -78,7 +78,7 @@ class TenantConfig:
     """
     
     def __init__(self, tenant_dir: str | Path | None = None):
-        env_dir = os.environ.get("BM_TENANT_DIR")
+        env_dir = os.environ.get("OPENAEC_TENANT_DIR")
         if tenant_dir:
             self._tenant_dir = Path(tenant_dir)
         elif env_dir:
@@ -183,7 +183,7 @@ Wijzig `fonts.py`:
 ### Stap 7: Tests aanpassen
 
 - Bestaande tests moeten blijven slagen
-- Tests die specifiek 3BM assets gebruiken → set `BM_TENANT_DIR` in fixture
+- Tests die specifiek 3BM assets gebruiken → set `OPENAEC_TENANT_DIR` in fixture
 - Voeg test toe: `test_tenant.py` met:
   - TenantConfig zonder env var → package defaults
   - TenantConfig met dir → tenant assets
@@ -194,13 +194,13 @@ Wijzig `fonts.py`:
 ### Stap 8: Documentatie
 
 - Update `CLAUDE.md` met tenant architectuur
-- Update `DEPLOYMENT_GUIDE.md` met `BM_TENANT_DIR` instructie
+- Update `DEPLOYMENT_GUIDE.md` met `OPENAEC_TENANT_DIR` instructie
 - Update `STATUS.md`
 
 ## Regels
 
 - GEEN breaking changes in de publieke API (Report.from_dict(), from_json())
-- Zonder BM_TENANT_DIR moet alles werken zoals nu (backward compatible)
+- Zonder OPENAEC_TENANT_DIR moet alles werken zoals nu (backward compatible)
 - Tests: alle 559 bestaande tests moeten blijven slagen
 - Nieuwe tests voor tenant logic
 
@@ -208,6 +208,6 @@ Wijzig `fonts.py`:
 
 Na afloop:
 1. `python -m pytest tests/ -v` → 0 failures
-2. `BM_TENANT_DIR=tenants/3bm_cooperatie python -m pytest tests/ -v` → 0 failures
-3. API starten met `BM_TENANT_DIR` → `/api/templates` toont alleen tenant + default templates
-4. API starten ZONDER `BM_TENANT_DIR` → `/api/templates` toont alleen default (blank)
+2. `OPENAEC_TENANT_DIR=tenants/3bm_cooperatie python -m pytest tests/ -v` → 0 failures
+3. API starten met `OPENAEC_TENANT_DIR` → `/api/templates` toont alleen tenant + default templates
+4. API starten ZONDER `OPENAEC_TENANT_DIR` → `/api/templates` toont alleen default (blank)

@@ -2,10 +2,10 @@
 
 from pathlib import Path
 
-from bm_reports.tools.stationery_extractor import StationeryExtractor
+from openaec_reports.tools.stationery_extractor import StationeryExtractor
 
 SOURCE = Path("huisstijl/2707_BBLrapportage_v01.pdf")
-OUTPUT = Path("src/bm_reports/assets/graphics")
+OUTPUT = Path("src/openaec_reports/assets/graphics")
 
 if not SOURCE.exists():
     print(f"FOUT: Referentie-PDF niet gevonden: {SOURCE}")

@@ -1,7 +1,7 @@
 # SKILL: Brand Extractie uit Huisstijl PDF
 
 ## Doel
-Extraheer een pixel-precieze brand.yaml uit een huisstijl-referentie PDF voor het bm-reports systeem.
+Extraheer een pixel-precieze brand.yaml uit een huisstijl-referentie PDF voor het openaec-reports systeem.
 
 ## Workflow
 
@@ -324,4 +324,4 @@ modules:
 ## Referentie
 - Bestaande brand.yaml: `tenants/3bm_cooperatie/brand.yaml`
 - Report schema: `schemas/report.schema.json`
-- Renderer code: `src/bm_reports/core/`
+- Renderer code: `src/openaec_reports/core/`

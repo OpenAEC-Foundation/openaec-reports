@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from bm_reports.core.data_transform import transform_json_to_engine_data
+from openaec_reports.core.data_transform import transform_json_to_engine_data
 
 PROJECT_ROOT = Path(__file__).parent.parent
 TENANTS_DIR = PROJECT_ROOT / "tenants"
@@ -45,7 +45,7 @@ class TestTemplateE2E:
 
     def test_generate_pdf(self, engine_data: dict) -> None:
         """Genereer PDF en verifieer output."""
-        from bm_reports.core.template_engine import TemplateEngine
+        from openaec_reports.core.template_engine import TemplateEngine
 
         output_path = OUTPUT_DIR / "test_template_e2e.pdf"
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -63,7 +63,7 @@ class TestTemplateE2E:
 
     def test_page_count(self, engine_data: dict) -> None:
         """Verifieer het aantal pagina's (verwacht: 6)."""
-        from bm_reports.core.template_engine import TemplateEngine
+        from openaec_reports.core.template_engine import TemplateEngine
 
         output_path = OUTPUT_DIR / "test_template_e2e_pagecount.pdf"
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

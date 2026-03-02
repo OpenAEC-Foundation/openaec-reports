@@ -6,7 +6,7 @@ import struct
 import zlib
 from unittest.mock import MagicMock, patch
 
-from bm_reports.components.map_block import KadasterMap
+from openaec_reports.components.map_block import KadasterMap
 
 
 def _make_white_png(width: int = 1, height: int = 1) -> bytes:
@@ -303,7 +303,7 @@ class TestWrapAndDraw:
         assert w > 0
         assert h > 0
         # Hoogte moet groter zijn dan alleen de kaart (er is caption + schaalbalk)
-        from bm_reports.core.document import MM_TO_PT
+        from openaec_reports.core.document import MM_TO_PT
         assert h > 90 * MM_TO_PT - 1  # marge voor afrondingsfouten
 
     def test_wrap_respects_available_width(self, tmp_path):
@@ -366,7 +366,7 @@ class TestIntegration:
 
     def test_report_with_map_block(self, tmp_path):
         """Rapport met een map block via from_dict → build → valide PDF."""
-        from bm_reports import Report
+        from openaec_reports import Report
 
         data = {
             "template": "structural",
@@ -391,7 +391,7 @@ class TestIntegration:
 
         # Mock KadasterClient.get_map op class niveau
         with patch(
-            "bm_reports.components.map_block.KadasterClient"
+            "openaec_reports.components.map_block.KadasterClient"
         ) as mock_client:
             mock_instance = MagicMock()
             mock_instance.get_map.return_value = png_bytes
@@ -409,7 +409,7 @@ class TestIntegration:
 
     def test_report_with_map_fallback(self, tmp_path):
         """Rapport met map block waar PDOK faalt → PDF met placeholder."""
-        from bm_reports import Report
+        from openaec_reports import Report
 
         data = {
             "template": "structural",
@@ -432,7 +432,7 @@ class TestIntegration:
 
         # Mock KadasterClient om ConnectionError te gooien
         with patch(
-            "bm_reports.components.map_block.KadasterClient"
+            "openaec_reports.components.map_block.KadasterClient"
         ) as mock_client:
             mock_instance = MagicMock()
             mock_instance.get_map.side_effect = ConnectionError("No network")

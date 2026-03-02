@@ -144,6 +144,15 @@ class TenantConfig:
         return pkg if pkg.exists() and any(pkg.iterdir()) else None
 
     @property
+    def page_types_dir(self) -> Path | None:
+        """Tenant YAML page type definities directory."""
+        if self._tenant_dir:
+            d = self._tenant_dir / "page_types"
+            if d.exists():
+                return d
+        return None
+
+    @property
     def modules_dir(self) -> Path | None:
         """Tenant YAML module definities directory."""
         if self._tenant_dir:

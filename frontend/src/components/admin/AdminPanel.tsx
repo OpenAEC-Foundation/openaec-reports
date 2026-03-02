@@ -11,7 +11,7 @@ const TABS = [
   { key: "tenants" as const, label: "Tenants" },
   { key: "users" as const, label: "Gebruikers" },
   { key: "api-keys" as const, label: "API Keys" },
-  { key: "templates" as const, label: "Templates" },
+  { key: "templates" as const, label: "YAML Bestanden" },
   { key: "brand" as const, label: "Brand" },
   { key: "help" as const, label: "📖 Help" },
 ];

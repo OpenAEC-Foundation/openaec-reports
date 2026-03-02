@@ -90,6 +90,8 @@ export interface TenantInfo {
   name: string;
   has_brand: boolean;
   template_count: number;
+  page_type_count: number;
+  module_count: number;
   stationery_count: number;
   logo_count: number;
   font_count: number;
@@ -101,6 +103,8 @@ export interface CreateTenantPayload {
 }
 
 export type AssetCategory = "stationery" | "logos" | "fonts";
+
+export type YamlCategory = "templates" | "page-types" | "modules";
 
 export interface TenantAsset {
   filename: string;
@@ -252,6 +256,62 @@ export const adminApi = {
       `/api/admin/tenants/${encodeURIComponent(tenant)}/templates/${encodeURIComponent(filename)}`,
       { method: "DELETE" }
     ),
+
+  // Page Types
+  listPageTypes: (tenant: string) =>
+    apiFetch<{ page_types: TenantTemplate[] }>(
+      `/api/admin/tenants/${encodeURIComponent(tenant)}/page-types`
+    ).then((r) => r.page_types),
+
+  uploadPageType: async (tenant: string, file: File): Promise<{ filename: string; size: number }> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(
+      `${API_BASE}/api/admin/tenants/${encodeURIComponent(tenant)}/page-types`,
+      { method: "POST", credentials: "include", body: formData }
+    );
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw { status: res.status, detail: body.detail ?? "Upload mislukt" } as ApiError;
+    }
+    return res.json();
+  },
+
+  deletePageType: (tenant: string, filename: string) =>
+    apiFetch<{ detail: string }>(
+      `/api/admin/tenants/${encodeURIComponent(tenant)}/page-types/${encodeURIComponent(filename)}`,
+      { method: "DELETE" }
+    ),
+
+  // Modules
+  listModules: (tenant: string) =>
+    apiFetch<{ modules: TenantTemplate[] }>(
+      `/api/admin/tenants/${encodeURIComponent(tenant)}/modules`
+    ).then((r) => r.modules),
+
+  uploadModule: async (tenant: string, file: File): Promise<{ filename: string; size: number }> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(
+      `${API_BASE}/api/admin/tenants/${encodeURIComponent(tenant)}/modules`,
+      { method: "POST", credentials: "include", body: formData }
+    );
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw { status: res.status, detail: body.detail ?? "Upload mislukt" } as ApiError;
+    }
+    return res.json();
+  },
+
+  deleteModule: (tenant: string, filename: string) =>
+    apiFetch<{ detail: string }>(
+      `/api/admin/tenants/${encodeURIComponent(tenant)}/modules/${encodeURIComponent(filename)}`,
+      { method: "DELETE" }
+    ),
+
+  // YAML download URL helper
+  getYamlDownloadUrl: (tenant: string, category: YamlCategory, filename: string): string =>
+    `${API_BASE}/api/admin/tenants/${encodeURIComponent(tenant)}/${category}/${encodeURIComponent(filename)}/download`,
 
   // Brand
   getBrand: (tenant: string) =>

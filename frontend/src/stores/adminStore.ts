@@ -57,6 +57,20 @@ interface AdminStore {
   uploadTemplate: (tenant: string, file: File) => Promise<boolean>;
   deleteTemplate: (tenant: string, filename: string) => Promise<boolean>;
 
+  // Page Types
+  pageTypes: TenantTemplate[];
+  pageTypesLoading: boolean;
+  loadPageTypes: (tenant: string) => Promise<void>;
+  uploadPageType: (tenant: string, file: File) => Promise<boolean>;
+  deletePageType: (tenant: string, filename: string) => Promise<boolean>;
+
+  // Modules
+  modules: TenantTemplate[];
+  modulesLoading: boolean;
+  loadModules: (tenant: string) => Promise<void>;
+  uploadModule: (tenant: string, file: File) => Promise<boolean>;
+  deleteModule: (tenant: string, filename: string) => Promise<boolean>;
+
   // Brand
   brandData: BrandData | null;
   brandLoading: boolean;
@@ -319,6 +333,82 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
       await adminApi.deleteTemplate(tenant, filename);
       set((s) => ({
         templates: s.templates.filter((t) => t.filename !== filename),
+      }));
+      return true;
+    } catch (e) {
+      set({ error: extractError(e) });
+      return false;
+    }
+  },
+
+  // Page Types
+  pageTypes: [],
+  pageTypesLoading: false,
+
+  loadPageTypes: async (tenant) => {
+    set({ pageTypesLoading: true });
+    try {
+      const pageTypes = await adminApi.listPageTypes(tenant);
+      set({ pageTypes, pageTypesLoading: false });
+    } catch (e) {
+      set({ pageTypesLoading: false, error: extractError(e) });
+    }
+  },
+
+  uploadPageType: async (tenant, file) => {
+    try {
+      await adminApi.uploadPageType(tenant, file);
+      await get().loadPageTypes(tenant);
+      return true;
+    } catch (e) {
+      set({ error: extractError(e) });
+      return false;
+    }
+  },
+
+  deletePageType: async (tenant, filename) => {
+    try {
+      await adminApi.deletePageType(tenant, filename);
+      set((s) => ({
+        pageTypes: s.pageTypes.filter((t) => t.filename !== filename),
+      }));
+      return true;
+    } catch (e) {
+      set({ error: extractError(e) });
+      return false;
+    }
+  },
+
+  // Modules
+  modules: [],
+  modulesLoading: false,
+
+  loadModules: async (tenant) => {
+    set({ modulesLoading: true });
+    try {
+      const modules = await adminApi.listModules(tenant);
+      set({ modules, modulesLoading: false });
+    } catch (e) {
+      set({ modulesLoading: false, error: extractError(e) });
+    }
+  },
+
+  uploadModule: async (tenant, file) => {
+    try {
+      await adminApi.uploadModule(tenant, file);
+      await get().loadModules(tenant);
+      return true;
+    } catch (e) {
+      set({ error: extractError(e) });
+      return false;
+    }
+  },
+
+  deleteModule: async (tenant, filename) => {
+    try {
+      await adminApi.deleteModule(tenant, filename);
+      set((s) => ({
+        modules: s.modules.filter((t) => t.filename !== filename),
       }));
       return true;
     } catch (e) {

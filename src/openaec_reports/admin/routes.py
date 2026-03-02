@@ -423,10 +423,26 @@ async def list_tenants():
                 else 0
             )
 
+            page_types_dir = entry / "page_types"
+            page_type_count = (
+                len(list(page_types_dir.glob("*.yaml")))
+                if page_types_dir.exists()
+                else 0
+            )
+
+            modules_dir = entry / "modules"
+            module_count = (
+                len(list(modules_dir.glob("*.yaml")))
+                if modules_dir.exists()
+                else 0
+            )
+
             tenants.append({
                 "name": entry.name,
                 "has_brand": has_brand,
                 "template_count": template_count,
+                "page_type_count": page_type_count,
+                "module_count": module_count,
                 "stationery_count": stationery_count,
                 "logo_count": logo_count,
                 "font_count": font_count,
@@ -459,6 +475,8 @@ async def create_tenant(payload: CreateTenantRequest):
     # Maak directory structuur aan
     tenant_dir.mkdir(parents=True, exist_ok=True)
     (tenant_dir / "templates").mkdir()
+    (tenant_dir / "page_types").mkdir()
+    (tenant_dir / "modules").mkdir()
     (tenant_dir / "stationery").mkdir()
     (tenant_dir / "logos").mkdir()
     (tenant_dir / "fonts").mkdir()
@@ -489,6 +507,8 @@ async def create_tenant(payload: CreateTenantRequest):
             "name": payload.name,
             "has_brand": True,
             "template_count": 0,
+            "page_type_count": 0,
+            "module_count": 0,
             "stationery_count": 0,
             "logo_count": 0,
             "font_count": 0,
@@ -653,6 +673,304 @@ async def delete_tenant_template(tenant: str, filename: str):
     filepath.unlink()
     logger.info("Template verwijderd: %s/%s", tenant, filename)
     return {"detail": f"Template '{filename}' verwijderd"}
+
+
+@admin_router.get("/tenants/{tenant}/templates/{filename}/download")
+async def download_tenant_template(tenant: str, filename: str):
+    """Download een template YAML bestand.
+
+    Args:
+        tenant: Tenant naam.
+        filename: Bestandsnaam.
+
+    Returns:
+        FileResponse met het YAML bestand.
+    """
+    _validate_path_segment(tenant, "tenant")
+    _validate_path_segment(filename, "bestandsnaam")
+
+    filepath = _get_tenants_base() / tenant / "templates" / filename
+    if not filepath.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Template '{filename}' niet gevonden",
+        )
+
+    return FileResponse(
+        filepath,
+        media_type="application/x-yaml",
+        filename=filename,
+    )
+
+
+# ============================================================
+# Page Types per tenant
+# ============================================================
+
+
+@admin_router.get("/tenants/{tenant}/page-types")
+async def list_tenant_page_types(tenant: str):
+    """Lijst page type YAML bestanden voor een tenant.
+
+    Args:
+        tenant: Tenant naam.
+
+    Returns:
+        Dict met lijst van page type bestanden.
+    """
+    _validate_path_segment(tenant, "tenant")
+
+    page_types_dir = _get_tenants_base() / tenant / "page_types"
+    page_types: list[dict] = []
+
+    if page_types_dir.exists() and page_types_dir.is_dir():
+        for f in sorted(page_types_dir.glob("*.yaml")):
+            page_types.append({
+                "filename": f.name,
+                "size": f.stat().st_size,
+            })
+
+    return {"page_types": page_types}
+
+
+@admin_router.post("/tenants/{tenant}/page-types")
+async def upload_tenant_page_type(tenant: str, file: UploadFile):
+    """Upload een page type YAML bestand voor een tenant.
+
+    Args:
+        tenant: Tenant naam.
+        file: Het YAML bestand (multipart upload).
+
+    Returns:
+        Bevestigingsbericht met bestandsinformatie.
+    """
+    _validate_path_segment(tenant, "tenant")
+
+    filename = file.filename or "page_type.yaml"
+    _validate_path_segment(filename, "bestandsnaam")
+
+    if not filename.endswith(".yaml"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Alleen .yaml bestanden zijn toegestaan",
+        )
+
+    content = await file.read()
+    if len(content) > MAX_YAML_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Bestand te groot (max {MAX_YAML_SIZE_BYTES // 1024} KB)",
+        )
+
+    try:
+        yaml.safe_load(content)
+    except yaml.YAMLError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Ongeldig YAML bestand: {e}",
+        )
+
+    page_types_dir = _get_tenants_base() / tenant / "page_types"
+    page_types_dir.mkdir(parents=True, exist_ok=True)
+
+    dest = page_types_dir / filename
+    dest.write_bytes(content)
+
+    logger.info("Page type geupload: %s/%s", tenant, filename)
+    return {
+        "detail": f"Page type '{filename}' geupload",
+        "filename": filename,
+        "size": len(content),
+    }
+
+
+@admin_router.delete("/tenants/{tenant}/page-types/{filename}")
+async def delete_tenant_page_type(tenant: str, filename: str):
+    """Verwijder een page type bestand.
+
+    Args:
+        tenant: Tenant naam.
+        filename: Bestandsnaam.
+
+    Returns:
+        Bevestigingsbericht.
+    """
+    _validate_path_segment(tenant, "tenant")
+    _validate_path_segment(filename, "bestandsnaam")
+
+    filepath = _get_tenants_base() / tenant / "page_types" / filename
+    if not filepath.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Page type '{filename}' niet gevonden",
+        )
+
+    filepath.unlink()
+    logger.info("Page type verwijderd: %s/%s", tenant, filename)
+    return {"detail": f"Page type '{filename}' verwijderd"}
+
+
+@admin_router.get("/tenants/{tenant}/page-types/{filename}/download")
+async def download_tenant_page_type(tenant: str, filename: str):
+    """Download een page type YAML bestand.
+
+    Args:
+        tenant: Tenant naam.
+        filename: Bestandsnaam.
+
+    Returns:
+        FileResponse met het YAML bestand.
+    """
+    _validate_path_segment(tenant, "tenant")
+    _validate_path_segment(filename, "bestandsnaam")
+
+    filepath = _get_tenants_base() / tenant / "page_types" / filename
+    if not filepath.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Page type '{filename}' niet gevonden",
+        )
+
+    return FileResponse(
+        filepath,
+        media_type="application/x-yaml",
+        filename=filename,
+    )
+
+
+# ============================================================
+# Modules per tenant
+# ============================================================
+
+
+@admin_router.get("/tenants/{tenant}/modules")
+async def list_tenant_modules(tenant: str):
+    """Lijst module YAML bestanden voor een tenant.
+
+    Args:
+        tenant: Tenant naam.
+
+    Returns:
+        Dict met lijst van module bestanden.
+    """
+    _validate_path_segment(tenant, "tenant")
+
+    modules_dir = _get_tenants_base() / tenant / "modules"
+    modules: list[dict] = []
+
+    if modules_dir.exists() and modules_dir.is_dir():
+        for f in sorted(modules_dir.glob("*.yaml")):
+            modules.append({
+                "filename": f.name,
+                "size": f.stat().st_size,
+            })
+
+    return {"modules": modules}
+
+
+@admin_router.post("/tenants/{tenant}/modules")
+async def upload_tenant_module(tenant: str, file: UploadFile):
+    """Upload een module YAML bestand voor een tenant.
+
+    Args:
+        tenant: Tenant naam.
+        file: Het YAML bestand (multipart upload).
+
+    Returns:
+        Bevestigingsbericht met bestandsinformatie.
+    """
+    _validate_path_segment(tenant, "tenant")
+
+    filename = file.filename or "module.yaml"
+    _validate_path_segment(filename, "bestandsnaam")
+
+    if not filename.endswith(".yaml"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Alleen .yaml bestanden zijn toegestaan",
+        )
+
+    content = await file.read()
+    if len(content) > MAX_YAML_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Bestand te groot (max {MAX_YAML_SIZE_BYTES // 1024} KB)",
+        )
+
+    try:
+        yaml.safe_load(content)
+    except yaml.YAMLError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Ongeldig YAML bestand: {e}",
+        )
+
+    modules_dir = _get_tenants_base() / tenant / "modules"
+    modules_dir.mkdir(parents=True, exist_ok=True)
+
+    dest = modules_dir / filename
+    dest.write_bytes(content)
+
+    logger.info("Module geupload: %s/%s", tenant, filename)
+    return {
+        "detail": f"Module '{filename}' geupload",
+        "filename": filename,
+        "size": len(content),
+    }
+
+
+@admin_router.delete("/tenants/{tenant}/modules/{filename}")
+async def delete_tenant_module(tenant: str, filename: str):
+    """Verwijder een module bestand.
+
+    Args:
+        tenant: Tenant naam.
+        filename: Bestandsnaam.
+
+    Returns:
+        Bevestigingsbericht.
+    """
+    _validate_path_segment(tenant, "tenant")
+    _validate_path_segment(filename, "bestandsnaam")
+
+    filepath = _get_tenants_base() / tenant / "modules" / filename
+    if not filepath.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Module '{filename}' niet gevonden",
+        )
+
+    filepath.unlink()
+    logger.info("Module verwijderd: %s/%s", tenant, filename)
+    return {"detail": f"Module '{filename}' verwijderd"}
+
+
+@admin_router.get("/tenants/{tenant}/modules/{filename}/download")
+async def download_tenant_module(tenant: str, filename: str):
+    """Download een module YAML bestand.
+
+    Args:
+        tenant: Tenant naam.
+        filename: Bestandsnaam.
+
+    Returns:
+        FileResponse met het YAML bestand.
+    """
+    _validate_path_segment(tenant, "tenant")
+    _validate_path_segment(filename, "bestandsnaam")
+
+    filepath = _get_tenants_base() / tenant / "modules" / filename
+    if not filepath.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Module '{filename}' niet gevonden",
+        )
+
+    return FileResponse(
+        filepath,
+        media_type="application/x-yaml",
+        filename=filename,
+    )
 
 
 # ============================================================

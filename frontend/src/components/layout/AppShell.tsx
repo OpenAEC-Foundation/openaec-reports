@@ -229,7 +229,10 @@ export function AppShell() {
         {/* Left: logo + view mode tabs */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-brand-primary font-bold text-lg tracking-tight">{brand.name}</span>
+            <span className="font-bold text-lg tracking-tight">
+              <span className="text-white">{brand.namePrefix}</span>
+              <span className="text-brand-primary">{brand.nameAccent}</span>
+            </span>
             <span className="text-white/50 text-sm font-medium">{brand.productName}</span>
           </div>
 

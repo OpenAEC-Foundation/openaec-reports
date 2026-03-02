@@ -17,18 +17,16 @@ import type {
   Heading2Block,
 } from '@/types/report';
 import { generateId } from './idGenerator';
-import brand from '@/config/brand';
-
 export function createDefaultReport(): EditorReport {
   return {
     template: 'custom',
-    brand: '3bm_cooperatie',
+    brand: '',
     format: 'A4',
     orientation: 'portrait',
     project: '',
     project_number: '',
     client: '',
-    author: brand.fullName,
+    author: '',
     report_type: '',
     date: new Date().toISOString().slice(0, 10),
     version: '1.0',

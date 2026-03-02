@@ -66,7 +66,7 @@ ASSETS_DIR = Path(__file__).parent / "assets"
 
 
 app = FastAPI(
-    title="3BM Report Generator API",
+    title="OpenAEC Report Generator API",
     description="HTTP API voor het genereren van professionele engineering rapporten.",
     version=__version__,
 )

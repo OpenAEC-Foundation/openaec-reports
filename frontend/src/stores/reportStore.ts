@@ -659,7 +659,7 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
 
 // ---------- Auto-save to localStorage ----------
 
-export const STORAGE_KEY = 'bm-reports-editor-state';
+export const STORAGE_KEY = 'openaec-report-editor-state';
 const SAVE_DEBOUNCE_MS = 1000;
 
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;

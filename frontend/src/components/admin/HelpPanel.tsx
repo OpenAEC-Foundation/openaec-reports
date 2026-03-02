@@ -15,8 +15,8 @@ const SECTIONS: HelpSection[] = [
     content: (
       <>
         <p>
-          Het beheerpaneel biedt toegang tot alle configuratie van het BM Reports
-          platform. Hieronder vind je uitleg per onderdeel.
+          Het beheerpaneel biedt toegang tot alle configuratie van het OpenAEC
+          Reports platform. Hieronder vind je uitleg per onderdeel.
         </p>
         <h4 className="mt-4 font-semibold text-gray-900">Architectuur</h4>
         <p className="mt-1">
@@ -24,7 +24,7 @@ const SECTIONS: HelpSection[] = [
         </p>
         <ul className="mt-2 list-disc pl-5 space-y-1">
           <li>
-            <strong>Library</strong> (bm-reports) — Python package dat PDF
+            <strong>Library</strong> (openaec-reports) — Python package dat PDF
             rapporten genereert op basis van JSON input en YAML templates.
           </li>
           <li>
@@ -55,7 +55,7 @@ const SECTIONS: HelpSection[] = [
           Een <strong>tenant</strong> is een organisatie met eigen huisstijl en
           templates. Elke tenant heeft een unieke slug (bijv.{" "}
           <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm">
-            3bm_cooperatie
+            mijn_organisatie
           </code>
           ).
         </p>

@@ -217,6 +217,65 @@ def _resolve_logo_path(brand: BrandConfig, logo_key: str, fallback_name: str) ->
 # ============================================================
 
 
+def _draw_cover_dynamic_text(
+    canvas,
+    config: DocumentConfig,
+    spec: dict[str, Any],
+    pw: float,
+    ph: float,
+    heading_font: str,
+    body_font: str,
+    brand: BrandConfig,
+) -> None:
+    """Teken alleen de dynamische titel en ondertitel op de cover.
+
+    Gebruikt wanneer stationery de statische visuals (achtergrond, logo,
+    badges, etc.) afhandelt.
+
+    Args:
+        canvas: ReportLab canvas.
+        config: Document configuratie.
+        spec: Cover spec dict uit brand.pages.cover.
+        pw: Pagina breedte in points.
+        ph: Pagina hoogte in points.
+        heading_font: Font voor de titel.
+        body_font: Font voor de ondertitel.
+        brand: Brand configuratie.
+    """
+    # Titel
+    title_size = _sf(spec.get("title_size_ref", 28.9), ph)
+    title_color = HexColor(
+        spec.get(
+            "title_color", brand.colors.get("primary", _FALLBACK_PRIMARY)
+        )
+    )
+    canvas.setFont(heading_font, title_size)
+    canvas.setFillColor(title_color)
+    canvas.drawString(
+        _sx(spec.get("title_x_ref", 54.28), pw),
+        _sy(spec.get("title_y_ref", 93.47), ph),
+        config.project,
+    )
+
+    # Ondertitel
+    subtitle = getattr(config, "subtitle", "")
+    if subtitle:
+        sub_size = _sf(spec.get("subtitle_size_ref", 17.8), ph)
+        sub_color = HexColor(
+            spec.get(
+                "subtitle_color",
+                brand.colors.get("secondary", _FALLBACK_SECONDARY),
+            )
+        )
+        canvas.setFont(body_font, sub_size)
+        canvas.setFillColor(sub_color)
+        canvas.drawString(
+            _sx(spec.get("subtitle_x_ref", 55.0), pw),
+            _sy(spec.get("subtitle_y_ref", 63.0), ph),
+            subtitle,
+        )
+
+
 def draw_cover_page(
     canvas,
     doc,
@@ -253,6 +312,16 @@ def draw_cover_page(
     heading_font = _resolve_font(brand, "heading")
     body_font = _resolve_font(brand, "body")
     medium_font = _resolve_font(brand, "medium")
+
+    # ---- Stationery-only modus: skip alle statische visuals ----
+    # Als stationery de achtergrond, logo, badges, etc. levert,
+    # renderen we alleen de dynamische titel en ondertitel.
+    if spec.get("stationery_only", False):
+        _draw_cover_dynamic_text(
+            canvas, config, spec, pw, ph, heading_font, body_font, brand
+        )
+        canvas.restoreState()
+        return
 
     # ---- Laag 1: Achtergrondvlak ----
     bg_y_ref = spec.get(

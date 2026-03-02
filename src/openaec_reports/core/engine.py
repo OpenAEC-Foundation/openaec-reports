@@ -17,7 +17,7 @@ from openaec_reports.core.block_registry import create_block
 from openaec_reports.core.brand import BrandConfig, BrandLoader
 from openaec_reports.core.document import A3, A4, Document, DocumentConfig, PageFormat
 from openaec_reports.core.page_templates import create_page_templates
-from openaec_reports.core.styles import create_stylesheet
+from openaec_reports.core.styles import activate_brand, create_stylesheet
 from openaec_reports.core.toc import TOC_HEADING_STYLES, TOCBuilder
 
 
@@ -104,6 +104,9 @@ class Report:
             self._brand = BrandLoader().load(brand)
         else:
             self._brand = BrandLoader().load_default()
+
+        # Activeer brand — update module-level BM_COLORS/BM_FONTS/BM_STYLES
+        activate_brand(self._brand)
 
         # Brand-aware stylesheet
         self._styles = create_stylesheet(brand=self._brand)

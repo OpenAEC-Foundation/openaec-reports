@@ -118,6 +118,29 @@ export interface BrandData {
   raw: string;
 }
 
+// ---------- API Key types ----------
+
+export interface ApiKeyInfo {
+  id: string;
+  name: string;
+  key_prefix: string;
+  user_id: string;
+  is_active: boolean;
+  created_at: string;
+  expires_at: string | null;
+}
+
+export interface CreateApiKeyPayload {
+  name: string;
+  user_id: string;
+  expires_at?: string;
+}
+
+export interface CreateApiKeyResponse {
+  api_key: ApiKeyInfo;
+  plaintext_key: string;
+}
+
 // ---------- Brand Extraction types ----------
 
 export interface BrandExtractionData {
@@ -277,6 +300,26 @@ export const adminApi = {
       `/api/admin/tenants/${encodeURIComponent(tenant)}/assets/${category}/${encodeURIComponent(filename)}`,
       { method: "DELETE" }
     ),
+
+  // API Keys
+  listApiKeys: () =>
+    apiFetch<{ api_keys: ApiKeyInfo[] }>("/api/admin/api-keys").then((r) => r.api_keys),
+
+  createApiKey: (payload: CreateApiKeyPayload) =>
+    apiFetch<CreateApiKeyResponse>("/api/admin/api-keys", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  revokeApiKey: (keyId: string) =>
+    apiFetch<{ detail: string }>(`/api/admin/api-keys/${keyId}/revoke`, {
+      method: "POST",
+    }),
+
+  deleteApiKey: (keyId: string) =>
+    apiFetch<{ detail: string }>(`/api/admin/api-keys/${keyId}`, {
+      method: "DELETE",
+    }),
 
   // Brand Extraction
   startBrandExtraction: async (

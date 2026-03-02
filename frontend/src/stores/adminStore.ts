@@ -12,10 +12,12 @@ import {
   type CreateUserPayload,
   type UpdateUserPayload,
   type CreateTenantPayload,
+  type ApiKeyInfo,
+  type CreateApiKeyPayload,
   type ApiError,
 } from "@/services/api";
 
-type AdminTab = "tenants" | "users" | "templates" | "brand" | "help";
+type AdminTab = "tenants" | "users" | "api-keys" | "templates" | "brand" | "help";
 
 interface AdminStore {
   // UI
@@ -31,6 +33,14 @@ interface AdminStore {
   updateUser: (id: string, payload: UpdateUserPayload) => Promise<AdminUser | null>;
   resetPassword: (id: string, newPassword: string) => Promise<boolean>;
   deleteUser: (id: string) => Promise<boolean>;
+
+  // API Keys
+  apiKeys: ApiKeyInfo[];
+  apiKeysLoading: boolean;
+  loadApiKeys: () => Promise<void>;
+  createApiKey: (payload: CreateApiKeyPayload) => Promise<string | null>;
+  revokeApiKey: (keyId: string) => Promise<boolean>;
+  deleteApiKey: (keyId: string) => Promise<boolean>;
 
   // Tenants
   tenants: TenantInfo[];
@@ -170,6 +180,64 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
       await adminApi.deleteUser(id);
       set((s) => ({
         users: s.users.filter((u) => u.id !== id),
+        error: null,
+      }));
+      return true;
+    } catch (e) {
+      set({ error: extractError(e) });
+      return false;
+    }
+  },
+
+  // API Keys
+  apiKeys: [],
+  apiKeysLoading: false,
+
+  loadApiKeys: async () => {
+    set({ apiKeysLoading: true });
+    try {
+      const apiKeys = await adminApi.listApiKeys();
+      set({ apiKeys, apiKeysLoading: false });
+    } catch (e) {
+      set({ apiKeysLoading: false, error: extractError(e) });
+    }
+  },
+
+  createApiKey: async (payload) => {
+    try {
+      const result = await adminApi.createApiKey(payload);
+      set((s) => ({
+        apiKeys: [result.api_key, ...s.apiKeys],
+        error: null,
+      }));
+      return result.plaintext_key;
+    } catch (e) {
+      set({ error: extractError(e) });
+      return null;
+    }
+  },
+
+  revokeApiKey: async (keyId) => {
+    try {
+      await adminApi.revokeApiKey(keyId);
+      set((s) => ({
+        apiKeys: s.apiKeys.map((k) =>
+          k.id === keyId ? { ...k, is_active: false } : k
+        ),
+        error: null,
+      }));
+      return true;
+    } catch (e) {
+      set({ error: extractError(e) });
+      return false;
+    }
+  },
+
+  deleteApiKey: async (keyId) => {
+    try {
+      await adminApi.deleteApiKey(keyId);
+      set((s) => ({
+        apiKeys: s.apiKeys.filter((k) => k.id !== keyId),
         error: null,
       }));
       return true;

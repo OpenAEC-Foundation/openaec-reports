@@ -33,6 +33,13 @@ class User:
     tenant: str = ""
     is_active: bool = True
     hashed_password: str = ""
+    # SSO / profiel velden
+    phone: str = ""
+    job_title: str = ""
+    registration_number: str = ""
+    company: str = ""
+    auth_provider: str = "local"  # "local" of "oidc"
+    oidc_subject: str = ""  # Authentik persistent subject ID
 
     def to_dict(self) -> dict:
         """Publieke representatie (zonder wachtwoord hash).
@@ -48,6 +55,11 @@ class User:
             "role": self.role.value,
             "tenant": self.tenant,
             "is_active": self.is_active,
+            "phone": self.phone,
+            "job_title": self.job_title,
+            "registration_number": self.registration_number,
+            "company": self.company,
+            "auth_provider": self.auth_provider,
         }
 
 
@@ -77,8 +89,18 @@ class UserDB:
         conn.row_factory = sqlite3.Row
         return conn
 
+    # Kolommen die via migratie worden toegevoegd aan bestaande databases
+    _MIGRATION_COLUMNS: list[tuple[str, str]] = [
+        ("phone", "TEXT NOT NULL DEFAULT ''"),
+        ("job_title", "TEXT NOT NULL DEFAULT ''"),
+        ("registration_number", "TEXT NOT NULL DEFAULT ''"),
+        ("company", "TEXT NOT NULL DEFAULT ''"),
+        ("auth_provider", "TEXT NOT NULL DEFAULT 'local'"),
+        ("oidc_subject", "TEXT NOT NULL DEFAULT ''"),
+    ]
+
     def _ensure_schema(self) -> None:
-        """Maak de users tabel aan als deze niet bestaat."""
+        """Maak de users tabel aan en voer migraties uit voor nieuwe kolommen."""
         with self._get_connection() as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS users (
@@ -91,9 +113,26 @@ class UserDB:
                     is_active INTEGER NOT NULL DEFAULT 1,
                     hashed_password TEXT NOT NULL,
                     created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+                    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                    phone TEXT NOT NULL DEFAULT '',
+                    job_title TEXT NOT NULL DEFAULT '',
+                    registration_number TEXT NOT NULL DEFAULT '',
+                    company TEXT NOT NULL DEFAULT '',
+                    auth_provider TEXT NOT NULL DEFAULT 'local',
+                    oidc_subject TEXT NOT NULL DEFAULT ''
                 )
             """)
+            # Migratie: voeg ontbrekende kolommen toe aan bestaande databases
+            existing = {
+                row[1]
+                for row in conn.execute("PRAGMA table_info(users)").fetchall()
+            }
+            for col_name, col_def in self._MIGRATION_COLUMNS:
+                if col_name not in existing:
+                    conn.execute(
+                        f"ALTER TABLE users ADD COLUMN {col_name} {col_def}"
+                    )
+                    logger.info("Migratie: kolom '%s' toegevoegd aan users", col_name)
             conn.commit()
 
     def _row_to_user(self, row: sqlite3.Row) -> User:
@@ -114,6 +153,20 @@ class UserDB:
             tenant=row["tenant"],
             is_active=bool(row["is_active"]),
             hashed_password=row["hashed_password"],
+            phone=row["phone"] if "phone" in row.keys() else "",
+            job_title=row["job_title"] if "job_title" in row.keys() else "",
+            registration_number=(
+                row["registration_number"]
+                if "registration_number" in row.keys()
+                else ""
+            ),
+            company=row["company"] if "company" in row.keys() else "",
+            auth_provider=(
+                row["auth_provider"] if "auth_provider" in row.keys() else "local"
+            ),
+            oidc_subject=(
+                row["oidc_subject"] if "oidc_subject" in row.keys() else ""
+            ),
         )
 
     def get_by_username(self, username: str) -> User | None:
@@ -146,6 +199,41 @@ class UserDB:
             ).fetchone()
             return self._row_to_user(row) if row else None
 
+    def get_by_oidc_subject(self, subject: str) -> User | None:
+        """Zoek een user op basis van OIDC subject identifier.
+
+        Args:
+            subject: Authentik persistent subject ID.
+
+        Returns:
+            User of None als niet gevonden.
+        """
+        if not subject:
+            return None
+        with self._get_connection() as conn:
+            row = conn.execute(
+                "SELECT * FROM users WHERE oidc_subject = ?", (subject,)
+            ).fetchone()
+            return self._row_to_user(row) if row else None
+
+    def get_by_email(self, email: str) -> User | None:
+        """Zoek een user op basis van e-mailadres.
+
+        Args:
+            email: E-mailadres.
+
+        Returns:
+            User of None als niet gevonden.
+        """
+        if not email:
+            return None
+        with self._get_connection() as conn:
+            row = conn.execute(
+                "SELECT * FROM users WHERE email = ? COLLATE NOCASE",
+                (email,),
+            ).fetchone()
+            return self._row_to_user(row) if row else None
+
     def create(self, user: User) -> User:
         """Maak een nieuwe user aan.
 
@@ -161,8 +249,9 @@ class UserDB:
         with self._get_connection() as conn:
             conn.execute(
                 """INSERT INTO users (id, username, email, display_name, role, tenant,
-                   is_active, hashed_password)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                   is_active, hashed_password, phone, job_title,
+                   registration_number, company, auth_provider, oidc_subject)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     user.id,
                     user.username,
@@ -172,6 +261,12 @@ class UserDB:
                     user.tenant,
                     int(user.is_active),
                     user.hashed_password,
+                    user.phone,
+                    user.job_title,
+                    user.registration_number,
+                    user.company,
+                    user.auth_provider,
+                    user.oidc_subject,
                 ),
             )
             conn.commit()
@@ -222,7 +317,8 @@ class UserDB:
         """
         allowed = {
             "email", "display_name", "role", "tenant",
-            "is_active", "hashed_password",
+            "is_active", "hashed_password", "phone", "job_title",
+            "registration_number", "company", "auth_provider", "oidc_subject",
         }
         invalid = set(fields.keys()) - allowed
         if invalid:

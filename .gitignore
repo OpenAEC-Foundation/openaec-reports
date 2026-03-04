@@ -80,3 +80,4 @@ frontend/tsconfig.tsbuildinfo
 
 # Ruff
 .ruff_cache/
+data/

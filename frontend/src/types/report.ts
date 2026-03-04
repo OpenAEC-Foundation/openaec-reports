@@ -55,6 +55,11 @@ export interface Colofon {
   fase?: string;
   status_colofon?: string;
   kenmerk?: string;
+  // Adviseur profiel velden (auto-fill vanuit SSO):
+  adviseur_email?: string;
+  adviseur_telefoon?: string;
+  adviseur_functie?: string;
+  adviseur_registratie?: string;
   // Legacy:
   extra_fields?: Record<string, string>;
   revision_history?: RevisionEntry[];

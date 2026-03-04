@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useReportStore } from '@/stores/reportStore';
+import { useAuthStore } from '@/stores/authStore';
 import { ToggleSwitch } from './ToggleSwitch';
 import brand from '@/config/brand';
 import type { Colofon, RevisionEntry } from '@/types/report';
@@ -25,6 +26,7 @@ function today(): string {
 export function ColofonForm() {
   const colofon = useReportStore((s) => s.report.colofon);
   const setColofon = useReportStore((s) => s.setColofon);
+  const user = useAuthStore((s) => s.user);
 
   // Local state for text inputs (commit on blur)
   const [local, setLocal] = useState({
@@ -33,6 +35,10 @@ export function ColofonForm() {
     opdrachtgever_adres: colofon.opdrachtgever_adres ?? '',
     adviseur_bedrijf: colofon.adviseur_bedrijf ?? brand.fullName,
     adviseur_naam: colofon.adviseur_naam ?? '',
+    adviseur_email: colofon.adviseur_email ?? '',
+    adviseur_telefoon: colofon.adviseur_telefoon ?? '',
+    adviseur_functie: colofon.adviseur_functie ?? '',
+    adviseur_registratie: colofon.adviseur_registratie ?? '',
     normen: colofon.normen ?? '',
     documentgegevens: colofon.documentgegevens ?? '',
     datum: colofon.datum ?? today(),
@@ -42,6 +48,35 @@ export function ColofonForm() {
     disclaimer: colofon.disclaimer ?? '',
   });
 
+  // Auto-fill adviseur velden vanuit user profiel (alleen lege velden)
+  useEffect(() => {
+    if (!user) return;
+    const updates: Partial<Colofon> = {};
+    if (!colofon.adviseur_naam && user.display_name) {
+      updates.adviseur_naam = user.display_name;
+    }
+    if (!colofon.adviseur_email && user.email) {
+      updates.adviseur_email = user.email;
+    }
+    if (!colofon.adviseur_telefoon && user.phone) {
+      updates.adviseur_telefoon = user.phone;
+    }
+    if (!colofon.adviseur_functie && user.job_title) {
+      updates.adviseur_functie = user.job_title;
+    }
+    if (!colofon.adviseur_registratie && user.registration_number) {
+      updates.adviseur_registratie = user.registration_number;
+    }
+    if (!colofon.adviseur_bedrijf && user.company) {
+      updates.adviseur_bedrijf = user.company;
+    }
+    if (Object.keys(updates).length > 0) {
+      setColofon({ ...colofon, ...updates });
+    }
+    // Alleen bij eerste mount of user wijziging
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
   // Sync local state when store changes externally
   useEffect(() => {
     setLocal({
@@ -50,6 +85,10 @@ export function ColofonForm() {
       opdrachtgever_adres: colofon.opdrachtgever_adres ?? '',
       adviseur_bedrijf: colofon.adviseur_bedrijf ?? brand.fullName,
       adviseur_naam: colofon.adviseur_naam ?? '',
+      adviseur_email: colofon.adviseur_email ?? '',
+      adviseur_telefoon: colofon.adviseur_telefoon ?? '',
+      adviseur_functie: colofon.adviseur_functie ?? '',
+      adviseur_registratie: colofon.adviseur_registratie ?? '',
       normen: colofon.normen ?? '',
       documentgegevens: colofon.documentgegevens ?? '',
       datum: colofon.datum ?? today(),
@@ -197,6 +236,54 @@ export function ColofonForm() {
                 onBlur={() => handleBlur('adviseur_naam')}
                 placeholder="Ir. S. de Vries"
               />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>E-mail</label>
+                <input
+                  type="email"
+                  className={inputClass}
+                  value={local.adviseur_email}
+                  onChange={(e) => handleLocalChange('adviseur_email', e.target.value)}
+                  onBlur={() => handleBlur('adviseur_email')}
+                  placeholder="adviseur@bedrijf.nl"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Telefoon</label>
+                <input
+                  type="tel"
+                  className={inputClass}
+                  value={local.adviseur_telefoon}
+                  onChange={(e) => handleLocalChange('adviseur_telefoon', e.target.value)}
+                  onBlur={() => handleBlur('adviseur_telefoon')}
+                  placeholder="+31 6 12345678"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Functie</label>
+                <input
+                  type="text"
+                  className={inputClass}
+                  value={local.adviseur_functie}
+                  onChange={(e) => handleLocalChange('adviseur_functie', e.target.value)}
+                  onBlur={() => handleBlur('adviseur_functie')}
+                  placeholder="Constructeur"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Registratienummer</label>
+                <input
+                  type="text"
+                  className={inputClass}
+                  value={local.adviseur_registratie}
+                  onChange={(e) => handleLocalChange('adviseur_registratie', e.target.value)}
+                  onBlur={() => handleBlur('adviseur_registratie')}
+                  placeholder="IBS-12345"
+                />
+              </div>
             </div>
           </fieldset>
 

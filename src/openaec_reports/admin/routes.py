@@ -86,6 +86,10 @@ class CreateUserRequest(BaseModel):
     password: str = Field(..., min_length=6)
     role: str = Field(default="user")
     tenant: str = Field(default="")
+    phone: str = Field(default="")
+    job_title: str = Field(default="")
+    registration_number: str = Field(default="")
+    company: str = Field(default="")
 
 
 class UpdateUserRequest(BaseModel):
@@ -96,6 +100,10 @@ class UpdateUserRequest(BaseModel):
     role: str | None = None
     tenant: str | None = None
     is_active: bool | None = None
+    phone: str | None = None
+    job_title: str | None = None
+    registration_number: str | None = None
+    company: str | None = None
 
 
 class ResetPasswordRequest(BaseModel):
@@ -317,6 +325,10 @@ async def create_user(payload: CreateUserRequest):
         role=role,
         tenant=payload.tenant,
         hashed_password=hash_password(payload.password),
+        phone=payload.phone,
+        job_title=payload.job_title,
+        registration_number=payload.registration_number,
+        company=payload.company,
     )
     db.create(user)
     return {"user": user.to_dict()}

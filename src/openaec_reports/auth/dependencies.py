@@ -1,9 +1,10 @@
 """FastAPI dependencies voor authenticatie.
 
-Ondersteunt drie authenticatie-methoden (in volgorde van prioriteit):
+Ondersteunt vier authenticatie-methoden (in volgorde van prioriteit):
 1. X-API-Key header — statische key voor machine-to-machine (pyRevit, MCP, scripts)
 2. httpOnly cookie — browser / frontend sessies
-3. Authorization: Bearer <token> — JWT voor scripts die login() gebruiken
+3. Authorization: Bearer <token> — lokale JWT voor scripts die login() gebruiken
+4. Authorization: Bearer <token> — OIDC token (RS256) van Authentik
 """
 
 from __future__ import annotations
@@ -141,13 +142,124 @@ def _authenticate_via_api_key(request: Request) -> User | None:
     return user
 
 
+def _authenticate_via_oidc(token: str) -> User | None:
+    """Probeer authenticatie via OIDC token (RS256 van Authentik).
+
+    Valideert het token, zoekt de user op via oidc_subject of email,
+    en maakt indien nodig een nieuwe user aan (auto-provisioning).
+
+    Args:
+        token: Bearer token string.
+
+    Returns:
+        User of None als OIDC niet enabled of token ongeldig.
+    """
+    from openaec_reports.auth.oidc import is_oidc_enabled, validate_oidc_token
+
+    if not is_oidc_enabled():
+        return None
+
+    try:
+        claims = validate_oidc_token(token)
+    except ValueError as exc:
+        logger.debug("OIDC token validatie mislukt: %s", exc)
+        return None
+
+    db = get_user_db()
+
+    # 1. Zoek op oidc_subject (bestaande SSO user)
+    user = db.get_by_oidc_subject(claims.subject)
+
+    # 2. Fallback: email-matching (migratie van lokale user)
+    if user is None and claims.email:
+        user = db.get_by_email(claims.email)
+        if user is not None:
+            # Koppel bestaande lokale user aan OIDC
+            db.update(
+                user.id,
+                oidc_subject=claims.subject,
+                auth_provider="oidc",
+            )
+            logger.info(
+                "Lokale user '%s' gekoppeld aan OIDC subject %s",
+                user.username,
+                claims.subject,
+            )
+
+    # 3. Auto-provisioning: maak nieuwe user aan
+    if user is None:
+        from openaec_reports.auth.security import hash_password
+        import uuid
+
+        user = User(
+            id=uuid.uuid4().hex,
+            username=claims.preferred_username or claims.email.split("@")[0],
+            email=claims.email,
+            display_name=claims.name,
+            role=UserRole.user,
+            tenant=claims.tenant,
+            is_active=True,
+            hashed_password=hash_password(uuid.uuid4().hex),  # Random, niet bruikbaar
+            phone=claims.phone,
+            job_title=claims.job_title,
+            registration_number=claims.registration_number,
+            company=claims.company,
+            auth_provider="oidc",
+            oidc_subject=claims.subject,
+        )
+        try:
+            db.create(user)
+            logger.info(
+                "OIDC auto-provisioning: user '%s' aangemaakt",
+                user.username,
+            )
+        except Exception:
+            # Username conflict — probeer met suffix
+            user.username = f"{user.username}_{claims.subject[:8]}"
+            db.create(user)
+            logger.info(
+                "OIDC auto-provisioning (met suffix): user '%s' aangemaakt",
+                user.username,
+            )
+
+    # Profiel sync bij elke login
+    sync_fields: dict[str, str] = {}
+    if claims.email and claims.email != user.email:
+        sync_fields["email"] = claims.email
+    if claims.name and claims.name != user.display_name:
+        sync_fields["display_name"] = claims.name
+    if claims.phone and claims.phone != user.phone:
+        sync_fields["phone"] = claims.phone
+    if claims.job_title and claims.job_title != user.job_title:
+        sync_fields["job_title"] = claims.job_title
+    if claims.registration_number and claims.registration_number != user.registration_number:
+        sync_fields["registration_number"] = claims.registration_number
+    if claims.company and claims.company != user.company:
+        sync_fields["company"] = claims.company
+    if claims.tenant and claims.tenant != user.tenant:
+        sync_fields["tenant"] = claims.tenant
+
+    if sync_fields:
+        db.update(user.id, **sync_fields)
+        # Herlaad user met gesyncte velden
+        user = db.get_by_id(user.id) or user
+        logger.debug("OIDC profiel sync voor '%s': %s", user.username, list(sync_fields.keys()))
+
+    if not user.is_active:
+        return None
+
+    logger.debug("Auth via OIDC: subject %s → user %s", claims.subject, user.username)
+    return user
+
+
 async def get_current_user(request: Request) -> User:
     """Haal de huidige user op via API key, cookie, of Bearer token.
 
     Authenticatie volgorde:
     1. X-API-Key header (machine-to-machine)
     2. httpOnly cookie (browser / frontend)
-    3. Authorization: Bearer <token> header (pyRevit login-flow)
+    3. Authorization: Bearer <token> — lokale JWT
+    4. Authorization: Bearer <token> — OIDC token (RS256, Authentik)
 
     Args:
         request: FastAPI Request object.
@@ -171,22 +283,23 @@ async def get_current_user(request: Request) -> User:
             detail="Niet ingelogd",
         )
 
+    # Probeer eerst lokale JWT
     payload = decode_access_token(token)
-    if payload is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Sessie verlopen — log opnieuw in",
-        )
+    if payload is not None:
+        db = get_user_db()
+        user = db.get_by_id(payload["sub"])
+        if user is not None and user.is_active:
+            return user
 
-    db = get_user_db()
-    user = db.get_by_id(payload["sub"])
-    if user is None or not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Gebruiker niet gevonden of inactief",
-        )
+    # Methode 4: OIDC token (als lokale JWT mislukt)
+    user = _authenticate_via_oidc(token)
+    if user is not None:
+        return user
 
-    return user
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Sessie verlopen — log opnieuw in",
+    )
 
 
 async def require_admin(request: Request) -> User:

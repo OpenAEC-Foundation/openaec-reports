@@ -1,6 +1,8 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { AppShell } from '@/components/layout/AppShell';
 import { LoginPage } from '@/components/auth/LoginPage';
+import { RegisterPage } from '@/components/auth/RegisterPage';
+import { OidcCallback } from '@/components/auth/OidcCallback';
 import { useReportStore, STORAGE_KEY } from '@/stores/reportStore';
 import { useApiStore } from '@/stores/apiStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -36,16 +38,22 @@ function LoadingSpinner() {
   );
 }
 
+type AuthView = 'login' | 'register';
+
 export function App() {
   const user = useAuthStore((s) => s.user);
   const isAuthLoading = useAuthStore((s) => s.isLoading);
   const checkSession = useAuthStore((s) => s.checkSession);
+  const registrationEnabled = useAuthStore((s) => s.registrationEnabled);
+  const checkRegistrationEnabled = useAuthStore((s) => s.checkRegistrationEnabled);
   const loadReport = useReportStore((s) => s.loadReport);
+  const [authView, setAuthView] = useState<AuthView>('login');
 
-  // Check bestaande sessie bij startup
+  // Check bestaande sessie en registratie status bij startup
   useEffect(() => {
     checkSession();
-  }, [checkSession]);
+    checkRegistrationEnabled();
+  }, [checkSession, checkRegistrationEnabled]);
 
   // Restore from localStorage or load example data (alleen als ingelogd)
   useEffect(() => {
@@ -92,14 +100,28 @@ export function App() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
+  // OIDC callback route
+  if (window.location.pathname === '/auth/callback') {
+    return <OidcCallback />;
+  }
+
   // Auth loading state
   if (isAuthLoading) {
     return <LoadingSpinner />;
   }
 
-  // Niet ingelogd → login pagina
+  // Niet ingelogd → login of registratie pagina
   if (!user) {
-    return <LoginPage />;
+    if (authView === 'register' && registrationEnabled) {
+      return <RegisterPage onSwitchToLogin={() => setAuthView('login')} />;
+    }
+    return (
+      <LoginPage
+        onSwitchToRegister={
+          registrationEnabled ? () => setAuthView('register') : undefined
+        }
+      />
+    );
   }
 
   // Ingelogd → editor

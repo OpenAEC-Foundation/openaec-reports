@@ -1,0 +1,46 @@
+# Caddyfile — Reverse proxy voor OpenAEC + Authentik
+#
+# Caddy regelt automatisch TLS via Let's Encrypt.
+# Zorg dat DNS A-records wijzen naar het server IP.
+
+# ── OpenAEC Reports ────────────────────────────────────────────────────
+{$REPORT_DOMAIN:report.open-aec.com} {
+	reverse_proxy openaec-reports:8000
+
+	# Gzip compressie
+	encode gzip
+
+	# Security headers
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	# Logging
+	log {
+		output stdout
+		format console
+	}
+}
+
+# ── Authentik SSO ──────────────────────────────────────────────────────
+{$AUTH_DOMAIN:auth.open-aec.com} {
+	reverse_proxy authentik-server:9000
+
+	# Gzip compressie
+	encode gzip
+
+	# Security headers
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

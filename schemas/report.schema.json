@@ -136,6 +136,10 @@
         "fase": { "type": "string", "description": "Projectfase" },
         "status_colofon": { "type": "string", "description": "Status op colofon (kan afwijken van rapport status)" },
         "kenmerk": { "type": "string", "description": "Documentkenmerk" },
+        "adviseur_email": { "type": "string", "description": "E-mailadres adviseur" },
+        "adviseur_telefoon": { "type": "string", "description": "Telefoonnummer adviseur" },
+        "adviseur_functie": { "type": "string", "description": "Functie/titel adviseur" },
+        "adviseur_registratie": { "type": "string", "description": "Registratienummer adviseur (bijv. IBS constructeur)" },
         "extra_fields": {
           "type": "object",
           "additionalProperties": { "type": "string" }

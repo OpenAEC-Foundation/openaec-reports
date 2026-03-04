@@ -188,6 +188,10 @@ function buildColofon(colofon: Colofon): Colofon | undefined {
   if (colofon.opdrachtgever_adres) { result.opdrachtgever_adres = colofon.opdrachtgever_adres; hasContent = true; }
   if (colofon.adviseur_bedrijf) { result.adviseur_bedrijf = colofon.adviseur_bedrijf; hasContent = true; }
   if (colofon.adviseur_naam) { result.adviseur_naam = colofon.adviseur_naam; hasContent = true; }
+  if (colofon.adviseur_email) { result.adviseur_email = colofon.adviseur_email; hasContent = true; }
+  if (colofon.adviseur_telefoon) { result.adviseur_telefoon = colofon.adviseur_telefoon; hasContent = true; }
+  if (colofon.adviseur_functie) { result.adviseur_functie = colofon.adviseur_functie; hasContent = true; }
+  if (colofon.adviseur_registratie) { result.adviseur_registratie = colofon.adviseur_registratie; hasContent = true; }
   if (colofon.normen) { result.normen = colofon.normen; hasContent = true; }
   if (colofon.documentgegevens) { result.documentgegevens = colofon.documentgegevens; hasContent = true; }
   if (colofon.datum) { result.datum = colofon.datum; hasContent = true; }

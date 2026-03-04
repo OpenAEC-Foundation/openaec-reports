@@ -555,6 +555,10 @@ class ColofonGenerator:
                 "adviseur_bedrijf", data.get("author", "3BM Coöperatie")
             ),
             "adviseur_naam": colofon.get("adviseur_naam", ""),
+            "adviseur_email": colofon.get("adviseur_email", ""),
+            "adviseur_telefoon": colofon.get("adviseur_telefoon", ""),
+            "adviseur_functie": colofon.get("adviseur_functie", ""),
+            "adviseur_registratie": colofon.get("adviseur_registratie", ""),
             "normen": colofon.get("normen", ""),
             "documentgegevens": colofon.get("documentgegevens", ""),
             "datum": data.get("date", ""),

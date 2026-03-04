@@ -25,6 +25,12 @@ from openaec_reports.auth.models import User, UserDB
 from openaec_reports.auth.routes import auth_router
 from openaec_reports.auth.security import is_default_secret
 from openaec_reports.core.data_transform import transform_json_to_engine_data
+from openaec_reports.storage.models import ReportDB
+from openaec_reports.storage.routes import (
+    init_report_db,
+    project_router,
+    report_router,
+)
 from openaec_reports.core.engine import Report
 from openaec_reports.core.renderer_v2 import ReportGeneratorV2
 from openaec_reports.core.template_engine import TemplateEngine
@@ -114,11 +120,19 @@ if is_default_secret():
         "Stel een veilige secret in via de OPENAEC_JWT_SECRET environment variable."
     )
 
-# Auth routes (login/logout zijn zelf open, /me checkt intern)
+# Report/project storage (zelfde database als auth)
+_report_db = ReportDB(db_path=_user_db.db_path)
+init_report_db(_report_db)
+
+# Auth routes (login/logout/register zijn zelf open, /me checkt intern)
 app.include_router(auth_router)
 
 # Admin routes (require_admin dependency op de router zelf)
 app.include_router(admin_router)
+
+# Project en rapport routes (authenticatie op de router)
+app.include_router(project_router)
+app.include_router(report_router)
 
 # Protected router — alle business endpoints vereisen authenticatie
 _protected = APIRouter(dependencies=[Depends(get_current_user)])
@@ -339,6 +353,9 @@ async def generate_report(request: Request, user: User = Depends(get_current_use
     if not data.get("template"):
         raise HTTPException(status_code=422, detail="Veld 'template' is verplicht")
 
+    # Inject user profiel defaults in colofon
+    _inject_user_profile_defaults(data, user)
+
     brand = (
         data.get("brand")
         or _resolve_brand_from_template(data, user.tenant)
@@ -358,6 +375,31 @@ async def generate_report(request: Request, user: User = Depends(get_current_use
 # ============================================================
 
 
+def _inject_user_profile_defaults(data: dict, user: User) -> None:
+    """Vul colofon adviseur-velden in vanuit het user profiel.
+
+    Alleen lege velden worden ingevuld (setdefault patroon).
+    Werkt voor alle auth-methoden (lokaal, OIDC, API key).
+
+    Args:
+        data: Rapport JSON data (wordt in-place gewijzigd).
+        user: De geauthenticeerde user.
+    """
+    colofon = data.setdefault("colofon", {})
+    if user.display_name and not colofon.get("adviseur_naam"):
+        colofon.setdefault("adviseur_naam", user.display_name)
+    if user.email and not colofon.get("adviseur_email"):
+        colofon.setdefault("adviseur_email", user.email)
+    if user.phone and not colofon.get("adviseur_telefoon"):
+        colofon.setdefault("adviseur_telefoon", user.phone)
+    if user.job_title and not colofon.get("adviseur_functie"):
+        colofon.setdefault("adviseur_functie", user.job_title)
+    if user.registration_number and not colofon.get("adviseur_registratie"):
+        colofon.setdefault("adviseur_registratie", user.registration_number)
+    if user.company and not colofon.get("adviseur_bedrijf"):
+        colofon.setdefault("adviseur_bedrijf", user.company)
+
+
 @_protected.post("/api/generate/v2")
 async def generate_report_v2(request: Request, user: User = Depends(get_current_user)):
     """Genereer PDF rapport via renderer_v2 (pixel-perfect huisstijl).
@@ -372,6 +414,9 @@ async def generate_report_v2(request: Request, user: User = Depends(get_current_
 
     if not data.get("project"):
         raise HTTPException(status_code=422, detail="Veld 'project' is verplicht")
+
+    # Inject user profiel defaults in colofon
+    _inject_user_profile_defaults(data, user)
 
     brand = (
         data.get("brand")
@@ -444,6 +489,9 @@ def _resolve_tenant_and_template(
 async def generate_template_report(request: Request, user: User = Depends(get_current_user)):
     """Genereer PDF rapport via TemplateEngine (YAML-driven, multi-tenant)."""
     data = await request.json()
+
+    # Inject user profiel defaults in colofon
+    _inject_user_profile_defaults(data, user)
 
     template_name = data.get("template")
     if not template_name:

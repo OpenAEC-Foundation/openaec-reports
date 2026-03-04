@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useReportStore } from '@/stores/reportStore';
 import { useApiStore } from '@/stores/apiStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useProjectStore } from '@/stores/projectStore';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import brand from '@/config/brand';
 import { Sidebar } from './Sidebar';
@@ -9,6 +10,7 @@ import { MainPanel } from './MainPanel';
 import { ValidationBanner } from './ValidationBanner';
 import { ShortcutHelp } from './ShortcutHelp';
 import { AdminPanel } from '@/components/admin/AdminPanel';
+import { ProjectBrowser } from '@/components/projects/ProjectBrowser';
 import type { ViewMode } from '@/stores/reportStore';
 
 const EDITOR_TABS: { mode: ViewMode; label: string }[] = [
@@ -44,6 +46,9 @@ export function AppShell() {
   const generatePdf = useApiStore((s) => s.generatePdf);
   const downloadPdf = useApiStore((s) => s.downloadPdf);
   const clearError = useApiStore((s) => s.clearError);
+
+  const saveReport = useProjectStore((s) => s.saveReport);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -92,7 +97,7 @@ export function AppShell() {
 
       // Shortcuts that always work (even when typing)
       const alwaysActive: Record<string, () => void> = {
-        'ctrl+s': () => handleExport(),
+        'ctrl+s': () => handleSaveToServer(),
         'ctrl+z': () => useReportStore.getState().undo(),
         'ctrl+y': () => useReportStore.getState().redo(),
         'ctrl+shift+z': () => useReportStore.getState().redo(),
@@ -137,6 +142,28 @@ export function AppShell() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [addBlockToActiveSection]);
+
+  async function handleSaveToServer() {
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      const state = useReportStore.getState();
+      const reportId = await saveReport(state.report, {
+        id: state.serverReportId ?? undefined,
+        title: state.report.project || "Naamloos rapport",
+        projectId: state.serverProjectId,
+      });
+      if (reportId) {
+        useReportStore.setState({
+          serverReportId: reportId,
+          isDirty: false,
+        });
+        setToast({ message: "Rapport opgeslagen op server", type: "success" });
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   function handleExport() {
     const json = exportJson();
@@ -250,10 +277,20 @@ export function AppShell() {
                 {tab.label}
               </button>
             ))}
+            <button
+              onClick={() => setViewMode('projects')}
+              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ml-1 border-l border-white/10 pl-2 ${
+                viewMode === 'projects'
+                  ? 'bg-white/15 text-white'
+                  : 'text-white/50 hover:text-white/80'
+              }`}
+            >
+              Projecten
+            </button>
             {authUser?.role === 'admin' && (
               <button
                 onClick={() => setViewMode('admin')}
-                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ml-1 border-l border-white/10 pl-2 ${
+                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
                   viewMode === 'admin'
                     ? 'bg-white/15 text-white'
                     : 'text-white/50 hover:text-white/80'
@@ -305,6 +342,22 @@ export function AppShell() {
               </svg>
             </button>
           </div>
+
+          {/* Opslaan op server */}
+          <button
+            onClick={handleSaveToServer}
+            disabled={isSaving}
+            title="Opslaan (Ctrl+S)"
+            className="rounded-md border border-white/20 px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {isSaving ? (
+              <span className="flex items-center gap-1.5">
+                <Spinner light /> Opslaan...
+              </span>
+            ) : (
+              'Opslaan'
+            )}
+          </button>
 
           {/* Import JSON */}
           <button
@@ -405,7 +458,11 @@ export function AppShell() {
       )}
 
       {/* Main content */}
-      {viewMode === 'admin' ? (
+      {viewMode === 'projects' ? (
+        <div className="flex-1 overflow-hidden">
+          <ProjectBrowser onOpenReport={() => setViewMode('editor')} />
+        </div>
+      ) : viewMode === 'admin' ? (
         <div className="flex-1 overflow-auto">
           <AdminPanel />
         </div>

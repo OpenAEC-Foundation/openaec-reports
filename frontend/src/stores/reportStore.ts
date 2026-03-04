@@ -25,7 +25,7 @@ export interface ValidationResult {
 
 // ---------- View mode ----------
 
-export type ViewMode = 'editor' | 'split' | 'json' | 'preview' | 'admin';
+export type ViewMode = 'editor' | 'split' | 'json' | 'preview' | 'admin' | 'projects';
 
 // ---------- Undo/redo constants ----------
 
@@ -57,6 +57,10 @@ export interface ReportStore {
 
   // Auto-save
   lastSavedAt: string | null;
+
+  // Server-side opslag referenties
+  serverReportId: string | null;
+  serverProjectId: string | null;
 
   // Actions — rapport niveau
   setMetadata: (fields: Partial<Pick<EditorReport, 'project' | 'project_number' | 'client' | 'author' | 'report_type' | 'date' | 'version' | 'status' | 'format' | 'orientation'>>) => void;
@@ -160,6 +164,10 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
 
   // Auto-save
   lastSavedAt: null,
+
+  // Server-side opslag referenties
+  serverReportId: null,
+  serverProjectId: null,
 
   _pushHistory: () => {
     const state = get();
@@ -653,6 +661,8 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
       canUndo: false,
       canRedo: false,
       lastSavedAt: null,
+      serverReportId: null,
+      serverProjectId: null,
     });
   },
 }));

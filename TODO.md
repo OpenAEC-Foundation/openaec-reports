@@ -1,7 +1,28 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-02
+> Laatst bijgewerkt: 2026-03-04 (avond)
+
+---
+
+## 🔴 Bugs — Hoog
+
+- [ ] **#14** — Colofon: `revision_history` en `disclaimer` worden niet gerenderd (silent failure)
+  - `_build_field_map()` incompleet, template mist posities, schema-implementatie mismatch
+  - Bestanden: `renderer_v2.py` (ColofonGenerator), `colofon.yaml`, `report.schema.json`
+- [ ] **#6** — Colofon update niet
+  - Colofon pagina refresht niet bij data-wijziging
+
+---
+
+## 🔴 Features — Hoog
+
+- [ ] **#13** — MCP-server toevoegen
+  - OpenAEC Reports als MCP server beschikbaar maken voor externe tools
+- [ ] **#9** — Spreadsheet blok inclusief copy/paste naar LibreOffice Calc
+  - Nieuw block type voor spreadsheet-achtige tabellen met clipboard support
+- [ ] **#1** — ERPNext integratie
+  - Projectinfo ophalen via API keys vanuit ERPNext
 
 ---
 
@@ -21,7 +42,7 @@ Self-service YAML beheer per tenant.
 - [ ] T5.7 — Kleurenpicker uit brand.yaml
 
 **Fase 3 — Brand onboarding wizard (deels klaar):**
-- [x] T5.8 — BrandExtractWizard (4-stap, paars) in admin panel
+- [x] T5.8 — BrandExtractWizard (4-stap, paurs) in admin panel
 - [ ] T5.9 — Upload referentie PDF → coordinaten-extractie naar YAML
 - [ ] T5.10 — Stationery PDF generator vanuit guidelines
 
@@ -55,11 +76,48 @@ Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
 
 ---
 
+## 🟡 GitHub Issues — Middel
+
+- [ ] **#10** — Read/Write to IFC
+  - IFC bestandsformaat lezen en schrijven (integratie)
+- [ ] **#8** — Bij regenerate blijf op oorspronkelijke pagina
+  - UX: na PDF regeneratie terug naar dezelfde pagina in de preview
+- [x] **#7** — Adviseur ook aan account koppelen + Authentik SSO
+  - User model uitgebreid met phone, job_title, registration_number, company, auth_provider, oidc_subject
+  - OIDC token validatie (JWKS/RS256) + auto-provisioning
+  - Frontend SSO login flow (PKCE, OidcCallback)
+  - Colofon auto-fill vanuit user profiel
+  - Docker Compose met Authentik
+- [x] **#5** — Organisation / Project Browser
+  - ProjectBrowser component (split-panel: projectlijst + rapportenlijst)
+  - Server-side rapport opslag (SQLite metadata + JSON op disk)
+  - "Projecten" tab in AppShell, server-save via Ctrl+S
+  - 11 API endpoints: CRUD projecten + rapporten + verplaatsen
+- [x] **#4** — Project → Report (mother-children relatie)
+  - `projects` en `reports` tabellen met foreign key relatie
+  - Rapport kan in project of standalone bestaan (nullable project_id)
+  - Cascade delete: project verwijderen verwijdert ook rapporten
+- [x] **#2** — Auteur koppelen aan user
+  - Colofon adviseur velden auto-filled vanuit user profiel (display_name, email, phone, etc.)
+
+---
+
+## 🟢 GitHub Issues — Laag
+
+- [ ] **#12** — RUST Library (R&D)
+  - Onderzoek naar Rust-implementatie van de report engine
+- [ ] **#11** — AI-instructies meegeven voor gebruik in andere tools
+  - Documentatie/schema zodat externe AI-tools rapporten kunnen genereren
+- [ ] **#3** — Brand visualiser maken
+  - Visuele editor voor brand configuratie (kleuren, fonts, layout)
+
+---
+
 ## 🟢 Frontend — Geavanceerde Features
 
 - [ ] F1 — Block copy/paste (Ctrl+C/V)
 - [ ] F2 — Section templates (standaard secties met pre-filled blocks)
-- [ ] F3 — Multi-rapport beheer (lijst, dupliceren, verwijderen)
+- [x] F3 — Multi-rapport beheer (lijst, dupliceren, verwijderen) — via ProjectBrowser
 - [ ] F4 — Visuele template editor (drag & drop sectie volgorde)
 - [ ] F5 — Revit bridge: WebSocket listener + auto-fill berekening blocks
 
@@ -115,6 +173,15 @@ Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
 
 ## ✅ VOLTOOID
 
+### Self-Registratie + Server-side Opslag + Projectstructuur (4 maart)
+- [x] Open registratie: `POST /api/auth/register` met validatie, env var guard (`OPENAEC_REGISTRATION_ENABLED`)
+- [x] RegisterPage frontend + authStore `register()` actie
+- [x] Server-side rapport opslag: `storage/models.py` (SQLite + bestandssysteem)
+- [x] 11 API endpoints: projecten CRUD, rapporten CRUD, verplaatsen, filteren
+- [x] ProjectBrowser UI (split-panel), projectStore (Zustand), server-save (Ctrl+S)
+- [x] Eigendom-isolatie: users zien alleen eigen projecten/rapporten
+- [x] 37 nieuwe tests (registratie + opslag), 1059 bestaande tests ongewijzigd
+
 ### API Key Management UI (2 maart)
 - [x] Frontend: ApiKeyManagement component + admin tab
 - [x] API types + store actions (list, create, revoke, delete)
@@ -147,13 +214,12 @@ Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
 ### Admin Panel Cleanup (1 maart)
 - [x] Replace button per asset
 - [x] BrandWizard (blauw, 3-stap) verwijderd
-- [x] BrandExtractWizard (paars, 4-stap) operationeel
+- [x] BrandExtractWizard (paurs, 4-stap) operationeel
 
 ### Tenant Resolution Fix (1 maart)
 - [x] `_resolve_tenant_and_template()` helper
 - [x] `_resolve_tenants_dir()` robuust met env vars
 - [x] 888 tests passed
-
 
 ### TemplateEngine V3 (28 feb)
 - [x] 102+ unit tests, 3 E2E tests

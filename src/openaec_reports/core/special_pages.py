@@ -658,13 +658,6 @@ def draw_colofon_page(
         "project": project_display,
         "client": config.client,
         "author": config.author,
-        # Colofon document velden
-        "date": data.get("date", ""),
-        "norms": data.get("norms", ""),
-        "document_description": data.get("document_description", ""),
-        "phase": data.get("phase", ""),
-        "status": data.get("status", "CONCEPT"),
-        "document_code": data.get("document_code", ""),
         # Opdrachtgever velden
         "opdrachtgever_contact": data.get("opdrachtgever_contact", ""),
         "opdrachtgever_naam": data.get("opdrachtgever_naam", ""),
@@ -678,6 +671,13 @@ def draw_colofon_page(
         "adviseur_email": data.get("adviseur_email", ""),
         "adviseur_telefoon": data.get("adviseur_telefoon", ""),
         "adviseur_registratie": data.get("adviseur_registratie", ""),
+        # Colofon document velden (Nederlandse keys — conform schema)
+        "normen": data.get("normen", ""),
+        "documentgegevens": data.get("documentgegevens", ""),
+        "datum": data.get("datum", data.get("date", "")),
+        "fase": data.get("fase", ""),
+        "status": data.get("status_colofon", data.get("status", "CONCEPT")),
+        "kenmerk": data.get("kenmerk", ""),
     }
     # Extra velden uit colofon_data (voor onbekende/custom keys)
     for key, val in data.items():
@@ -723,24 +723,24 @@ def draw_colofon_page(
     # ---- Default velden (neutraal, volledig) ----
     default_fields = [
         {"label": "Project", "type": "project", "y_pt": 320.8},
-        {"label": "Client", "type": "client", "y_pt": 368.8},
+        {"label": "Client", "type": "opdrachtgever_contact", "y_pt": 368.8},
         {"label": "", "type": "opdrachtgever_naam", "y_pt": 381.8},
         {"label": "", "type": "opdrachtgever_adres", "y_pt": 394.6},
         {"type": "line", "y_pt": 478},
         {"label": "Adviseur", "type": "adviseur_bedrijf", "y_pt": 488.8},
         {"label": "", "type": "adviseur_naam", "y_pt": 501.1},
         {"type": "line", "y_pt": 517},
-        {"label": "Normen", "type": "norms", "y_pt": 524.8},
+        {"label": "Normen", "type": "normen", "y_pt": 524.8},
         {"type": "line", "y_pt": 542},
-        {"label": "Documentgegevens", "type": "document_description", "y_pt": 548.8},
+        {"label": "Documentgegevens", "type": "documentgegevens", "y_pt": 548.8},
         {"type": "line", "y_pt": 566},
-        {"label": "Datum", "type": "date", "y_pt": 572.8},
+        {"label": "Datum", "type": "datum", "y_pt": 572.8},
         {"type": "line", "y_pt": 590},
-        {"label": "Fase", "type": "phase", "y_pt": 596.8},
+        {"label": "Fase", "type": "fase", "y_pt": 596.8},
         {"type": "line", "y_pt": 614},
         {"label": "Status", "type": "status", "y_pt": 620.8},
         {"type": "line", "y_pt": 638},
-        {"label": "Kenmerk", "type": "document_code", "y_pt": 644.8},
+        {"label": "Kenmerk", "type": "kenmerk", "y_pt": 644.8},
     ]
     fields = spec.get("fields", default_fields)
 

@@ -783,6 +783,48 @@ def draw_colofon_page(
                     value_x, y_rl - i * (value_size * 1.4), vline.strip()
                 )
 
+    # ---- Revisiehistorie (optioneel) ----
+    revisions = data.get("revision_history", [])
+    if revisions:
+        rev_y_pt = spec.get("revision_y_pt", 670)
+        rev_y = ph - rev_y_pt
+        rev_end_y = _draw_revision_table(
+            canvas,
+            revisions,
+            start_y=rev_y,
+            left_x=label_x,
+            right_x=line_x2,
+            heading_font=label_font,
+            body_font=value_font,
+            header_color=other_color,
+            page_h=ph,
+            text_color=brand.colors.get("text", _FALLBACK_TEXT),
+            separator_color=brand.colors.get("separator", _FALLBACK_SEPARATOR),
+        )
+    else:
+        rev_end_y = ph - spec.get("revision_y_pt", 670)
+
+    # ---- Disclaimer (optioneel) ----
+    disclaimer = data.get("disclaimer", "")
+    if disclaimer:
+        discl_font = get_font_name(
+            spec.get("disclaimer_font", brand.fonts.get("italic", "Helvetica-Oblique"))
+        )
+        discl_size = spec.get("disclaimer_size", 7.0)
+        discl_color = HexColor(
+            spec.get(
+                "disclaimer_color",
+                brand.colors.get("text_light", _FALLBACK_TEXT),
+            )
+        )
+        discl_y = rev_end_y - _sf(12, ph)
+        canvas.setFont(discl_font, discl_size)
+        canvas.setFillColor(discl_color)
+        for i, line in enumerate(disclaimer.split("\n")):
+            canvas.drawString(
+                label_x, discl_y - i * (discl_size * 1.4), line.strip()
+            )
+
     # ---- Footer: accent blok + logo + paginanummer ----
     rect_spec = spec.get("footer_rect", [0, 771, 282, 842])
     rect_color = HexColor(

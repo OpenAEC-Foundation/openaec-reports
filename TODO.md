@@ -1,24 +1,22 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-04 (avond)
+> Laatst bijgewerkt: 2026-03-05
 
 ---
 
 ## 🔴 Bugs — Hoog
 
-- [ ] **#14** — Colofon: `revision_history` en `disclaimer` worden niet gerenderd (silent failure)
-  - `_build_field_map()` incompleet, template mist posities, schema-implementatie mismatch
-  - Bestanden: `renderer_v2.py` (ColofonGenerator), `colofon.yaml`, `report.schema.json`
-- [ ] **#6** — Colofon update niet
-  - Colofon pagina refresht niet bij data-wijziging
+_(Geen openstaande bugs)_
 
 ---
 
 ## 🔴 Features — Hoog
 
-- [ ] **#13** — MCP-server toevoegen
-  - OpenAEC Reports als MCP server beschikbaar maken voor externe tools
+- [x] **#13** — MCP-server toevoegen
+  - OpenAEC MCP wrapper operationeel (`Z:\50_projecten\7_OpenAEC_bouwkunde\_MCP_servers\bm_reports\server.py`)
+  - Tools: list_templates, get_template_scaffold, validate_report, generate_report, generate_report_v2
+  - Draait via dedicated venv (`C:\MCP_venvs\bm_reports\`)
 - [ ] **#9** — Spreadsheet blok inclusief copy/paste naar LibreOffice Calc
   - Nieuw block type voor spreadsheet-achtige tabellen met clipboard support
 - [ ] **#1** — ERPNext integratie
@@ -172,6 +170,18 @@ Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
 ---
 
 ## ✅ VOLTOOID
+
+### Bug Fixes: Rendering + Colofon (5 maart)
+- [x] **#14** — Colofon: `revision_history` en `disclaimer` rendering in V1 en V2
+  - V1: `_draw_revision_table()` aangeroepen vanuit `draw_colofon_page()`, disclaimer rendering
+  - V2: ColofonGenerator uitgebreid met revision_history tabel + disclaimer tekst
+  - `colofon.yaml` uitgebreid met revision_history en disclaimer configuratie
+- [x] **#6** — Colofon update niet → Geverifieerd: werkt correct (frontend chain intact)
+- [x] Tabel text-wrap: cellen gewrapt in `Paragraph` objecten i.p.v. plain strings (`table_block.py`)
+- [x] Tabel page-break: `split()` methode toegevoegd aan `BMFlowable` + `repeatRows=1` (`base.py`, `table_block.py`)
+- [x] Colofon velden: `field_values` mapping uitgebreid met alle adviseur/opdrachtgever velden (`special_pages.py`)
+- [x] Cover images: `base_dir` parameter toegevoegd aan MCP server `generate_report()` (`server.py`)
+- [x] **#13** — MCP-server wrapper operationeel (OpenAEC-specifiek, buiten repo)
 
 ### Self-Registratie + Server-side Opslag + Projectstructuur (4 maart)
 - [x] Open registratie: `POST /api/auth/register` met validatie, env var guard (`OPENAEC_REGISTRATION_ENABLED`)

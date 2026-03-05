@@ -336,6 +336,7 @@ class CoverGenerator:
         """Cover via PyMuPDF: tekst op PDF stationery."""
         doc = fitz.open(str(stationery_pdf))
         page = doc[0]
+        page.clean_contents()  # Normaliseer content stream voor TextWriter
         self.fonts.insert_into_page(page)
 
         fields = self.tpl.get("dynamic_fields", {})
@@ -465,6 +466,7 @@ class ColofonGenerator:
         """Generate colofon PDF."""
         doc = fitz.open(str(stationery_pdf))
         page = doc[0]
+        page.clean_contents()  # Normaliseer content stream voor TextWriter
         self.fonts.insert_into_page(page)
 
         # Title
@@ -765,6 +767,7 @@ class ContentRenderer:
 
         self.page_count += 1
         self.page = self.doc[-1]
+        self.page.clean_contents()  # Normaliseer content stream voor TextWriter
         self.fonts.insert_into_page(self.page)
 
         margins = self.tpl.standaard.get("margins", {})

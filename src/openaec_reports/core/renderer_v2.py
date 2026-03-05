@@ -1013,6 +1013,44 @@ class ContentRenderer:
             else:
                 col_widths_pt = [max_w / num_cols] * num_cols
 
+        # --- Enforce minimum column widths ---
+        # Prevent narrow columns from becoming too small to display their
+        # widest single word/token, which causes unwanted line breaks.
+        body_font_size = body_s.get("size", 8)
+        header_font_size = header_s.get("size", 9)
+        min_widths = []
+        for i in range(num_cols):
+            # Widest single token in header
+            h_text = str(headers[i]) if i < len(headers) else ""
+            h_tokens = h_text.split() or [""]
+            min_w = max(
+                self.fonts.measure(t, header_font_size, bold=True) for t in h_tokens
+            )
+            # Widest single token in body rows
+            for row in rows:
+                cell_val = str(row[i]) if i < len(row) else ""
+                tokens = cell_val.split() or [""]
+                token_max = max(self.fonts.measure(t, body_font_size) for t in tokens)
+                min_w = max(min_w, token_max)
+            min_widths.append(min_w + cell_pad * 2)
+
+        # Redistribute: bump undersized columns, shrink oversized ones
+        deficit = 0.0
+        flexible_width = 0.0
+        for i in range(num_cols):
+            if col_widths_pt[i] < min_widths[i]:
+                deficit += min_widths[i] - col_widths_pt[i]
+            else:
+                flexible_width += col_widths_pt[i]
+
+        if deficit > 0 and flexible_width > 0:
+            shrink_factor = max((flexible_width - deficit) / flexible_width, 0.5)
+            for i in range(num_cols):
+                if col_widths_pt[i] < min_widths[i]:
+                    col_widths_pt[i] = min_widths[i]
+                else:
+                    col_widths_pt[i] *= shrink_factor
+
         h_fontname = header_s.get("font", "Inter-Bold")
         h_fontsize = header_s.get("size", 9)
         h_color = _hex_to_rgb(header_s.get("color", "#FFFFFF"))

@@ -523,6 +523,99 @@ class ColofonGenerator:
                     )
                     tw.write_text(page, color=value_color)
 
+        # Revision history (optional)
+        rev_cfg = self.tpl.get("revision_history", {})
+        revisions = colofon_data.get("revision_history", [])
+        current_y = rev_cfg.get("y_td", 670.0)
+        if revisions:
+            # Label
+            lbl_font_name = rev_cfg.get("label_font", "Helvetica-Bold")
+            lbl_size = rev_cfg.get("label_size", 10.0)
+            lbl_color = _hex_to_rgb(rev_cfg.get("label_color", "#38BDA0"))
+            lbl_x = rev_cfg.get("label_x", 103.0)
+            font_obj = self.fonts.get_fitz_font(lbl_font_name)
+            tw = fitz.TextWriter(page.rect)
+            tw.append(
+                (lbl_x, current_y + lbl_size * 0.8),
+                "Revisiehistorie", font=font_obj, fontsize=lbl_size,
+            )
+            tw.write_text(page, color=lbl_color)
+            current_y += lbl_size * 1.8
+
+            # Table
+            tbl_x = rev_cfg.get("table_x", 103.0)
+            tbl_end_x = rev_cfg.get("table_end_x", 420.0)
+            hdr_font_name = rev_cfg.get("header_font", "Helvetica-Bold")
+            hdr_size = rev_cfg.get("header_size", 8.0)
+            hdr_color = _hex_to_rgb(rev_cfg.get("header_color", "#40124A"))
+            body_font_name = rev_cfg.get("body_font", "Helvetica")
+            body_size = rev_cfg.get("body_size", 8.0)
+            body_color = _hex_to_rgb(rev_cfg.get("body_color", "#45243D"))
+            row_h = rev_cfg.get("row_height", 14.0)
+
+            tbl_width = tbl_end_x - tbl_x
+            col_ratios = rev_cfg.get("col_widths", [0.12, 0.18, 0.25, 0.45])
+            col_xs = [tbl_x]
+            for ratio in col_ratios[:-1]:
+                col_xs.append(col_xs[-1] + tbl_width * ratio)
+
+            # Header row
+            headers = ["Versie", "Datum", "Auteur", "Omschrijving"]
+            hdr_font = self.fonts.get_fitz_font(hdr_font_name)
+            for i, header in enumerate(headers):
+                tw = fitz.TextWriter(page.rect)
+                tw.append(
+                    (col_xs[i], current_y + hdr_size * 0.8),
+                    header, font=hdr_font, fontsize=hdr_size,
+                )
+                tw.write_text(page, color=hdr_color)
+            current_y += row_h
+
+            # Separator line
+            page.draw_line(
+                fitz.Point(tbl_x, current_y - row_h * 0.3),
+                fitz.Point(tbl_end_x, current_y - row_h * 0.3),
+                color=hdr_color, width=0.5,
+            )
+
+            # Data rows
+            body_font = self.fonts.get_fitz_font(body_font_name)
+            for rev in revisions:
+                cells = [
+                    rev.get("version", ""),
+                    rev.get("date", ""),
+                    rev.get("author", ""),
+                    rev.get("description", ""),
+                ]
+                for i, cell in enumerate(cells):
+                    if cell:
+                        tw = fitz.TextWriter(page.rect)
+                        tw.append(
+                            (col_xs[i], current_y + body_size * 0.8),
+                            str(cell), font=body_font, fontsize=body_size,
+                        )
+                        tw.write_text(page, color=body_color)
+                current_y += row_h
+
+        # Disclaimer (optional)
+        disclaimer = colofon_data.get("disclaimer", "")
+        if disclaimer:
+            discl_cfg = self.tpl.get("disclaimer", {})
+            discl_x = discl_cfg.get("x", 103.0)
+            discl_font_name = discl_cfg.get("font", "Helvetica-Oblique")
+            discl_size = discl_cfg.get("size", 7.0)
+            discl_color = _hex_to_rgb(discl_cfg.get("color", "#7F8C8D"))
+            discl_y = current_y + 8.0
+
+            discl_font = self.fonts.get_fitz_font(discl_font_name)
+            for i, line in enumerate(disclaimer.split("\n")):
+                tw = fitz.TextWriter(page.rect)
+                tw.append(
+                    (discl_x, discl_y + i * (discl_size * 1.6) + discl_size * 0.8),
+                    line.strip(), font=discl_font, fontsize=discl_size,
+                )
+                tw.write_text(page, color=discl_color)
+
         # Page number
         pn_cfg = self.tpl.get("page_number", {})
         pn_size = pn_cfg.get("size", 8)

@@ -13,7 +13,7 @@
 #   3. docker compose -f docker-compose.openaec.yml up -d
 #   4. Voeg Caddyfile.openaec snippet toe aan bestaande Caddyfile
 #   5. Herlaad Caddy: docker exec caddy caddy reload --config /etc/caddy/Caddyfile
-#   6. Open https://auth.openaec.com/if/flow/initial-setup/
+#   6. Open https://auth.open-aec.com/if/flow/initial-setup/
 #   7. Configureer de OAuth2 application (zie README.md)
 #
 # Updaten:
@@ -112,7 +112,7 @@ services:
       # JWT
       OPENAEC_JWT_SECRET: ${OPENAEC_JWT_SECRET:?Set OPENAEC_JWT_SECRET in .env}
       # Cookies
-      OPENAEC_COOKIE_DOMAIN: ${OPENAEC_COOKIE_DOMAIN:-.openaec.com}
+      OPENAEC_COOKIE_DOMAIN: ${OPENAEC_COOKIE_DOMAIN:-.open-aec.com}
       OPENAEC_COOKIE_SECURE: "true"
       # OIDC — Authentik
       OPENAEC_OIDC_ISSUER: https://${AUTH_DOMAIN}/application/o/openaec-reports/

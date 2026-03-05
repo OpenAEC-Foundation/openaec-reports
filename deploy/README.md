@@ -246,7 +246,7 @@ docker compose down -v       # Stop EN verwijder volumes (DATA VERLIES!)
 
 ---
 
-## Variant B: Bestaande Caddy (openaec.com)
+## Variant B: Bestaande Caddy (open-aec.com)
 
 Voor deployment op een VPS waar al een Caddy reverse proxy draait (bijv. Hetzner).
 Gebruikt `docker-compose.openaec.yml` — geen eigen Caddy, verbindt via extern Docker netwerk.
@@ -256,8 +256,8 @@ Gebruikt `docker-compose.openaec.yml` — geen eigen Caddy, verbindt via extern 
 ```
 Internet
   │
-  ├── reports.openaec.com ──→ Bestaande Caddy ──→ openaec-reports (:8000)
-  └── auth.openaec.com    ──→ Bestaande Caddy ──→ authentik-server (:9000)
+  ├── report.open-aec.com ──→ Bestaande Caddy ──→ openaec-reports (:8000)
+  └── auth.open-aec.com    ──→ Bestaande Caddy ──→ authentik-server (:9000)
                                                     ├── postgresql  ┐
                                                     └── redis       ┘ internal network
 ```
@@ -268,8 +268,8 @@ Maak A-records aan die naar het server IP wijzen:
 
 | Record | Type | Waarde |
 |--------|------|--------|
-| `reports.openaec.com` | A | `<server-ip>` |
-| `auth.openaec.com` | A | `<server-ip>` |
+| `report.open-aec.com` | A | `<server-ip>` |
+| `auth.open-aec.com` | A | `<server-ip>` |
 
 ### B2. Caddy netwerk opzoeken
 
@@ -351,32 +351,32 @@ Volg stappen 6.1 t/m 6.5 uit Variant A, maar met deze aangepaste waarden:
 
 | Instelling | Waarde |
 |-----------|--------|
-| Admin setup URL | `https://auth.openaec.com/if/flow/initial-setup/` |
-| Redirect URIs | `https://reports.openaec.com/auth/callback` + `http://localhost:5173/auth/callback` |
-| Launch URL | `https://reports.openaec.com` |
+| Admin setup URL | `https://auth.open-aec.com/if/flow/initial-setup/` |
+| Redirect URIs | `https://report.open-aec.com/auth/callback` + `http://localhost:5173/auth/callback` |
+| Launch URL | `https://report.open-aec.com` |
 
 ### B8. Eerste admin user aanmaken
 
 ```bash
 docker compose -f docker-compose.openaec.yml exec openaec-reports \
     openaec-report create-user \
-    --username admin --password <wachtwoord> --email admin@openaec.com --admin
+    --username admin --password <wachtwoord> --email admin@open-aec.com --admin
 ```
 
 ### B9. Verificatie
 
 ```bash
 # Health check
-curl https://reports.openaec.com/api/health
+curl https://report.open-aec.com/api/health
 
 # OIDC config check (moet enabled: true tonen)
-curl https://reports.openaec.com/api/auth/oidc/config
+curl https://report.open-aec.com/api/auth/oidc/config
 
 # Authentik discovery
-curl https://auth.openaec.com/application/o/openaec-reports/.well-known/openid-configuration
+curl https://auth.open-aec.com/application/o/openaec-reports/.well-known/openid-configuration
 ```
 
-Open `https://reports.openaec.com` — je zou nu de **"Inloggen via SSO"** knop moeten zien.
+Open `https://report.open-aec.com` — je zou nu de **"Inloggen via SSO"** knop moeten zien.
 
 ### Beheer (Variant B)
 
@@ -399,5 +399,5 @@ docker compose -f docker-compose.openaec.yml down -v       # DATA VERLIES!
 |----------|-----------|
 | Container niet bereikbaar via Caddy | Check of container in `caddy_net` zit: `docker network inspect caddy_net` |
 | Netwerk niet gevonden | `CADDY_NETWORK` in `.env` moet matchen met bestaand netwerk |
-| Cookie werkt niet cross-domain | `OPENAEC_COOKIE_DOMAIN` moet `.openaec.com` zijn (met punt) |
+| Cookie werkt niet cross-domain | `OPENAEC_COOKIE_DOMAIN` moet `.open-aec.com` zijn (met punt) |
 | TLS certificaat mislukt | DNS A-records controleren, bestaande Caddy moet poort 80/443 open hebben |

@@ -670,8 +670,8 @@ class ColofonGenerator:
         # Fallback: hardcoded from reference
         return [
             ("project", 321.1),
-            ("opdrachtgever_contact", 369.1),
-            ("opdrachtgever_naam", 381.8),
+            ("opdrachtgever_naam", 369.1),
+            ("opdrachtgever_contact", 381.8),
             ("opdrachtgever_adres", 394.6),
             ("adviseur_bedrijf", 489.1),
             ("adviseur_naam", 501.1),

@@ -723,8 +723,8 @@ def draw_colofon_page(
     # ---- Default velden (neutraal, volledig) ----
     default_fields = [
         {"label": "Project", "type": "project", "y_pt": 320.8},
-        {"label": "Client", "type": "opdrachtgever_contact", "y_pt": 368.8},
-        {"label": "", "type": "opdrachtgever_naam", "y_pt": 381.8},
+        {"label": "Client", "type": "opdrachtgever_naam", "y_pt": 368.8},
+        {"label": "", "type": "opdrachtgever_contact", "y_pt": 381.8},
         {"label": "", "type": "opdrachtgever_adres", "y_pt": 394.6},
         {"type": "line", "y_pt": 478},
         {"label": "Adviseur", "type": "adviseur_bedrijf", "y_pt": 488.8},

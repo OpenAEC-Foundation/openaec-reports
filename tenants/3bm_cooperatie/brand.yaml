@@ -301,7 +301,7 @@ stationery:
       x_pt: 90.0
       y_pt: 38.9
       width_pt: 451.6
-      height_pt: 746.0
+      height_pt: 741.1
   toc:
     source: ""
     header_footer: "content"

@@ -4,11 +4,11 @@
 # Na toevoegen: docker exec caddy caddy reload --config /etc/caddy/Caddyfile
 #
 # Vereisten:
-#   - DNS A-records voor reports.openaec.com en auth.openaec.com
+#   - DNS A-records voor report.open-aec.com en auth.open-aec.com
 #   - Containers in hetzelfde Docker netwerk als Caddy (caddy_net)
 
 # ── OpenAEC Reports ────────────────────────────────────────────────────
-reports.openaec.com {
+report.open-aec.com {
 	reverse_proxy openaec-reports:8000
 
 	# Gzip compressie
@@ -30,7 +30,7 @@ reports.openaec.com {
 }
 
 # ── Authentik SSO ──────────────────────────────────────────────────────
-auth.openaec.com {
+auth.open-aec.com {
 	reverse_proxy authentik-server:9000
 
 	# Gzip compressie

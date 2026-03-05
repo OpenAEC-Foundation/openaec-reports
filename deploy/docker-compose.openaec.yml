@@ -1,0 +1,151 @@
+# Docker Compose — OpenAEC Reports op openaec.com
+#
+# Variant voor deployment ACHTER een bestaande Caddy reverse proxy.
+# Geen eigen Caddy — services worden via extern Docker netwerk bereikbaar.
+#
+# Inclusief:
+#   - Authentik SSO (OAuth2/OIDC identity provider)
+#   - OpenAEC Reports (API + frontend)
+#
+# Gebruik:
+#   1. Kopieer .env.openaec.example naar .env en vul de secrets in
+#   2. Maak het externe Caddy netwerk aan (zie README.md)
+#   3. docker compose -f docker-compose.openaec.yml up -d
+#   4. Voeg Caddyfile.openaec snippet toe aan bestaande Caddyfile
+#   5. Herlaad Caddy: docker exec caddy caddy reload --config /etc/caddy/Caddyfile
+#   6. Open https://auth.openaec.com/if/flow/initial-setup/
+#   7. Configureer de OAuth2 application (zie README.md)
+#
+# Updaten:
+#   docker compose -f docker-compose.openaec.yml pull openaec-reports
+#   docker compose -f docker-compose.openaec.yml up -d openaec-reports
+
+services:
+
+  # ── Authentik SSO ────────────────────────────────────────────────────
+
+  postgresql:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - authentik_db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: authentik
+      POSTGRES_USER: authentik
+      POSTGRES_PASSWORD: ${AUTHENTIK_PG_PASS:?Set AUTHENTIK_PG_PASS in .env}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d authentik -U authentik"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: --save 60 1 --loglevel warning
+    volumes:
+      - authentik_redis:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  authentik-server:
+    image: ghcr.io/goauthentik/server:2024.12
+    restart: unless-stopped
+    command: server
+    environment:
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:?Set AUTHENTIK_SECRET_KEY in .env}
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_PG_PASS}
+      # Proxy headers (Caddy stuurt X-Forwarded-*)
+      AUTHENTIK_LISTEN__HTTP: 0.0.0.0:9000
+      AUTHENTIK_LISTEN__HTTPS: 0.0.0.0:9443
+    volumes:
+      - authentik_media:/media
+      - authentik_templates:/templates
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - internal
+      - caddy_net
+
+  authentik-worker:
+    image: ghcr.io/goauthentik/server:2024.12
+    restart: unless-stopped
+    command: worker
+    environment:
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_PG_PASS}
+    volumes:
+      - authentik_media:/media
+      - authentik_templates:/templates
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - internal
+
+  # ── OpenAEC Reports ──────────────────────────────────────────────────
+
+  openaec-reports:
+    image: ghcr.io/openaec-foundation/openaec-reports:latest
+    restart: unless-stopped
+    environment:
+      # JWT
+      OPENAEC_JWT_SECRET: ${OPENAEC_JWT_SECRET:?Set OPENAEC_JWT_SECRET in .env}
+      # Cookies
+      OPENAEC_COOKIE_DOMAIN: ${OPENAEC_COOKIE_DOMAIN:-.openaec.com}
+      OPENAEC_COOKIE_SECURE: "true"
+      # OIDC — Authentik
+      OPENAEC_OIDC_ISSUER: https://${AUTH_DOMAIN}/application/o/openaec-reports/
+      OPENAEC_OIDC_CLIENT_ID: ${OPENAEC_OIDC_CLIENT_ID:-openaec-reports}
+      # CORS
+      CORS_ORIGINS: "https://${REPORT_DOMAIN},http://localhost:5173"
+      # Registratie
+      OPENAEC_REGISTRATION_ENABLED: ${OPENAEC_REGISTRATION_ENABLED:-false}
+      # Tenants
+      OPENAEC_TENANTS_ROOT: /app/tenants
+      OPENAEC_TENANT_DIR: /app/tenants/default
+    volumes:
+      - openaec_data:/app/data
+      - openaec_uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - caddy_net
+
+networks:
+  internal:
+    driver: bridge
+  caddy_net:
+    external: true
+    name: ${CADDY_NETWORK:-caddy_net}
+
+volumes:
+  authentik_db:
+  authentik_redis:
+  authentik_media:
+  authentik_templates:
+  openaec_data:
+  openaec_uploads:

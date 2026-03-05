@@ -1,0 +1,50 @@
+# Caddyfile snippet — OpenAEC Reports + Authentik SSO
+#
+# Voeg dit toe aan de bestaande Caddyfile op de VPS.
+# Na toevoegen: docker exec caddy caddy reload --config /etc/caddy/Caddyfile
+#
+# Vereisten:
+#   - DNS A-records voor reports.openaec.com en auth.openaec.com
+#   - Containers in hetzelfde Docker netwerk als Caddy (caddy_net)
+
+# ── OpenAEC Reports ────────────────────────────────────────────────────
+reports.openaec.com {
+	reverse_proxy openaec-reports:8000
+
+	# Gzip compressie
+	encode gzip
+
+	# Security headers
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	# Logging
+	log {
+		output stdout
+		format console
+	}
+}
+
+# ── Authentik SSO ──────────────────────────────────────────────────────
+auth.openaec.com {
+	reverse_proxy authentik-server:9000
+
+	# Gzip compressie
+	encode gzip
+
+	# Security headers
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

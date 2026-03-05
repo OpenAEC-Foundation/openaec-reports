@@ -215,12 +215,16 @@ pages:
     page_num_font: "GothamBook"
     page_num_size: 9.5
     page_num_color: "#38BDA0"
-    # Veld volgorde met y_pt posities
+    # Veld volgorde met y_pt posities (aligned met renderer_v2 colofon.yaml)
     fields:
       - {label: "Project", type: "project", y_pt: 320.8}
       - {label: "In opdracht van", type: "client", y_pt: 368.8}
+      - {label: "", type: "opdrachtgever_naam", y_pt: 381.8}
+      - {label: "", type: "opdrachtgever_adres", y_pt: 394.6}
+      - {type: "line", y_pt: 478}
+      - {label: "Adviseur", type: "adviseur_bedrijf", y_pt: 488.8}
+      - {label: "", type: "adviseur_naam", y_pt: 501.1}
       - {type: "line", y_pt: 517}
-      - {label: "Adviseur", type: "author", y_pt: 488.8}
       - {label: "Toegepaste Normen", type: "norms", y_pt: 524.8}
       - {type: "line", y_pt: 542}
       - {label: "Documentgegevens", type: "document_description", y_pt: 548.8}

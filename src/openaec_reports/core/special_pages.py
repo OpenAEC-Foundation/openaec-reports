@@ -649,18 +649,37 @@ def draw_colofon_page(
         canvas.drawString(sub_x, ph - sub_y, subtitle)
 
     # ---- Veldwaarden mapping ----
+    project_display = config.project
+    if getattr(config, "project_number", ""):
+        project_display = f"{config.project_number} - {config.project}"
+
     field_values = {
-        "project": config.project,
+        # Basis velden (uit DocumentConfig)
+        "project": project_display,
         "client": config.client,
         "author": config.author,
+        # Colofon document velden
         "date": data.get("date", ""),
         "norms": data.get("norms", ""),
         "document_description": data.get("document_description", ""),
         "phase": data.get("phase", ""),
         "status": data.get("status", "CONCEPT"),
         "document_code": data.get("document_code", ""),
+        # Opdrachtgever velden
+        "opdrachtgever_contact": data.get("opdrachtgever_contact", ""),
+        "opdrachtgever_naam": data.get("opdrachtgever_naam", ""),
+        "opdrachtgever_adres": data.get("opdrachtgever_adres", ""),
+        # Adviseur velden
+        "adviseur_bedrijf": data.get(
+            "adviseur_bedrijf", config.author
+        ),
+        "adviseur_naam": data.get("adviseur_naam", ""),
+        "adviseur_functie": data.get("adviseur_functie", ""),
+        "adviseur_email": data.get("adviseur_email", ""),
+        "adviseur_telefoon": data.get("adviseur_telefoon", ""),
+        "adviseur_registratie": data.get("adviseur_registratie", ""),
     }
-    # Extra velden uit colofon_data
+    # Extra velden uit colofon_data (voor onbekende/custom keys)
     for key, val in data.items():
         if key not in field_values and isinstance(val, str):
             field_values[key] = val
@@ -701,17 +720,32 @@ def draw_colofon_page(
     value_font = get_font_name(spec.get("value_font", "Helvetica"))
     value_size = spec.get("value_size", 10.0)
 
-    # ---- Default velden (neutraal, Engelstalig) ----
+    # ---- Default velden (neutraal, volledig) ----
     default_fields = [
         {"label": "Project", "type": "project", "y_pt": 320.8},
         {"label": "Client", "type": "client", "y_pt": 368.8},
+        {"label": "", "type": "opdrachtgever_naam", "y_pt": 381.8},
+        {"label": "", "type": "opdrachtgever_adres", "y_pt": 394.6},
+        {"type": "line", "y_pt": 478},
+        {"label": "Adviseur", "type": "adviseur_bedrijf", "y_pt": 488.8},
+        {"label": "", "type": "adviseur_naam", "y_pt": 501.1},
         {"type": "line", "y_pt": 517},
-        {"label": "Author", "type": "author", "y_pt": 488.8},
+        {"label": "Normen", "type": "norms", "y_pt": 524.8},
+        {"type": "line", "y_pt": 542},
+        {"label": "Documentgegevens", "type": "document_description", "y_pt": 548.8},
+        {"type": "line", "y_pt": 566},
+        {"label": "Datum", "type": "date", "y_pt": 572.8},
+        {"type": "line", "y_pt": 590},
+        {"label": "Fase", "type": "phase", "y_pt": 596.8},
+        {"type": "line", "y_pt": 614},
+        {"label": "Status", "type": "status", "y_pt": 620.8},
+        {"type": "line", "y_pt": 638},
+        {"label": "Kenmerk", "type": "document_code", "y_pt": 644.8},
     ]
     fields = spec.get("fields", default_fields)
 
     first_n_colored = 2
-    field_index = 0
+    labeled_index = 0
 
     for field_def in fields:
         y_pt = field_def.get("y_pt", 0)
@@ -729,11 +763,17 @@ def draw_colofon_page(
             # Multiline waarden: split op newlines, teken elk op eigen regel
             value_lines = str(value).split("\n") if value else [""]
 
-            # Label kleur: eerste N in primaire kleur, rest secundair
-            color = first_color if field_index < first_n_colored else other_color
-            canvas.setFont(label_font, label_size)
-            canvas.setFillColor(color)
-            canvas.drawString(label_x, y_rl, label)
+            # Label kleur: eerste N gelabelde velden in primaire kleur
+            if label:
+                color = (
+                    first_color
+                    if labeled_index < first_n_colored
+                    else other_color
+                )
+                canvas.setFont(label_font, label_size)
+                canvas.setFillColor(color)
+                canvas.drawString(label_x, y_rl, label)
+                labeled_index += 1
 
             # Waarde(n)
             canvas.setFont(value_font, value_size)
@@ -742,8 +782,6 @@ def draw_colofon_page(
                 canvas.drawString(
                     value_x, y_rl - i * (value_size * 1.4), vline.strip()
                 )
-
-            field_index += 1
 
     # ---- Footer: accent blok + logo + paginanummer ----
     rect_spec = spec.get("footer_rect", [0, 771, 282, 842])

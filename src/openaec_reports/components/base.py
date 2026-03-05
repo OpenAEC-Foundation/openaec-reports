@@ -26,6 +26,17 @@ class BMFlowable(Flowable):
         self.height = h
         return (self.width, self.height)
 
+    def split(self, available_width: float, available_height: float) -> list:
+        """Delegeer splitting naar het interne flowable object.
+
+        Hierdoor kunnen grote tabellen en andere content blocks automatisch
+        over meerdere pagina's verdeeld worden door ReportLab.
+        """
+        if self._content is None:
+            self._content = self._build_content(available_width)
+            self._content.wrap(available_width, available_height)
+        return self._content.split(available_width, available_height)
+
     def draw(self):
         if self._content is not None:
             self._content.drawOn(self.canv, 0, 0)

@@ -205,6 +205,21 @@ class TemplateLoader:
 
         colofon: dict[str, Any] = {
             "enabled": colofon_enabled,
+            "opdrachtgever_naam": "",
+            "opdrachtgever_contact": "",
+            "opdrachtgever_adres": "",
+            "adviseur_bedrijf": "",
+            "adviseur_naam": "",
+            "adviseur_email": "",
+            "adviseur_telefoon": "",
+            "adviseur_functie": "",
+            "adviseur_registratie": "",
+            "normen": "",
+            "documentgegevens": "",
+            "datum": today,
+            "fase": "",
+            "status_colofon": "CONCEPT",
+            "kenmerk": "",
             "extra_fields": {},
             "revision_history": [
                 {

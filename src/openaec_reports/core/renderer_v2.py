@@ -654,7 +654,7 @@ class ColofonGenerator:
             "adviseur_registratie": colofon.get("adviseur_registratie", ""),
             "normen": colofon.get("normen", ""),
             "documentgegevens": colofon.get("documentgegevens", ""),
-            "datum": data.get("date", ""),
+            "datum": colofon.get("datum", data.get("date", "")),
             "fase": colofon.get("fase", ""),
             "status": colofon.get("status_colofon", data.get("status", "CONCEPT")),
             "kenmerk": colofon.get("kenmerk", ""),

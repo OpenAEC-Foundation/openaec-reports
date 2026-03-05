@@ -920,8 +920,9 @@ class ContentRenderer:
         s = self.blocks.get("heading_2", {})
         n = s.get("number", {})
         t = s.get("title", {})
-        self.y += s.get("spacing_before", 30.0)
-        self._check_overflow(t.get("size", 13) + s.get("spacing_after", 20.5))
+        spacing_before = s.get("spacing_before", 30.0)
+        self._check_overflow(spacing_before + t.get("size", 13) + s.get("spacing_after", 20.5))
+        self.y += spacing_before
         self._text(n["x"], self.y, number, n["font"], n["size"], n["color"])
         y_title = self.y - (t["size"] - n["size"]) * 0.3
         self._text(t["x"], y_title, title, t["font"], t["size"], t["color"])
@@ -929,10 +930,11 @@ class ContentRenderer:
 
     def paragraph(self, text: str) -> None:
         s = self.blocks.get("paragraph", {})
-        self.y += s.get("spacing_before", 12.0)
+        spacing_before = s.get("spacing_before", 12.0)
         text = _strip_html(text)
         lines = self.fonts.wrap_text(text, s["size"], s["max_width"])
-        self._check_overflow(len(lines) * s["line_height"])
+        self._check_overflow(spacing_before + len(lines) * s["line_height"])
+        self.y += spacing_before
         for line in lines:
             self._text(s["x"], self.y, line, s["font"], s["size"], s["color"])
             self.y += s["line_height"]
@@ -1075,12 +1077,13 @@ class ContentRenderer:
         header_max_lines = max((len(lines) for lines in header_wrapped), default=1)
         header_h = max(header_max_lines * (h_fontsize * 1.35) + 8, 20.0)
 
-        self.y += s.get("spacing_before", 20.0)
+        spacing_before = s.get("spacing_before", 20.0)
 
         # Title above table
         if title:
             title_s = s.get("title", {})
-            self._check_overflow(16 + header_h)
+            self._check_overflow(spacing_before + 16 + header_h)
+            self.y += spacing_before
             self._text(
                 x, self.y, title,
                 title_s.get("font", "Inter-Bold"),
@@ -1088,6 +1091,9 @@ class ContentRenderer:
                 title_s.get("color", "#401246"),
             )
             self.y += 16
+        else:
+            self._check_overflow(spacing_before + header_h + cell_line_h + 8)
+            self.y += spacing_before
 
         self._check_overflow(header_h + cell_line_h + 8)  # at least header + 1 row line
 
@@ -1577,9 +1583,10 @@ class ContentRenderer:
         if reference:
             lines_needed += 1
         block_h = lines_needed * 16 + 16  # padding
+        spacing_before = 12
 
-        self.y += 12
-        self._check_overflow(block_h)
+        self._check_overflow(spacing_before + block_h)
+        self.y += spacing_before
 
         # Background rect
         bg_color = _hex_to_rgb(calc_s.get("background", "#F5F5F5"))
@@ -1656,8 +1663,9 @@ class ContentRenderer:
         max_w = self.blocks.get("paragraph", {}).get("max_width", 393.0)
 
         block_h = 80
-        self.y += 12
-        self._check_overflow(block_h)
+        spacing_before = 12
+        self._check_overflow(spacing_before + block_h)
+        self.y += spacing_before
 
         # Background rect
         bg_color = _hex_to_rgb(chk_s.get("background", "#F5F5F5"))

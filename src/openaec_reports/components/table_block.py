@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import xml.sax.saxutils as saxutils
 from typing import Any
 
 from reportlab.lib.colors import HexColor
-from reportlab.platypus import Table, TableStyle
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.platypus import Paragraph, Table, TableStyle
 
 from openaec_reports.components.base import BMFlowable
 from openaec_reports.core.document import MM_TO_PT
@@ -39,31 +41,53 @@ class TableBlock(BMFlowable):
         self.zebra = zebra
 
     def _build_content(self, available_width: float) -> Table:
-        """Bouw ReportLab Table met styling."""
-        data = [self.headers] + self.rows
+        """Bouw ReportLab Table met styling en text-wrapping."""
+        # Paragraph styles voor cellen — zorgt voor automatische word-wrap
+        header_style = ParagraphStyle(
+            "TableHeader",
+            fontName=BM_FONTS.heading,
+            fontSize=BM_FONTS.body_size,
+            leading=BM_FONTS.body_size * 1.3,
+            textColor=HexColor(BM_COLORS.table_header_text),
+        )
+        body_style = ParagraphStyle(
+            "TableBody",
+            fontName=BM_FONTS.body,
+            fontSize=BM_FONTS.body_size,
+            leading=BM_FONTS.body_size * 1.3,
+            textColor=HexColor(BM_COLORS.text),
+        )
 
-        col_widths = None
+        # Wrap celinhoud in Paragraph objecten voor automatische text-wrap
+        header_row = [
+            Paragraph(saxutils.escape(str(h)), header_style)
+            for h in self.headers
+        ]
+        body_rows = [
+            [Paragraph(saxutils.escape(str(cell)), body_style) for cell in row]
+            for row in self.rows
+        ]
+        data = [header_row] + body_rows
+
+        # Kolombreedte: expliciet, of gelijk verdeeld over beschikbare breedte
         if self.col_widths_mm:
             col_widths = [w * MM_TO_PT for w in self.col_widths_mm]
+        else:
+            n_cols = len(self.headers) if self.headers else 1
+            col_widths = [available_width / n_cols] * n_cols
 
-        table = Table(data, colWidths=col_widths)
+        table = Table(data, colWidths=col_widths, repeatRows=1)
 
         style_commands = [
             # Header styling
             ("BACKGROUND", (0, 0), (-1, 0), HexColor(BM_COLORS.table_header_bg)),
-            ("TEXTCOLOR", (0, 0), (-1, 0), HexColor(BM_COLORS.table_header_text)),
-            ("FONTNAME", (0, 0), (-1, 0), BM_FONTS.heading),
-            ("FONTSIZE", (0, 0), (-1, 0), BM_FONTS.body_size),
-            # Body styling
-            ("FONTNAME", (0, 1), (-1, -1), BM_FONTS.body),
-            ("FONTSIZE", (0, 1), (-1, -1), BM_FONTS.body_size),
-            ("TEXTCOLOR", (0, 1), (-1, -1), HexColor(BM_COLORS.text)),
             # Grid
             ("GRID", (0, 0), (-1, -1), 0.5, HexColor(BM_COLORS.rule)),
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ("TOPPADDING", (0, 0), (-1, -1), 3),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
             ("LEFTPADDING", (0, 0), (-1, -1), 4),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 4),
         ]
 
         if self.zebra:
@@ -76,4 +100,4 @@ class TableBlock(BMFlowable):
         table.setStyle(TableStyle(style_commands))
         return table
 
-    # wrap() en draw() worden geërfd van BMFlowable
+    # wrap(), draw() en split() worden geërfd van BMFlowable

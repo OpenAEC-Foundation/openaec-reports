@@ -140,7 +140,7 @@ networks:
     driver: bridge
   caddy_net:
     external: true
-    name: ${CADDY_NETWORK:-caddy_net}
+    name: ${CADDY_NETWORK:-openaec_platform}
 
 volumes:
   authentik_db:

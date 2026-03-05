@@ -39,9 +39,9 @@ table:
   rows:
     - key: project
       y_td: 321.1
-    - key: opdrachtgever_contact
-      y_td: 369.1
     - key: opdrachtgever_naam
+      y_td: 369.1
+    - key: opdrachtgever_contact
       y_td: 381.8
     - key: opdrachtgever_adres
       y_td: 394.6

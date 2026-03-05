@@ -41,7 +41,8 @@ def get_cookie_domain() -> str | None:
     Returns:
         Cookie domain of None.
     """
-    return os.environ.get("OPENAEC_COOKIE_DOMAIN", None)
+    domain = os.environ.get("OPENAEC_COOKIE_DOMAIN", "")
+    return domain if domain else None
 
 
 def is_default_secret() -> bool:

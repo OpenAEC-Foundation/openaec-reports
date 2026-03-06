@@ -121,6 +121,7 @@ services:
       # OIDC — Authentik
       OPENAEC_OIDC_ISSUER: https://${AUTH_DOMAIN}/application/o/openaec-reports/
       OPENAEC_OIDC_CLIENT_ID: ${OPENAEC_OIDC_CLIENT_ID:-openaec-reports}
+      OPENAEC_OIDC_TRUSTED_CLIENTS: ${OPENAEC_OIDC_TRUSTED_CLIENTS:-}
       # CORS
       CORS_ORIGINS: "https://${REPORT_DOMAIN},http://localhost:5173"
       # Registratie

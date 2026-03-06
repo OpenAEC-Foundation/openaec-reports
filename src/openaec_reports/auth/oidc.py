@@ -5,8 +5,11 @@ OIDC-conforme IdP) zijn uitgegeven. Gebruikt PyJWT met cryptography
 voor RS256 signature verification.
 
 Configuratie via environment variables:
-    OPENAEC_OIDC_ISSUER    — OIDC issuer URL (bijv. https://auth.3bm.co.nl/...)
-    OPENAEC_OIDC_CLIENT_ID — OAuth2 client ID
+    OPENAEC_OIDC_ISSUER          — OIDC issuer URL (bijv. https://auth.3bm.co.nl/...)
+    OPENAEC_OIDC_CLIENT_ID       — OAuth2 client ID
+    OPENAEC_OIDC_TRUSTED_CLIENTS — Comma-separated extra client IDs van sibling-apps
+                                   op dezelfde Authentik instance die tokens mogen
+                                   sturen (bijv. "warmteverlies,monty")
 """
 
 from __future__ import annotations
@@ -43,6 +46,60 @@ def _get_oidc_client_id() -> str:
         Client ID string.
     """
     return os.environ.get("OPENAEC_OIDC_CLIENT_ID", "")
+
+
+def _get_trusted_audiences() -> list[str]:
+    """Bouw lijst van geaccepteerde audiences.
+
+    Bevat altijd de eigen client_id, plus eventuele sibling-apps
+    uit OPENAEC_OIDC_TRUSTED_CLIENTS (comma-separated).
+
+    Returns:
+        Lijst van geaccepteerde audience strings.
+    """
+    own = _get_oidc_client_id()
+    audiences = [own] if own else []
+
+    extra = os.environ.get("OPENAEC_OIDC_TRUSTED_CLIENTS", "").strip()
+    if extra:
+        audiences.extend(c.strip() for c in extra.split(",") if c.strip())
+
+    return audiences
+
+
+def _get_trusted_issuers() -> list[str]:
+    """Bouw lijst van geaccepteerde issuers.
+
+    Authentik gebruikt per-application issuer URLs:
+        https://auth.example.com/application/o/<slug>/
+
+    Deze functie genereert de issuer URL voor elke trusted client
+    op basis van het base domain van de eigen issuer.
+
+    Returns:
+        Lijst van geaccepteerde issuer URLs.
+    """
+    own_issuer = _get_oidc_issuer()
+    if not own_issuer:
+        return []
+
+    issuers = [own_issuer]
+
+    extra = os.environ.get("OPENAEC_OIDC_TRUSTED_CLIENTS", "").strip()
+    if not extra:
+        return issuers
+
+    # Leid base URL af: https://auth.example.com/application/o/
+    # van bijv. https://auth.example.com/application/o/openaec-reports/
+    parts = own_issuer.rstrip("/").rsplit("/", 1)
+    if len(parts) == 2:
+        base = parts[0]  # https://auth.example.com/application/o
+        for client in extra.split(","):
+            client = client.strip()
+            if client:
+                issuers.append(f"{base}/{client}/")
+
+    return issuers
 
 
 def is_oidc_enabled() -> bool:
@@ -145,10 +202,10 @@ def validate_oidc_token(token: str) -> OidcClaims:
     Raises:
         ValueError: Bij ongeldige, verlopen, of onbetrouwbare token.
     """
-    issuer = _get_oidc_issuer()
-    client_id = _get_oidc_client_id()
+    audiences = _get_trusted_audiences()
+    issuers = _get_trusted_issuers()
 
-    if not issuer or not client_id:
+    if not audiences or not issuers:
         raise ValueError("OIDC niet geconfigureerd (issuer/client_id ontbreekt)")
 
     jwks_data = _fetch_jwks()
@@ -181,19 +238,34 @@ def validate_oidc_token(token: str) -> OidcClaims:
         # Bouw public key van JWK
         public_key = jwt.algorithms.RSAAlgorithm.from_jwk(rsa_key)
 
-        # Decodeer en valideer
-        payload = jwt.decode(
-            token,
-            public_key,
-            algorithms=["RS256"],
-            audience=client_id,
-            issuer=issuer,
-            options={
-                "verify_exp": True,
-                "verify_iss": True,
-                "verify_aud": True,
-            },
-        )
+        # Probeer validatie tegen elke trusted issuer
+        # (PyJWT accepteert een list voor audience, maar niet voor issuer)
+        payload = None
+        last_error: jwt.InvalidTokenError | None = None
+        for issuer in issuers:
+            try:
+                payload = jwt.decode(
+                    token,
+                    public_key,
+                    algorithms=["RS256"],
+                    audience=audiences,
+                    issuer=issuer,
+                    options={
+                        "verify_exp": True,
+                        "verify_iss": True,
+                        "verify_aud": True,
+                    },
+                )
+                break  # Succes — stop
+            except (jwt.InvalidIssuerError, jwt.InvalidAudienceError) as exc:
+                last_error = exc
+                continue  # Probeer volgende issuer
+
+        if payload is None:
+            if last_error is not None:
+                raise last_error
+            raise jwt.InvalidTokenError("Geen matching issuer/audience gevonden")
+
     except jwt.ExpiredSignatureError as exc:
         raise ValueError("OIDC token verlopen") from exc
     except jwt.InvalidAudienceError as exc:

@@ -1,6 +1,6 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-01 (sessie: pixel fixes + admin cleanup)
+> Laatst bijgewerkt: 2026-03-03 (sessie: planning T10 user reports + profiel)
 
 ---
 
@@ -108,6 +108,12 @@
 - **Replace button:** "Vervangen" knop per asset bestand in BrandManagement. Upload met filename rename via `new File([file], replaceTarget)`.
 - **BrandWizard verwijderd:** Standalone BrandWizard (blauw, 3-stap) volledig verwijderd — 8 bestanden. BrandExtractWizard (paars, 4-stap) blijft als enige brand creation flow.
 - **AdminTab type:** `"brand-wizard"` verwijderd uit union type.
+
+### T10 Planning — User Reports + Profiel (3 maart)
+- Uitvoerplan geschreven: `PLAN-user-reports.md`
+- TODO.md bijgewerkt met T10.1–T10.16 (16 subtaken, 5 fasen)
+- 8 nieuwe bestanden, 7 te wijzigen bestanden, 4 test bestanden
+- Features: auto-save PDFs, user profiel, rapporten-lijst, wachtwoord wijzigen
 
 ### Tenant resolution in `/api/generate/template` — GEFIXT (cfaa808)
 - **FIX-1:** Nieuwe `_resolve_tenant_and_template()` helper leidt tenant af uit template naam prefix (bijv. `symitech_bic_factuur` → tenant=`symitech`). Scant bestaande tenant directories, sorted by name length (langste eerst) om ambiguïteit te voorkomen. Fallback: `data["brand"]` → `user.tenant` → `"symitech"`.

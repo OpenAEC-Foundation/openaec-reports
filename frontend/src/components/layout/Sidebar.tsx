@@ -15,6 +15,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useReportStore } from '@/stores/reportStore';
+import type { MetadataPanel } from '@/stores/reportStore';
 import { useApiStore } from '@/stores/apiStore';
 import { BlockIcon } from '@/components/shared/BlockIcons';
 import type { EditorSection, EditorAppendix } from '@/types/report';
@@ -37,10 +38,59 @@ function blockCountLabel(count: number): string {
   return `${count} block${count !== 1 ? 's' : ''}`;
 }
 
+// ---------- Sidebar navigation items ----------
+
+interface SidebarNavItem {
+  id: MetadataPanel;
+  label: string;
+  icon: JSX.Element;
+}
+
+const NAV_ITEMS: SidebarNavItem[] = [
+  {
+    id: 'rapport',
+    label: 'Rapport',
+    icon: (
+      <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.298 1.466l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.298 1.466l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.298-1.466l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.298-1.466l1.297-2.247a1.125 1.125 0 011.37-.49l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'voorblad',
+    label: 'Voorblad',
+    icon: (
+      <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A1.5 1.5 0 0021.75 19.5V4.5A1.5 1.5 0 0020.25 3H3.75A1.5 1.5 0 002.25 4.5v15A1.5 1.5 0 003.75 21z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'colofon',
+    label: 'Colofon',
+    icon: (
+      <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'opties',
+    label: 'Opties',
+    icon: (
+      <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+      </svg>
+    ),
+  },
+];
+
 // ---------- Sortable section item ----------
 
 interface SortableSectionItemProps {
   section: EditorSection;
+  chapterNumber: number;
   isActive: boolean;
   isCollapsed: boolean;
   onSelect: () => void;
@@ -48,7 +98,7 @@ interface SortableSectionItemProps {
   onToggleCollapse: () => void;
 }
 
-function SortableSectionItem({ section, isActive, isCollapsed, onSelect, onRemove, onToggleCollapse }: SortableSectionItemProps) {
+function SortableSectionItem({ section, chapterNumber, isActive, isCollapsed, onSelect, onRemove, onToggleCollapse }: SortableSectionItemProps) {
   const {
     attributes,
     listeners,
@@ -97,7 +147,7 @@ function SortableSectionItem({ section, isActive, isCollapsed, onSelect, onRemov
         className="mt-2 flex h-5 w-5 shrink-0 cursor-grab items-center justify-center rounded text-gray-300 hover:text-gray-500 active:cursor-grabbing"
         {...attributes}
         {...listeners}
-        aria-label="Versleep sectie"
+        aria-label="Versleep hoofdstuk"
       >
         <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
           <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
@@ -110,13 +160,13 @@ function SortableSectionItem({ section, isActive, isCollapsed, onSelect, onRemov
         className="flex flex-1 items-start gap-2 py-2 pr-1 text-left"
       >
         <span
-          className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs font-medium ${
+          className={`mt-0.5 flex h-5 min-w-[1.25rem] shrink-0 items-center justify-center rounded text-xs font-bold ${
             isActive
               ? 'bg-brand-primary/20 text-brand-primary-dark'
               : 'bg-gray-100 text-gray-500'
           }`}
         >
-          H{section.level}
+          {chapterNumber}
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -158,8 +208,8 @@ function SortableSectionItem({ section, isActive, isCollapsed, onSelect, onRemov
           onRemove();
         }}
         className="mr-1 mt-2 flex h-5 w-5 shrink-0 items-center justify-center rounded text-gray-300 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
-        aria-label="Verwijder sectie"
-        title="Verwijder sectie"
+        aria-label="Verwijder hoofdstuk"
+        title="Verwijder hoofdstuk"
       >
         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -281,8 +331,10 @@ export function Sidebar() {
   const appendices = useReportStore((s) => s.report.appendices);
   const activeSection = useReportStore((s) => s.activeSection);
   const activeAppendix = useReportStore((s) => s.activeAppendix);
+  const activePanel = useReportStore((s) => s.activePanel);
   const setActiveSection = useReportStore((s) => s.setActiveSection);
   const setActiveAppendix = useReportStore((s) => s.setActiveAppendix);
+  const setActivePanel = useReportStore((s) => s.setActivePanel);
   const addNewSection = useReportStore((s) => s.addNewSection);
   const removeSection = useReportStore((s) => s.removeSection);
   const reorderSections = useReportStore((s) => s.reorderSections);
@@ -364,6 +416,8 @@ export function Sidebar() {
     }
   }
 
+  const isNavActive = activeSection === null && activeAppendix === null;
+
   const totalBlocks =
     sections.reduce((sum, s) => sum + s.content.length, 0) +
     appendices.reduce((sum, a) => sum + a.content.length, 0);
@@ -393,8 +447,7 @@ export function Sidebar() {
       </div>
 
       {/* Actions */}
-      <div className="px-3 pt-3 pb-1 space-y-1">
-        {/* Nieuw rapport */}
+      <div className="px-3 pt-3 pb-1">
         <button
           onClick={() => {
             if (isDirty) {
@@ -409,38 +462,43 @@ export function Sidebar() {
           </svg>
           Nieuw rapport
         </button>
-
-        {/* Rapport instellingen */}
-        <button
-          onClick={() => { setActiveSection(null); }}
-          className={`w-full flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors ${
-            activeSection === null && activeAppendix === null
-              ? 'bg-brand-primary-light text-brand-primary-dark font-medium'
-              : 'text-gray-600 hover:bg-gray-50'
-          }`}
-        >
-          <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.298 1.466l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.298 1.466l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.298-1.466l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.298-1.466l1.297-2.247a1.125 1.125 0 011.37-.49l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          Rapport instellingen
-        </button>
       </div>
 
       {/* Divider */}
       <div className="mx-4 border-t border-gray-100" />
 
-      {/* Scrollable area for sections + appendices */}
+      {/* Scrollable area */}
       <div className="flex-1 overflow-y-auto">
-        {/* Section list header + add button */}
-        <div className="flex items-center justify-between px-4 pt-3 pb-1">
+        {/* Navigation items: Rapport, Voorblad, Colofon, Opties */}
+        <nav className="px-2 pt-2 pb-1 space-y-0.5">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActivePanel(item.id)}
+              className={`w-full flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors ${
+                isNavActive && activePanel === item.id
+                  ? 'bg-brand-primary-light text-brand-primary-dark font-medium'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {item.icon}
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        {/* Divider */}
+        <div className="mx-4 my-1 border-t border-gray-100" />
+
+        {/* Chapter list header + add button */}
+        <div className="flex items-center justify-between px-4 pt-2 pb-1">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-            Secties
+            Hoofdstukken
           </p>
           <button
             onClick={() => addNewSection()}
             className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-gray-400 hover:bg-brand-primary-light hover:text-brand-primary-dark transition-colors"
-            title="Sectie toevoegen"
+            title="Hoofdstuk toevoegen"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -458,12 +516,12 @@ export function Sidebar() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
               </div>
-              <p className="text-sm text-gray-500">Geen secties</p>
+              <p className="text-sm text-gray-500">Geen hoofdstukken</p>
               <button
                 onClick={() => addNewSection()}
                 className="mt-2 text-sm text-brand-primary hover:text-brand-primary-dark font-medium"
               >
-                Eerste sectie toevoegen
+                Eerste hoofdstuk toevoegen
               </button>
             </div>
           )}
@@ -476,10 +534,11 @@ export function Sidebar() {
               items={sections.map((s) => s.id)}
               strategy={verticalListSortingStrategy}
             >
-              {sections.map((section) => (
+              {sections.map((section, index) => (
                 <div key={section.id} className="relative">
                   <SortableSectionItem
                     section={section}
+                    chapterNumber={index + 1}
                     isActive={activeSection === section.id}
                     isCollapsed={collapsed.has(section.id)}
                     onSelect={() => setActiveSection(section.id)}
@@ -504,7 +563,7 @@ export function Sidebar() {
           </DndContext>
         </nav>
 
-        {/* Divider between sections and appendices */}
+        {/* Divider between chapters and appendices */}
         <div className="mx-4 my-1 border-t border-gray-100" />
 
         {/* Appendix list header + add button */}
@@ -571,7 +630,7 @@ export function Sidebar() {
       <div className="border-t border-gray-200 px-4 py-3">
         <div className="flex items-center justify-between">
           <p className="text-xs text-gray-400">
-            {sections.length} sectie{sections.length !== 1 ? 's' : ''} &middot;{' '}
+            {sections.length} hoofdstuk{sections.length !== 1 ? 'ken' : ''} &middot;{' '}
             {appendices.length > 0 && (
               <>{appendices.length} bijlage{appendices.length !== 1 ? 'n' : ''} &middot; </>
             )}

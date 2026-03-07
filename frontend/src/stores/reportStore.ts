@@ -27,6 +27,8 @@ export interface ValidationResult {
 
 export type ViewMode = 'editor' | 'split' | 'json' | 'preview' | 'admin' | 'projects';
 
+export type MetadataPanel = 'rapport' | 'voorblad' | 'colofon' | 'opties';
+
 // ---------- Undo/redo constants ----------
 
 const MAX_UNDO_HISTORY = 50;
@@ -42,6 +44,7 @@ export interface ReportStore {
   activeSection: string | null;
   activeAppendix: string | null;
   activeBlock: string | null;
+  activePanel: MetadataPanel;
   viewMode: ViewMode;
   isDirty: boolean;
 
@@ -103,6 +106,7 @@ export interface ReportStore {
   setActiveSection: (id: string | null) => void;
   setActiveAppendix: (id: string | null) => void;
   setActiveBlock: (id: string | null) => void;
+  setActivePanel: (panel: MetadataPanel) => void;
   setViewMode: (mode: ViewMode) => void;
 
   // Actions — I/O
@@ -152,6 +156,7 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
   activeSection: null,
   activeAppendix: null,
   activeBlock: null,
+  activePanel: 'rapport',
   viewMode: 'editor',
   isDirty: false,
 
@@ -578,6 +583,7 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
   setActiveSection: (id) => set({ activeSection: id, activeAppendix: null, activeBlock: null }),
   setActiveAppendix: (id) => set({ activeAppendix: id, activeSection: null, activeBlock: null }),
   setActiveBlock: (id) => set({ activeBlock: id }),
+  setActivePanel: (panel) => set({ activePanel: panel, activeSection: null, activeAppendix: null, activeBlock: null }),
   setViewMode: (mode) => set({ viewMode: mode }),
 
   // --- I/O ---
@@ -596,6 +602,7 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
         activeSection: null,
         activeAppendix: null,
         activeBlock: null,
+        activePanel: 'rapport',
         isDirty: false,
         _past: [],
         _future: [],
@@ -623,6 +630,7 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
       activeSection: null,
       activeAppendix: null,
       activeBlock: null,
+      activePanel: 'rapport',
       isDirty: false,
       _past: [],
       _future: [],
@@ -639,6 +647,7 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
       activeSection: null,
       activeAppendix: null,
       activeBlock: null,
+      activePanel: 'rapport',
       isDirty: false,
       _past: [],
       _future: [],
@@ -654,6 +663,7 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
       activeSection: null,
       activeAppendix: null,
       activeBlock: null,
+      activePanel: 'rapport',
       viewMode: 'editor',
       isDirty: false,
       _past: [],

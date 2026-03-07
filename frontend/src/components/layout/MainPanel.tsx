@@ -445,6 +445,7 @@ function EditorContent({
   handleDragEnd: (event: DragEndEvent) => void;
 }) {
   const activePanel = useReportStore((s) => s.activePanel);
+  const sections = useReportStore((s) => s.report.sections);
 
   // Appendix editor
   if (activeAppendix) {
@@ -470,7 +471,6 @@ function EditorContent({
     );
   }
 
-  const sections = useReportStore((s) => s.report.sections);
   const chapterNumber = sections.findIndex((s) => s.id === section.id) + 1;
 
   return (

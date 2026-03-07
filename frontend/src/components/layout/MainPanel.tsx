@@ -19,7 +19,10 @@ import { useApiStore } from '@/stores/apiStore';
 import { BlockToolbox } from '@/components/editor/BlockToolbox';
 import { BlockEditor } from '@/components/editor/BlockEditor';
 import { AppendixEditor } from '@/components/editor/AppendixEditor';
-import { MetadataTabs } from '@/components/forms/MetadataTabs';
+import { MetadataForm } from '@/components/forms/MetadataForm';
+import { CoverForm } from '@/components/forms/CoverForm';
+import { ColofonForm } from '@/components/forms/ColofonForm';
+import { OptionsPanel } from '@/components/forms/OptionsPanel';
 import { ToggleSwitch } from '@/components/forms/ToggleSwitch';
 import { BlockIcon } from '@/components/shared/BlockIcons';
 import type { EditorBlock, EditorSection } from '@/types/report';
@@ -271,7 +274,7 @@ function SortableBlockItem({ block, sectionId, isActive, onSelect }: SortableBlo
 
 // ---------- Section title editor ----------
 
-function SectionHeader({ section }: { section: EditorSection }) {
+function SectionHeader({ section, chapterNumber }: { section: EditorSection; chapterNumber: number }) {
   const updateSection = useReportStore((s) => s.updateSection);
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(section.title);
@@ -289,8 +292,8 @@ function SectionHeader({ section }: { section: EditorSection }) {
   if (editing) {
     return (
       <div className="flex items-center gap-3">
-        <span className="flex h-7 w-7 items-center justify-center rounded bg-brand-primary/15 text-xs font-semibold text-brand-primary-dark">
-          H{section.level}
+        <span className="flex h-7 w-7 items-center justify-center rounded bg-brand-primary/15 text-sm font-bold text-brand-primary-dark">
+          {chapterNumber}
         </span>
         <input
           autoFocus
@@ -322,8 +325,8 @@ function SectionHeader({ section }: { section: EditorSection }) {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="flex h-7 w-7 items-center justify-center rounded bg-brand-primary/15 text-xs font-semibold text-brand-primary-dark">
-        H{section.level}
+      <span className="flex h-7 w-7 items-center justify-center rounded bg-brand-primary/15 text-sm font-bold text-brand-primary-dark">
+        {chapterNumber}
       </span>
       <h2
         className="flex-1 text-lg font-semibold text-gray-900 cursor-pointer hover:text-brand-primary-dark transition-colors"
@@ -415,6 +418,15 @@ export function MainPanel() {
   );
 }
 
+// ---------- Panel titles ----------
+
+const PANEL_TITLES: Record<string, string> = {
+  rapport: 'Rapport instellingen',
+  voorblad: 'Voorblad',
+  colofon: 'Colofon',
+  opties: 'Opties',
+};
+
 // ---------- Editor content (reusable in full + split) ----------
 
 function EditorContent({
@@ -432,21 +444,40 @@ function EditorContent({
   sensors: ReturnType<typeof useSensors>;
   handleDragEnd: (event: DragEndEvent) => void;
 }) {
+  const activePanel = useReportStore((s) => s.activePanel);
+
   // Appendix editor
   if (activeAppendix) {
     return <AppendixEditor appendixId={activeAppendix} />;
   }
 
-  // No section selected — show metadata tabs
+  // No section selected — show active metadata panel
   if (!section) {
-    return <MetadataTabs />;
+    return (
+      <div className="flex-1 overflow-y-auto">
+        <div className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 backdrop-blur px-6 py-4">
+          <h2 className="text-lg font-semibold text-gray-900">
+            {PANEL_TITLES[activePanel] ?? activePanel}
+          </h2>
+        </div>
+        <div className="px-6 py-6">
+          {activePanel === 'rapport' && <MetadataForm />}
+          {activePanel === 'voorblad' && <CoverForm />}
+          {activePanel === 'colofon' && <ColofonForm />}
+          {activePanel === 'opties' && <OptionsPanel />}
+        </div>
+      </div>
+    );
   }
+
+  const sections = useReportStore((s) => s.report.sections);
+  const chapterNumber = sections.findIndex((s) => s.id === section.id) + 1;
 
   return (
     <div className="flex-1 overflow-y-auto">
       {/* Section header */}
       <div className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 backdrop-blur px-6 py-4">
-        <SectionHeader section={section} />
+        <SectionHeader section={section} chapterNumber={chapterNumber} />
       </div>
 
       {/* Content blocks */}
@@ -563,6 +594,108 @@ function JsonEditor() {
 
 // ---------- PDF Preview ----------
 
+// ---------- Preview outline (clickable TOC for navigation) ----------
+
+function PreviewOutline() {
+  const sections = useReportStore((s) => s.report.sections);
+  const appendices = useReportStore((s) => s.report.appendices);
+  const activeSection = useReportStore((s) => s.activeSection);
+  const activeAppendix = useReportStore((s) => s.activeAppendix);
+  const setActiveSection = useReportStore((s) => s.setActiveSection);
+  const setActiveAppendix = useReportStore((s) => s.setActiveAppendix);
+  const setActivePanel = useReportStore((s) => s.setActivePanel);
+  const activePanel = useReportStore((s) => s.activePanel);
+  const [expanded, setExpanded] = useState(true);
+
+  const isNavActive = activeSection === null && activeAppendix === null;
+
+  if (!expanded) {
+    return (
+      <button
+        onClick={() => setExpanded(true)}
+        className="absolute top-2 left-2 z-20 rounded-md bg-white/90 border border-gray-200 px-2 py-1 text-xs text-gray-500 hover:bg-white shadow-sm"
+        title="Toon navigatie"
+      >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+      </button>
+    );
+  }
+
+  return (
+    <div className="absolute top-2 left-2 z-20 w-56 max-h-[60%] overflow-y-auto rounded-lg bg-white/95 border border-gray-200 shadow-lg backdrop-blur">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
+        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Navigatie</span>
+        <button
+          onClick={() => setExpanded(false)}
+          className="text-gray-400 hover:text-gray-600"
+        >
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <nav className="p-1.5 space-y-0.5">
+        {/* Meta panels */}
+        {(['rapport', 'voorblad', 'colofon', 'opties'] as const).map((panel) => (
+          <button
+            key={panel}
+            onClick={() => setActivePanel(panel)}
+            className={`w-full text-left rounded px-2 py-1 text-xs transition-colors ${
+              isNavActive && activePanel === panel
+                ? 'bg-brand-primary-light text-brand-primary-dark font-medium'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+            }`}
+          >
+            {panel === 'rapport' ? 'Rapport' : panel === 'voorblad' ? 'Voorblad' : panel === 'colofon' ? 'Colofon' : 'Opties'}
+          </button>
+        ))}
+
+        {sections.length > 0 && (
+          <div className="border-t border-gray-100 pt-1 mt-1">
+            {sections.map((s, i) => (
+              <button
+                key={s.id}
+                onClick={() => setActiveSection(s.id)}
+                className={`w-full text-left rounded px-2 py-1 text-xs transition-colors ${
+                  activeSection === s.id
+                    ? 'bg-brand-primary-light text-brand-primary-dark font-medium'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <span className="font-bold mr-1">{i + 1}.</span>
+                <span className="truncate">{s.title}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {appendices.length > 0 && (
+          <div className="border-t border-gray-100 pt-1 mt-1">
+            {appendices.map((a) => (
+              <button
+                key={a.id}
+                onClick={() => setActiveAppendix(a.id)}
+                className={`w-full text-left rounded px-2 py-1 text-xs transition-colors ${
+                  activeAppendix === a.id
+                    ? 'bg-teal-50 text-teal-700 font-medium'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <span className="font-bold mr-1">B{a.number}.</span>
+                <span className="truncate">{a.title}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </nav>
+    </div>
+  );
+}
+
+// ---------- PDF Preview ----------
+
 function PdfPreview() {
   const lastPdfUrl = useApiStore((s) => s.lastPdfUrl);
   const isGenerating = useApiStore((s) => s.isGenerating);
@@ -570,6 +703,7 @@ function PdfPreview() {
   const connected = useApiStore((s) => s.connected);
   const autoPreview = useApiStore((s) => s.autoPreview);
   const setAutoPreview = useApiStore((s) => s.setAutoPreview);
+  const viewMode = useReportStore((s) => s.viewMode);
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -598,11 +732,14 @@ function PdfPreview() {
 
       {/* Preview content */}
       {lastPdfUrl ? (
-        <iframe
-          src={lastPdfUrl}
-          className="w-full flex-1 border-0"
-          title="PDF Preview"
-        />
+        <div className="relative flex-1">
+          {viewMode === 'split' && <PreviewOutline />}
+          <iframe
+            src={lastPdfUrl}
+            className="absolute inset-0 w-full h-full border-0"
+            title="PDF Preview"
+          />
+        </div>
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center text-gray-400 gap-4">
           <div className="rounded-full bg-gray-100 p-4">

@@ -1,13 +1,24 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-05
+> Laatst bijgewerkt: 2026-03-07
 
 ---
 
-## 🔴 Bugs — Hoog
+## 🔴 T9 — Font Embedding Fix (BLOCKER)
 
-_(Geen openstaande bugs)_
+Fonts worden NIET embedded in gegenereerde PDF's. Alle 3 engines vallen terug op Helvetica (Type1 referentie, nooit embedded).
+
+**Zie `PLAN-font-embedding.md` voor het volledige uitvoerplan (10 stappen).**
+
+Samenvatting:
+- [ ] T9.1 — Bundle Liberation Sans/Mono TTFs in `assets/fonts/`
+- [ ] T9.2 — `core/fonts.py`: fallback registratie + `_HELVETICA_TO_LIBERATION` mapping
+- [ ] T9.3 — `core/styles.py`: verwijder `@functools.cache`, update fallbacks
+- [ ] T9.4 — `core/renderer_v2.py`: PyMuPDF FontManager fix (Liberation Sans i.p.v. `fitz.Font("helv")`)
+- [ ] T9.5 — Brand YAML fixes: Customer (`Helvetica` → `Arial`), default brand → LiberationSans
+- [ ] T9.6 — `core/special_pages.py` + `brand_renderer.py` + `template_engine.py`: alle Helvetica fallbacks
+- [ ] T9.7 — Nieuwe tests `test_font_embedding.py` + bestaande tests updaten
 
 ---
 

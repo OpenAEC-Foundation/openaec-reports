@@ -140,6 +140,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         return;
       }
 
+      if (!config.authorizationEndpoint) {
+        set({ error: "SSO authorization endpoint niet beschikbaar" });
+        return;
+      }
+
       // PKCE challenge genereren
       const pkce = await generatePkceChallenge();
       storePkceVerifier(pkce.codeVerifier);
@@ -147,18 +152,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       // State parameter voor CSRF protection
       const state = generateState();
 
-      // Haal authorization endpoint uit discovery
-      const discoveryRes = await fetch(
-        `${config.authority}/.well-known/openid-configuration`
-      );
-      if (!discoveryRes.ok) {
-        set({ error: "Kan OIDC discovery niet laden" });
-        return;
-      }
-      const discovery = await discoveryRes.json();
-      const authEndpoint = discovery.authorization_endpoint;
-
-      // Redirect naar Authentik
+      // Redirect naar Authentik (endpoint komt van backend discovery)
       const params = new URLSearchParams({
         response_type: "code",
         client_id: config.clientId,
@@ -169,7 +163,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         code_challenge_method: pkce.codeChallengeMethod,
       });
 
-      window.location.href = `${authEndpoint}?${params.toString()}`;
+      window.location.href = `${config.authorizationEndpoint}?${params.toString()}`;
     } catch {
       set({ error: "Kan SSO login niet starten" });
     }

@@ -232,19 +232,39 @@ async def me(request: Request):
 async def oidc_config():
     """Retourneer OIDC configuratie voor de frontend.
 
+    Doet server-side OIDC discovery zodat de frontend geen cross-origin
+    requests naar de IdP hoeft te doen (CORS).
+
     Returns:
-        Dict met enabled status en publieke OIDC settings.
+        Dict met enabled status, publieke OIDC settings en authorization_endpoint.
     """
     import os
+
+    import requests as http_requests
 
     enabled = is_oidc_enabled()
     if not enabled:
         return {"enabled": False}
 
+    issuer = os.environ.get("OPENAEC_OIDC_ISSUER", "").rstrip("/")
+    client_id = os.environ.get("OPENAEC_OIDC_CLIENT_ID", "")
+
+    # Server-side discovery om authorization_endpoint op te halen
+    authorization_endpoint = ""
+    try:
+        discovery = http_requests.get(
+            f"{issuer}/.well-known/openid-configuration", timeout=10
+        )
+        discovery.raise_for_status()
+        authorization_endpoint = discovery.json().get("authorization_endpoint", "")
+    except Exception:
+        logger.warning("OIDC discovery mislukt voor %s", issuer)
+
     return {
         "enabled": True,
-        "issuer": os.environ.get("OPENAEC_OIDC_ISSUER", ""),
-        "client_id": os.environ.get("OPENAEC_OIDC_CLIENT_ID", ""),
+        "issuer": issuer,
+        "client_id": client_id,
+        "authorization_endpoint": authorization_endpoint,
     }
 
 

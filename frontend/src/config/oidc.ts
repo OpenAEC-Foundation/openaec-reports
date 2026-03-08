@@ -1,8 +1,9 @@
 /**
  * OIDC configuratie voor Authentik SSO.
  *
- * Gebruikt VITE_OIDC_AUTHORITY en VITE_OIDC_CLIENT_ID als primaire bron,
- * met fallback naar backend discovery via /api/auth/oidc/config.
+ * Haalt alle OIDC info op via de backend (/api/auth/oidc/config),
+ * inclusief het authorization_endpoint (server-side discovery).
+ * Fallback naar Vite env vars voor lokale dev.
  */
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
@@ -13,46 +14,33 @@ export interface OidcConfig {
   clientId: string;
   redirectUri: string;
   scopes: string;
+  authorizationEndpoint: string;
 }
 
-/** Statische config uit Vite environment variables */
-function getStaticConfig(): OidcConfig | null {
-  const authority = import.meta.env.VITE_OIDC_AUTHORITY;
-  const clientId = import.meta.env.VITE_OIDC_CLIENT_ID;
-
-  if (!authority || !clientId) {
-    return null;
-  }
-
-  return {
-    enabled: true,
-    authority: authority.replace(/\/$/, ""),
-    clientId,
-    redirectUri: `${window.location.origin}/auth/callback`,
-    scopes: "openid profile email openaec_profile",
-  };
-}
+const DISABLED_CONFIG: OidcConfig = {
+  enabled: false,
+  authority: "",
+  clientId: "",
+  redirectUri: "",
+  scopes: "",
+  authorizationEndpoint: "",
+};
 
 /** Cached config na discovery */
 let _cachedConfig: OidcConfig | null = null;
 let _discoveryDone = false;
 
 /**
- * Haal OIDC config op — eerst statisch (env vars), daarna backend discovery.
+ * Haal OIDC config op via de backend (die server-side discovery doet).
+ * Fallback naar Vite env vars voor lokale dev zonder backend.
  */
 export async function getOidcConfig(): Promise<OidcConfig> {
-  // Statische config heeft voorrang
-  const staticCfg = getStaticConfig();
-  if (staticCfg) {
-    return staticCfg;
-  }
-
   // Cache hit
   if (_discoveryDone && _cachedConfig) {
     return _cachedConfig;
   }
 
-  // Backend discovery
+  // Backend discovery (inclusief authorization_endpoint)
   try {
     const res = await fetch(`${API_BASE}/api/auth/oidc/config`);
     if (res.ok) {
@@ -64,26 +52,42 @@ export async function getOidcConfig(): Promise<OidcConfig> {
           clientId: data.client_id,
           redirectUri: `${window.location.origin}/auth/callback`,
           scopes: "openid profile email openaec_profile",
+          authorizationEndpoint: data.authorization_endpoint || "",
         };
         _discoveryDone = true;
         return _cachedConfig;
       }
     }
   } catch {
-    // Backend niet bereikbaar — OIDC disabled
+    // Backend niet bereikbaar — probeer statische fallback
+  }
+
+  // Statische fallback (Vite env vars, lokale dev)
+  const authority = import.meta.env.VITE_OIDC_AUTHORITY;
+  const clientId = import.meta.env.VITE_OIDC_CLIENT_ID;
+  if (authority && clientId) {
+    _cachedConfig = {
+      enabled: true,
+      authority: authority.replace(/\/$/, ""),
+      clientId,
+      redirectUri: `${window.location.origin}/auth/callback`,
+      scopes: "openid profile email openaec_profile",
+      authorizationEndpoint: "",  // Niet beschikbaar zonder discovery
+    };
+    _discoveryDone = true;
+    return _cachedConfig;
   }
 
   _discoveryDone = true;
-  return { enabled: false, authority: "", clientId: "", redirectUri: "", scopes: "" };
+  return DISABLED_CONFIG;
 }
 
 /**
  * Check snel of OIDC mogelijk enabled is (zonder async fetch).
- * Gebruikt env vars of cached discovery resultaat.
+ * Gebruikt cached discovery resultaat.
  */
 export function isOidcPossiblyEnabled(): boolean {
-  const staticCfg = getStaticConfig();
-  if (staticCfg) return true;
   if (_cachedConfig) return _cachedConfig.enabled;
-  return false;
+  // Statische fallback check
+  return !!(import.meta.env.VITE_OIDC_AUTHORITY && import.meta.env.VITE_OIDC_CLIENT_ID);
 }

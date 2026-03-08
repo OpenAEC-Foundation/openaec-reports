@@ -51,59 +51,29 @@ export function OidcCallback() {
         return;
       }
 
-      // Exchange code voor tokens bij de IdP
+      // Haal redirect_uri op (moet matchen met wat we bij de authorize stuurden)
       const config = await getOidcConfig();
       if (!config.enabled) {
         setError("OIDC is niet geconfigureerd");
         return;
       }
 
-      // Haal token endpoint uit discovery
-      const discoveryRes = await fetch(
-        `${config.authority}/.well-known/openid-configuration`
-      );
-      if (!discoveryRes.ok) {
-        setError("Kan OIDC discovery niet laden");
-        return;
-      }
-      const discovery = await discoveryRes.json();
-      const tokenEndpoint = discovery.token_endpoint;
-
-      // Token request
-      const tokenRes = await fetch(tokenEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          grant_type: "authorization_code",
-          code,
-          redirect_uri: config.redirectUri,
-          client_id: config.clientId,
-          code_verifier: codeVerifier,
-        }),
-      });
-
-      if (!tokenRes.ok) {
-        const errBody = await tokenRes.json().catch(() => ({}));
-        setError(`Token exchange mislukt: ${errBody.error_description || tokenRes.statusText}`);
-        return;
-      }
-
-      const tokens = await tokenRes.json();
-
-      // Stuur tokens naar backend voor user sync + cookie
-      const exchangeRes = await fetch(`${API_BASE}/api/auth/oidc/token-exchange`, {
+      // Server-side code exchange — backend doet de token request naar de IdP
+      // (voorkomt CORS issues met het IdP token endpoint)
+      const exchangeRes = await fetch(`${API_BASE}/api/auth/oidc/code-exchange`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          access_token: tokens.access_token,
-          id_token: tokens.id_token,
+          code,
+          code_verifier: codeVerifier,
+          redirect_uri: config.redirectUri,
         }),
       });
 
       if (!exchangeRes.ok) {
         const errBody = await exchangeRes.json().catch(() => ({}));
-        setError(`Backend token exchange mislukt: ${errBody.detail || exchangeRes.statusText}`);
+        setError(`SSO login mislukt: ${errBody.detail || exchangeRes.statusText}`);
         return;
       }
 

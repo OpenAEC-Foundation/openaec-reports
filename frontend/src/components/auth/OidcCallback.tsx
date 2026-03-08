@@ -77,11 +77,13 @@ export function OidcCallback() {
         return;
       }
 
-      // Sessie herladen en redirect naar app
-      await checkSession();
-
-      // Verwijder query params en redirect naar root
+      // Verwijder query params VOOR checkSession — checkSession triggert een
+      // synchrone React re-render (via useSyncExternalStore). Als pathname
+      // dan nog /auth/callback is, rendert App opnieuw OidcCallback.
       window.history.replaceState({}, "", "/");
+
+      // Sessie herladen — triggert re-render, App ziet pathname "/" + user → AppShell
+      await checkSession();
     } catch (err) {
       setError(`Onverwachte fout: ${err instanceof Error ? err.message : String(err)}`);
     }

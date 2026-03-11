@@ -11,6 +11,7 @@ import { TableEditor } from '@/components/blocks/TableEditor';
 import { MapEditor } from '@/components/blocks/MapEditor';
 import { BulletListEditor } from '@/components/blocks/BulletListEditor';
 import { Heading2Editor } from '@/components/blocks/Heading2Editor';
+import { SpreadsheetEditor } from '@/components/blocks/SpreadsheetEditor';
 
 interface BlockEditorProps {
   block: EditorBlock;
@@ -65,6 +66,8 @@ function BlockEditorInner({
       return <BulletListEditor block={block} onChange={onChange} />;
     case 'heading_2':
       return <Heading2Editor block={block} onChange={onChange} />;
+    case 'spreadsheet':
+      return <SpreadsheetEditor block={block} onChange={onChange} />;
     case 'raw_flowable':
       return (
         <p className="text-xs italic text-gray-400">

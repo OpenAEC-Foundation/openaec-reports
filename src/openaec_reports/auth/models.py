@@ -40,6 +40,7 @@ class User:
     company: str = ""
     auth_provider: str = "local"  # "local" of "oidc"
     oidc_subject: str = ""  # Authentik persistent subject ID
+    organisation_id: str = ""  # FK naar organisations tabel
 
     def to_dict(self) -> dict:
         """Publieke representatie (zonder wachtwoord hash).
@@ -60,6 +61,7 @@ class User:
             "registration_number": self.registration_number,
             "company": self.company,
             "auth_provider": self.auth_provider,
+            "organisation_id": self.organisation_id,
         }
 
 
@@ -97,6 +99,7 @@ class UserDB:
         ("company", "TEXT NOT NULL DEFAULT ''"),
         ("auth_provider", "TEXT NOT NULL DEFAULT 'local'"),
         ("oidc_subject", "TEXT NOT NULL DEFAULT ''"),
+        ("organisation_id", "TEXT NOT NULL DEFAULT ''"),
     ]
 
     def _ensure_schema(self) -> None:
@@ -119,7 +122,8 @@ class UserDB:
                     registration_number TEXT NOT NULL DEFAULT '',
                     company TEXT NOT NULL DEFAULT '',
                     auth_provider TEXT NOT NULL DEFAULT 'local',
-                    oidc_subject TEXT NOT NULL DEFAULT ''
+                    oidc_subject TEXT NOT NULL DEFAULT '',
+                    organisation_id TEXT NOT NULL DEFAULT ''
                 )
             """)
             # Migratie: voeg ontbrekende kolommen toe aan bestaande databases
@@ -166,6 +170,9 @@ class UserDB:
             ),
             oidc_subject=(
                 row["oidc_subject"] if "oidc_subject" in row.keys() else ""
+            ),
+            organisation_id=(
+                row["organisation_id"] if "organisation_id" in row.keys() else ""
             ),
         )
 
@@ -250,8 +257,9 @@ class UserDB:
             conn.execute(
                 """INSERT INTO users (id, username, email, display_name, role, tenant,
                    is_active, hashed_password, phone, job_title,
-                   registration_number, company, auth_provider, oidc_subject)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                   registration_number, company, auth_provider, oidc_subject,
+                   organisation_id)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     user.id,
                     user.username,
@@ -267,6 +275,7 @@ class UserDB:
                     user.company,
                     user.auth_provider,
                     user.oidc_subject,
+                    user.organisation_id,
                 ),
             )
             conn.commit()
@@ -319,6 +328,7 @@ class UserDB:
             "email", "display_name", "role", "tenant",
             "is_active", "hashed_password", "phone", "job_title",
             "registration_number", "company", "auth_provider", "oidc_subject",
+            "organisation_id",
         }
         invalid = set(fields.keys()) - allowed
         if invalid:
@@ -364,3 +374,201 @@ class UserDB:
         if deleted:
             logger.info("User %s verwijderd", user_id)
         return deleted
+
+
+@dataclass
+class Organisation:
+    """Organisatie (bedrijf/bureau) in het systeem."""
+
+    id: str = field(default_factory=lambda: uuid.uuid4().hex)
+    name: str = ""
+    address: str = ""
+    postal_code: str = ""
+    city: str = ""
+    phone: str = ""
+    email: str = ""
+    website: str = ""
+    kvk_number: str = ""
+    is_active: bool = True
+
+    def to_dict(self) -> dict:
+        """Publieke representatie van de organisatie.
+
+        Returns:
+            Dict met organisatie gegevens.
+        """
+        return {
+            "id": self.id,
+            "name": self.name,
+            "address": self.address,
+            "postal_code": self.postal_code,
+            "city": self.city,
+            "phone": self.phone,
+            "email": self.email,
+            "website": self.website,
+            "kvk_number": self.kvk_number,
+            "is_active": self.is_active,
+        }
+
+
+class OrganisationDB:
+    """SQLite wrapper voor organisatie CRUD operaties.
+
+    Args:
+        db_path: Pad naar de SQLite database.
+    """
+
+    def __init__(self, db_path: str | Path | None = None) -> None:
+        import os
+        self.db_path = Path(db_path or os.environ.get("OPENAEC_AUTH_DB", DEFAULT_DB_PATH))
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self._ensure_schema()
+
+    def _get_connection(self) -> sqlite3.Connection:
+        """Maak een nieuwe connectie met WAL mode.
+
+        Returns:
+            SQLite connectie.
+        """
+        conn = sqlite3.connect(str(self.db_path))
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA foreign_keys=ON")
+        conn.row_factory = sqlite3.Row
+        return conn
+
+    def _ensure_schema(self) -> None:
+        """Maak de organisations tabel aan als die nog niet bestaat."""
+        with self._get_connection() as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS organisations (
+                    id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL DEFAULT '',
+                    address TEXT NOT NULL DEFAULT '',
+                    postal_code TEXT NOT NULL DEFAULT '',
+                    city TEXT NOT NULL DEFAULT '',
+                    phone TEXT NOT NULL DEFAULT '',
+                    email TEXT NOT NULL DEFAULT '',
+                    website TEXT NOT NULL DEFAULT '',
+                    kvk_number TEXT NOT NULL DEFAULT '',
+                    is_active INTEGER NOT NULL DEFAULT 1,
+                    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+                )
+            """)
+            conn.commit()
+
+    def _row_to_org(self, row: sqlite3.Row) -> Organisation:
+        """Converteer een database row naar een Organisation object.
+
+        Args:
+            row: SQLite Row object.
+
+        Returns:
+            Organisation instance.
+        """
+        return Organisation(
+            id=row["id"],
+            name=row["name"],
+            address=row["address"],
+            postal_code=row["postal_code"],
+            city=row["city"],
+            phone=row["phone"],
+            email=row["email"],
+            website=row["website"],
+            kvk_number=row["kvk_number"],
+            is_active=bool(row["is_active"]),
+        )
+
+    def get_by_id(self, org_id: str) -> Organisation | None:
+        """Zoek een organisatie op basis van ID.
+
+        Args:
+            org_id: De organisatie UUID.
+
+        Returns:
+            Organisation of None als niet gevonden.
+        """
+        with self._get_connection() as conn:
+            row = conn.execute("SELECT * FROM organisations WHERE id = ?", (org_id,)).fetchone()
+            return self._row_to_org(row) if row else None
+
+    def list_all(self) -> list[Organisation]:
+        """Lijst alle organisaties alfabetisch op naam.
+
+        Returns:
+            Lijst van Organisation objecten.
+        """
+        with self._get_connection() as conn:
+            rows = conn.execute("SELECT * FROM organisations ORDER BY name").fetchall()
+            return [self._row_to_org(row) for row in rows]
+
+    def create(self, org: Organisation) -> Organisation:
+        """Maak een nieuwe organisatie aan.
+
+        Args:
+            org: Organisation object met alle velden ingevuld.
+
+        Returns:
+            De aangemaakte Organisation.
+        """
+        with self._get_connection() as conn:
+            conn.execute(
+                """INSERT INTO organisations (id, name, address, postal_code, city,
+                   phone, email, website, kvk_number, is_active)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (org.id, org.name, org.address, org.postal_code, org.city,
+                 org.phone, org.email, org.website, org.kvk_number, int(org.is_active)),
+            )
+            conn.commit()
+        logger.info("Organisatie aangemaakt: %s", org.name)
+        return org
+
+    def update(self, org_id: str, **fields) -> Organisation | None:
+        """Update een organisatie met dynamische velden.
+
+        Alleen whitelisted velden worden geaccepteerd.
+
+        Args:
+            org_id: De organisatie UUID.
+            **fields: Velden om te updaten.
+
+        Returns:
+            De geupdate Organisation of None als niet gevonden.
+
+        Raises:
+            ValueError: Als een niet-toegestaan veld wordt meegegeven.
+        """
+        allowed = {"name", "address", "postal_code", "city", "phone", "email", "website", "kvk_number", "is_active"}
+        invalid = set(fields.keys()) - allowed
+        if invalid:
+            raise ValueError(f"Niet-toegestane velden: {invalid}")
+        if not fields:
+            return self.get_by_id(org_id)
+        set_clauses = []
+        values = []
+        for key, value in fields.items():
+            set_clauses.append(f"{key} = ?")
+            values.append(int(value) if key == "is_active" else value)
+        set_clauses.append("updated_at = datetime('now')")
+        values.append(org_id)
+        sql = f"UPDATE organisations SET {', '.join(set_clauses)} WHERE id = ?"
+        with self._get_connection() as conn:
+            cursor = conn.execute(sql, values)
+            conn.commit()
+            if cursor.rowcount == 0:
+                return None
+        return self.get_by_id(org_id)
+
+    def delete(self, org_id: str) -> bool:
+        """Verwijder een organisatie.
+
+        Args:
+            org_id: De organisatie UUID.
+
+        Returns:
+            True als verwijderd, False als niet gevonden.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.execute("DELETE FROM organisations WHERE id = ?", (org_id,))
+            conn.commit()
+            return cursor.rowcount > 0

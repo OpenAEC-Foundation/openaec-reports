@@ -196,6 +196,31 @@ def create_page_break(data: dict[str, Any]) -> Flowable:
     return PageBreak()
 
 
+def create_spreadsheet(data: dict[str, Any]) -> Flowable:
+    """Maak een SpreadsheetBlock flowable.
+
+    Vertaalt schema-velden naar component parameters:
+    - column_widths → col_widths_mm
+    - style "striped" → zebra=True
+    - show_row_numbers → toon automatische rijnummers
+    - note → voetnoot onder de tabel
+    """
+    from openaec_reports.components.spreadsheet_block import SpreadsheetBlock
+
+    style = data.get("style", "default")
+    zebra = style in ("default", "striped")
+
+    return SpreadsheetBlock(
+        headers=data.get("headers", []),
+        rows=data.get("rows", []),
+        title=data.get("title", ""),
+        col_widths_mm=data.get("column_widths"),
+        show_row_numbers=data.get("show_row_numbers", False),
+        zebra=zebra,
+        note=data.get("note", ""),
+    )
+
+
 def create_raw_flowable(data: dict[str, Any]) -> Flowable:
     """Maak een dynamische Flowable via class naam (library-only).
 
@@ -221,6 +246,7 @@ BLOCK_REGISTRY: dict[str, Any] = {
     "calculation": create_calculation,
     "check": create_check,
     "table": create_table,
+    "spreadsheet": create_spreadsheet,
     "image": create_image,
     "map": create_map,
     "spacer": create_spacer,

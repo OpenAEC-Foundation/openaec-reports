@@ -228,6 +228,48 @@ async def me(request: Request):
     return {"user": user.to_dict()}
 
 
+@auth_router.get("/profile")
+async def get_profile(request: Request):
+    """Retourneer het volledige profiel van de huidige gebruiker inclusief organisatie.
+
+    Returns:
+        User data inclusief gekoppelde organisatie (indien aanwezig).
+    """
+    user = await get_current_user(request)
+    result = user.to_dict()
+    if user.organisation_id:
+        from openaec_reports.auth.dependencies import get_organisation_db
+        try:
+            org_db = get_organisation_db()
+            org = org_db.get_by_id(user.organisation_id)
+            if org:
+                result["organisation"] = org.to_dict()
+        except RuntimeError:
+            pass
+    return {"user": result}
+
+
+@auth_router.patch("/profile")
+async def update_profile(request: Request):
+    """Update het profiel van de huidige gebruiker.
+
+    Body (optionele velden):
+        display_name, email, phone, job_title, company
+
+    Returns:
+        De geupdate user data.
+    """
+    user = await get_current_user(request)
+    body = await request.json()
+    allowed = {"display_name", "email", "phone", "job_title", "company"}
+    fields = {k: v for k, v in body.items() if k in allowed and v is not None}
+    if not fields:
+        return {"user": user.to_dict()}
+    db = get_user_db()
+    updated = db.update(user.id, **fields)
+    return {"user": updated.to_dict() if updated else user.to_dict()}
+
+
 @auth_router.get("/oidc/config")
 async def oidc_config():
     """Retourneer OIDC configuratie voor de frontend.

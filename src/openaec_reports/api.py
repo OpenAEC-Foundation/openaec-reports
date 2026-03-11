@@ -20,8 +20,8 @@ from starlette.background import BackgroundTask
 from openaec_reports import __version__
 from openaec_reports.admin.routes import admin_router
 from openaec_reports.auth.api_keys import ApiKeyDB
-from openaec_reports.auth.dependencies import get_current_user, init_api_key_db, init_user_db
-from openaec_reports.auth.models import User, UserDB
+from openaec_reports.auth.dependencies import get_current_user, init_api_key_db, init_organisation_db, init_user_db
+from openaec_reports.auth.models import OrganisationDB, User, UserDB
 from openaec_reports.auth.routes import auth_router
 from openaec_reports.auth.security import is_default_secret
 from openaec_reports.core.data_transform import transform_json_to_engine_data
@@ -113,6 +113,9 @@ init_user_db(_user_db)
 
 _api_key_db = ApiKeyDB()
 init_api_key_db(_api_key_db)
+
+_organisation_db = OrganisationDB()
+init_organisation_db(_organisation_db)
 
 if is_default_secret():
     logger.warning(
@@ -380,6 +383,8 @@ def _inject_user_profile_defaults(data: dict, user: User) -> None:
 
     Alleen lege velden worden ingevuld (setdefault patroon).
     Werkt voor alle auth-methoden (lokaal, OIDC, API key).
+    Als de user een organisation_id heeft en geen company, wordt de
+    organisatienaam opgehaald en gebruikt als adviseur_bedrijf.
 
     Args:
         data: Rapport JSON data (wordt in-place gewijzigd).
@@ -398,6 +403,16 @@ def _inject_user_profile_defaults(data: dict, user: User) -> None:
         colofon.setdefault("adviseur_registratie", user.registration_number)
     if user.company and not colofon.get("adviseur_bedrijf"):
         colofon.setdefault("adviseur_bedrijf", user.company)
+    # Fallback: haal organisatienaam op als company leeg maar organisation_id gezet is
+    if not colofon.get("adviseur_bedrijf") and user.organisation_id:
+        try:
+            from openaec_reports.auth.dependencies import get_organisation_db
+            org_db = get_organisation_db()
+            org = org_db.get_by_id(user.organisation_id)
+            if org and org.name:
+                colofon.setdefault("adviseur_bedrijf", org.name)
+        except RuntimeError:
+            pass
 
 
 @_protected.post("/api/generate/v2")

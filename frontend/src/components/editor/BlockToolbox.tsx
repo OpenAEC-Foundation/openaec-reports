@@ -14,6 +14,7 @@ const BLOCK_OPTIONS: BlockTypeOption[] = [
   { type: 'calculation', label: 'Berekening', accent: 'text-blue-500' },
   { type: 'check', label: 'Toets', accent: 'text-green-500' },
   { type: 'table', label: 'Tabel', accent: 'text-gray-500' },
+  { type: 'spreadsheet', label: 'Spreadsheet', accent: 'text-teal-500' },
   { type: 'image', label: 'Afbeelding', accent: 'text-purple-500' },
   { type: 'map', label: 'Kaart', accent: 'text-emerald-500' },
   { type: 'bullet_list', label: 'Opsomming', accent: 'text-gray-500' },

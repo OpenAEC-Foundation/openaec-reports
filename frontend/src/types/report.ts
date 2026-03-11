@@ -182,6 +182,17 @@ export interface RawFlowableBlock {
   kwargs?: Record<string, unknown>;
 }
 
+export interface SpreadsheetBlock {
+  type: 'spreadsheet';
+  title?: string;
+  headers: string[];
+  rows: (string | number | null)[][];
+  row_headers?: string[];
+  column_widths?: number[];
+  show_grid?: boolean;
+  zebra?: boolean;
+}
+
 /** Discriminated union van alle block types */
 export type ContentBlock =
   | ParagraphBlock
@@ -194,7 +205,8 @@ export type ContentBlock =
   | PageBreakBlock
   | BulletListBlock
   | Heading2Block
-  | RawFlowableBlock;
+  | RawFlowableBlock
+  | SpreadsheetBlock;
 
 /** Block types die de frontend kan aanmaken (exclusief raw_flowable) */
 export type EditableBlockType = Exclude<ContentBlock['type'], 'raw_flowable'>;

@@ -1,7 +1,7 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-07
+> Laatst bijgewerkt: 2026-03-11
 
 ---
 
@@ -28,8 +28,9 @@ Samenvatting:
   - OpenAEC MCP wrapper operationeel (`Z:\50_projecten\7_OpenAEC_bouwkunde\_MCP_servers\bm_reports\server.py`)
   - Tools: list_templates, get_template_scaffold, validate_report, generate_report, generate_report_v2
   - Draait via dedicated venv (`C:\MCP_venvs\bm_reports\`)
-- [ ] **#9** — Spreadsheet blok inclusief copy/paste naar LibreOffice Calc
-  - Nieuw block type voor spreadsheet-achtige tabellen met clipboard support
+- [x] **#9** — Spreadsheet blok inclusief copy/paste naar LibreOffice Calc
+  - SpreadsheetBlock component + frontend SpreadsheetEditor met TSV copy/paste
+  - JSON schema uitgebreid, block_registry bijgewerkt
 - [ ] **#1** — ERPNext integratie
   - Projectinfo ophalen via API keys vanuit ERPNext
 
@@ -115,8 +116,8 @@ Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
 
 - [ ] **#12** — RUST Library (R&D)
   - Onderzoek naar Rust-implementatie van de report engine
-- [ ] **#11** — AI-instructies meegeven voor gebruik in andere tools
-  - Documentatie/schema zodat externe AI-tools rapporten kunnen genereren
+- [x] **#11** — AI-instructies meegeven voor gebruik in andere tools
+  - `docs/ai-instructions.md`: Engelstalig document met API, auth, block types, MCP server, voorbeeld JSON
 - [ ] **#3** — Brand visualiser maken
   - Visuele editor voor brand configuratie (kleuren, fonts, layout)
 
@@ -143,7 +144,7 @@ Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
 ## 🟢 Housekeeping
 
 - [ ] H1 — `_temp_analyze.py` verwijderen uit project root
-- [ ] H2 — CLAUDE.md updaten (nog verwijzingen naar `src/bm_reports` in architectuur sectie)
+- [x] H2 — Dead code `src/bm_reports/` verwijderd + `docs/TENANT_GUIDE.md` verwijderd
 - [ ] H3 — `lessons_learned.md` aanmaken
 - [ ] H4 — `Inter-Bold.ttf` etc. instructies in fonts.py updaten (verwijst naar oude pad)
 - [ ] H5 — STATUS.md en frontend/STATUS.md actualiseren
@@ -152,6 +153,7 @@ Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
 
 ## 🟢 Infrastructure
 
+- [x] I0 — Deploy script (`deploy.sh`): git pull → docker build --no-cache → deploy → health check
 - [ ] I1 — Caddyfile vereenvoudigen
 - [ ] I2 — fail2ban installeren
 - [ ] I3 — Portainer installeren

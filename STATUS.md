@@ -1,6 +1,6 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-11 (sessie: issues #5/#7/#9/#11, organisaties, spreadsheet, deploy)
+> Laatst bijgewerkt: 2026-03-11 (sessie: T9 font embedding fix)
 
 ---
 
@@ -104,7 +104,21 @@
 
 ---
 
-## Sessie 11 maart — Issues #5/#7/#9/#11 + Organisaties + Deploy
+## Sessie 11 maart (2) — T9 Font Embedding Fix (2de2741)
+
+- [x] **T9** — Font Embedding Fix: Liberation Sans als embedded fallback
+  - 5 Liberation Sans/Mono TTFs gebundeld in `assets/fonts/` (Apache 2.0)
+  - `fonts.py`: `register_liberation_fonts()`, `_HELVETICA_TO_LIBERATION` mapping, `get_font_name()` onderschept Helvetica
+  - `styles.py`: `@functools.cache` vervangen door manual flag
+  - `renderer_v2.py`: FontManager laadt Liberation Sans TTF i.p.v. `fitz.Font("helv")`
+  - Alle Helvetica defaults vervangen in 15 bronbestanden + 2 testbestanden
+  - `default.yaml` brand fonts → LiberationSans
+  - PDF verificatie: alle content fonts zijn TrueType (embedded), geen Type1
+  - 1045 tests passed, 0 regressies
+
+---
+
+## Sessie 11 maart (1) — Issues #5/#7/#9/#11 + Organisaties + Deploy
 
 - [x] **#9** — SpreadsheetBlock: grid-tabel met headers, zebra-striping, rijnummers, voetnoot
   - `components/spreadsheet_block.py` + `create_spreadsheet()` in block_registry

@@ -145,7 +145,7 @@ class BrandRenderer:
         y = zone_y + elem.y * MM_TO_PT
 
         # Resolve font en kleur
-        font = self._resolve_font(elem.font) if elem.font else "Helvetica"
+        font = self._resolve_font(elem.font) if elem.font else "LiberationSans"
         size = elem.size if elem.size > 0 else 9.0
         color = self._resolve_color(elem.color) if elem.color else BM_COLORS.text
 
@@ -269,7 +269,7 @@ class BrandRenderer:
         """
         if ref.startswith("$"):
             key = ref[1:]
-            return self._brand.fonts.get(key, "Helvetica")
+            return self._brand.fonts.get(key, "LiberationSans")
         return ref
 
     def _resolve_variables(self, template: str, variables: dict[str, str]) -> str:

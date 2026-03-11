@@ -609,8 +609,8 @@ async def create_tenant(payload: CreateTenantRequest):
     brand_config = {
         "name": display,
         "fonts": {
-            "heading": "Helvetica",
-            "body": "Helvetica",
+            "heading": "LiberationSans-Bold",
+            "body": "LiberationSans",
         },
         "colors": {
             "primary": "#333333",

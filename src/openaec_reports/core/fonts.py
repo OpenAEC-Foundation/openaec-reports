@@ -1,18 +1,24 @@
-"""Fonts module — Registreer custom fonts (Inter) voor ReportLab.
+"""Fonts module — Registreer custom en fallback fonts voor ReportLab.
 
 Zoekt naar Inter TTF/OTF bestanden in assets/fonts/.
 Als ze beschikbaar zijn, worden ze geregistreerd in ReportLab's pdfmetrics.
-Bij ontbrekende bestanden valt de module terug op Helvetica (graceful fallback).
 
-Font bestanden die verwacht worden in assets/fonts/:
-    - Inter-Bold.ttf of Inter-Bold.otf
-    - Inter-Regular.ttf of Inter-Regular.otf
-    - Inter-Medium.ttf of Inter-Medium.otf
-    - Inter-Italic.ttf of Inter-Italic.otf
+Bij ontbrekende custom fonts valt de module terug op Liberation Sans — een
+open-source TTF font dat altijd EMBEDDED wordt in de PDF. Dit vervangt de
+oude Helvetica fallback (Type1 referentie, nooit embedded).
 
-TODO: Plaats de Inter TTF/OTF bestanden in:
-    src/openaec_reports/assets/fonts/
-om de OpenAEC huisstijl fonts te activeren.
+Bundled fonts (altijd beschikbaar):
+    - LiberationSans-Regular.ttf    (vervangt Helvetica)
+    - LiberationSans-Bold.ttf       (vervangt Helvetica-Bold)
+    - LiberationSans-Italic.ttf     (vervangt Helvetica-Oblique)
+    - LiberationSans-BoldItalic.ttf (vervangt Helvetica-BoldOblique)
+    - LiberationMono-Regular.ttf    (vervangt Courier)
+
+Custom fonts (optioneel):
+    - Inter-Bold.ttf / .otf
+    - Inter-Regular.ttf / .otf
+    - Inter-Medium.ttf / .otf
+    - Inter-Italic.ttf / .otf
 """
 
 from __future__ import annotations
@@ -24,6 +30,31 @@ logger = logging.getLogger(__name__)
 
 # Standaard locatie van font bestanden binnen het package
 FONTS_DIR = Path(__file__).parent.parent / "assets" / "fonts"
+
+# ---------------------------------------------------------------------------
+# Liberation Sans — embedded fallback fonts (bundled, Apache 2.0)
+# ---------------------------------------------------------------------------
+
+_LIBERATION_FONTS: dict[str, str] = {
+    "LiberationSans": "LiberationSans-Regular.ttf",
+    "LiberationSans-Bold": "LiberationSans-Bold.ttf",
+    "LiberationSans-Italic": "LiberationSans-Italic.ttf",
+    "LiberationSans-BoldItalic": "LiberationSans-BoldItalic.ttf",
+    "LiberationMono": "LiberationMono-Regular.ttf",
+}
+
+# Mapping: Helvetica (Type1, nooit embedded) → Liberation Sans (TTF, altijd embedded)
+_HELVETICA_TO_LIBERATION: dict[str, str] = {
+    "Helvetica": "LiberationSans",
+    "Helvetica-Bold": "LiberationSans-Bold",
+    "Helvetica-Oblique": "LiberationSans-Italic",
+    "Helvetica-BoldOblique": "LiberationSans-BoldItalic",
+    "Courier": "LiberationMono",
+}
+
+# ---------------------------------------------------------------------------
+# Inter — custom OpenAEC fonts
+# ---------------------------------------------------------------------------
 
 # Mapping van ReportLab font naam → mogelijke bestandsnamen (meerdere varianten)
 _FONT_CANDIDATES: dict[str, list[str]] = {
@@ -57,16 +88,19 @@ _FONT_CANDIDATES: dict[str, list[str]] = {
     ],
 }
 
-# Fallback mapping: Inter naam → Helvetica equivalent
+# Fallback mapping: Inter naam → Liberation Sans equivalent (was: Helvetica)
 _FALLBACK_FONTS: dict[str, str] = {
-    "Inter-Bold": "Helvetica-Bold",
-    "Inter-Regular": "Helvetica",
-    "Inter-Medium": "Helvetica",
-    "Inter-RegularItalic": "Helvetica-Oblique",
+    "Inter-Bold": "LiberationSans-Bold",
+    "Inter-Regular": "LiberationSans",
+    "Inter-Medium": "LiberationSans",
+    "Inter-RegularItalic": "LiberationSans-Italic",
 }
 
 # Globale staat: welke fonts zijn succesvol geregistreerd
 _registered: dict[str, bool] = {}
+
+# Vlag: Liberation Sans registratie al uitgevoerd
+_liberation_registered: bool = False
 
 
 def _find_font_file(font_name: str, fonts_dir: Path) -> Path | None:
@@ -89,23 +123,67 @@ def _find_font_file(font_name: str, fonts_dir: Path) -> Path | None:
     return None
 
 
-def register_fonts(fonts_dir: Path | None = None) -> dict[str, str]:
-    """Registreer Inter fonts in ReportLab.
+def register_liberation_fonts(fonts_dir: Path | None = None) -> None:
+    """Registreer Liberation Sans fonts als embedded fallback.
 
-    Zoekt naar font bestanden in de opgegeven directory.
-    Voor elke gevonden font registreert het ReportLab TTFont.
-    Voor ontbrekende fonts wordt de Helvetica fallback gebruikt.
+    Deze fonts worden altijd geregistreerd bij eerste aanroep.
+    Ze zijn gebundeld in het package en worden embedded in elke PDF.
+
+    Args:
+        fonts_dir: Directory met font bestanden. Standaard: assets/fonts/.
+    """
+    global _liberation_registered
+    if _liberation_registered:
+        return
+
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+
+    search_dir = fonts_dir or FONTS_DIR
+
+    for font_name, filename in _LIBERATION_FONTS.items():
+        if _registered.get(font_name, False):
+            continue
+
+        font_path = search_dir / filename
+        if font_path.exists():
+            try:
+                pdfmetrics.registerFont(TTFont(font_name, str(font_path)))
+                _registered[font_name] = True
+                logger.info("Liberation font geregistreerd: %s", font_name)
+            except (OSError, ValueError):
+                logger.exception("Fout bij registreren Liberation font %s", font_name)
+                _registered[font_name] = False
+        else:
+            logger.warning(
+                "Liberation font niet gevonden: %s → %s (verwacht in %s)",
+                font_name,
+                filename,
+                search_dir,
+            )
+            _registered[font_name] = False
+
+    _liberation_registered = True
+
+
+def register_fonts(fonts_dir: Path | None = None) -> dict[str, str]:
+    """Registreer Inter fonts + Liberation Sans fallback in ReportLab.
+
+    Registreert eerst Liberation Sans (altijd, als embedded fallback).
+    Zoekt daarna naar Inter font bestanden in de opgegeven directory.
+    Voor ontbrekende Inter fonts wordt Liberation Sans als fallback gebruikt.
 
     Args:
         fonts_dir: Directory met font bestanden. Standaard: assets/fonts/.
 
     Returns:
-        Dict van font naam → geregistreerde naam (Inter of Helvetica fallback).
-        Bijv. {"Inter-Bold": "Inter-Bold"} als gevonden,
-              {"Inter-Bold": "Helvetica-Bold"} als fallback.
+        Dict van font naam → geregistreerde naam (Inter of Liberation fallback).
     """
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
+
+    # Altijd eerst Liberation Sans registreren als embedded fallback
+    register_liberation_fonts(fonts_dir)
 
     search_dir = fonts_dir or FONTS_DIR
     result: dict[str, str] = {}
@@ -161,6 +239,9 @@ def register_tenant_fonts(font_files: dict[str, str], fonts_dir: Path) -> dict[s
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
 
+    # Zorg dat Liberation Sans beschikbaar is als ultieme fallback
+    register_liberation_fonts()
+
     result: dict[str, str] = {}
     for font_name, filename in font_files.items():
         if font_name in _registered and _registered[font_name]:
@@ -188,24 +269,54 @@ def get_font_name(font_name: str) -> str:
     """Geef de effectieve font naam voor gebruik in ReportLab.
 
     Controleert of een font geregistreerd is (Inter, tenant fonts, etc.).
-    Als het geregistreerd is, retourneer de naam.
-    Anders check Inter fallback mapping.
-    Als laatste: retourneer de letterlijke naam (ReportLab built-in).
+    Onderschept Helvetica-varianten en vervangt ze door Liberation Sans
+    zodat fonts altijd embedded worden in de PDF.
 
     Args:
         font_name: Gewenste font naam (bijv. 'Inter-Bold', 'Arial', 'Helvetica-Bold').
 
     Returns:
-        Effectieve font naam voor ReportLab.
+        Effectieve font naam voor ReportLab (altijd een embedded TTF font).
     """
+    # Zorg dat Liberation Sans geregistreerd is
+    register_liberation_fonts()
+
     # Tenant of custom font geregistreerd?
     if _registered.get(font_name, False):
         return font_name
-    # Inter fallback?
+    # Inter fallback → Liberation Sans
     if font_name in _FALLBACK_FONTS:
         return _FALLBACK_FONTS[font_name]
-    # Letterlijke naam (built-in ReportLab fonts: Helvetica, etc.)
+    # Helvetica → Liberation Sans (kernfix voor font embedding)
+    if font_name in _HELVETICA_TO_LIBERATION:
+        return _HELVETICA_TO_LIBERATION[font_name]
+    # Letterlijke naam (voor andere geregistreerde fonts)
     return font_name
+
+
+def get_liberation_font_path(variant: str = "regular") -> Path | None:
+    """Geef het pad naar een Liberation Sans font bestand.
+
+    Handig voor PyMuPDF (fitz) die een fontfile pad nodig heeft.
+
+    Args:
+        variant: 'regular', 'bold', 'italic', of 'bolditalic'.
+
+    Returns:
+        Path naar het TTF bestand, of None als niet gevonden.
+    """
+    mapping = {
+        "regular": "LiberationSans-Regular.ttf",
+        "bold": "LiberationSans-Bold.ttf",
+        "italic": "LiberationSans-Italic.ttf",
+        "bolditalic": "LiberationSans-BoldItalic.ttf",
+        "mono": "LiberationMono-Regular.ttf",
+    }
+    filename = mapping.get(variant)
+    if not filename:
+        return None
+    path = FONTS_DIR / filename
+    return path if path.exists() else None
 
 
 def optional_fonts_available() -> bool:
@@ -214,7 +325,9 @@ def optional_fonts_available() -> bool:
     Returns:
         True als een of meer Inter fonts geregistreerd zijn.
     """
-    return any(_registered.values())
+    return any(
+        _registered.get(name, False) for name in _FONT_CANDIDATES
+    )
 
 
 def fonts_status() -> dict[str, str]:
@@ -224,10 +337,17 @@ def fonts_status() -> dict[str, str]:
         Dict met font naam → 'registered' of 'fallback: <font>'.
     """
     status = {}
+    # Liberation Sans
+    for font_name in _LIBERATION_FONTS:
+        if _registered.get(font_name, False):
+            status[font_name] = "registered (embedded fallback)"
+        else:
+            status[font_name] = "NOT registered"
+    # Inter
     for font_name in _FONT_CANDIDATES:
         if _registered.get(font_name, False):
             status[font_name] = "registered"
         else:
-            fallback = _FALLBACK_FONTS.get(font_name, "Helvetica")
+            fallback = _FALLBACK_FONTS.get(font_name, "LiberationSans")
             status[font_name] = f"fallback: {fallback}"
     return status

@@ -12,9 +12,9 @@ colors:
   rule: "#BDC3C7"
 
 fonts:
-  heading: "Helvetica-Bold"
-  body: "Helvetica"
-  mono: "Courier"
+  heading: "LiberationSans-Bold"
+  body: "LiberationSans"
+  mono: "LiberationMono"
 
 contact:
   name: ""

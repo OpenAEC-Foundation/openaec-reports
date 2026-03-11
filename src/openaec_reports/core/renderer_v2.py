@@ -116,7 +116,7 @@ class FontManager:
 
     Ondersteunt twee modi:
     - Custom fonts (Inter): laad TTF bestanden uit font_dir
-    - Standaard fonts (Helvetica, Arial): gebruik fitz ingebouwde fonts
+    - Fallback: Liberation Sans (altijd embedded, nooit Type1 Helvetica)
     """
 
     _DEFAULT_FONT_MAP = {
@@ -125,12 +125,20 @@ class FontManager:
         "Inter-Medium": "Inter-Medium.ttf",
     }
 
+    # Liberation Sans fallback fonts (altijd beschikbaar in FONT_DIR)
+    _LIBERATION_FONT_MAP = {
+        "LiberationSans": "LiberationSans-Regular.ttf",
+        "LiberationSans-Bold": "LiberationSans-Bold.ttf",
+        "LiberationSans-Italic": "LiberationSans-Italic.ttf",
+    }
+
     _BUILTIN_FONTS = {
         "Helvetica", "Helvetica-Bold", "Helvetica-Oblique", "Helvetica-BoldOblique",
         "Courier", "Courier-Bold", "Courier-Oblique", "Courier-BoldOblique",
         "Times-Roman", "Times-Bold", "Times-Italic", "Times-BoldItalic",
         "Symbol", "ZapfDingbats",
         "Arial", "ArialMT", "Arial-BoldMT",
+        "LiberationSans", "LiberationSans-Bold", "LiberationSans-Italic",
     }
 
     def __init__(self, font_dir: Path | None = None, brand_fonts: dict | None = None):
@@ -139,7 +147,10 @@ class FontManager:
         self._fitz_fonts: dict[str, fitz.Font] = {}
         self._uses_custom_fonts = True
 
-        # Bepaal of we custom fonts of builtin fonts gebruiken
+        # Laad Liberation Sans als embedded fallback (altijd)
+        self._load_liberation_fonts()
+
+        # Bepaal of we custom fonts of builtin/liberation fonts gebruiken
         if brand_fonts:
             heading = brand_fonts.get("heading", "")
             body = brand_fonts.get("body", "")
@@ -154,12 +165,38 @@ class FontManager:
                 path = self.font_dir / filename
                 if path.exists():
                     self._fitz_fonts[name] = fitz.Font(fontfile=str(path))
-            self._bold_font = self._fitz_fonts.get("Inter-Bold") or fitz.Font("helv")
-            self._book_font = self._fitz_fonts.get("Inter-Regular") or fitz.Font("helv")
+            self._bold_font = self._fitz_fonts.get("Inter-Bold") or self._liberation_bold
+            self._book_font = self._fitz_fonts.get("Inter-Regular") or self._liberation_regular
         else:
             self.FONT_MAP = {}
-            self._bold_font = fitz.Font("helv")
-            self._book_font = fitz.Font("helv")
+            self._bold_font = self._liberation_bold
+            self._book_font = self._liberation_regular
+
+    def _load_liberation_fonts(self) -> None:
+        """Laad Liberation Sans als embedded fallback voor PyMuPDF."""
+        lib_bold_path = FONT_DIR / "LiberationSans-Bold.ttf"
+        lib_regular_path = FONT_DIR / "LiberationSans-Regular.ttf"
+        lib_italic_path = FONT_DIR / "LiberationSans-Italic.ttf"
+
+        if lib_bold_path.exists():
+            self._liberation_bold = fitz.Font(fontfile=str(lib_bold_path))
+            self._fitz_fonts["LiberationSans-Bold"] = self._liberation_bold
+        else:
+            logger.warning("LiberationSans-Bold.ttf niet gevonden, val terug op helv")
+            self._liberation_bold = fitz.Font("helv")
+
+        if lib_regular_path.exists():
+            self._liberation_regular = fitz.Font(fontfile=str(lib_regular_path))
+            self._fitz_fonts["LiberationSans"] = self._liberation_regular
+        else:
+            logger.warning("LiberationSans-Regular.ttf niet gevonden, val terug op helv")
+            self._liberation_regular = fitz.Font("helv")
+
+        if lib_italic_path.exists():
+            self._liberation_italic = fitz.Font(fontfile=str(lib_italic_path))
+            self._fitz_fonts["LiberationSans-Italic"] = self._liberation_italic
+        else:
+            self._liberation_italic = self._liberation_regular
 
     @property
     def inter_book(self) -> fitz.Font:
@@ -173,17 +210,22 @@ class FontManager:
 
     @classmethod
     def _is_builtin(cls, fontname: str) -> bool:
-        """Check of een fontnaam een ingebouwde PDF font is."""
+        """Check of een fontnaam een ingebouwde of Liberation font is."""
         return (
             fontname in cls._BUILTIN_FONTS
             or fontname.startswith("Helvetica")
             or fontname.startswith("Arial")
+            or fontname.startswith("Liberation")
         )
 
     def register_reportlab(self) -> None:
         """Register fonts with ReportLab (once)."""
         if self._rl_registered:
             return
+        # Registreer Liberation Sans via core fonts module
+        from openaec_reports.core.fonts import register_liberation_fonts
+        register_liberation_fonts()
+        # Registreer custom fonts
         for name, filename in self.FONT_MAP.items():
             path = self.font_dir / filename
             if path.exists():
@@ -194,13 +236,18 @@ class FontManager:
         self._rl_registered = True
 
     def insert_into_page(self, page: fitz.Page) -> None:
-        """Insert custom fonts into a PyMuPDF page."""
-        if not self._uses_custom_fonts:
-            return
-        for name, filename in self.FONT_MAP.items():
-            path = self.font_dir / filename
+        """Insert fonts into a PyMuPDF page (custom + Liberation fallback)."""
+        # Altijd Liberation Sans inserten als embedded fallback
+        for name, filename in self._LIBERATION_FONT_MAP.items():
+            path = FONT_DIR / filename
             if path.exists():
                 page.insert_font(fontname=name, fontfile=str(path))
+        # Custom fonts
+        if self._uses_custom_fonts:
+            for name, filename in self.FONT_MAP.items():
+                path = self.font_dir / filename
+                if path.exists():
+                    page.insert_font(fontname=name, fontfile=str(path))
 
     def get_fitz_font(self, fontname: str) -> fitz.Font:
         """Return fitz.Font object for given fontname string."""
@@ -345,7 +392,7 @@ class CoverGenerator:
         tf = fields.get("rapport_type", {})
         title_text = data.get("report_type", "")
         if title_text:
-            font_obj = self.fonts.get_fitz_font(tf.get("font", "Helvetica-Bold"))
+            font_obj = self.fonts.get_fitz_font(tf.get("font", "LiberationSans-Bold"))
             size = tf.get("size", 28)
             y_bl = tf.get("y_bl", tf.get("y", 93))
             y_td = page.rect.height - y_bl
@@ -357,7 +404,7 @@ class CoverGenerator:
         sf = fields.get("project_naam", {})
         subtitle_text = data.get("project", "")
         if subtitle_text:
-            font_obj = self.fonts.get_fitz_font(sf.get("font", "Helvetica"))
+            font_obj = self.fonts.get_fitz_font(sf.get("font", "LiberationSans"))
             size = sf.get("size", 17)
             y_bl = sf.get("y_bl", sf.get("y", 63))
             y_td = page.rect.height - y_bl
@@ -419,7 +466,7 @@ class CoverGenerator:
             c.setFillColor(Color(0.15, 0.35, 0.35, alpha=0.4))
             c.rect(55.6, 161.7, 484.0, 280, fill=1, stroke=0)
             c.setFillColor(HexColor("#FFFFFF"))
-            c.setFont("Helvetica", 16)
+            c.setFont("LiberationSans", 16)
             c.drawCentredString(w / 2, 440, "[ PROJECTFOTO ]")
 
         # Layer 2: Stationery overlay (with alpha channel)
@@ -474,7 +521,7 @@ class ColofonGenerator:
         report_type = data.get("report_type", "")
         if report_type:
             font_obj = self.fonts.get_fitz_font(
-                title_cfg.get("font", "Helvetica-Bold")
+                title_cfg.get("font", "LiberationSans-Bold")
             )
             tw = fitz.TextWriter(page.rect)
             tw.append(
@@ -493,7 +540,7 @@ class ColofonGenerator:
         project_name = data.get("project", "")
         if project_name:
             font_obj = self.fonts.get_fitz_font(
-                sub_cfg.get("font", "Helvetica")
+                sub_cfg.get("font", "LiberationSans")
             )
             tw = fitz.TextWriter(page.rect)
             tw.append(
@@ -510,7 +557,7 @@ class ColofonGenerator:
         table_cfg = self.tpl.get("table", {})
         value_x = table_cfg.get("value_x", 229.1)
         value_size = table_cfg.get("value_size", 10)
-        value_font = table_cfg.get("value_font", "Helvetica")
+        value_font = table_cfg.get("value_font", "LiberationSans")
         value_color = _hex_to_rgb(table_cfg.get("value_color", "#40124A"))
 
         for field_key, y_td in self._get_field_positions():
@@ -531,7 +578,7 @@ class ColofonGenerator:
         current_y = rev_cfg.get("y_td", 670.0)
         if revisions:
             # Label
-            lbl_font_name = rev_cfg.get("label_font", "Helvetica-Bold")
+            lbl_font_name = rev_cfg.get("label_font", "LiberationSans-Bold")
             lbl_size = rev_cfg.get("label_size", 10.0)
             lbl_color = _hex_to_rgb(rev_cfg.get("label_color", "#38BDA0"))
             lbl_x = rev_cfg.get("label_x", 103.0)
@@ -547,10 +594,10 @@ class ColofonGenerator:
             # Table
             tbl_x = rev_cfg.get("table_x", 103.0)
             tbl_end_x = rev_cfg.get("table_end_x", 420.0)
-            hdr_font_name = rev_cfg.get("header_font", "Helvetica-Bold")
+            hdr_font_name = rev_cfg.get("header_font", "LiberationSans-Bold")
             hdr_size = rev_cfg.get("header_size", 8.0)
             hdr_color = _hex_to_rgb(rev_cfg.get("header_color", "#40124A"))
-            body_font_name = rev_cfg.get("body_font", "Helvetica")
+            body_font_name = rev_cfg.get("body_font", "LiberationSans")
             body_size = rev_cfg.get("body_size", 8.0)
             body_color = _hex_to_rgb(rev_cfg.get("body_color", "#45243D"))
             row_h = rev_cfg.get("row_height", 14.0)
@@ -604,7 +651,7 @@ class ColofonGenerator:
         if disclaimer:
             discl_cfg = self.tpl.get("disclaimer", {})
             discl_x = discl_cfg.get("x", 103.0)
-            discl_font_name = discl_cfg.get("font", "Helvetica-Oblique")
+            discl_font_name = discl_cfg.get("font", "LiberationSans-Italic")
             discl_size = discl_cfg.get("size", 7.0)
             discl_color = _hex_to_rgb(discl_cfg.get("color", "#7F8C8D"))
             discl_y = current_y + 8.0
@@ -622,7 +669,7 @@ class ColofonGenerator:
         pn_cfg = self.tpl.get("page_number", {})
         pn_size = pn_cfg.get("size", 8)
         font_obj = self.fonts.get_fitz_font(
-            pn_cfg.get("font", "Helvetica-Bold")
+            pn_cfg.get("font", "LiberationSans-Bold")
         )
         tw = fitz.TextWriter(page.rect)
         tw.append(
@@ -953,7 +1000,7 @@ class ContentRenderer:
             self._text(
                 marker["x"], self.y,
                 "\u2022",
-                marker.get("font", "Helvetica"),
+                marker.get("font", "LiberationSans"),
                 marker["size"],
                 marker["color"],
             )

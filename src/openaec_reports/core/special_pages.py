@@ -98,7 +98,7 @@ def _brand_color(brand: BrandConfig, key: str, fallback: str) -> HexColor:
 
 
 def _resolve_font(brand: BrandConfig, role: str) -> str:
-    """Resolve font naam via brand config met Helvetica fallback.
+    """Resolve font naam via brand config met Liberation Sans fallback.
 
     Args:
         brand: Brand configuratie.
@@ -107,12 +107,12 @@ def _resolve_font(brand: BrandConfig, role: str) -> str:
     Returns:
         Geregistreerde font naam bruikbaar in ReportLab.
     """
-    helvetica_fonts = {
-        "heading": "Helvetica-Bold",
-        "body": "Helvetica",
-        "medium": "Helvetica",
+    fallback_fonts = {
+        "heading": "LiberationSans-Bold",
+        "body": "LiberationSans",
+        "medium": "LiberationSans",
     }
-    brand_font = brand.fonts.get(role, helvetica_fonts.get(role, "Helvetica"))
+    brand_font = brand.fonts.get(role, fallback_fonts.get(role, "LiberationSans"))
     return get_font_name(brand_font)
 
 
@@ -389,7 +389,7 @@ def draw_cover_page(
     tagline = spec.get("tagline", "")
     if tagline:
         tag_font = get_font_name(
-            spec.get("tagline_font", brand.fonts.get("medium", "Helvetica"))
+            spec.get("tagline_font", brand.fonts.get("medium", "LiberationSans"))
         )
         tag_size = _sf(spec.get("tagline_size", 10.0), ph)
         tag_color = HexColor(
@@ -613,7 +613,7 @@ def draw_colofon_page(
 
     # ---- Rapport type titel + subtitel bovenaan ----
     rt_font = get_font_name(
-        spec.get("report_type_font", "Helvetica-Bold")
+        spec.get("report_type_font", "LiberationSans-Bold")
     )
     rt_size = spec.get("report_type_size", 22.0)
     rt_color = HexColor(
@@ -631,7 +631,7 @@ def draw_colofon_page(
         canvas.setFillColor(rt_color)
         canvas.drawString(rt_x, ph - rt_y, report_type)
 
-    sub_font = get_font_name(spec.get("subtitle_font", "Helvetica"))
+    sub_font = get_font_name(spec.get("subtitle_font", "LiberationSans"))
     sub_size = spec.get("subtitle_size", 14.0)
     sub_color = HexColor(
         spec.get(
@@ -715,9 +715,9 @@ def draw_colofon_page(
         )
     )
 
-    label_font = get_font_name(spec.get("label_font", "Helvetica-Bold"))
+    label_font = get_font_name(spec.get("label_font", "LiberationSans-Bold"))
     label_size = spec.get("label_size", 10.0)
-    value_font = get_font_name(spec.get("value_font", "Helvetica"))
+    value_font = get_font_name(spec.get("value_font", "LiberationSans"))
     value_size = spec.get("value_size", 10.0)
 
     # ---- Default velden (neutraal, volledig) ----
@@ -808,7 +808,7 @@ def draw_colofon_page(
     disclaimer = data.get("disclaimer", "")
     if disclaimer:
         discl_font = get_font_name(
-            spec.get("disclaimer_font", brand.fonts.get("italic", "Helvetica-Oblique"))
+            spec.get("disclaimer_font", brand.fonts.get("italic", "LiberationSans-Italic"))
         )
         discl_size = spec.get("disclaimer_size", 7.0)
         discl_color = HexColor(
@@ -849,7 +849,7 @@ def draw_colofon_page(
     # Paginanummer
     pn_x = spec.get("page_num_x_pt", 534)
     pn_y = spec.get("page_num_y_pt", 796.3)
-    pn_font = get_font_name(spec.get("page_num_font", "Helvetica"))
+    pn_font = get_font_name(spec.get("page_num_font", "LiberationSans"))
     pn_size = spec.get("page_num_size", 9.5)
     pn_color = HexColor(
         spec.get(
@@ -1013,7 +1013,7 @@ def draw_appendix_divider_page(
 
     # Bijlage nummer
     num_font = get_font_name(
-        spec.get("number_font", "Helvetica-Bold")
+        spec.get("number_font", "LiberationSans-Bold")
     )
     num_size = spec.get("number_size", 41.4)
     num_color = HexColor(
@@ -1030,7 +1030,7 @@ def draw_appendix_divider_page(
     canvas.drawString(num_x, num_y, f"Bijlage {appendix_number}")
 
     # Titel (kan meerdere regels zijn, split op \n)
-    title_font = get_font_name(spec.get("title_font", "Helvetica"))
+    title_font = get_font_name(spec.get("title_font", "LiberationSans"))
     title_size = spec.get("title_size", 41.4)
     title_color = HexColor(spec.get("title_color", "#FFFFFF"))
     title_x = spec.get("title_x_pt", 136.1)
@@ -1048,7 +1048,7 @@ def draw_appendix_divider_page(
     tagline = spec.get("tagline", "")
     if tagline:
         tag_font = get_font_name(
-            spec.get("tagline_font", "Helvetica-Bold")
+            spec.get("tagline_font", "LiberationSans-Bold")
         )
         tag_size = spec.get("tagline_size", 17.9)
         tag_color = HexColor(
@@ -1177,7 +1177,7 @@ def draw_backcover_page(
         tag_font = get_font_name(
             spec.get(
                 "tagline_font",
-                brand.fonts.get("heading", "Helvetica-Bold"),
+                brand.fonts.get("heading", "LiberationSans-Bold"),
             )
         )
         tag_size = _sf(spec.get("tagline_size", 14.0), ph)

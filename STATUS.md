@@ -1,6 +1,6 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-03 (sessie: planning T10 user reports + profiel)
+> Laatst bijgewerkt: 2026-03-11 (sessie: issues #5/#7/#9/#11, organisaties, spreadsheet, deploy)
 
 ---
 
@@ -8,10 +8,11 @@
 
 | Omgeving | URL | Status |
 |----------|-----|--------|
-| Productie | https://report.3bm.co.nl | ⚠️ Online, wacht op rebuild (`docker build --no-cache`) |
+| Productie | https://report.3bm.co.nl | ✅ Online |
 | API Health | https://report.3bm.co.nl/api/health | ✅ OK (v0.1.0) |
 | `/api/generate/v2` | POST | ✅ Werkt (3BM rapporten) |
-| `/api/generate/template` | POST | ✅ Code gefixt, wacht op deploy |
+| `/api/generate/template` | POST | ✅ Werkt (Symitech BIC) |
+| Deploy script | `deploy.sh` | ✅ Git pull → docker build → deploy → health check |
 
 ---
 
@@ -59,12 +60,14 @@
 
 | Feature | Lokaal | Productie |
 |---------|--------|-----------|
-| Block editors (paragraph, table, image, calc, check, map) | ✅ | ✅ |
+| Block editors (paragraph, table, image, calc, check, map, spreadsheet) | ✅ | ⏳ Wacht op deploy |
 | Template selector + scaffold loader | ✅ | ✅ |
 | Split view + live preview | ✅ | ✅ |
 | JSON import/export | ✅ | ✅ |
-| Smart endpoint routing (V2 vs TemplateEngine) | ✅ | ⏳ Wacht op `--no-cache` rebuild |
-| Admin: Asset replace button | ✅ | ⏳ Wacht op deploy |
+| Smart endpoint routing (V2 vs TemplateEngine) | ✅ | ✅ |
+| Admin: Asset replace button | ✅ | ✅ |
+| Admin: Organisatie beheer (CRUD) | ✅ | ⏳ Wacht op deploy |
+| Profiel pagina (self-service) | ✅ | ⏳ Wacht op deploy |
 | Admin: BrandExtractWizard (4-stap, paars) | ✅ | ✅ |
 
 ---
@@ -81,6 +84,13 @@
 | `/api/generate/v2` | POST | ✅ | ✅ |
 | `/api/generate/template` | POST | ✅ | ⏳ Wacht op deploy |
 | `/api/upload` | POST | ✅ | ✅ |
+| `/api/auth/profile` | GET | ✅ | ✅ |
+| `/api/auth/profile` | PATCH | ✅ | ✅ |
+| `/api/admin/organisations` | GET | ✅ Admin | ✅ |
+| `/api/admin/organisations` | POST | ✅ Admin | ✅ |
+| `/api/admin/organisations/{id}` | GET | ✅ Admin | ✅ |
+| `/api/admin/organisations/{id}` | PATCH | ✅ Admin | ✅ |
+| `/api/admin/organisations/{id}` | DELETE | ✅ Admin | ✅ |
 
 ---
 
@@ -91,6 +101,29 @@
 - [x] Deprecated `tenants/symitech/modules/` verwijderd
 - [x] Prompt bestanden gearchiveerd naar `_archive/prompts/`
 - [x] pytest cache opgeruimd
+
+---
+
+## Sessie 11 maart — Issues #5/#7/#9/#11 + Organisaties + Deploy
+
+- [x] **#9** — SpreadsheetBlock: grid-tabel met headers, zebra-striping, rijnummers, voetnoot
+  - `components/spreadsheet_block.py` + `create_spreadsheet()` in block_registry
+  - Frontend: `SpreadsheetEditor.tsx` met TSV copy/paste support
+  - JSON schema uitgebreid met `block_spreadsheet` definitie
+- [x] **#11** — AI-instructies document (`docs/ai-instructions.md`)
+  - Engelstalig document voor externe AI-tools: API, auth, block types, MCP server, voorbeeld JSON
+- [x] **#5** — Organisation model + admin CRUD
+  - `Organisation` dataclass + `OrganisationDB` in `auth/models.py`
+  - 5 admin endpoints: GET/POST/GET/PATCH/DELETE `/api/admin/organisations`
+  - Frontend: `OrganisationManagement.tsx` in admin panel
+  - User model uitgebreid met `organisation_id`
+- [x] **#7** — Adviseur koppeling via profiel + organisatie
+  - `GET/PATCH /api/auth/profile` endpoints (self-service)
+  - Auto-fill `adviseur_naam` en `adviseur_bedrijf` in generate endpoints
+  - Organisatie genest in profiel response
+- [x] Deploy script (`deploy.sh`): git pull → docker build --no-cache → deploy → health check
+- [x] Dead code cleanup: `src/bm_reports/` directory + `docs/TENANT_GUIDE.md` verwijderd
+- [x] 764 tests passed
 
 ---
 

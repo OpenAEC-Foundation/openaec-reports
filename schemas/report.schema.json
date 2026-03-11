@@ -208,6 +208,7 @@
         { "$ref": "#/$defs/block_calculation" },
         { "$ref": "#/$defs/block_check" },
         { "$ref": "#/$defs/block_table" },
+        { "$ref": "#/$defs/block_spreadsheet" },
         { "$ref": "#/$defs/block_image" },
         { "$ref": "#/$defs/block_map" },
         { "$ref": "#/$defs/block_spacer" },
@@ -300,6 +301,65 @@
           "type": "string",
           "enum": ["default", "minimal", "striped"],
           "default": "default"
+        }
+      }
+    },
+
+    "block_spreadsheet": {
+      "type": "object",
+      "required": ["type", "headers", "rows"],
+      "description": "Spreadsheet-achtige tabel met ondersteuning voor formule-annotaties, totaalrijen en rijlabels",
+      "properties": {
+        "type": { "const": "spreadsheet" },
+        "title": { "type": "string", "description": "Tabel-/spreadsheet-titel (optioneel)" },
+        "headers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Kolomnamen"
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                { "type": ["string", "number", "null"] },
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": { "type": ["string", "number", "null"], "description": "Celwaarde" },
+                    "formula": { "type": "string", "description": "Formule-annotatie (wordt cursief weergegeven)" },
+                    "style": {
+                      "type": "string",
+                      "enum": ["normal", "total", "header"],
+                      "description": "Celstijl: normal (default), total (vette tekst + markering), header (kolomkop-stijl)"
+                    }
+                  }
+                }
+              ]
+            },
+            "description": "Rij van celwaarden (string, getal, of celdict met value/formula/style)"
+          },
+          "description": "Data rijen (2D array)"
+        },
+        "column_widths": {
+          "type": "array",
+          "items": { "type": "number" },
+          "description": "Kolombreedte in mm (optioneel, auto als weggelaten)"
+        },
+        "style": {
+          "type": "string",
+          "enum": ["default", "minimal", "striped"],
+          "default": "default"
+        },
+        "show_row_numbers": {
+          "type": "boolean",
+          "default": false,
+          "description": "Toon automatische rijnummers als eerste kolom"
+        },
+        "note": {
+          "type": "string",
+          "description": "Optionele voetnoot onder de tabel"
         }
       }
     },

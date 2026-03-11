@@ -15,6 +15,7 @@ import type {
   PageBreakBlock,
   BulletListBlock,
   Heading2Block,
+  SpreadsheetBlock,
 } from '@/types/report';
 import { generateId } from './idGenerator';
 export function createDefaultReport(): EditorReport {
@@ -67,6 +68,14 @@ const blockDefaults: Record<EditableBlockType, () => ContentBlock> = {
   calculation: (): CalculationBlock => ({ type: 'calculation', title: '' }),
   check: (): CheckBlock => ({ type: 'check', description: '', limit: 1.0 }),
   table: (): TableBlock => ({ type: 'table', headers: ['Kolom 1', 'Kolom 2'], rows: [['', '']] }),
+  spreadsheet: (): SpreadsheetBlock => ({
+    type: 'spreadsheet',
+    title: '',
+    headers: ['Kolom 1', 'Kolom 2', 'Kolom 3'],
+    rows: [['', '', '']],
+    show_grid: true,
+    zebra: true,
+  }),
   image: (): ImageBlock => ({ type: 'image', src: '', alignment: 'center' }),
   map: (): MapBlock => ({ type: 'map', address: '', layers: ['percelen'], zoom: 16 }),
   spacer: (): SpacerBlock => ({ type: 'spacer', height_mm: 5 }),

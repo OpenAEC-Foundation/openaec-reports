@@ -59,6 +59,30 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 
 // ---------- Admin types ----------
 
+export interface Organisation {
+  id: string;
+  name: string;
+  address: string;
+  postal_code: string;
+  city: string;
+  phone: string;
+  email: string;
+  website: string;
+  kvk_number: string;
+  is_active: boolean;
+}
+
+export interface CreateOrganisationPayload {
+  name: string;
+  address?: string;
+  postal_code?: string;
+  city?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  kvk_number?: string;
+}
+
 export interface AdminUser {
   id: string;
   username: string;
@@ -459,6 +483,27 @@ export const adminApi = {
         }),
       }
     ),
+
+  // Organisations
+  listOrganisations: () =>
+    apiFetch<{ organisations: Organisation[] }>("/api/admin/organisations"),
+
+  createOrganisation: (data: CreateOrganisationPayload) =>
+    apiFetch<{ organisation: Organisation }>("/api/admin/organisations", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateOrganisation: (id: string, data: Partial<Organisation>) =>
+    apiFetch<{ organisation: Organisation }>(`/api/admin/organisations/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  deleteOrganisation: (id: string) =>
+    apiFetch<{ detail: string }>(`/api/admin/organisations/${id}`, {
+      method: "DELETE",
+    }),
 };
 
 // ---------- Report API ----------

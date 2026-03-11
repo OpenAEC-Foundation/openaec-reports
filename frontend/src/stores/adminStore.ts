@@ -16,9 +16,11 @@ import {
   type ApiKeyInfo,
   type CreateApiKeyPayload,
   type ApiError,
+  type Organisation,
+  type CreateOrganisationPayload,
 } from "@/services/api";
 
-type AdminTab = "tenants" | "users" | "api-keys" | "templates" | "brand" | "help";
+type AdminTab = "tenants" | "users" | "api-keys" | "templates" | "brand" | "organisations" | "help";
 
 interface AdminStore {
   // UI
@@ -131,6 +133,14 @@ interface AdminStore {
     brandSlug?: string
   ) => Promise<boolean>;
   resetExtraction: () => void;
+
+  // Organisations
+  organisations: Organisation[];
+  organisationsLoading: boolean;
+  loadOrganisations: () => Promise<void>;
+  createOrganisation: (data: CreateOrganisationPayload) => Promise<Organisation | null>;
+  updateOrganisation: (id: string, data: Partial<Organisation>) => Promise<Organisation | null>;
+  deleteOrganisation: (id: string) => Promise<boolean>;
 
   // General
   error: string | null;
@@ -653,6 +663,59 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
       promptPackage: null,
       extractionLoading: false,
     }),
+
+  // Organisations
+  organisations: [],
+  organisationsLoading: false,
+
+  loadOrganisations: async () => {
+    set({ organisationsLoading: true });
+    try {
+      const result = await adminApi.listOrganisations();
+      set({ organisations: result.organisations, organisationsLoading: false });
+    } catch (e) {
+      set({ organisationsLoading: false, error: extractError(e) });
+    }
+  },
+
+  createOrganisation: async (data) => {
+    try {
+      const result = await adminApi.createOrganisation(data);
+      set((s) => ({ organisations: [...s.organisations, result.organisation], error: null }));
+      return result.organisation;
+    } catch (e) {
+      set({ error: extractError(e) });
+      return null;
+    }
+  },
+
+  updateOrganisation: async (id, data) => {
+    try {
+      const result = await adminApi.updateOrganisation(id, data);
+      set((s) => ({
+        organisations: s.organisations.map((o) => (o.id === id ? result.organisation : o)),
+        error: null,
+      }));
+      return result.organisation;
+    } catch (e) {
+      set({ error: extractError(e) });
+      return null;
+    }
+  },
+
+  deleteOrganisation: async (id) => {
+    try {
+      await adminApi.deleteOrganisation(id);
+      set((s) => ({
+        organisations: s.organisations.filter((o) => o.id !== id),
+        error: null,
+      }));
+      return true;
+    } catch (e) {
+      set({ error: extractError(e) });
+      return false;
+    }
+  },
 
   // General
   error: null,

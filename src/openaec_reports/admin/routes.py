@@ -1488,6 +1488,137 @@ async def delete_api_key(key_id: str):
 
 
 # ============================================================
+# Organisaties
+# ============================================================
+
+
+class CreateOrganisationRequest(BaseModel):
+    """Request model voor het aanmaken van een organisatie."""
+
+    name: str = Field(..., min_length=1, max_length=200)
+    address: str = Field(default="")
+    postal_code: str = Field(default="")
+    city: str = Field(default="")
+    phone: str = Field(default="")
+    email: str = Field(default="")
+    website: str = Field(default="")
+    kvk_number: str = Field(default="")
+
+
+class UpdateOrganisationRequest(BaseModel):
+    """Request model voor het updaten van een organisatie."""
+
+    name: str | None = None
+    address: str | None = None
+    postal_code: str | None = None
+    city: str | None = None
+    phone: str | None = None
+    email: str | None = None
+    website: str | None = None
+    kvk_number: str | None = None
+    is_active: bool | None = None
+
+
+@admin_router.get("/organisations")
+async def list_organisations():
+    """Lijst alle organisaties.
+
+    Returns:
+        Dict met lijst van organisatie dicts.
+    """
+    from openaec_reports.auth.dependencies import get_organisation_db
+    db = get_organisation_db()
+    orgs = db.list_all()
+    return {"organisations": [o.to_dict() for o in orgs]}
+
+
+@admin_router.post("/organisations", status_code=status.HTTP_201_CREATED)
+async def create_organisation(payload: CreateOrganisationRequest):
+    """Maak een nieuwe organisatie aan.
+
+    Args:
+        payload: Organisatie gegevens.
+
+    Returns:
+        De aangemaakte organisatie dict.
+    """
+    from openaec_reports.auth.dependencies import get_organisation_db
+    from openaec_reports.auth.models import Organisation
+    db = get_organisation_db()
+    org = Organisation(
+        name=payload.name,
+        address=payload.address,
+        postal_code=payload.postal_code,
+        city=payload.city,
+        phone=payload.phone,
+        email=payload.email,
+        website=payload.website,
+        kvk_number=payload.kvk_number,
+    )
+    db.create(org)
+    return {"organisation": org.to_dict()}
+
+
+@admin_router.get("/organisations/{org_id}")
+async def get_organisation(org_id: str):
+    """Haal organisatie details op.
+
+    Args:
+        org_id: De organisatie UUID.
+
+    Returns:
+        Organisatie dict.
+    """
+    from openaec_reports.auth.dependencies import get_organisation_db
+    db = get_organisation_db()
+    org = db.get_by_id(org_id)
+    if not org:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organisatie niet gevonden")
+    return {"organisation": org.to_dict()}
+
+
+@admin_router.patch("/organisations/{org_id}")
+async def update_organisation(org_id: str, payload: UpdateOrganisationRequest):
+    """Update een organisatie (partial).
+
+    Args:
+        org_id: De organisatie UUID.
+        payload: Velden om te updaten.
+
+    Returns:
+        De geupdate organisatie dict.
+    """
+    from openaec_reports.auth.dependencies import get_organisation_db
+    db = get_organisation_db()
+    existing = db.get_by_id(org_id)
+    if not existing:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organisatie niet gevonden")
+    fields = {k: v for k, v in payload.model_dump().items() if v is not None}
+    if not fields:
+        return {"organisation": existing.to_dict()}
+    updated = db.update(org_id, **fields)
+    return {"organisation": updated.to_dict() if updated else existing.to_dict()}
+
+
+@admin_router.delete("/organisations/{org_id}")
+async def delete_organisation(org_id: str):
+    """Verwijder een organisatie.
+
+    Args:
+        org_id: De organisatie UUID.
+
+    Returns:
+        Bevestigingsbericht.
+    """
+    from openaec_reports.auth.dependencies import get_organisation_db
+    db = get_organisation_db()
+    deleted = db.delete(org_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organisatie niet gevonden")
+    return {"detail": "Organisatie verwijderd"}
+
+
+# ============================================================
 # Brand Extraction Wizard
 # ============================================================
 

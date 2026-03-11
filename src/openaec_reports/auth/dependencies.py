@@ -14,7 +14,7 @@ import logging
 from fastapi import HTTPException, Request, status
 
 from openaec_reports.auth.api_keys import ApiKeyDB
-from openaec_reports.auth.models import User, UserDB, UserRole
+from openaec_reports.auth.models import OrganisationDB, User, UserDB, UserRole
 from openaec_reports.auth.security import COOKIE_NAME, decode_access_token
 
 logger = logging.getLogger(__name__)
@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 # Module-level DB instances (worden gezet bij app startup)
 _user_db: UserDB | None = None
 _api_key_db: ApiKeyDB | None = None
+_organisation_db: OrganisationDB | None = None
 
 
 def init_user_db(db: UserDB) -> None:
@@ -46,6 +47,18 @@ def init_api_key_db(db: ApiKeyDB) -> None:
     """
     global _api_key_db  # noqa: PLW0603
     _api_key_db = db
+
+
+def init_organisation_db(db: OrganisationDB) -> None:
+    """Stel de module-level OrganisationDB instance in.
+
+    Wordt eenmalig aangeroepen bij app startup.
+
+    Args:
+        db: OrganisationDB instance.
+    """
+    global _organisation_db  # noqa: PLW0603
+    _organisation_db = db
 
 
 def get_user_db() -> UserDB:
@@ -74,6 +87,20 @@ def get_api_key_db() -> ApiKeyDB:
     if _api_key_db is None:
         raise RuntimeError("ApiKeyDB niet geinitialiseerd — roep init_api_key_db() aan")
     return _api_key_db
+
+
+def get_organisation_db() -> OrganisationDB:
+    """Haal de actieve OrganisationDB op.
+
+    Returns:
+        De OrganisationDB instance.
+
+    Raises:
+        RuntimeError: Als init_organisation_db() niet is aangeroepen.
+    """
+    if _organisation_db is None:
+        raise RuntimeError("OrganisationDB niet geinitialiseerd — roep init_organisation_db() aan")
+    return _organisation_db
 
 
 def _extract_token(request: Request) -> str | None:

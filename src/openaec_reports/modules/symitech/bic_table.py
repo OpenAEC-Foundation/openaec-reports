@@ -86,8 +86,8 @@ class BicTableModule(ContentModule):
         primary = HexColor(cfg.colors.get("primary", "#006FAB"))
         secondary = HexColor(cfg.colors.get("secondary", "#94571E"))
         text_color = HexColor(cfg.colors.get("text", "#000000"))
-        heading_font = cfg.fonts.get("heading", "Helvetica-Bold")
-        body_font = cfg.fonts.get("body", "Helvetica")
+        heading_font = cfg.fonts.get("heading", "LiberationSans-Bold")
+        body_font = cfg.fonts.get("body", "LiberationSans")
 
         ref_x = w * LABEL_COL_FRAC
         actual_x = w * REF_COL_FRAC

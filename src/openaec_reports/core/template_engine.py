@@ -119,9 +119,9 @@ def _resolve_font(font_ref: str, brand) -> str:
     if font_ref in brand.fonts:
         font_name = brand.fonts[font_ref]
     elif font_ref == "heading_bold":
-        font_name = brand.fonts.get("heading", "Helvetica-Bold")
+        font_name = brand.fonts.get("heading", "LiberationSans-Bold")
     elif font_ref == "body_bold":
-        base = brand.fonts.get("body", "Helvetica")
+        base = brand.fonts.get("body", "LiberationSans")
         font_name = base + "-Bold" if not base.endswith("Bold") else base
     else:
         font_name = font_ref

@@ -17,8 +17,8 @@ class ModuleConfig:
     """Configuratie voor content modules (fonts, kleuren, maten)."""
 
     fonts: dict = field(default_factory=lambda: {
-        "heading": "Helvetica-Bold",
-        "body": "Helvetica",
+        "heading": "LiberationSans-Bold",
+        "body": "LiberationSans",
     })
     colors: dict = field(default_factory=lambda: {
         "primary": "#006FAB",

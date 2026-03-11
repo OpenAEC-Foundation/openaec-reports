@@ -392,7 +392,7 @@ class TestBrandRenderer:
 
     def test_resolve_font_unknown_ref(self):
         renderer = self._make_renderer()
-        assert renderer._resolve_font("$nonexistent") == "Helvetica"
+        assert renderer._resolve_font("$nonexistent") == "LiberationSans"
 
     def test_zero_height_header_skipped(self):
         brand = BrandConfig(

@@ -30,9 +30,9 @@ fonts:
   medium: "GothamMedium"      # Website tekst, badges
   body_italic: "Gotham-BookItalic"
   # Fallbacks als Gotham niet beschikbaar:
-  heading_fb: "Helvetica-Bold"
-  body_fb: "Helvetica"
-  medium_fb: "Helvetica"
+  heading_fb: "LiberationSans-Bold"
+  body_fb: "LiberationSans"
+  medium_fb: "LiberationSans"
 
 # ==============================================================================
 # PAGINA TYPES

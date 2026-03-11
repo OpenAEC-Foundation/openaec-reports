@@ -74,8 +74,8 @@ class TestModuleConfig:
 
     def test_default_fonts(self):
         cfg = ModuleConfig()
-        assert cfg.fonts["heading"] == "Helvetica-Bold"
-        assert cfg.fonts["body"] == "Helvetica"
+        assert cfg.fonts["heading"] == "LiberationSans-Bold"
+        assert cfg.fonts["body"] == "LiberationSans"
 
     def test_default_colors(self):
         cfg = ModuleConfig()
@@ -232,7 +232,7 @@ class TestContentModule:
     def test_default_config(self):
         module = DummyModule(data={})
         assert isinstance(module.config, ModuleConfig)
-        assert module.config.fonts["heading"] == "Helvetica-Bold"
+        assert module.config.fonts["heading"] == "LiberationSans-Bold"
 
     def test_custom_config(self):
         cfg = ModuleConfig(label_size=14.0)

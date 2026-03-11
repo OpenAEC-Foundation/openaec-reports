@@ -113,8 +113,8 @@ class LocationDetailModule(ContentModule):
         primary = HexColor(cfg.colors.get("primary", "#006FAB"))
         secondary = HexColor(cfg.colors.get("secondary", "#94571E"))
         text_color = HexColor(cfg.colors.get("text", "#000000"))
-        heading_font = cfg.fonts.get("heading", "Helvetica-Bold")
-        body_font = cfg.fonts.get("body", "Helvetica")
+        heading_font = cfg.fonts.get("heading", "LiberationSans-Bold")
+        body_font = cfg.fonts.get("body", "LiberationSans")
 
         label_right = w * LABEL_COL_FRAC
         value_x = label_right + 8
@@ -255,7 +255,7 @@ class LocationDetailModule(ContentModule):
             # Fallback bij ongeldige afbeelding
             self._draw_placeholder(
                 c, y, w,
-                self.config.fonts.get("body", "Helvetica"),
+                self.config.fonts.get("body", "LiberationSans"),
                 HexColor(self.config.colors.get("text", "#000000")),
             )
 

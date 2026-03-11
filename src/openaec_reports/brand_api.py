@@ -703,9 +703,9 @@ def _generate_brand_yaml(
         bold_fonts = [f for f, _ in sorted_fonts if "bold" in f.lower()]
         regular_fonts = [f for f, _ in sorted_fonts if "bold" not in f.lower()]
         brand_data["fonts"]["heading"] = bold_fonts[0] if bold_fonts else sorted_fonts[0][0]
-        brand_data["fonts"]["heading_fallback"] = "Helvetica-Bold"
+        brand_data["fonts"]["heading_fallback"] = "LiberationSans-Bold"
         brand_data["fonts"]["body"] = regular_fonts[0] if regular_fonts else sorted_fonts[0][0]
-        brand_data["fonts"]["body_fallback"] = "Helvetica"
+        brand_data["fonts"]["body_fallback"] = "LiberationSans"
 
     if modules:
         brand_data["tenant_modules"] = modules

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import functools
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -15,11 +14,16 @@ from openaec_reports.core.fonts import get_font_name, register_fonts
 if TYPE_CHECKING:
     from openaec_reports.core.brand import BrandConfig
 
+_fonts_registered = False
 
-@functools.cache
+
 def _ensure_fonts_registered() -> None:
     """Registreer fonts eenmalig (lazy, bij eerste gebruik)."""
+    global _fonts_registered
+    if _fonts_registered:
+        return
     register_fonts()
+    _fonts_registered = True
 
 
 # ============================================================
@@ -263,10 +267,10 @@ def activate_brand(brand: BrandConfig) -> None:
 
     # 2. Update BM_FONTS font names van brand.fonts
     _font_roles: dict[str, str] = {
-        "heading": "Helvetica-Bold",
-        "body": "Helvetica",
-        "medium": "Helvetica",
-        "italic": "Helvetica-Oblique",
+        "heading": "LiberationSans-Bold",
+        "body": "LiberationSans",
+        "medium": "LiberationSans",
+        "italic": "LiberationSans-Italic",
     }
     if brand.fonts:
         for role, fallback in _font_roles.items():

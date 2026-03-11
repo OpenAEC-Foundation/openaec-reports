@@ -5,23 +5,6 @@
 
 ---
 
-## 🔴 T9 — Font Embedding Fix (BLOCKER)
-
-Fonts worden NIET embedded in gegenereerde PDF's. Alle 3 engines vallen terug op Helvetica (Type1 referentie, nooit embedded).
-
-**Zie `PLAN-font-embedding.md` voor het volledige uitvoerplan (10 stappen).**
-
-Samenvatting:
-- [ ] T9.1 — Bundle Liberation Sans/Mono TTFs in `assets/fonts/`
-- [ ] T9.2 — `core/fonts.py`: fallback registratie + `_HELVETICA_TO_LIBERATION` mapping
-- [ ] T9.3 — `core/styles.py`: verwijder `@functools.cache`, update fallbacks
-- [ ] T9.4 — `core/renderer_v2.py`: PyMuPDF FontManager fix (Liberation Sans i.p.v. `fitz.Font("helv")`)
-- [ ] T9.5 — Brand YAML fixes: Symitech (`Helvetica` → `Arial`), default brand → LiberationSans
-- [ ] T9.6 — `core/special_pages.py` + `brand_renderer.py` + `template_engine.py`: alle Helvetica fallbacks
-- [ ] T9.7 — Nieuwe tests `test_font_embedding.py` + bestaande tests updaten
-
----
-
 ## 🔴 Features — Hoog
 
 - [x] **#13** — MCP-server toevoegen
@@ -146,7 +129,7 @@ Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
 - [ ] H1 — `_temp_analyze.py` verwijderen uit project root
 - [x] H2 — Dead code `src/bm_reports/` verwijderd + `docs/TENANT_GUIDE.md` verwijderd
 - [ ] H3 — `lessons_learned.md` aanmaken
-- [ ] H4 — `Gotham-Bold.ttf` etc. instructies in fonts.py updaten (verwijst naar oude pad)
+- [x] H4 — `fonts.py` herschreven met Liberation Sans documentatie (was: verouderde Gotham pad instructies)
 - [ ] H5 — STATUS.md en frontend/STATUS.md actualiseren
 
 ---
@@ -173,7 +156,7 @@ Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
 
 | Bestand | Regel | TODO |
 |---------|-------|------|
-| `core/fonts.py` | 13 | Gotham TTF pad instructies updaten |
+| ~~`core/fonts.py`~~ | ~~13~~ | ~~Gotham TTF pad instructies updaten~~ — OPGELOST in T9 |
 | `data/kadaster.py` | 60 | RD↔WGS84 conversie met pyproj/RDNAPTRANS |
 | `data/revit_adapter.py` | 42, 64, 69, 89 | Volledige Revit integratie (4 methoden) |
 | `reports/building_code.py` | 33 | Bouwbesluit toetsingssecties |
@@ -183,6 +166,14 @@ Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
 ---
 
 ## ✅ VOLTOOID
+
+### T9 — Font Embedding Fix (11 maart, 2de2741)
+- [x] **T9** — Liberation Sans als embedded fallback, vervangt Helvetica Type1
+  - 5 Liberation Sans/Mono TTFs gebundeld (Apache 2.0)
+  - `fonts.py`: `register_liberation_fonts()`, `_HELVETICA_TO_LIBERATION` mapping
+  - `renderer_v2.py`: FontManager TTF i.p.v. `fitz.Font("helv")`
+  - Alle Helvetica defaults vervangen in 15 bronbestanden
+  - 1045 tests passed
 
 ### Bug Fixes: Rendering + Colofon (5 maart)
 - [x] **#14** — Colofon: `revision_history` en `disclaimer` rendering in V1 en V2

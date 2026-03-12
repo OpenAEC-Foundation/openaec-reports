@@ -1,0 +1,41 @@
+# =============================================================
+# 3BM V2 — Inhoud (Table of Contents)
+# =============================================================
+# Stationery: standaard.pdf (zelfde als content pages)
+# Engine rendert: "Inhoud" titel + paginanummer.
+# TOC entries worden door de engine's TOC-mechanisme gegenereerd
+# binnen het content_frame.
+#
+# Coordinaten: mm top-down (geconverteerd uit toc.yaml pt)
+# =============================================================
+
+name: inhoud
+stationery: standaard.pdf
+
+text_zones:
+  # "Inhoud" titel
+  # Origineel: x=90pt y_td=74.9pt → GothamBook 18pt #40124A
+  - bind: "_static.Inhoud"
+    x_mm: 31.7
+    y_mm: 26.4
+    font: body
+    size: 18
+    color: "primary"
+
+  # Paginanummer
+  # Origineel: x=533pt y_td=793.5pt → GothamBook 9.5pt #40124A
+  - bind: _page_number
+    x_mm: 188.0
+    y_mm: 279.9
+    font: body
+    size: 9.5
+    color: "primary"
+    align: right
+
+# Content frame voor TOC entries
+# entries_start_y=127.2pt → 44.9mm, tot y=780pt → 275.1mm
+content_frame:
+  x_mm: 31.7
+  y_mm: 44.9
+  width_mm: 155.7
+  height_mm: 230.3

@@ -1,0 +1,94 @@
+# =============================================================
+# 3BM Cooperatie V2 — Brand configuratie (nieuwe template engine)
+# =============================================================
+# Kopie van 3bm_cooperatie met aanpassingen voor template_engine.
+# Kleuren en fonts worden gerefereerd vanuit page_type YAMLs
+# via sleutelnamen (bijv. color: "primary", font: "heading").
+# =============================================================
+
+brand:
+  name: "3BM Coöperatie"
+  slug: "3bm-cooperatie"
+
+colors:
+  primary: "#40124A"
+  secondary: "#38BDA0"
+  text: "#45243D"
+  text_accent: "#56B49B"
+  white: "#FFFFFF"
+  accent: "#2ECC71"
+  warning: "#E74C3C"
+  text_light: "#7F8C8D"
+  table_header_bg: "#45233C"
+  table_header_text: "#FFFFFF"
+  table_footer_bg: "#55B49B"
+  separator: "#E0D0E8"
+
+fonts:
+  heading: "GothamBold"
+  body: "GothamBook"
+  medium: "GothamMedium"
+  italic: "GothamBookItalic"
+
+logos:
+  main: "logos/3bm-cooperatie.png"
+  tagline: "logos/3bm-cooperatie-tagline.png"
+  white: "logos/3bm-cooperatie-wit.png"
+
+contact:
+  name: "3bm Coöperatie U.A."
+  address: "Wattstraat 17  |  3335 LV Zwijndrecht  |  T. 078 7400 250"
+  website: "3bm.co.nl"
+
+header:
+  height: 0
+  elements: []
+
+footer:
+  height: 17
+  elements:
+    - type: text
+      content: "{page}"
+      x: 188
+      y: 5
+      font: "$body"
+      size: 9.5
+      color: "$text"
+      align: right
+
+styles:
+  Normal:
+    fontName: "GothamBook"
+    fontSize: 9.5
+    leading: 12.0
+    textColor: "#45243D"
+  Heading1:
+    fontName: "GothamBook"
+    fontSize: 18.0
+    leading: 23.4
+    textColor: "#45243D"
+  Heading2:
+    fontName: "GothamBook"
+    fontSize: 13.0
+    leading: 16.9
+    textColor: "#56B49B"
+  Heading3:
+    fontName: "GothamBook"
+    fontSize: 11.0
+    leading: 14.3
+    textColor: "#56B49B"
+
+modules:
+  table:
+    header_bg: "$colors.table_header_bg"
+    header_text_color: "#FFFFFF"
+    body_font: "GothamBook"
+    body_size: 9.0
+    footer_bg: "$colors.table_footer_bg"
+    grid_color: "$colors.separator"
+  calculation:
+    title_color: "$colors.primary"
+    accent_line_color: "$colors.secondary"
+  check:
+    pass_color: "$colors.accent"
+    fail_color: "$colors.warning"

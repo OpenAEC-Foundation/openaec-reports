@@ -1,0 +1,157 @@
+# =============================================================
+# 3BM V2 — Colofon (projectinformatie pagina)
+# =============================================================
+# Stationery: colofon.pdf bevat:
+#   - 3BM logo + tagline (rechtsboven)
+#   - Turquoise hoekblok (linksboven)
+#   - Labels: Project, In opdracht van, Adviseur, etc.
+#   - Scheidingslijnen
+# Engine rendert alleen de WAARDEN (rechterkolom) + titel.
+#
+# Coordinaten: mm top-down (geconverteerd uit colofon.yaml pt)
+# PT_TO_MM = 0.35278, y_mm = y_td_pt × PT_TO_MM
+# =============================================================
+
+name: colofon
+stationery: colofon.pdf
+
+text_zones:
+  # === Header ===
+
+  # Rapport type titel (bijv. "BBL Rapportage")
+  # Origineel: x=70.9pt y_td=57.3pt → GothamBold 22pt #40124A
+  - bind: project
+    x_mm: 25.0
+    y_mm: 20.2
+    font: heading
+    size: 22
+    color: "primary"
+
+  # Ondertitel (bijv. projectnaam)
+  # Origineel: x=70.9pt y_td=86.8pt → GothamBook 14pt #38BDA0
+  - bind: cover.subtitle
+    x_mm: 25.0
+    y_mm: 30.6
+    font: body
+    size: 14
+    color: "secondary"
+
+  # === Waarden kolom (x=229.1pt → 80.8mm) ===
+
+  # Project
+  # y_td=320.8pt → 113.2mm
+  - bind: colofon.project_description
+    x_mm: 80.8
+    y_mm: 113.2
+    font: body
+    size: 10
+    color: "primary"
+
+  # Opdrachtgever (bedrijfsnaam)
+  # y_td=368.8pt → 130.1mm
+  - bind: colofon.client_name
+    x_mm: 80.8
+    y_mm: 130.1
+    font: body
+    size: 10
+    color: "primary"
+
+  # Opdrachtgever contactpersoon
+  # y_td=381.8pt → 134.7mm
+  - bind: colofon.client_contact
+    x_mm: 80.8
+    y_mm: 134.7
+    font: body
+    size: 10
+    color: "primary"
+
+  # Opdrachtgever adres
+  # y_td=394.6pt → 139.2mm
+  - bind: colofon.client_address
+    x_mm: 80.8
+    y_mm: 139.2
+    font: body
+    size: 10
+    color: "primary"
+
+  # Adviseur bedrijf
+  # y_td=488.8pt → 172.4mm
+  - bind: colofon.advisor
+    x_mm: 80.8
+    y_mm: 172.4
+    font: body
+    size: 10
+    color: "primary"
+
+  # Adviseur naam
+  # y_td=501.1pt → 176.7mm
+  - bind: colofon.advisor_name
+    x_mm: 80.8
+    y_mm: 176.7
+    font: body
+    size: 10
+    color: "primary"
+
+  # Toegepaste Normen
+  # y_td=524.8pt → 185.1mm
+  - bind: colofon.norms
+    x_mm: 80.8
+    y_mm: 185.1
+    font: body
+    size: 10
+    color: "primary"
+
+  # Documentgegevens
+  # y_td=548.8pt → 193.6mm
+  - bind: colofon.document_info
+    x_mm: 80.8
+    y_mm: 193.6
+    font: body
+    size: 10
+    color: "primary"
+
+  # Datum rapport
+  # y_td=572.8pt → 202.1mm
+  - bind: colofon.date
+    x_mm: 80.8
+    y_mm: 202.1
+    font: body
+    size: 10
+    color: "primary"
+
+  # Fase in bouwproces
+  # y_td=596.8pt → 210.5mm
+  - bind: colofon.phase
+    x_mm: 80.8
+    y_mm: 210.5
+    font: body
+    size: 10
+    color: "primary"
+
+  # Rapportstatus
+  # y_td=620.8pt → 218.9mm
+  - bind: colofon.status
+    x_mm: 80.8
+    y_mm: 218.9
+    font: body
+    size: 10
+    color: "primary"
+
+  # Documentkenmerk
+  # y_td=644.8pt → 227.4mm
+  - bind: colofon.document_code
+    x_mm: 80.8
+    y_mm: 227.4
+    font: body
+    size: 10
+    color: "primary"
+
+  # === Paginanummer ===
+  # Origineel: x=534pt y_td=796.3pt → GothamBook 9.5pt #38BDA0
+  - bind: _page_number
+    x_mm: 188.4
+    y_mm: 280.9
+    font: body
+    size: 9.5
+    color: "secondary"
+    align: right

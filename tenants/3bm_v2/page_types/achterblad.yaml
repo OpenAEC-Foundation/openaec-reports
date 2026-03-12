@@ -1,0 +1,14 @@
+# =============================================================
+# 3BM V2 — Achterblad (back cover)
+# =============================================================
+# Stationery: achterblad.pdf bevat alle visuele elementen:
+#   - Turquoise achtergrond met geometrische vormen
+#   - Paars vlak linksboven
+#   - 3BM logo (kleur variant)
+#   - Contactgegevens footer
+#   - "Ontdek ons 3bm.co.nl"
+# Engine rendert: niets extra — alles zit in de stationery.
+# =============================================================
+
+name: achterblad
+stationery: achterblad.pdf

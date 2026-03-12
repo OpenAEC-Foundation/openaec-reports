@@ -1,0 +1,33 @@
+# =============================================================
+# 3BM V2 — Standaard (content page, flow mode)
+# =============================================================
+# Stationery: standaard.pdf (header strip + footer)
+# Engine rendert: paginanummer + flow content (tekst, tabellen,
+# afbeeldingen) binnen het content_frame.
+#
+# Coordinaten: mm top-down (geconverteerd uit standaard.yaml pt)
+# Content area: x=90pt w=441.3pt y_start=74.9pt y_end=780pt
+# =============================================================
+
+name: standaard
+stationery: standaard.pdf
+
+text_zones:
+  # Paginanummer
+  # Origineel: x=533pt y_td=793.5pt → GothamBook 9.5pt #40124A
+  - bind: _page_number
+    x_mm: 188.0
+    y_mm: 279.9
+    font: body
+    size: 9.5
+    color: "primary"
+    align: right
+
+# Content frame voor flow content (Platypus flowables)
+# left=90pt → 31.7mm, top=74.9pt → 26.4mm
+# width=441.3pt → 155.7mm, height=705.1pt → 248.7mm
+content_frame:
+  x_mm: 31.7
+  y_mm: 26.4
+  width_mm: 155.7
+  height_mm: 248.7

@@ -1,0 +1,33 @@
+# =============================================================
+# 3BM V2 — Bijlage Divider (appendix scheidingspagina)
+# =============================================================
+# Stationery: bijlagen.pdf bevat:
+#   - Turquoise achtergrond
+#   - Paarse balk linksonder
+#   - Tagline "Projecten die inspireren"
+# Engine rendert: bijlage nummer + titel.
+#
+# Coordinaten: mm top-down (geconverteerd uit bijlage.yaml pt)
+# =============================================================
+
+name: bijlage_divider
+stationery: bijlagen.pdf
+
+text_zones:
+  # Bijlage nummer (bijv. "Bijlage A")
+  # Origineel: x=103pt y_td=193.9pt → GothamBold 41.4pt #40124A
+  - bind: appendix.label
+    x_mm: 36.3
+    y_mm: 68.4
+    font: heading
+    size: 41.4
+    color: "primary"
+
+  # Bijlage titel (bijv. "Berekeningen")
+  # Origineel: x=136.1pt y_td=262.2pt → GothamBook 20pt #FFFFFF
+  - bind: appendix.title
+    x_mm: 48.0
+    y_mm: 92.5
+    font: body
+    size: 20
+    color: "white"

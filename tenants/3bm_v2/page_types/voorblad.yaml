@@ -1,0 +1,44 @@
+# =============================================================
+# 3BM V2 — Voorblad (cover page)
+# =============================================================
+# Stationery: PNG overlay met alpha-gat voor hero foto.
+# De overlay bevat: paars vlak, logo, "Ontdek ons", badges.
+# Engine rendert: rapport type titel + project naam.
+#
+# NB: Hero foto rendering vereist custom cover logic —
+# de page_type preview toont alleen de overlay + tekst.
+#
+# Coordinaten: mm top-down (geconverteerd uit cover.yaml pt)
+# PT_TO_MM = 0.35278, y_mm = (841.9 - y_bl) × PT_TO_MM
+# =============================================================
+
+name: voorblad
+stationery: 2707_BBLrapportage_v01_1.png
+
+text_zones:
+  # Rapport type (bijv. "BBL Rapportage")
+  # Origineel: x=54.3pt y_bl=120.5pt → GothamBold 28.9pt #40124A
+  - bind: project
+    x_mm: 19.2
+    y_mm: 254.5
+    font: heading
+    size: 28.9
+    color: "primary"
+
+  # Project naam / ondertitel
+  # Origineel: x=55.0pt y_bl=78.6pt → GothamBook 17.8pt #38BDA0
+  - bind: cover.subtitle
+    x_mm: 19.4
+    y_mm: 269.2
+    font: body
+    size: 17.8
+    color: "secondary"
+
+# Hero foto placeholder (optioneel)
+image_zones:
+  - bind: cover.image
+    x_mm: 19.6
+    y_mm: 57.0
+    width_mm: 170.7
+    height_mm: 197.8
+    fallback: ""

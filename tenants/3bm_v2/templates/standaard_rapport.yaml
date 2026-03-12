@@ -1,0 +1,36 @@
+# =============================================================
+# 3BM V2 — Standaard Rapport (documentstructuur)
+# =============================================================
+# Definieert de volgorde van pagina's in een standaard rapport.
+# Elke entry verwijst naar een page_type in page_types/.
+#
+# Types:
+#   special — eenmalige pagina (cover, backcover)
+#   fixed   — vaste layout met data zones (colofon)
+#   toc     — inhoudsopgave (engine genereert entries)
+#   flow    — doorlopende content (tekst, tabellen, afbeeldingen)
+# =============================================================
+
+name: 3bm_v2_standaard
+tenant: 3bm_v2
+
+pages:
+  - type: special
+    page_type: voorblad
+    orientation: portrait
+
+  - type: fixed
+    page_type: colofon
+    orientation: portrait
+
+  - type: toc
+    page_type: inhoud
+    orientation: portrait
+
+  - type: flow
+    page_type: standaard
+    orientation: portrait
+
+  - type: special
+    page_type: achterblad
+    orientation: portrait

@@ -426,6 +426,27 @@ export const adminApi = {
       method: "DELETE",
     }),
 
+  // Page-type preview
+  previewPageType: (
+    tenant: string,
+    yamlContent: string,
+    sampleData?: Record<string, unknown>,
+    dpi?: number,
+    signal?: AbortSignal
+  ) =>
+    apiFetch<{ image: string; width: number; height: number }>(
+      `/api/admin/tenants/${encodeURIComponent(tenant)}/preview/page-type`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          yaml_content: yamlContent,
+          sample_data: sampleData ?? null,
+          dpi: dpi ?? 150,
+        }),
+        signal,
+      }
+    ),
+
   // Brand Extraction
   startBrandExtraction: async (
     tenant: string,

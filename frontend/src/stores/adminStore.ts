@@ -104,10 +104,25 @@ interface AdminStore {
   editorOriginal: string;
   editorLoading: boolean;
   editorSaving: boolean;
+  editorMode: "raw" | "form";
   openEditor: (tenant: string, category: YamlCategory, filename: string) => Promise<void>;
   closeEditor: () => void;
   setEditorContent: (content: string) => void;
+  setEditorMode: (mode: "raw" | "form") => void;
   saveEditorContent: () => Promise<boolean>;
+
+  // Preview
+  previewImage: string | null;
+  previewWidth: number;
+  previewHeight: number;
+  previewLoading: boolean;
+  previewError: string | null;
+  requestPreview: (signal?: AbortSignal) => Promise<void>;
+  clearPreview: () => void;
+
+  // Brand Colors
+  brandColors: Record<string, string> | null;
+  loadBrandColors: (tenant: string) => Promise<void>;
 
   // Brand Extraction Wizard
   extractionStep: number; // 0=inactive, 1=upload, 2=review, 3=prompt, 4=finalize
@@ -536,6 +551,7 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
   editorOriginal: "",
   editorLoading: false,
   editorSaving: false,
+  editorMode: "raw",
 
   openEditor: async (tenant, category, filename) => {
     set({ editorLoading: true, error: null });
@@ -546,6 +562,7 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
         editorContent: result.raw,
         editorOriginal: result.raw,
         editorLoading: false,
+        editorMode: "raw",
       });
     } catch (e) {
       set({ editorLoading: false, error: extractError(e) });
@@ -559,9 +576,17 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
       editorOriginal: "",
       editorLoading: false,
       editorSaving: false,
+      editorMode: "raw",
+      previewImage: null,
+      previewWidth: 0,
+      previewHeight: 0,
+      previewLoading: false,
+      previewError: null,
     }),
 
   setEditorContent: (content) => set({ editorContent: content }),
+
+  setEditorMode: (mode) => set({ editorMode: mode }),
 
   saveEditorContent: async () => {
     const { editorFile, editorContent } = get();
@@ -579,6 +604,67 @@ export const useAdminStore = create<AdminStore>()((set, get) => ({
     } catch (e) {
       set({ editorSaving: false, error: extractError(e) });
       return false;
+    }
+  },
+
+  // Preview
+  previewImage: null,
+  previewWidth: 0,
+  previewHeight: 0,
+  previewLoading: false,
+  previewError: null,
+
+  requestPreview: async (signal) => {
+    const { editorFile, editorContent } = get();
+    if (!editorFile || editorFile.category !== "page-types") return;
+    set({ previewLoading: true, previewError: null });
+    try {
+      const result = await adminApi.previewPageType(
+        editorFile.tenant,
+        editorContent,
+        undefined,
+        undefined,
+        signal,
+      );
+      // Controleer of request niet geannuleerd is
+      if (signal?.aborted) return;
+      set({
+        previewImage: result.image,
+        previewWidth: result.width,
+        previewHeight: result.height,
+        previewLoading: false,
+      });
+    } catch (e) {
+      if (signal?.aborted) return;
+      set({
+        previewLoading: false,
+        previewError: extractError(e),
+      });
+    }
+  },
+
+  clearPreview: () =>
+    set({
+      previewImage: null,
+      previewWidth: 0,
+      previewHeight: 0,
+      previewLoading: false,
+      previewError: null,
+    }),
+
+  // Brand Colors
+  brandColors: null,
+
+  loadBrandColors: async (tenant) => {
+    try {
+      const brand = await adminApi.getBrand(tenant);
+      if (brand.parsed && typeof brand.parsed.colors === "object") {
+        set({ brandColors: brand.parsed.colors as Record<string, string> });
+      } else {
+        set({ brandColors: null });
+      }
+    } catch {
+      set({ brandColors: null });
     }
   },
 

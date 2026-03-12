@@ -1924,3 +1924,74 @@ async def merge_brand(tenant: str, payload: BrandMergeRequest):
         "yaml": final_yaml,
         "path": str(brand_path),
     }
+
+
+# ============================================================
+# Preview endpoints
+# ============================================================
+
+
+class PreviewPageTypeRequest(BaseModel):
+    """Request model voor page-type preview."""
+
+    yaml_content: str = Field(..., max_length=MAX_YAML_SIZE_BYTES)
+    sample_data: dict | None = None
+    dpi: int = Field(default=150, ge=72, le=300)
+
+
+@admin_router.post("/tenants/{tenant}/preview/page-type")
+async def preview_page_type(
+    tenant: str,
+    payload: PreviewPageTypeRequest,
+    _user: User = Depends(require_admin),
+):
+    """Render een page-type YAML als PNG preview.
+
+    Args:
+        tenant: Tenant identifier.
+        payload: YAML content + optionele sample data + DPI.
+
+    Returns:
+        Dict met base64-encoded PNG, breedte en hoogte.
+    """
+    import base64
+
+    _validate_path_segment(tenant, "tenant")
+
+    tenants_base = _get_tenants_base()
+    tenant_dir = tenants_base / tenant
+    if not tenant_dir.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Tenant '{tenant}' niet gevonden",
+        )
+
+    from openaec_reports.admin.preview import render_page_type_preview
+
+    try:
+        png_bytes, width, height = await asyncio.to_thread(
+            render_page_type_preview,
+            yaml_content=payload.yaml_content,
+            tenant=tenant,
+            tenants_dir=tenants_base,
+            sample_data=payload.sample_data,
+            dpi=payload.dpi,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        )
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(exc),
+        )
+
+    b64 = base64.b64encode(png_bytes).decode("ascii")
+
+    return {
+        "image": f"data:image/png;base64,{b64}",
+        "width": width,
+        "height": height,
+    }

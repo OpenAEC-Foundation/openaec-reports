@@ -1,7 +1,7 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-11
+> Laatst bijgewerkt: 2026-03-14
 
 ---
 
@@ -23,16 +23,16 @@
 
 Self-service YAML beheer per tenant.
 
-**Fase 1 — Upload & beheer (quick win):**
-- [ ] T5.1 — API: `/api/admin/tenants/{tenant}/page_types/` CRUD
-- [ ] T5.2 — Frontend: YAML file browser per tenant
-- [ ] T5.3 — Upload/download YAML's + brand.yaml
-- [ ] T5.4 — Preview: upload → render test-PDF → bekijk resultaat
+**Fase 1 — Upload & beheer:** ✅
+- [x] T5.1 — API: `/api/admin/tenants/{tenant}/page_types/` CRUD
+- [x] T5.2 — Frontend: YAML file browser per tenant
+- [x] T5.3 — Upload/download YAML's + brand.yaml
+- [x] T5.4 — Preview: upload → render test-PDF → bekijk resultaat
 
-**Fase 2 — Visuele editor:**
-- [ ] T5.5 — YAML als formulier: text_zones als bewerkbare rijen
-- [ ] T5.6 — Live preview bij wijziging
-- [ ] T5.7 — Kleurenpicker uit brand.yaml
+**Fase 2 — Visuele editor:** ✅
+- [x] T5.5 — YAML als formulier: text_zones, line_zones, image_zones, content_frame, table als bewerkbare rijen
+- [x] T5.6 — Live preview bij wijziging
+- [x] T5.7 — Kleurenpicker uit brand.yaml
 
 **Fase 3 — Brand onboarding wizard (deels klaar):**
 - [x] T5.8 — BrandExtractWizard (4-stap, paurs) in admin panel
@@ -41,13 +41,11 @@ Self-service YAML beheer per tenant.
 
 ---
 
-## 🟡 T6 — Report Type Stubs Implementeren
+## ~~🟡 T6 — Report Type Stubs Implementeren~~ ✅
 
-Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
-
-- [ ] T6.1 — `reports/structural.py` — Constructief rapport sectie-opbouw
-- [ ] T6.2 — `reports/daylight.py` — Daglichtsecties
-- [ ] T6.3 — `reports/building_code.py` — Bouwbesluit toetsingssecties
+- [x] T6.1 — `reports/structural.py` — Uitgangspunten, belastingen, berekeningen per element, UC overzicht, conclusie
+- [x] T6.2 — `reports/daylight.py` — Uitgangspunten, situatie, daglichtberekening per ruimte, toetsing, conclusie
+- [x] T6.3 — `reports/building_code.py` — Projectgegevens, toetsingen per hoofdstuk met CheckBlocks, overzicht, conclusie
 
 ---
 
@@ -63,9 +61,9 @@ Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
 
 ---
 
-## 🟡 T8 — Kadaster/PDOK Verbetering
+## ~~🟡 T8 — Kadaster/PDOK Verbetering~~ ✅
 
-- [ ] T8.1 — `data/kadaster.py` RD ↔ WGS84 conversie verbeteren (pyproj of RDNAPTRANS i.p.v. huidige benadering)
+- [x] T8.1 — `data/kadaster.py` RD ↔ WGS84 conversie via pyproj (<1mm nauwkeurigheid) + rd_to_wgs84() reverse
 
 ---
 
@@ -73,8 +71,9 @@ Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
 
 - [ ] **#10** — Read/Write to IFC
   - IFC bestandsformaat lezen en schrijven (integratie)
-- [ ] **#8** — Bij regenerate blijf op oorspronkelijke pagina
-  - UX: na PDF regeneratie terug naar dezelfde pagina in de preview
+- [x] **#8** — Bij regenerate blijf op oorspronkelijke pagina
+  - `previewPage` state in apiStore + `#page=N` fragment op blob URL
+  - Page input in preview toolbar, page bewaard bij regeneratie
 - [x] **#7** — Adviseur ook aan account koppelen + Authentik SSO
   - User model uitgebreid met phone, job_title, registration_number, company, auth_provider, oidc_subject
   - OIDC token validatie (JWKS/RS256) + auto-provisioning
@@ -157,15 +156,26 @@ Stub-modules met alleen `# TODO` comments. Moeten gevuld worden:
 | Bestand | Regel | TODO |
 |---------|-------|------|
 | ~~`core/fonts.py`~~ | ~~13~~ | ~~Gotham TTF pad instructies updaten~~ — OPGELOST in T9 |
-| `data/kadaster.py` | 60 | RD↔WGS84 conversie met pyproj/RDNAPTRANS |
+| ~~`data/kadaster.py`~~ | ~~60~~ | ~~RD↔WGS84 conversie~~ — OPGELOST in T8 (pyproj) |
 | `data/revit_adapter.py` | 42, 64, 69, 89 | Volledige Revit integratie (4 methoden) |
-| `reports/building_code.py` | 33 | Bouwbesluit toetsingssecties |
-| `reports/daylight.py` | 27 | Daglichtsecties |
-| `reports/structural.py` | 28 | Sectie-opbouw vanuit data |
+| ~~`reports/building_code.py`~~ | ~~33~~ | ~~Bouwbesluit toetsingssecties~~ — OPGELOST in T6 |
+| ~~`reports/daylight.py`~~ | ~~27~~ | ~~Daglichtsecties~~ — OPGELOST in T6 |
+| ~~`reports/structural.py`~~ | ~~28~~ | ~~Sectie-opbouw vanuit data~~ — OPGELOST in T6 |
 
 ---
 
 ## ✅ VOLTOOID
+
+### T5/T6/T8 — YAML Editor + Report Types + Kadaster (14 maart)
+- [x] **T5** — YAML Editor fase 1+2 compleet: ImageZoneSection + ContentFrameSection form editors toegevoegd
+- [x] **T6** — Drie rapporttypen geïmplementeerd met volledige build_sections():
+  - StructuralReport: uitgangspunten, belastingen, elementen met CalculationBlock/CheckBlock, UC overzicht
+  - DaylightReport: ruimtes met raamberekening, equivalente daglichtoppervlakte, toetsing per NEN 2057
+  - BuildingCodeReport: hoofdstukken met CheckBlocks per artikel, samenvattend overzicht
+- [x] **T8** — Kadaster RD↔WGS84 conversie: polynoom-benadering vervangen door pyproj Transformer (<1mm)
+  - `rd_to_wgs84()` reverse methode toegevoegd
+  - 17 tests (referentiepunten Amsterdam, Rotterdam, Maastricht, Groningen + roundtrip)
+  - 28 tests voor rapporttypen (unit + PDF integratie)
 
 ### T9 — Font Embedding Fix (11 maart, 2de2741)
 - [x] **T9** — Liberation Sans als embedded fallback, vervangt Helvetica Type1

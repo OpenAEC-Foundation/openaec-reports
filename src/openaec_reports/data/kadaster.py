@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import requests
+from pyproj import Transformer
 
 
 class KadasterClient:
@@ -20,7 +21,7 @@ class KadasterClient:
     - BGT (Basisregistratie Grootschalige Topografie)
 
     Coördinaten worden intern geconverteerd van WGS84 naar
-    Rijksdriehoek (EPSG:28992) voor de WMS requests.
+    Rijksdriehoek (EPSG:28992) via pyproj (nauwkeurigheid <1mm).
     """
 
     WMS_SERVICES = {
@@ -29,6 +30,10 @@ class KadasterClient:
         "luchtfoto": "https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0",
         "bag": "https://service.pdok.nl/lv/bag/wms/v2_0",
     }
+
+    # Transformers worden eenmalig aangemaakt (thread-safe singletons)
+    _wgs84_to_rd: Transformer = Transformer.from_crs("EPSG:4326", "EPSG:28992", always_xy=True)
+    _rd_to_wgs84: Transformer = Transformer.from_crs("EPSG:28992", "EPSG:4326", always_xy=True)
 
     def __init__(self, cache_dir: str | Path | None = None):
         """Initialiseer Kadaster client.
@@ -45,8 +50,8 @@ class KadasterClient:
     def wgs84_to_rd(self, lat: float, lon: float) -> tuple[float, float]:
         """Converteer WGS84 naar Rijksdriehoekscoördinaten.
 
-        Gebruikt benaderende transformatie.
-        Nauwkeurigheid: ~1m (voldoende voor kaartjes).
+        Gebruikt pyproj Transformer (EPSG:4326 → EPSG:28992).
+        Nauwkeurigheid: <1mm (geodetische standaard).
 
         Args:
             lat: Breedtegraad (WGS84).
@@ -55,16 +60,22 @@ class KadasterClient:
         Returns:
             Tuple (x, y) in RD coördinaten (meters).
         """
-        # Benadering op basis van 2 referentiepunten
-        # Bron: https://www.kadaster.nl/zakelijk/registraties/basisregistraties/rijksdriehoeksmeting
-        # TODO: Implementeer nauwkeuriger met pyproj of RDNAPTRANS
-        d_lat = 0.36 * (lat - 52.15517440)
-        d_lon = 0.36 * (lon - 5.38720621)
-
-        x = 155000 + (190094.945 * d_lon) + (-11832.228 * d_lat * d_lon)
-        y = 463000 + (309056.544 * d_lat) + (3638.893 * d_lon * d_lon)
-
+        # pyproj met always_xy=True verwacht (lon, lat)
+        x, y = self._wgs84_to_rd.transform(lon, lat)
         return (x, y)
+
+    def rd_to_wgs84(self, x: float, y: float) -> tuple[float, float]:
+        """Converteer Rijksdriehoekscoördinaten naar WGS84.
+
+        Args:
+            x: RD x-coördinaat (meters).
+            y: RD y-coördinaat (meters).
+
+        Returns:
+            Tuple (lat, lon) in WGS84 graden.
+        """
+        lon, lat = self._rd_to_wgs84.transform(x, y)
+        return (lat, lon)
 
     def get_map(
         self,

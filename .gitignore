@@ -81,3 +81,7 @@ frontend/tsconfig.tsbuildinfo
 # Ruff
 .ruff_cache/
 data/
+
+# Rust
+rust/target/
+rust/Cargo.lock

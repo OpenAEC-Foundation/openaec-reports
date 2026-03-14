@@ -1,0 +1,15 @@
+[package]
+name = "openaec-ffi"
+description = "C ABI wrapper for OpenAEC report generation (DLL/so/dylib)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+openaec-core = { path = "../openaec-core" }
+libc = { workspace = true }
+serde_json = { workspace = true }

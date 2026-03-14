@@ -92,6 +92,13 @@ openaec-reports/            # Monorepo
 │       ├── stationery/     # PDF/PNG achtergronden
 │       ├── logos/          # Logo's (SVG, PNG)
 │       └── fonts/          # Inter fonts (TTF, OTF)
+├── rust/                   # Rust implementatie (parallel aan Python)
+│   ├── Cargo.toml          # Workspace: 4 crates
+│   └── crates/
+│       ├── openaec-core/   # Kernlibrary (schema, brand, tenant, fonts, renderer)
+│       ├── openaec-server/  # Axum API server (drop-in voor FastAPI)
+│       ├── openaec-cli/    # CLI tool
+│       └── openaec-ffi/    # C ABI wrapper → DLL/so/dylib
 ├── schemas/                # JSON Schema — contract tussen library, API en frontend
 └── Dockerfile              # Multi-stage: node build + python runtime
 ```

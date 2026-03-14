@@ -1,6 +1,6 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-11 (sessie: T9 font embedding fix)
+> Laatst bijgewerkt: 2026-03-14 (sessie: T5/T6/T8 implementatie)
 
 ---
 
@@ -101,6 +101,27 @@
 - [x] Deprecated `tenants/customer/modules/` verwijderd
 - [x] Prompt bestanden gearchiveerd naar `_archive/prompts/`
 - [x] pytest cache opgeruimd
+
+---
+
+## Sessie 14 maart — T5/T6/T8 Implementatie
+
+- [x] **T8** — Kadaster RD↔WGS84 conversie: pyproj Transformer vervangt polynoom-benadering
+  - `pyproj>=3.6` toegevoegd aan dependencies
+  - `wgs84_to_rd()` herschreven met `Transformer.from_crs("EPSG:4326", "EPSG:28992")`
+  - `rd_to_wgs84()` reverse methode toegevoegd
+  - 17 tests: referentiepunten + roundtrip nauwkeurigheid <0.0001°
+- [x] **T6** — Drie rapporttypen volledig geïmplementeerd:
+  - `StructuralReport`: uitgangspunten, belastingen (subsecties), elementen met CalculationBlock/CheckBlock, UC overzicht tabel, conclusie
+  - `DaylightReport`: uitgangspunten, situatie, daglichtberekening per ruimte (ramen tabel, A_eq berekening, Bouwbesluit check), toetsingsoverzicht, conclusie
+  - `BuildingCodeReport`: projectgegevens, toetsingen per hoofdstuk met CheckBlocks, samenvattend overzicht, conclusie
+  - 28 tests (unit + PDF integratie per rapporttype)
+- [x] **T5** — YAML Editor fase 2 compleet:
+  - `ImageZoneSection.tsx`: bind, x/y, width/height, fallback
+  - `ContentFrameSection.tsx`: x/y, width/height met toggle
+  - Geïntegreerd in `YamlFormEditor.tsx`, geëxporteerd via `index.ts`
+  - TypeScript type check clean
+- [x] 1121 tests passed (45 nieuw), 0 regressies
 
 ---
 

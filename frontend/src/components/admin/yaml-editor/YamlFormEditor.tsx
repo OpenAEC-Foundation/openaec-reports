@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import jsYaml from "js-yaml";
-import type { PageTypeYaml, TextZoneYaml, LineZoneYaml, TableConfigYaml } from "@/types/pageType";
+import type { PageTypeYaml, TextZoneYaml, LineZoneYaml, ImageZoneYaml, ContentFrameYaml, TableConfigYaml } from "@/types/pageType";
 import { TextZoneSection } from "./TextZoneSection";
 import { LineZoneSection } from "./LineZoneSection";
+import { ImageZoneSection } from "./ImageZoneSection";
+import { ContentFrameSection } from "./ContentFrameSection";
 import { TableConfigSection } from "./TableConfigSection";
 import { Field, TextInput } from "./ZoneRow";
 
@@ -77,6 +79,21 @@ export function YamlFormEditor({ yamlContent, onChange, brandColors }: YamlFormE
     updateField({ line_zones: zones });
   }
 
+  function handleImageZonesChange(zones: ImageZoneYaml[]) {
+    updateField({ image_zones: zones });
+  }
+
+  function handleContentFrameChange(frame: ContentFrameYaml | undefined) {
+    if (frame === undefined) {
+      const { content_frame: _removed, ...rest } = formData!;
+      const updated = rest as PageTypeYaml;
+      setFormData(updated);
+      syncToYaml(updated);
+    } else {
+      updateField({ content_frame: frame });
+    }
+  }
+
   function handleTableChange(table: TableConfigYaml | undefined) {
     if (table === undefined) {
       const { table: _removed, ...rest } = formData!;
@@ -139,6 +156,18 @@ export function YamlFormEditor({ yamlContent, onChange, brandColors }: YamlFormE
         zones={formData.line_zones ?? []}
         onChange={handleLineZonesChange}
         brandColors={brandColors}
+      />
+
+      {/* Image Zones */}
+      <ImageZoneSection
+        zones={formData.image_zones ?? []}
+        onChange={handleImageZonesChange}
+      />
+
+      {/* Content Frame */}
+      <ContentFrameSection
+        frame={formData.content_frame}
+        onChange={handleContentFrameChange}
       />
 
       {/* Table */}

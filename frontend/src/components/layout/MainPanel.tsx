@@ -703,6 +703,8 @@ function PdfPreview() {
   const connected = useApiStore((s) => s.connected);
   const autoPreview = useApiStore((s) => s.autoPreview);
   const setAutoPreview = useApiStore((s) => s.setAutoPreview);
+  const previewPage = useApiStore((s) => s.previewPage);
+  const setPreviewPage = useApiStore((s) => s.setPreviewPage);
   const viewMode = useReportStore((s) => s.viewMode);
 
   return (
@@ -718,6 +720,19 @@ function PdfPreview() {
             </svg>
             Genereren...
           </span>
+        )}
+        {lastPdfUrl && (
+          <div className="flex items-center gap-1 text-xs text-gray-500">
+            <label htmlFor="preview-page" className="whitespace-nowrap">Pagina</label>
+            <input
+              id="preview-page"
+              type="number"
+              min={1}
+              value={previewPage}
+              onChange={(e) => setPreviewPage(Number(e.target.value))}
+              className="w-12 rounded border border-gray-300 px-1.5 py-0.5 text-xs text-center font-mono focus:outline-none focus:ring-1 focus:ring-purple-400"
+            />
+          </div>
         )}
         {!autoPreview && (
           <button

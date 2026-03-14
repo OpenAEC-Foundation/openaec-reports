@@ -28,6 +28,7 @@ interface ApiStore {
   isGenerating: boolean;
   lastPdfUrl: string | null;
   lastPdfFilename: string | null;
+  previewPage: number;
 
   // Auto-preview
   autoPreview: boolean;
@@ -47,6 +48,7 @@ interface ApiStore {
   clearError: () => void;
   clearValidation: () => void;
   setAutoPreview: (enabled: boolean) => void;
+  setPreviewPage: (page: number) => void;
   schedulePreview: () => void;
 }
 
@@ -94,6 +96,7 @@ export const useApiStore = create<ApiStore>()((set, get) => ({
   isGenerating: false,
   lastPdfUrl: null,
   lastPdfFilename: null,
+  previewPage: 1,
   autoPreview: true,
   _previewTimeout: null,
   error: null,
@@ -157,9 +160,11 @@ export const useApiStore = create<ApiStore>()((set, get) => ({
 
       // Revoke previous URL if exists
       const prev = get().lastPdfUrl;
-      if (prev) URL.revokeObjectURL(prev);
+      if (prev) URL.revokeObjectURL(prev.replace(/#.*$/, ''));
 
-      const url = URL.createObjectURL(blob);
+      const blobUrl = URL.createObjectURL(blob);
+      const page = get().previewPage;
+      const url = page > 1 ? `${blobUrl}#page=${page}` : blobUrl;
       const parts = [report.project_number, report.project].filter(Boolean);
       const filename = (parts.length > 0 ? parts.join('_') : 'rapport') + '.pdf';
 
@@ -180,15 +185,15 @@ export const useApiStore = create<ApiStore>()((set, get) => ({
     const { lastPdfUrl, lastPdfFilename } = get();
     if (!lastPdfUrl) return;
     const a = document.createElement('a');
-    a.href = lastPdfUrl;
+    a.href = lastPdfUrl.replace(/#.*$/, '');
     a.download = lastPdfFilename ?? 'rapport.pdf';
     a.click();
   },
 
   clearPdf: () => {
     const prev = get().lastPdfUrl;
-    if (prev) URL.revokeObjectURL(prev);
-    set({ lastPdfUrl: null, lastPdfFilename: null });
+    if (prev) URL.revokeObjectURL(prev.replace(/#.*$/, ''));
+    set({ lastPdfUrl: null, lastPdfFilename: null, previewPage: 1 });
   },
 
   clearError: () => set({ error: null }),
@@ -196,6 +201,11 @@ export const useApiStore = create<ApiStore>()((set, get) => ({
   clearValidation: () => set({ validationErrors: [] }),
 
   setAutoPreview: (enabled) => set({ autoPreview: enabled }),
+
+  setPreviewPage: (page) => {
+    const p = Math.max(1, Math.round(page));
+    set({ previewPage: p });
+  },
 
   schedulePreview: () => {
     const state = get();

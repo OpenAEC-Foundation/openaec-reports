@@ -29,6 +29,12 @@ async fn main() {
         .route("/api/brands", get(list_brands))
         .route("/api/validate", post(validate))
         .route("/api/generate", post(generate))
+        // Auth mock — auto-login as test user (no real auth yet)
+        .route("/api/auth/me", get(auth_me))
+        .route("/api/auth/login", post(auth_login))
+        .route("/api/auth/logout", post(auth_logout))
+        .route("/api/auth/registration-enabled", get(auth_registration))
+        .route("/api/auth/oidc/config", get(auth_oidc_config))
         // SPA fallback: serve static files, index.html for unknown routes
         .fallback_service(spa_service);
 
@@ -76,6 +82,42 @@ async fn validate(Json(payload): Json<Value>) -> Result<Json<Value>, (StatusCode
         }))),
     }
 }
+
+// ── Auth mock endpoints ──────────────────────────────────────────────
+
+async fn auth_me() -> Json<Value> {
+    Json(json!({
+        "user": {
+            "id": "rust-test-user",
+            "username": "testuser",
+            "email": "test@open-aec.com",
+            "display_name": "Rust Test User",
+            "role": "admin",
+            "tenant": "default",
+            "is_active": true,
+            "company": "OpenAEC",
+            "auth_provider": "local"
+        }
+    }))
+}
+
+async fn auth_login() -> Json<Value> {
+    auth_me().await
+}
+
+async fn auth_logout() -> Json<Value> {
+    Json(json!({"detail": "logged out"}))
+}
+
+async fn auth_registration() -> Json<Value> {
+    Json(json!({"enabled": false}))
+}
+
+async fn auth_oidc_config() -> Json<Value> {
+    Json(json!({"enabled": false}))
+}
+
+// ── Report generation ────────────────────────────────────────────────
 
 async fn generate(Json(payload): Json<Value>) -> Result<Vec<u8>, (StatusCode, String)> {
     let json_str =

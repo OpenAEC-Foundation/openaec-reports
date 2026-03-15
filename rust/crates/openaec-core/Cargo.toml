@@ -15,6 +15,7 @@ tracing = { workspace = true }
 fontdb = { workspace = true }
 base64 = { workspace = true }
 image = { workspace = true }
+openaec-layout = { path = "../openaec-layout" }
 
 [dev-dependencies]
 tempfile = { workspace = true }

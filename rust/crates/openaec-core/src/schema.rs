@@ -281,6 +281,7 @@ pub enum ContentBlock {
     CostSummary(CostSummaryBlock),
     LocationDetail(LocationDetailBlock),
     ObjectDescription(ObjectDescriptionBlock),
+    Spreadsheet(SpreadsheetBlock),
 }
 
 // ── Paragraph ─────────────────────────────────────────────────────────
@@ -643,6 +644,35 @@ pub struct ObjectField {
     pub label: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub value: Option<String>,
+}
+
+// ── Spreadsheet ──────────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SpreadsheetBlock {
+    /// Optional table title.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+
+    /// Column headers.
+    #[serde(default)]
+    pub headers: Vec<String>,
+
+    /// Data rows.
+    #[serde(default)]
+    pub rows: Vec<Vec<serde_json::Value>>,
+
+    /// Show row numbers.
+    #[serde(default)]
+    pub show_row_numbers: bool,
+
+    /// Optional footnote.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub footnote: Option<String>,
+
+    /// Column widths in mm (auto if omitted).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub column_widths: Option<Vec<f64>>,
 }
 
 // ── Image Source ───────────────────────────────────────────────────────

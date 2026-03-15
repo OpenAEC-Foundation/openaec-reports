@@ -33,6 +33,7 @@ services:
       - caddy_config:/config
     depends_on:
       - openaec-reports
+      - openaec-reports-rs
       - authentik-server
 
   # ── Authentik SSO ────────────────────────────────────────────────────
@@ -134,6 +135,22 @@ services:
       - openaec_uploads:/app/uploads
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ── OpenAEC Reports — Rust API ───────────────────────────────────────
+
+  openaec-reports-rs:
+    build:
+      context: ..
+      dockerfile: rust/Dockerfile
+    restart: unless-stopped
+    environment:
+      OPENAEC_FONTS_DIR: /app/fonts
+      OPENAEC_TENANTS_ROOT: /app/tenants
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/api/health"]
       interval: 30s
       timeout: 5s
       retries: 3

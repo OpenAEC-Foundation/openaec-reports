@@ -1,6 +1,62 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-14 (sessie: T5/T6/T8 implementatie)
+> Laatst bijgewerkt: 2026-03-15 (sessie: Rust implementatie Phase 1-4 + Special Pages + Dockerfile)
+
+---
+
+## Rust Implementatie — Phase 1-4 (15 maart)
+
+| Component | Status | Tests | Lines |
+|-----------|--------|-------|-------|
+| **openaec-layout** (eigen ReportLab) | ✅ Compleet | 9 | ~1,200 |
+| — types.rs (Pt, Mm, Size, Rect, Color, A4/A3) | ✅ | 5 | 200 |
+| — fonts.rs (FontRegistry, TTF metrics, text width) | ✅ | 1 | 160 |
+| — draw.rs (DrawOp, DrawList) | ✅ | — | 130 |
+| — flowable.rs (Flowable trait, SplitResult) | ✅ | — | 55 |
+| — spacer.rs (Spacer, PageBreak) | ✅ | — | 70 |
+| — paragraph.rs (word wrap, ParagraphStyle) | ✅ | 1 | 230 |
+| — table.rs (grid, header, zebra-striping, split) | ✅ | 2 | 250 |
+| — image_flowable.rs (ImageData, aspect ratio) | ✅ | — | 120 |
+| — frame.rs (flowable container, overflow) | ✅ | — | 100 |
+| — page_template.rs (PageCallback) | ✅ | — | 50 |
+| — doc_template.rs (multi-page PDF assembly via printpdf) | ✅ | — | 360 |
+| **openaec-core** (data+rendering) | ✅ | 52 | ~3,300 |
+| — schema.rs (alle block types + Spreadsheet) | ✅ | 30 | 1,150 |
+| — brand.rs (YAML loading, color/font resolution) | ✅ | 8 | 600 |
+| — tenant.rs (multi-tenant asset paden) | ✅ | 5 | 256 |
+| — font_manager.rs (Gotham discovery + fallback) | ✅ | 9 | 316 |
+| — block_renderer.rs (ContentBlock → Flowable) | ✅ | 9 | 420 |
+| — engine.rs (ReportData → PDF, font setup) | ✅ | 3 | 260 |
+| **openaec-cli** | ✅ | — | 115 |
+| — generate (JSON → PDF) | ✅ | — | — |
+| — validate (JSON schema check) | ✅ | — | — |
+| — serve (placeholder) | ⏳ | — | — |
+| **openaec-server** (Axum API) | ✅ | — | 95 |
+| — GET /api/health | ✅ | — | — |
+| — GET /api/templates | ✅ | — | — |
+| — GET /api/brands | ✅ | — | — |
+| — POST /api/validate | ✅ | — | — |
+| — POST /api/generate | ✅ | — | — |
+| **openaec-ffi** (C ABI wrapper) | ⏳ Stubs | — | 39 |
+| **Totaal** | **62 tests, 0 failures** | **62** | **~5,500** |
+
+### E2E Verificatie
+
+```
+$ cargo run -p openaec-cli -- generate --data tests/fixtures/example_structural.json --output output/test_rust_structural.pdf
+Registering font: LiberationSans-Regular, LiberationSans-Bold, Gotham-Bold, Gotham-Book, ...
+Generated: output/test_rust_structural.pdf (3,022,534 bytes)
+
+$ python -c "import fitz; doc=fitz.open('output/test_rust_structural.pdf'); print(f'Pages: {len(doc)}')"
+Pages: 2
+```
+
+- 2 pagina's, 6 secties, 13 fonts embedded (Liberation Sans + Gotham)
+- Alle content block types renderen (paragraph, calculation, check, table, bullet_list, heading_2, spacer, page_break, spreadsheet)
+- Image en Map blocks zijn gestubbed (placeholder)
+- Special pages: cover (paarse achtergrond + titel), colofon (2-kolom metadata), TOC (sectie-index), backcover (turquoise + contact)
+- Dockerfile: `rust/Dockerfile` multi-stage build (rust:1.85 → debian:bookworm-slim), healthcheck, OPENAEC_FONTS_DIR
+- Deploy: `docker build -f rust/Dockerfile .` vanuit monorepo root
 
 ---
 

@@ -1,0 +1,17 @@
+[package]
+name = "openaec-layout"
+description = "PDF layout engine — Rust equivalent of ReportLab Platypus"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+printpdf = "0.7"
+ttf-parser = "0.25"
+image = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

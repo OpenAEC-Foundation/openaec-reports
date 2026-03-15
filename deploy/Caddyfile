@@ -25,6 +25,27 @@
 	}
 }
 
+# ── OpenAEC Reports — Rust API ────────────────────────────────────────
+{$REPORT_RS_DOMAIN:report-rs.open-aec.com} {
+	reverse_proxy openaec-reports-rs:8001
+
+	# Gzip compressie
+	encode gzip
+
+	# Security headers
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
+
 # ── Authentik SSO ──────────────────────────────────────────────────────
 {$AUTH_DOMAIN:auth.open-aec.com} {
 	reverse_proxy authentik-server:9000

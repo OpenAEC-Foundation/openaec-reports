@@ -94,10 +94,55 @@ Self-service YAML beheer per tenant.
 
 ---
 
+## 🔴 Rust Implementatie — Deadline 17 maart
+
+Zie `PLAN-rust-implementation.md` voor details.
+
+**Phase 0 — Setup + Schema Types:** ✅ Compleet (40 tests)
+
+**Phase 1 — openaec-layout (eigen ReportLab in Rust):** ✅ Compleet (9 tests)
+- [x] R1.1 — Basis types (Pt, Mm, Size, Rect, Color, A4/A3) + FontRegistry
+- [x] R1.2 — DrawList (tekst, lijnen, rects, images)
+- [x] R1.3 — Flowable trait + SplitResult
+- [x] R1.4 — Spacer + PageBreak
+- [x] R1.5 — Paragraph (styled text, word-wrap, leading)
+- [x] R1.6 — Table (kolommen, stijlen, split over pagina's)
+- [x] R1.7 — Image flowable
+- [x] R1.8 — Frame (flowable container, overflow detectie)
+- [x] R1.9 — PageTemplate (PageCallback)
+- [x] R1.10 — DocTemplate (multi-page PDF assembly)
+- [x] R1.11 — PDF backend (printpdf crate)
+
+**Phase 2 — Python libs porten:** ✅ MVP Compleet
+- [x] R2.1 — Schema sync: Spreadsheet block toegevoegd
+- [x] R2.6 — block_renderer.rs (ContentBlock → Flowable, alle block types)
+- [ ] R2.2 — document.rs (page sizes, marges) — deels via engine.rs
+- [ ] R2.3 — styles.rs (font rollen, kleuren, paragraph styles)
+- [ ] R2.4 — template_config.rs (PageType, TextZone, ImageZone)
+- [ ] R2.5 — template_loader.rs (YAML discovery, scaffold)
+- [ ] R2.7 — data_transform.rs (JSON → flat dict)
+- [ ] R2.8 — stationery.rs (PDF merge met lopdf)
+- [ ] R2.9 — toc.rs (TOC data)
+- [ ] R2.10 — kadaster.rs (RD↔WGS84, PDOK WMS)
+- [ ] R2.11 — json_adapter.rs (schema validatie)
+- [ ] R2.12 — report_types.rs (structural, daylight, building_code)
+
+**Phase 3 — Rendering pipeline:** ✅ Compleet
+- [x] R3.1 — Block renderers (ContentBlock → Flowable) — alle types
+- [x] R3.2 — Special pages (cover, colofon, TOC, backcover) — RawPage canvas rendering
+- [x] R3.3 — Engine (ReportData → PDF)
+
+**Phase 4 — Server + CLI:** ✅ Compleet
+- [x] R4.1 — CLI wiring (generate, validate)
+- [x] R4.2 — Axum API server (health, generate, validate, templates, brands)
+- [x] R4.3 — Dockerfile (multi-stage, rust:1.85 + debian:bookworm-slim)
+- [ ] R4.4 — Deploy als report-rs.open-aec.com (wacht op subdomein)
+
+---
+
 ## 🟢 GitHub Issues — Laag
 
-- [ ] **#12** — RUST Library (R&D)
-  - Onderzoek naar Rust-implementatie van de report engine
+- [x] **#12** — RUST Library — Actief, zie Rust Implementatie sectie hierboven
 - [x] **#11** — AI-instructies meegeven voor gebruik in andere tools
   - `docs/ai-instructions.md`: Engelstalig document met API, auth, block types, MCP server, voorbeeld JSON
 - [ ] **#3** — Brand visualiser maken

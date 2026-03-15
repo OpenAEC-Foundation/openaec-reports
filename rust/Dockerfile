@@ -6,7 +6,7 @@ FROM rust:1.85-bookworm AS builder
 WORKDIR /build
 
 # Copy workspace and all crates
-COPY rust/Cargo.toml rust/Cargo.lock ./
+COPY rust/Cargo.toml ./
 COPY rust/crates/ ./crates/
 
 # Build the server binary in release mode

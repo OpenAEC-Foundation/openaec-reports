@@ -1,20 +1,40 @@
 use axum::{http::StatusCode, routing::{get, post}, Json, Router};
 use serde_json::{json, Value};
 use std::net::SocketAddr;
+use tower_http::services::{ServeDir, ServeFile};
 
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
 
+    // SPA: serve frontend from /app/static (Docker) or ../frontend/dist (dev)
+    let static_dir = std::env::var("OPENAEC_STATIC_DIR")
+        .unwrap_or_else(|_| {
+            // Try common paths
+            for candidate in &["./static", "../frontend/dist", "/app/static"] {
+                if std::path::Path::new(candidate).is_dir() {
+                    return candidate.to_string();
+                }
+            }
+            "./static".to_string()
+        });
+
+    let spa_service = ServeDir::new(&static_dir)
+        .not_found_service(ServeFile::new(format!("{}/index.html", static_dir)));
+
     let app = Router::new()
+        // API routes
         .route("/api/health", get(health))
         .route("/api/templates", get(list_templates))
         .route("/api/brands", get(list_brands))
         .route("/api/validate", post(validate))
-        .route("/api/generate", post(generate));
+        .route("/api/generate", post(generate))
+        // SPA fallback: serve static files, index.html for unknown routes
+        .fallback_service(spa_service);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8001));
     tracing::info!("Rust API server listening on {}", addr);
+    tracing::info!("Serving frontend from: {}", static_dir);
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();

@@ -1,7 +1,7 @@
 # Build context: monorepo root (docker build -f rust/Dockerfile .)
 #
 # ---- Stage 1: Build ----
-FROM rust:1.85-bookworm AS builder
+FROM rust:1.88-bookworm AS builder
 
 WORKDIR /build
 

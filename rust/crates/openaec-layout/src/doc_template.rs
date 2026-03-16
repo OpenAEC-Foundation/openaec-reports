@@ -199,12 +199,11 @@ impl DocTemplate {
                 .page_templates
                 .iter()
                 .find(|t| t.name == page.template_name)
+                && let Some(ref callback) = template.on_page
             {
-                if let Some(ref callback) = template.on_page {
-                    let mut updated = DrawList::new();
-                    callback.on_page(&mut updated, i + 1, total_pages, page.page_size);
-                    page.draw_list.ops.extend(updated.ops);
-                }
+                let mut updated = DrawList::new();
+                callback.on_page(&mut updated, i + 1, total_pages, page.page_size);
+                page.draw_list.ops.extend(updated.ops);
             }
         }
 
@@ -363,7 +362,6 @@ impl DocTemplate {
                     let line = printpdf::Line {
                         points,
                         is_closed: false,
-                        ..Default::default()
                     };
                     layer.add_line(line);
                 }

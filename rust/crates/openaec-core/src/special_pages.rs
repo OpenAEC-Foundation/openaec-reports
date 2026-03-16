@@ -76,8 +76,8 @@ pub fn build_cover_page(data: &ReportData, brand: &BrandConfig) -> RawPage {
     dl.draw_text(Pt::from(Mm(55.0)), Pt::from(Mm(750.0 / 2.8346)), &data.project);
 
     // Subtitle (if present) in turquoise below the title
-    if let Some(ref cover) = data.cover {
-        if let Some(ref subtitle) = cover.subtitle {
+    if let Some(ref cover) = data.cover
+        && let Some(ref subtitle) = cover.subtitle {
             dl.set_fill_color(secondary);
             dl.set_font("LiberationSans-Regular", Pt(12.0));
             dl.draw_text(
@@ -86,7 +86,6 @@ pub fn build_cover_page(data: &ReportData, brand: &BrandConfig) -> RawPage {
                 subtitle,
             );
         }
-    }
 
     // Project metadata in white, bottom area
     let mut meta_y = Pt::from(Mm(750.0 / 2.8346 + 20.0));

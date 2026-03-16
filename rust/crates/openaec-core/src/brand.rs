@@ -27,7 +27,7 @@ pub enum BrandError {
 // ── Brand Config ──────────────────────────────────────────────────────
 
 /// Complete brand configuration loaded from YAML.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BrandConfig {
     /// Brand identity.
     #[serde(default)]

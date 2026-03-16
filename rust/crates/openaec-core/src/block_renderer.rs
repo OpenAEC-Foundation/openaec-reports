@@ -262,7 +262,7 @@ fn render_table(
         .iter()
         .map(|row| {
             row.iter()
-                .map(|cell| json_value_to_string(cell))
+                .map(json_value_to_string)
                 .collect()
         })
         .collect();
@@ -383,7 +383,7 @@ fn render_spreadsheet(
         })
         .collect();
 
-    let mut headers = if block.show_row_numbers {
+    let headers = if block.show_row_numbers {
         let mut h = vec!["#".to_string()];
         h.extend(block.headers.clone());
         h

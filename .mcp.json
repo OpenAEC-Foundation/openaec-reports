@@ -1,11 +1,14 @@
 {
   "mcpServers": {
-    "file_operations": { "disabled": false },
-    "business_admin": { "disabled": true },
-    "thunderbird": { "disabled": true },
-    "revit-mcp-python": { "disabled": true },
-    "desktop_vision": { "disabled": true },
-    "pyrevit_tools": { "disabled": true },
-    "wordpress": { "disabled": true }
+    "file_operations": {
+      "type": "stdio",
+      "command": "C:\\MCP_venvs\\file_operations\\Scripts\\python.exe",
+      "args": ["Z:\\50_projecten\\7_3BM_bouwkunde\\_MCP_servers\\file_operations\\server.py"]
+    },
+    "bm_reports": {
+      "type": "stdio",
+      "command": "C:\\MCP_venvs\\bm_reports\\Scripts\\python.exe",
+      "args": ["Z:\\50_projecten\\7_3BM_bouwkunde\\_MCP_servers\\bm_reports\\server.py"]
+    }
   }
 }

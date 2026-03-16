@@ -231,8 +231,8 @@ async fn list_brands() -> Json<Value> {
         }
     }
 
-    if let Some(root) = tc.tenants_root() {
-        if let Ok(entries) = std::fs::read_dir(root) {
+    if let Some(root) = tc.tenants_root()
+        && let Ok(entries) = std::fs::read_dir(root) {
             let mut tenant_names: Vec<String> = entries
                 .flatten()
                 .filter(|e| e.path().is_dir() && e.path().join("brand.yaml").is_file())
@@ -250,7 +250,6 @@ async fn list_brands() -> Json<Value> {
                 }));
             }
         }
-    }
 
     if brands.is_empty() {
         brands.push(json!({ "name": "default", "slug": "default" }));
@@ -265,8 +264,8 @@ async fn list_stationery() -> Json<Value> {
     let tc = tenant_config();
     let mut result = serde_json::Map::new();
 
-    if let Some(root) = tc.tenants_root() {
-        if let Ok(entries) = std::fs::read_dir(root) {
+    if let Some(root) = tc.tenants_root()
+        && let Ok(entries) = std::fs::read_dir(root) {
             for entry in entries.flatten() {
                 let path = entry.path();
                 if !path.is_dir() {
@@ -299,7 +298,6 @@ async fn list_stationery() -> Json<Value> {
                 );
             }
         }
-    }
 
     Json(json!({ "brands": result }))
 }
@@ -323,8 +321,8 @@ async fn list_tenants() -> Json<Value> {
     let tc = tenant_config();
     let mut tenants = Vec::new();
 
-    if let Some(root) = tc.tenants_root() {
-        if let Ok(entries) = std::fs::read_dir(root) {
+    if let Some(root) = tc.tenants_root()
+        && let Ok(entries) = std::fs::read_dir(root) {
             let mut dirs: Vec<_> = entries.flatten().filter(|e| e.path().is_dir()).collect();
             dirs.sort_by_key(|e| e.file_name());
 
@@ -344,7 +342,6 @@ async fn list_tenants() -> Json<Value> {
                 }));
             }
         }
-    }
 
     Json(json!({ "tenants": tenants }))
 }

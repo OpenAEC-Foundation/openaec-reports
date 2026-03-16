@@ -238,6 +238,8 @@ fn setup_fonts(fonts: &SharedFontRegistry, tenant: &TenantConfig) {
 
     // Scan directories for TTF files and register them
     let mut registry = fonts.lock().unwrap();
+    let mut registered_names: Vec<String> = Vec::new();
+
     for dir in &font_dirs {
         if let Ok(entries) = std::fs::read_dir(dir) {
             for entry in entries.flatten() {
@@ -254,8 +256,25 @@ fn setup_fonts(fonts: &SharedFontRegistry, tenant: &TenantConfig) {
                     tracing::info!(font = %name, path = %path.display(), "Registering font");
                     if let Err(e) = registry.register_ttf_bytes(&name, data) {
                         tracing::warn!(font = %name, error = %e, "Failed to register font");
+                    } else {
+                        registered_names.push(name);
                     }
                 }
+            }
+        }
+    }
+
+    // Register base-name aliases: "LiberationSans-Regular" → "LiberationSans",
+    // "Inter-Book" → "Inter", etc. This ensures ParagraphStyle default
+    // font_name "LiberationSans" resolves correctly.
+    for name in &registered_names {
+        let suffixes = ["-Regular", "-Book", "-Roman", "-Normal"];
+        for suffix in &suffixes {
+            if let Some(base) = name.strip_suffix(suffix)
+                && registry.get(base).is_none()
+            {
+                registry.register_alias(base, name);
+                tracing::info!(alias = base, target = %name, "Registered font alias");
             }
         }
     }

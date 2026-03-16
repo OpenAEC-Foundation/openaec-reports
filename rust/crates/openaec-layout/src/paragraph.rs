@@ -47,6 +47,7 @@ impl Default for ParagraphStyle {
 #[derive(Debug, Clone)]
 struct TextLine {
     text: String,
+    #[allow(dead_code)]
     width: Pt,
 }
 

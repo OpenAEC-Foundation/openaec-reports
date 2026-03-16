@@ -95,7 +95,8 @@ impl Frame {
                     SplitResult::Split(mut first, second) => {
                         let first_size = first.wrap(inner_w, remaining_height, ctx);
                         first.draw(start_x, Pt(start_y.0 + cursor_y.0), draw_list);
-                        cursor_y = Pt(cursor_y.0 + first_size.height.0);
+                        // cursor_y advances but we return immediately
+                        let _cursor_y = Pt(cursor_y.0 + first_size.height.0);
                         return FrameResult::Overflow {
                             first_remaining: i + 1,
                             split_remainder: Some(second),

@@ -155,8 +155,8 @@ fn build_flowables(data: &ReportData, brand: &BrandConfig) -> Vec<Box<dyn Flowab
     flowables.push(Box::new(Paragraph::new(&data.project, title_style)));
 
     // Subtitle (from cover if available)
-    if let Some(ref cover) = data.cover {
-        if let Some(ref subtitle) = cover.subtitle {
+    if let Some(ref cover) = data.cover
+        && let Some(ref subtitle) = cover.subtitle {
             let subtitle_style = ParagraphStyle {
                 font_size: Pt(12.0),
                 leading: Pt(16.0),
@@ -166,7 +166,6 @@ fn build_flowables(data: &ReportData, brand: &BrandConfig) -> Vec<Box<dyn Flowab
             };
             flowables.push(Box::new(Paragraph::new(subtitle, subtitle_style)));
         }
-    }
 
     // Metadata line
     let meta_parts: Vec<String> = [
@@ -243,19 +242,18 @@ fn setup_fonts(fonts: &SharedFontRegistry, tenant: &TenantConfig) {
         if let Ok(entries) = std::fs::read_dir(dir) {
             for entry in entries.flatten() {
                 let path = entry.path();
-                if let Some(ext) = path.extension() {
-                    if ext.eq_ignore_ascii_case("ttf") || ext.eq_ignore_ascii_case("otf") {
-                        if let Ok(data) = std::fs::read(&path) {
-                            let name = path
-                                .file_stem()
-                                .and_then(|s| s.to_str())
-                                .unwrap_or("unknown")
-                                .to_string();
-                            tracing::info!(font = %name, path = %path.display(), "Registering font");
-                            if let Err(e) = registry.register_ttf_bytes(&name, data) {
-                                tracing::warn!(font = %name, error = %e, "Failed to register font");
-                            }
-                        }
+                if let Some(ext) = path.extension()
+                    && (ext.eq_ignore_ascii_case("ttf") || ext.eq_ignore_ascii_case("otf"))
+                    && let Ok(data) = std::fs::read(&path)
+                {
+                    let name = path
+                        .file_stem()
+                        .and_then(|s| s.to_str())
+                        .unwrap_or("unknown")
+                        .to_string();
+                    tracing::info!(font = %name, path = %path.display(), "Registering font");
+                    if let Err(e) = registry.register_ttf_bytes(&name, data) {
+                        tracing::warn!(font = %name, error = %e, "Failed to register font");
                     }
                 }
             }

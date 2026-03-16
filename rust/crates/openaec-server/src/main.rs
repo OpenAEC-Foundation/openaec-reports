@@ -1,6 +1,7 @@
 use axum::{
     extract::{Path as AxumPath, State},
-    http::StatusCode,
+    http::{header, StatusCode},
+    response::IntoResponse,
     routing::{get, post, put},
     Json, Router,
 };
@@ -430,7 +431,9 @@ async fn validate(Json(payload): Json<Value>) -> Result<Json<Value>, (StatusCode
 
 // ── Generate PDF ────────────────────────────────────────────────────
 
-async fn generate(Json(payload): Json<Value>) -> Result<Vec<u8>, (StatusCode, String)> {
+async fn generate(
+    Json(payload): Json<Value>,
+) -> Result<impl IntoResponse, (StatusCode, String)> {
     let json_str =
         serde_json::to_string(&payload).map_err(|e| (StatusCode::BAD_REQUEST, e.to_string()))?;
 
@@ -438,15 +441,23 @@ async fn generate(Json(payload): Json<Value>) -> Result<Vec<u8>, (StatusCode, St
         .map_err(|e| (StatusCode::BAD_REQUEST, format!("Invalid JSON: {}", e)))?;
 
     let temp_path = std::path::Path::new("temp_output.pdf");
-    let pdf_bytes = openaec_core::engine::generate_pdf(&report_data, temp_path)
-        .map_err(|e| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Generation failed: {}", e),
-            )
-        })?;
+    let pdf_bytes = openaec_core::engine::generate_pdf(&report_data, temp_path).map_err(|e| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Generation failed: {}", e),
+        )
+    })?;
 
-    Ok(pdf_bytes)
+    Ok((
+        [
+            (header::CONTENT_TYPE, "application/pdf"),
+            (
+                header::CONTENT_DISPOSITION,
+                "inline; filename=\"rapport.pdf\"",
+            ),
+        ],
+        pdf_bytes,
+    ))
 }
 
 // ── Projects CRUD ───────────────────────────────────────────────────

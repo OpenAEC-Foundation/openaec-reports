@@ -104,7 +104,14 @@ impl Paragraph {
         }
 
         let mut fonts = ctx.fonts.lock().unwrap();
-        let font_id = match fonts.get(&self.style.font_name) {
+        // FontRegistry.get() already tries "-Regular" suffix fallback.
+        // Also try the bold variant name to match what draw() will use.
+        let lookup_name = if self.style.bold {
+            format!("{}-Bold", self.style.font_name)
+        } else {
+            self.style.font_name.clone()
+        };
+        let font_id = match fonts.get(&lookup_name).or_else(|| fonts.get(&self.style.font_name)) {
             Some(id) => id,
             None => {
                 // Fallback: return single unwrapped line
@@ -207,7 +214,10 @@ impl Flowable for Paragraph {
         draw_list.set_font(&font_name, self.style.font_size);
         draw_list.set_fill_color(self.style.text_color);
 
-        let mut cy = Pt(y.0 + self.style.space_before.0 + self.style.leading.0 * 0.8);
+        // Baseline offset: use font_size * 0.8 (cap-height approximation).
+        // This is much more accurate than leading * 0.8 which over-shoots
+        // for typical leading values (e.g. 14pt leading → 11.2 vs 10pt font → 8.0).
+        let mut cy = Pt(y.0 + self.style.space_before.0 + self.style.font_size.0 * 0.8);
         let left = Pt(x.0 + self.style.left_indent.0);
 
         for (i, line) in self.lines.iter().enumerate() {

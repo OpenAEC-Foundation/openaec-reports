@@ -102,9 +102,24 @@ impl FontRegistry {
         Ok(id)
     }
 
-    /// Look up font by name.
+    /// Register an alias for an existing font name.
+    ///
+    /// This allows e.g. `"LiberationSans"` to resolve to `"LiberationSans-Regular"`.
+    pub fn register_alias(&mut self, alias: &str, target: &str) -> bool {
+        if let Some(&id) = self.names.get(target) {
+            self.names.insert(alias.to_string(), id);
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Look up font by name, with automatic `-Regular` suffix fallback.
     pub fn get(&self, name: &str) -> Option<FontId> {
-        self.names.get(name).copied()
+        self.names
+            .get(name)
+            .or_else(|| self.names.get(&format!("{}-Regular", name)))
+            .copied()
     }
 
     /// Get raw font bytes (for PDF embedding).

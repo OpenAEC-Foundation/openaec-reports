@@ -70,10 +70,11 @@ pub fn build_cover_page(data: &ReportData, brand: &BrandConfig) -> RawPage {
         dl.draw_text(Pt::from(Mm(55.0)), Pt::from(Mm(58.0)), tagline);
     }
 
-    // Project title: large white text in the colored area
+    // Project title: large white text in the colored area (~265mm from top)
+    let title_y = Pt::from(Mm(220.0));
     dl.set_fill_color(Color::WHITE);
     dl.set_font("LiberationSans-Bold", Pt(18.0));
-    dl.draw_text(Pt::from(Mm(55.0)), Pt::from(Mm(750.0 / 2.8346)), &data.project);
+    dl.draw_text(Pt::from(Mm(55.0)), title_y, &data.project);
 
     // Subtitle (if present) in turquoise below the title
     if let Some(ref cover) = data.cover
@@ -82,13 +83,13 @@ pub fn build_cover_page(data: &ReportData, brand: &BrandConfig) -> RawPage {
             dl.set_font("LiberationSans-Regular", Pt(12.0));
             dl.draw_text(
                 Pt::from(Mm(55.0)),
-                Pt::from(Mm(750.0 / 2.8346 + 8.0)),
+                Pt(title_y.0 + Pt::from(Mm(8.0)).0),
                 subtitle,
             );
         }
 
     // Project metadata in white, bottom area
-    let mut meta_y = Pt::from(Mm(750.0 / 2.8346 + 20.0));
+    let mut meta_y = Pt(title_y.0 + Pt::from(Mm(20.0)).0);
     dl.set_fill_color(Color::WHITE);
     dl.set_font("LiberationSans-Regular", Pt(9.0));
 

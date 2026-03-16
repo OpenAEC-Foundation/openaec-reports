@@ -180,11 +180,7 @@ impl DocTemplate {
                 }
             }
 
-            // Apply page callback (first pass, total_pages unknown)
-            if let Some(ref callback) = template.on_page {
-                callback.on_page(&mut draw_list, pages.len() + 1, 0, template.page_size);
-            }
-
+            // Don't run callbacks in first pass — we need total page count.
             pages.push(RenderedPage {
                 draw_list,
                 page_size: template.page_size,
@@ -192,7 +188,7 @@ impl DocTemplate {
             });
         }
 
-        // Second pass: re-run callbacks with correct total page count
+        // Single pass: run callbacks with correct total page count
         let total_pages = pages.len();
         for (i, page) in pages.iter_mut().enumerate() {
             if let Some(template) = self
@@ -201,9 +197,7 @@ impl DocTemplate {
                 .find(|t| t.name == page.template_name)
                 && let Some(ref callback) = template.on_page
             {
-                let mut updated = DrawList::new();
-                callback.on_page(&mut updated, i + 1, total_pages, page.page_size);
-                page.draw_list.ops.extend(updated.ops);
+                callback.on_page(&mut page.draw_list, i + 1, total_pages, page.page_size);
             }
         }
 
@@ -282,11 +276,20 @@ impl DocTemplate {
             match op {
                 DrawOp::SetFont { name, size } => {
                     current_font_size = size.0;
-                    current_font = fonts.get(name.as_str()).or_else(|| {
-                        // Fallback: try base name without -Bold/-Italic
-                        let base = name.split('-').next().unwrap_or(name);
-                        fonts.get(base)
-                    });
+                    current_font = fonts.get(name.as_str())
+                        .or_else(|| {
+                            // Fallback 1: try with -Regular suffix
+                            fonts.get(&format!("{}-Regular", name))
+                        })
+                        .or_else(|| {
+                            // Fallback 2: try base name without variant suffix
+                            let base = name.split('-').next().unwrap_or(name);
+                            fonts.get(base)
+                                .or_else(|| fonts.get(&format!("{}-Regular", base)))
+                        });
+                    if current_font.is_none() {
+                        tracing::warn!(font = %name, "Font not found, text will be invisible");
+                    }
                 }
 
                 DrawOp::DrawText { x, y, text }
@@ -325,17 +328,28 @@ impl DocTemplate {
                     y,
                     width,
                     height,
-                    fill: _,
-                    stroke: _,
+                    fill,
+                    stroke,
                 } => {
                     let pdf_y = Pt(page_height.0 - y.0 - height.0);
-                    let rect = printpdf::Rect::new(
-                        to_pdf_mm(*x),
-                        to_pdf_mm(pdf_y),
-                        to_pdf_mm(Pt(x.0 + width.0)),
-                        to_pdf_mm(Pt(pdf_y.0 + height.0)),
-                    );
-                    layer.add_rect(rect);
+                    let mode = match (fill, stroke) {
+                        (true, true) => printpdf::path::PaintMode::FillStroke,
+                        (true, false) => printpdf::path::PaintMode::Fill,
+                        (false, true) => printpdf::path::PaintMode::Stroke,
+                        (false, false) => continue, // nothing to draw
+                    };
+                    let ring = vec![
+                        (printpdf::Point::new(to_pdf_mm(*x), to_pdf_mm(pdf_y)), false),
+                        (printpdf::Point::new(to_pdf_mm(Pt(x.0 + width.0)), to_pdf_mm(pdf_y)), false),
+                        (printpdf::Point::new(to_pdf_mm(Pt(x.0 + width.0)), to_pdf_mm(Pt(pdf_y.0 + height.0))), false),
+                        (printpdf::Point::new(to_pdf_mm(*x), to_pdf_mm(Pt(pdf_y.0 + height.0))), false),
+                    ];
+                    let polygon = printpdf::Polygon {
+                        rings: vec![ring],
+                        mode,
+                        winding_order: printpdf::path::WindingOrder::NonZero,
+                    };
+                    layer.add_polygon(polygon);
                 }
 
                 DrawOp::DrawLine { x1, y1, x2, y2 } => {

@@ -652,6 +652,9 @@ pub fn build_backcover_page(data: &ReportData, brand: &BrandConfig) -> RawPage {
     }
 
     // ── Logo ─────────────────────────────────────────────────────
+    // Set fill to white (logo sits on white polygon, not purple triangle).
+    // This ensures correct alpha compositing background.
+    dl.set_fill_color(Color::WHITE);
     let logo_key = brand.page_str("backcover", "logo_key", "main");
     if let Some(logo_path) = brand.logo_path(&logo_key) {
         if let Ok(logo_data) = std::fs::read(&logo_path) {

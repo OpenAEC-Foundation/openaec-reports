@@ -508,12 +508,14 @@ impl DocTemplate {
                         };
                         let pdf_image = printpdf::Image::from(image_xobj);
                         let pdf_y = Pt(page_height.0 - y.0 - height.0);
-                        // At DPI=72, scale_x/y values map directly to points
+                        // printpdf scale_x/y are MULTIPLIERS on the native image size.
+                        // At DPI=72: native_size = image_px points (1px = 1pt).
+                        // So scale = desired_pt / image_px gives correct physical size.
                         let transform = printpdf::ImageTransform {
                             translate_x: Some(to_pdf_mm(*x)),
                             translate_y: Some(to_pdf_mm(pdf_y)),
-                            scale_x: Some(width.0),
-                            scale_y: Some(height.0),
+                            scale_x: Some(width.0 / img_w as f32),
+                            scale_y: Some(height.0 / img_h as f32),
                             dpi: Some(72.0),
                             ..Default::default()
                         };

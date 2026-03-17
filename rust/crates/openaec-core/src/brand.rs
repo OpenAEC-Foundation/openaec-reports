@@ -407,6 +407,155 @@ impl BrandConfig {
             .map(|dir| dir.join(relative))
             .or_else(|| Some(PathBuf::from(relative)))
     }
+
+    // ── Page spec helpers ────────────────────────────────────────────
+
+    /// Extract an f64 from `pages.<page_type>.<key>`, with default fallback.
+    pub fn page_f64(&self, page_type: &str, key: &str, default: f64) -> f64 {
+        self.pages
+            .get(page_type)
+            .and_then(|v| v.get(key))
+            .and_then(|v| v.as_f64())
+            .unwrap_or(default)
+    }
+
+    /// Extract a String from `pages.<page_type>.<key>`, with default fallback.
+    pub fn page_str(&self, page_type: &str, key: &str, default: &str) -> String {
+        self.pages
+            .get(page_type)
+            .and_then(|v| v.get(key))
+            .and_then(|v| v.as_str())
+            .unwrap_or(default)
+            .to_string()
+    }
+
+    /// Extract a polygon (Vec of (f64, f64)) from `pages.<page_type>.<key>`.
+    pub fn page_polygon(&self, page_type: &str, key: &str) -> Vec<(f64, f64)> {
+        self.pages
+            .get(page_type)
+            .and_then(|v| v.get(key))
+            .and_then(|v| v.as_sequence())
+            .map(|seq| {
+                seq.iter()
+                    .filter_map(|pt| {
+                        let arr = pt.as_sequence()?;
+                        Some((arr.first()?.as_f64()?, arr.get(1)?.as_f64()?))
+                    })
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
+    /// Extract a rect [x, y, w, h] from `pages.<page_type>.<key>`.
+    pub fn page_rect(&self, page_type: &str, key: &str) -> Option<[f64; 4]> {
+        let seq = self
+            .pages
+            .get(page_type)?
+            .get(key)?
+            .as_sequence()?;
+        if seq.len() >= 4 {
+            Some([
+                seq[0].as_f64()?,
+                seq[1].as_f64()?,
+                seq[2].as_f64()?,
+                seq[3].as_f64()?,
+            ])
+        } else {
+            None
+        }
+    }
+
+    /// Extract badge specs from `pages.<page_type>.badges`.
+    pub fn page_badges(&self, page_type: &str) -> Vec<BadgeSpec> {
+        self.pages
+            .get(page_type)
+            .and_then(|v| v.get("badges"))
+            .and_then(|v| v.as_sequence())
+            .map(|seq| {
+                seq.iter()
+                    .filter_map(|b| {
+                        Some(BadgeSpec {
+                            label: b.get("label")?.as_str()?.to_string(),
+                            bg_color: b.get("bg_color")?.as_str()?.to_string(),
+                            text_color: b.get("text_color")?.as_str()?.to_string(),
+                            x_ref: b.get("x_ref")?.as_f64()?,
+                            y_ref: b.get("y_ref")?.as_f64()?,
+                            w_ref: b.get("w_ref")?.as_f64()?,
+                            h_ref: b.get("h_ref")?.as_f64()?,
+                        })
+                    })
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
+    /// Extract colofon field specs from `pages.<page_type>.fields`.
+    pub fn page_fields(&self, page_type: &str) -> Vec<FieldSpec> {
+        self.pages
+            .get(page_type)
+            .and_then(|v| v.get("fields"))
+            .and_then(|v| v.as_sequence())
+            .map(|seq| {
+                seq.iter()
+                    .filter_map(|f| {
+                        let field_type = f.get("type")?.as_str()?.to_string();
+                        Some(FieldSpec {
+                            label: f
+                                .get("label")
+                                .and_then(|l| l.as_str())
+                                .unwrap_or("")
+                                .to_string(),
+                            field_type,
+                            y_pt: f.get("y_pt")?.as_f64()?,
+                            line_x1_pt: f
+                                .get("line_x1_pt")
+                                .and_then(|v| v.as_f64()),
+                            line_x2_pt: f
+                                .get("line_x2_pt")
+                                .and_then(|v| v.as_f64()),
+                        })
+                    })
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
+    /// Resolve a font role to an actual font name with LiberationSans fallback.
+    ///
+    /// `role` is e.g. "heading" or "body". Looks up in `fonts` map.
+    /// Falls back to LiberationSans-Bold for heading, LiberationSans for others.
+    pub fn resolve_font_name(&self, role: &str) -> String {
+        if let Some(name) = self.fonts.get(role) {
+            name.clone()
+        } else {
+            match role {
+                "heading" => "LiberationSans-Bold".to_string(),
+                _ => "LiberationSans".to_string(),
+            }
+        }
+    }
+}
+
+/// Badge specification from brand.yaml pages config.
+#[derive(Debug, Clone)]
+pub struct BadgeSpec {
+    pub label: String,
+    pub bg_color: String,
+    pub text_color: String,
+    pub x_ref: f64,
+    pub y_ref: f64,
+    pub w_ref: f64,
+    pub h_ref: f64,
+}
+
+/// Field specification for colofon page.
+#[derive(Debug, Clone)]
+pub struct FieldSpec {
+    pub label: String,
+    pub field_type: String,
+    pub y_pt: f64,
+    pub line_x1_pt: Option<f64>,
+    pub line_x2_pt: Option<f64>,
 }
 
 #[cfg(test)]
@@ -597,5 +746,154 @@ stationery:
 
         let logo = config.logo_path("main").unwrap();
         assert!(logo.ends_with("logos/main.png"));
+    }
+
+    fn sample_yaml_with_pages() -> &'static str {
+        r##"
+brand:
+  name: "Test Brand"
+  slug: "test-brand"
+
+colors:
+  primary: "#40124A"
+  secondary: "#38BDA0"
+  text: "#45243D"
+
+fonts:
+  heading: "Inter-Bold"
+  body: "Inter-Regular"
+
+logos: {}
+contact: {}
+
+pages:
+  cover:
+    purple_rect_y_ref: 218.268
+    purple_rect_h_ref: 623.622
+    title_size_ref: 28.9
+    title_x_ref: 54.28
+    title_y_ref: 93.47
+    logo_key: "white"
+    clip_polygon:
+      - [350.809, 159.816]
+      - [383.673, 192.680]
+      - [538.583, 347.589]
+    photo_rect: [55.636, 161.648, 484.002, 560.753]
+    badges:
+      - label: "MEEDENKEN"
+        bg_color: "#f0c385"
+        text_color: "#40124A"
+        x_ref: 297.64
+        y_ref: 298.82
+        w_ref: 112.05
+        h_ref: 33.97
+  colofon:
+    report_type_size: 22.0
+    report_type_x_pt: 70.9
+    label_x_pt: 103
+    value_x_pt: 229
+    footer_rect: [0, 771, 282, 842]
+    fields:
+      - {label: "Project", type: "project", y_pt: 320.8}
+      - {type: "line", y_pt: 478}
+      - {label: "Datum rapport", type: "date", y_pt: 572.8}
+  backcover:
+    white_polygon:
+      - [0, 0]
+      - [0, 698]
+      - [268, 842]
+    purple_triangle:
+      - [0, 842]
+      - [0, 539]
+      - [170, 688]
+      - [170, 842]
+"##
+    }
+
+    #[test]
+    fn test_page_f64() {
+        let config: BrandConfig =
+            serde_yaml::from_str(sample_yaml_with_pages()).unwrap();
+        assert!((config.page_f64("cover", "purple_rect_y_ref", 0.0) - 218.268).abs() < 0.01);
+        assert!((config.page_f64("cover", "title_size_ref", 0.0) - 28.9).abs() < 0.01);
+        // Default fallback
+        assert_eq!(config.page_f64("cover", "nonexistent", 42.0), 42.0);
+        assert_eq!(config.page_f64("nonexistent_page", "key", 99.0), 99.0);
+    }
+
+    #[test]
+    fn test_page_str() {
+        let config: BrandConfig =
+            serde_yaml::from_str(sample_yaml_with_pages()).unwrap();
+        assert_eq!(config.page_str("cover", "logo_key", "main"), "white");
+        assert_eq!(config.page_str("cover", "nonexistent", "fallback"), "fallback");
+    }
+
+    #[test]
+    fn test_page_polygon() {
+        let config: BrandConfig =
+            serde_yaml::from_str(sample_yaml_with_pages()).unwrap();
+        let poly = config.page_polygon("cover", "clip_polygon");
+        assert_eq!(poly.len(), 3);
+        assert!((poly[0].0 - 350.809).abs() < 0.01);
+        assert!((poly[0].1 - 159.816).abs() < 0.01);
+
+        let tri = config.page_polygon("backcover", "purple_triangle");
+        assert_eq!(tri.len(), 4);
+
+        // Empty fallback
+        let empty = config.page_polygon("cover", "nonexistent");
+        assert!(empty.is_empty());
+    }
+
+    #[test]
+    fn test_page_rect() {
+        let config: BrandConfig =
+            serde_yaml::from_str(sample_yaml_with_pages()).unwrap();
+        let rect = config.page_rect("cover", "photo_rect").unwrap();
+        assert!((rect[0] - 55.636).abs() < 0.01);
+        assert!((rect[3] - 560.753).abs() < 0.01);
+
+        let fr = config.page_rect("colofon", "footer_rect").unwrap();
+        assert_eq!(fr[0] as i64, 0);
+        assert_eq!(fr[1] as i64, 771);
+
+        assert!(config.page_rect("cover", "nonexistent").is_none());
+    }
+
+    #[test]
+    fn test_page_badges() {
+        let config: BrandConfig =
+            serde_yaml::from_str(sample_yaml_with_pages()).unwrap();
+        let badges = config.page_badges("cover");
+        assert_eq!(badges.len(), 1);
+        assert_eq!(badges[0].label, "MEEDENKEN");
+        assert_eq!(badges[0].bg_color, "#f0c385");
+        assert!((badges[0].x_ref - 297.64).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_page_fields() {
+        let config: BrandConfig =
+            serde_yaml::from_str(sample_yaml_with_pages()).unwrap();
+        let fields = config.page_fields("colofon");
+        assert_eq!(fields.len(), 3);
+        assert_eq!(fields[0].label, "Project");
+        assert_eq!(fields[0].field_type, "project");
+        assert!((fields[0].y_pt - 320.8).abs() < 0.01);
+        assert_eq!(fields[1].field_type, "line");
+    }
+
+    #[test]
+    fn test_resolve_font_name() {
+        let config: BrandConfig =
+            serde_yaml::from_str(sample_yaml_with_pages()).unwrap();
+        assert_eq!(config.resolve_font_name("heading"), "Inter-Bold");
+        assert_eq!(config.resolve_font_name("body"), "Inter-Regular");
+        // Fallback
+        assert_eq!(config.resolve_font_name("heading"), "Inter-Bold");
+        let empty: BrandConfig = BrandConfig::default();
+        assert_eq!(empty.resolve_font_name("heading"), "LiberationSans-Bold");
+        assert_eq!(empty.resolve_font_name("body"), "LiberationSans");
     }
 }

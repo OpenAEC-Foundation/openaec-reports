@@ -59,6 +59,24 @@ pub enum DrawOp {
         height: Pt,
     },
 
+    /// Draw a closed polygon (filled and/or stroked).
+    DrawPolygon {
+        points: Vec<(Pt, Pt)>,
+        fill: bool,
+        stroke: bool,
+    },
+
+    /// Draw a rounded rectangle.
+    DrawRoundedRect {
+        x: Pt,
+        y: Pt,
+        width: Pt,
+        height: Pt,
+        radius: Pt,
+        fill: bool,
+        stroke: bool,
+    },
+
     /// Save graphics state.
     SaveState,
 
@@ -142,6 +160,35 @@ impl DrawList {
             y,
             width,
             height,
+        });
+    }
+
+    pub fn draw_polygon(&mut self, points: Vec<(Pt, Pt)>, fill: bool, stroke: bool) {
+        self.ops.push(DrawOp::DrawPolygon {
+            points,
+            fill,
+            stroke,
+        });
+    }
+
+    pub fn draw_rounded_rect(
+        &mut self,
+        x: Pt,
+        y: Pt,
+        width: Pt,
+        height: Pt,
+        radius: Pt,
+        fill: bool,
+        stroke: bool,
+    ) {
+        self.ops.push(DrawOp::DrawRoundedRect {
+            x,
+            y,
+            width,
+            height,
+            radius,
+            fill,
+            stroke,
         });
     }
 

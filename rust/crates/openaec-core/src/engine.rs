@@ -6,8 +6,8 @@
 use std::path::{Path, PathBuf};
 
 use openaec_layout::{
-    shared_font_registry, A4, DocTemplate, Flowable, Frame, Mm, PageTemplate, Paragraph,
-    ParagraphStyle, Pt, Rect, SharedFontRegistry, Spacer,
+    shared_font_registry, A4, DocTemplate, DrawList, Flowable, Frame, Mm, PageCallback,
+    PageTemplate, Paragraph, ParagraphStyle, Pt, Rect, SharedFontRegistry, Size, Spacer,
 };
 
 use crate::block_renderer::render_section;
@@ -55,16 +55,14 @@ pub fn generate_pdf_bytes(data: &ReportData) -> Result<Vec<u8>, EngineError> {
     let fonts = shared_font_registry();
     setup_fonts(&fonts, &tenant);
 
-    // 4. Create DocTemplate with A4 page and 20mm margins
+    // 4. Create DocTemplate with content frame from brand
     let mut doc = DocTemplate::new(&data.project, fonts);
-    let margin = Pt::from(Mm(20.0));
-    let frame = Frame::new(Rect::new(
-        margin,
-        margin,
-        Pt(A4.width.0 - margin.0 * 2.0),
-        Pt(A4.height.0 - margin.0 * 2.0),
-    ));
-    let template = PageTemplate::new("content", A4, frame);
+    let frame = build_content_frame(&brand);
+    let callback = build_footer_callback(&brand);
+    let mut template = PageTemplate::new("content", A4, frame);
+    if let Some(cb) = callback {
+        template = template.with_callback(cb);
+    }
     doc.add_page_template(template);
 
     // 5. Add special pages
@@ -88,14 +86,12 @@ pub fn generate_pdf_with_config(
     setup_fonts(&fonts, tenant);
 
     let mut doc = DocTemplate::new(&data.project, fonts);
-    let margin = Pt::from(Mm(20.0));
-    let frame = Frame::new(Rect::new(
-        margin,
-        margin,
-        Pt(A4.width.0 - margin.0 * 2.0),
-        Pt(A4.height.0 - margin.0 * 2.0),
-    ));
-    let template = PageTemplate::new("content", A4, frame);
+    let frame = build_content_frame(brand);
+    let callback = build_footer_callback(brand);
+    let mut template = PageTemplate::new("content", A4, frame);
+    if let Some(cb) = callback {
+        template = template.with_callback(cb);
+    }
     doc.add_page_template(template);
 
     // Add special pages
@@ -129,6 +125,140 @@ fn add_special_pages(doc: &mut DocTemplate, data: &ReportData, brand: &BrandConf
     // Backcover page (if enabled)
     if data.backcover.as_ref().is_some_and(|b| b.enabled) {
         doc.add_post_page(special_pages::build_backcover_page(data, brand));
+    }
+}
+
+// ── Content frame from brand ────────────────────────────────────────────
+
+/// Build a content Frame from `brand.stationery.content.content_frame`.
+///
+/// Falls back to 20mm margins if no content_frame is configured.
+fn build_content_frame(brand: &BrandConfig) -> Frame {
+    if let Some(content_stationery) = brand.stationery.get("content")
+        && let Some(ref cf) = content_stationery.content_frame
+    {
+        Frame::new(Rect::new(
+            Pt(cf.x_pt as f32),
+            Pt(cf.y_pt as f32),
+            Pt(cf.width_pt as f32),
+            Pt(cf.height_pt as f32),
+        ))
+    } else {
+        // Fallback: 20mm margins
+        let margin = Pt::from(Mm(20.0));
+        Frame::new(Rect::new(
+            margin,
+            margin,
+            Pt(A4.width.0 - margin.0 * 2.0),
+            Pt(A4.height.0 - margin.0 * 2.0),
+        ))
+    }
+}
+
+/// Build a footer PageCallback from `brand.footer` config.
+///
+/// Returns None if footer height is 0 or no elements are defined.
+fn build_footer_callback(brand: &BrandConfig) -> Option<Box<dyn PageCallback>> {
+    if brand.footer.height == 0.0 || brand.footer.elements.is_empty() {
+        return None;
+    }
+
+    let elements: Vec<FooterElement> = brand
+        .footer
+        .elements
+        .iter()
+        .filter(|el| el.element_type == "text")
+        .map(|el| {
+            // Resolve font reference
+            let font_name = el
+                .font
+                .as_deref()
+                .map(|f| brand.resolve_font(f).to_string())
+                .unwrap_or_else(|| brand.resolve_font_name("body"));
+
+            // Resolve color reference
+            let color = el
+                .color
+                .as_deref()
+                .and_then(|c| {
+                    brand
+                        .resolve_color(c)
+                        .and_then(openaec_layout::Color::from_hex)
+                })
+                .unwrap_or(openaec_layout::Color::rgb(69, 36, 61));
+
+            FooterElement {
+                content: el.content.clone().unwrap_or_default(),
+                x_mm: el.x,
+                y_mm: el.y,
+                font_name,
+                font_size: el.size.unwrap_or(9.5) as f32,
+                color,
+                align: el.align.clone().unwrap_or_else(|| "left".to_string()),
+            }
+        })
+        .collect();
+
+    if elements.is_empty() {
+        return None;
+    }
+
+    Some(Box::new(BrandFooterCallback { elements }))
+}
+
+/// A single footer element resolved from brand config.
+#[derive(Debug, Clone)]
+struct FooterElement {
+    content: String,
+    x_mm: f64,
+    y_mm: f64,
+    font_name: String,
+    font_size: f32,
+    color: openaec_layout::Color,
+    align: String,
+}
+
+/// Footer callback that renders brand footer elements on each content page.
+#[derive(Debug, Clone)]
+struct BrandFooterCallback {
+    elements: Vec<FooterElement>,
+}
+
+impl PageCallback for BrandFooterCallback {
+    fn on_page(
+        &self,
+        draw_list: &mut DrawList,
+        page_num: usize,
+        total_pages: usize,
+        page_size: Size,
+    ) {
+        // Only render on pass 2 (when total_pages is known)
+        if total_pages == 0 {
+            return;
+        }
+
+        let page_h = page_size.height;
+
+        for el in &self.elements {
+            // Variable substitution
+            let text = el
+                .content
+                .replace("{page}", &page_num.to_string())
+                .replace("{total_pages}", &total_pages.to_string());
+
+            // Convert mm to points (footer y is from bottom of page)
+            let x = Pt::from(Mm(el.x_mm as f32));
+            let y = Pt(page_h.0 - Pt::from(Mm(el.y_mm as f32)).0);
+
+            draw_list.set_fill_color(el.color);
+            draw_list.set_font(&el.font_name, Pt(el.font_size));
+
+            match el.align.as_str() {
+                "right" => draw_list.draw_text_right(x, y, &text),
+                "center" => draw_list.draw_text_center(x, y, &text),
+                _ => draw_list.draw_text(x, y, &text),
+            }
+        }
     }
 }
 

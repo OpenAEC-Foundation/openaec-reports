@@ -3,7 +3,8 @@
 //! Bridge between the data layer (schema.rs) and the layout engine (openaec-layout).
 
 use openaec_layout::{
-    Color, Flowable, Mm, Paragraph, ParagraphStyle, Pt, Spacer, Table, TableStyleConfig,
+    Color, Flowable, ImageFlowable, Mm, Paragraph, ParagraphStyle, Pt, Spacer, Table,
+    TableStyleConfig,
 };
 
 use crate::brand::BrandConfig;
@@ -19,10 +20,7 @@ pub fn render_block(block: &ContentBlock, brand: &BrandConfig) -> Vec<Box<dyn Fl
         ContentBlock::Calculation(c) => render_calculation(c, brand),
         ContentBlock::Check(c) => render_check(c, brand),
         ContentBlock::Table(t) => render_table(t, brand),
-        ContentBlock::Image(_) => {
-            // TODO: Image rendering not yet implemented
-            Vec::new()
-        }
+        ContentBlock::Image(img) => render_image(img, brand),
         ContentBlock::Map(_) => {
             // TODO: Map rendering not yet implemented (requires PDOK WMS)
             Vec::new()
@@ -148,7 +146,7 @@ fn render_calculation(
             grid_width: Pt(0.5),
             row_backgrounds: vec![None, Some(Color::rgb(248, 248, 248))],
             cell_padding: openaec_layout::Padding::new(Pt(2.0), Pt(4.0), Pt(2.0), Pt(4.0)),
-            font_name: "LiberationSans".to_string(),
+            font_name: brand.resolve_font_name("body"),
             font_size: Pt(9.0),
             header_font_size: Pt(9.0),
         };
@@ -224,7 +222,7 @@ fn render_check(
         grid_width: Pt(0.5),
         row_backgrounds: vec![None],
         cell_padding: openaec_layout::Padding::new(Pt(2.0), Pt(4.0), Pt(2.0), Pt(4.0)),
-        font_name: "LiberationSans".to_string(),
+        font_name: brand.resolve_font_name("body"),
         font_size: Pt(9.0),
         header_font_size: Pt(9.0),
     };
@@ -277,7 +275,7 @@ fn render_table(
         grid_width: Pt(0.5),
         row_backgrounds: vec![None, Some(Color::rgb(245, 245, 245))],
         cell_padding: openaec_layout::Padding::new(Pt(3.0), Pt(4.0), Pt(3.0), Pt(4.0)),
-        font_name: "LiberationSans".to_string(),
+        font_name: brand.resolve_font_name("body"),
         font_size: Pt(9.0),
         header_font_size: Pt(9.0),
     };
@@ -421,6 +419,67 @@ fn render_placeholder(label: &str) -> Vec<Box<dyn Flowable>> {
         ..Default::default()
     };
     vec![Box::new(Paragraph::new(label, style))]
+}
+
+fn render_image(
+    img: &crate::schema::ImageBlock,
+    _brand: &BrandConfig,
+) -> Vec<Box<dyn Flowable>> {
+    use crate::schema::ImageSource;
+
+    // Resolve image bytes from source
+    let result = match &img.src {
+        ImageSource::Path(path_str) => {
+            // Try as file path first
+            let path = std::path::Path::new(path_str);
+            if path.is_file() {
+                std::fs::read(path).ok()
+            } else {
+                // Could be a URL — skip for now (would need HTTP client)
+                tracing::warn!(path = %path_str, "Image file not found, skipping");
+                None
+            }
+        }
+        ImageSource::Base64 { data, .. } => {
+            use base64::Engine;
+            base64::engine::general_purpose::STANDARD
+                .decode(data)
+                .ok()
+        }
+    };
+
+    let Some(bytes) = result else {
+        return Vec::new();
+    };
+
+    // Determine width
+    let width = if let Some(w_mm) = img.width_mm {
+        Pt::from(Mm(w_mm as f32))
+    } else {
+        // Default: full frame width (will be constrained by wrap())
+        Pt::from(Mm(160.0))
+    };
+
+    let Ok(mut flowable) = ImageFlowable::from_bytes(bytes, width) else {
+        return Vec::new();
+    };
+
+    // Alignment
+    let alignment = match img.alignment {
+        crate::schema::Alignment::Left => openaec_layout::Alignment::Left,
+        crate::schema::Alignment::Center => openaec_layout::Alignment::Center,
+        crate::schema::Alignment::Right => openaec_layout::Alignment::Right,
+    };
+    flowable = flowable.with_alignment(alignment);
+
+    // Caption
+    if let Some(ref caption) = img.caption {
+        flowable = flowable.with_caption(caption);
+    }
+
+    let mut result: Vec<Box<dyn Flowable>> = vec![Box::new(flowable)];
+    result.push(Box::new(Spacer::from_mm(3.0)));
+    result
 }
 
 // ── Brand color helpers ────────────────────────────────────────────────

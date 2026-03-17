@@ -180,7 +180,9 @@ impl DocTemplate {
                 }
             }
 
-            // Don't run callbacks in first pass — we need total page count.
+            // NOTE: Pass 1 callback removed — callbacks only run in pass 2
+            // with correct total_pages. This prevents double-rendering of
+            // footer elements.
             pages.push(RenderedPage {
                 draw_list,
                 page_size: template.page_size,
@@ -417,6 +419,101 @@ impl DocTemplate {
                         };
                         pdf_image.add_to_layer(layer.clone(), transform);
                     }
+                }
+
+                DrawOp::DrawPolygon {
+                    points,
+                    fill,
+                    stroke,
+                } => {
+                    if points.len() >= 2 {
+                        let pdf_points: Vec<(printpdf::Point, bool)> = points
+                            .iter()
+                            .map(|(x, y)| {
+                                let pdf_y = page_height.0 - y.0;
+                                (
+                                    printpdf::Point::new(to_pdf_mm(*x), to_pdf_mm(Pt(pdf_y))),
+                                    false,
+                                )
+                            })
+                            .collect();
+
+                        let mode = match (fill, stroke) {
+                            (true, true) => printpdf::path::PaintMode::FillStroke,
+                            (true, false) => printpdf::path::PaintMode::Fill,
+                            (false, true) => printpdf::path::PaintMode::Stroke,
+                            (false, false) => printpdf::path::PaintMode::Fill,
+                        };
+
+                        let polygon = printpdf::Polygon {
+                            rings: vec![pdf_points],
+                            mode,
+                            winding_order: printpdf::path::WindingOrder::NonZero,
+                        };
+                        layer.add_polygon(polygon);
+                    }
+                }
+
+                DrawOp::DrawRoundedRect {
+                    x,
+                    y,
+                    width,
+                    height,
+                    radius,
+                    fill,
+                    stroke,
+                } => {
+                    // Approximate rounded rect with bezier curves
+                    let pdf_y = Pt(page_height.0 - y.0 - height.0);
+                    let r = radius.0.min(width.0 / 2.0).min(height.0 / 2.0);
+
+                    // Control point offset for circular approximation
+                    let k: f32 = 0.5522847498;
+                    let kr = k * r;
+
+                    // Build points clockwise from bottom-left
+                    let x0 = x.0;
+                    let y0 = pdf_y.0;
+                    let x1 = x.0 + width.0;
+                    let y1 = pdf_y.0 + height.0;
+
+                    let points = vec![
+                        // Bottom-left corner start
+                        (printpdf::Point::new(to_pdf_mm(Pt(x0)), to_pdf_mm(Pt(y0 + r))), false),
+                        // Bottom-left arc
+                        (printpdf::Point::new(to_pdf_mm(Pt(x0)), to_pdf_mm(Pt(y0 + r - kr))), true),
+                        (printpdf::Point::new(to_pdf_mm(Pt(x0 + r - kr)), to_pdf_mm(Pt(y0))), true),
+                        (printpdf::Point::new(to_pdf_mm(Pt(x0 + r)), to_pdf_mm(Pt(y0))), false),
+                        // Bottom-right corner
+                        (printpdf::Point::new(to_pdf_mm(Pt(x1 - r)), to_pdf_mm(Pt(y0))), false),
+                        (printpdf::Point::new(to_pdf_mm(Pt(x1 - r + kr)), to_pdf_mm(Pt(y0))), true),
+                        (printpdf::Point::new(to_pdf_mm(Pt(x1)), to_pdf_mm(Pt(y0 + r - kr))), true),
+                        (printpdf::Point::new(to_pdf_mm(Pt(x1)), to_pdf_mm(Pt(y0 + r))), false),
+                        // Top-right corner
+                        (printpdf::Point::new(to_pdf_mm(Pt(x1)), to_pdf_mm(Pt(y1 - r))), false),
+                        (printpdf::Point::new(to_pdf_mm(Pt(x1)), to_pdf_mm(Pt(y1 - r + kr))), true),
+                        (printpdf::Point::new(to_pdf_mm(Pt(x1 - r + kr)), to_pdf_mm(Pt(y1))), true),
+                        (printpdf::Point::new(to_pdf_mm(Pt(x1 - r)), to_pdf_mm(Pt(y1))), false),
+                        // Top-left corner
+                        (printpdf::Point::new(to_pdf_mm(Pt(x0 + r)), to_pdf_mm(Pt(y1))), false),
+                        (printpdf::Point::new(to_pdf_mm(Pt(x0 + r - kr)), to_pdf_mm(Pt(y1))), true),
+                        (printpdf::Point::new(to_pdf_mm(Pt(x0)), to_pdf_mm(Pt(y1 - r + kr))), true),
+                        (printpdf::Point::new(to_pdf_mm(Pt(x0)), to_pdf_mm(Pt(y1 - r))), false),
+                    ];
+
+                    let mode = match (fill, stroke) {
+                        (true, true) => printpdf::path::PaintMode::FillStroke,
+                        (true, false) => printpdf::path::PaintMode::Fill,
+                        (false, true) => printpdf::path::PaintMode::Stroke,
+                        (false, false) => printpdf::path::PaintMode::Fill,
+                    };
+
+                    let polygon = printpdf::Polygon {
+                        rings: vec![points],
+                        mode,
+                        winding_order: printpdf::path::WindingOrder::NonZero,
+                    };
+                    layer.add_polygon(polygon);
                 }
 
                 DrawOp::SaveState => {

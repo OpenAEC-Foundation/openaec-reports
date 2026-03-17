@@ -41,10 +41,13 @@ impl Default for TableStyleConfig {
     }
 }
 
-/// Row data (pre-computed heights).
+/// Row data (pre-computed heights with text wrapping).
 #[derive(Debug, Clone)]
 struct RowLayout {
+    /// Original cell texts.
     cells: Vec<String>,
+    /// Wrapped lines per cell (computed during wrap phase).
+    wrapped_cells: Vec<Vec<String>>,
     height: Pt,
     is_header: bool,
 }
@@ -122,13 +125,98 @@ impl Table {
         vec![col_width; num_cols]
     }
 
-    /// Calculate row height based on content (single line for now).
-    fn row_height(&self) -> Pt {
+    /// Single-line row height (used for comparison in tests).
+    #[allow(dead_code)]
+    fn single_row_height(&self, font_size: Pt) -> Pt {
         let padding = self.style.cell_padding.vertical();
-        Pt(self.style.font_size.0 + padding.0 + 2.0)
+        Pt(font_size.0 + padding.0 + 2.0)
     }
 
-    /// Draw a single row.
+    /// Wrap cell text to fit within column width.
+    ///
+    /// Uses approximate character width (0.5 × font_size for proportional fonts).
+    fn wrap_text(&self, text: &str, col_width: Pt, font_size: Pt) -> Vec<String> {
+        let usable_width = col_width.0
+            - self.style.cell_padding.left.0
+            - self.style.cell_padding.right.0;
+
+        if usable_width <= 0.0 || text.is_empty() {
+            return vec![text.to_string()];
+        }
+
+        // Approximate char width (proportional fonts ≈ 0.5 × font_size)
+        let char_width = font_size.0 * 0.5;
+        let max_chars = (usable_width / char_width).max(1.0) as usize;
+
+        if text.len() <= max_chars {
+            return vec![text.to_string()];
+        }
+
+        let mut lines = Vec::new();
+        let mut remaining = text;
+
+        while !remaining.is_empty() {
+            if remaining.len() <= max_chars {
+                lines.push(remaining.to_string());
+                break;
+            }
+
+            // Find last space within max_chars
+            let split_at = remaining[..max_chars.min(remaining.len())]
+                .rfind(' ')
+                .map(|pos| pos + 1)
+                .unwrap_or(max_chars.min(remaining.len()));
+
+            lines.push(remaining[..split_at].trim_end().to_string());
+            remaining = remaining[split_at..].trim_start();
+        }
+
+        if lines.is_empty() {
+            lines.push(String::new());
+        }
+        lines
+    }
+
+    /// Compute wrapped row layout: wrap all cells and calculate row height.
+    fn compute_row_layout(
+        &self,
+        cells: &[String],
+        is_header: bool,
+    ) -> RowLayout {
+        let font_size = if is_header {
+            self.style.header_font_size
+        } else {
+            self.style.font_size
+        };
+
+        let wrapped_cells: Vec<Vec<String>> = cells
+            .iter()
+            .enumerate()
+            .map(|(col_idx, text)| {
+                let col_width = self
+                    .computed_col_widths
+                    .get(col_idx)
+                    .copied()
+                    .unwrap_or(Pt(50.0));
+                self.wrap_text(text, col_width, font_size)
+            })
+            .collect();
+
+        // Row height = max lines across all cells × leading + padding
+        let max_lines = wrapped_cells.iter().map(|w| w.len()).max().unwrap_or(1);
+        let leading = font_size.0 * 1.2;
+        let padding = self.style.cell_padding.vertical();
+        let height = Pt(max_lines as f32 * leading + padding.0 + 2.0);
+
+        RowLayout {
+            cells: cells.to_vec(),
+            wrapped_cells,
+            height,
+            is_header,
+        }
+    }
+
+    /// Draw a single row with multi-line text wrapping support.
     fn draw_row(
         &self,
         row: &RowLayout,
@@ -177,10 +265,11 @@ impl Table {
         draw_list.set_font(&font_name, font_size);
         draw_list.set_fill_color(text_color);
 
-        let text_y = Pt(y.0 + self.style.cell_padding.top.0 + font_size.0 * 0.8);
+        let leading = font_size.0 * 1.2;
+        let base_text_y = Pt(y.0 + self.style.cell_padding.top.0 + font_size.0 * 0.8);
         let mut cx = x;
 
-        for (col_idx, cell_text) in row.cells.iter().enumerate() {
+        for (col_idx, wrapped_lines) in row.wrapped_cells.iter().enumerate() {
             let col_width = self
                 .computed_col_widths
                 .get(col_idx)
@@ -188,7 +277,13 @@ impl Table {
                 .unwrap_or(Pt(50.0));
 
             let text_x = Pt(cx.0 + self.style.cell_padding.left.0);
-            draw_list.draw_text(text_x, text_y, cell_text);
+
+            // Draw each wrapped line
+            for (line_idx, line) in wrapped_lines.iter().enumerate() {
+                let line_y = Pt(base_text_y.0 + line_idx as f32 * leading);
+                draw_list.draw_text(text_x, line_y, line);
+            }
+
             cx = Pt(cx.0 + col_width.0);
         }
 
@@ -198,7 +293,12 @@ impl Table {
 
         let total_width: f32 = self.computed_col_widths.iter().map(|w| w.0).sum();
         // Bottom line
-        draw_list.draw_line(x, Pt(y.0 + row.height.0), Pt(x.0 + total_width), Pt(y.0 + row.height.0));
+        draw_list.draw_line(
+            x,
+            Pt(y.0 + row.height.0),
+            Pt(x.0 + total_width),
+            Pt(y.0 + row.height.0),
+        );
 
         // Vertical lines
         let mut vx = x;
@@ -214,26 +314,19 @@ impl Table {
 impl Flowable for Table {
     fn wrap(&mut self, available_width: Pt, _available_height: Pt, _ctx: &LayoutContext) -> Size {
         self.computed_col_widths = self.compute_col_widths(available_width);
-        let row_h = self.row_height();
 
         self.row_layouts.clear();
 
         // Header row
         if !self.headers.is_empty() {
-            self.row_layouts.push(RowLayout {
-                cells: self.headers.clone(),
-                height: row_h,
-                is_header: true,
-            });
+            self.row_layouts
+                .push(self.compute_row_layout(&self.headers.clone(), true));
         }
 
         // Data rows
-        for row in &self.rows {
-            self.row_layouts.push(RowLayout {
-                cells: row.clone(),
-                height: row_h,
-                is_header: false,
-            });
+        for row in self.rows.clone() {
+            self.row_layouts
+                .push(self.compute_row_layout(&row, false));
         }
 
         self.wrapped_height = Pt(self.row_layouts.iter().map(|r| r.height.0).sum());
@@ -335,7 +428,7 @@ impl Flowable for Table {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::fonts::{shared_font_registry, SharedFontRegistry};
+    use crate::fonts::shared_font_registry;
 
     fn test_ctx() -> LayoutContext {
         LayoutContext {
@@ -370,5 +463,53 @@ mod tests {
         let widths = table.compute_col_widths(Pt(200.0));
         assert_eq!(widths.len(), 2);
         assert!((widths[0].0 - 100.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_text_wrapping() {
+        let mut table = Table::new(
+            vec!["Header".into()],
+            vec![vec![
+                "This is a very long text that should definitely wrap across multiple lines in the table cell"
+                    .into(),
+            ]],
+        )
+        .with_col_widths(vec![Pt(80.0)]); // Narrow column
+
+        let ctx = test_ctx();
+        let _size = table.wrap(Pt(80.0), Pt(1000.0), &ctx);
+
+        // Row with wrapping should be taller than single-line row
+        assert!(table.row_layouts.len() == 2); // header + 1 data row
+        let data_row = &table.row_layouts[1];
+        assert!(
+            data_row.wrapped_cells[0].len() > 1,
+            "Long text should wrap: {:?}",
+            data_row.wrapped_cells[0]
+        );
+        // Height should reflect multiple lines
+        let single_h = table.single_row_height(table.style.font_size);
+        assert!(
+            data_row.height.0 > single_h.0,
+            "Wrapped row should be taller than single-line: {} vs {}",
+            data_row.height.0,
+            single_h.0
+        );
+    }
+
+    #[test]
+    fn test_short_text_no_wrap() {
+        let mut table = Table::new(
+            vec!["A".into(), "B".into()],
+            vec![vec!["Short".into(), "Text".into()]],
+        );
+
+        let ctx = test_ctx();
+        table.wrap(Pt(500.0), Pt(1000.0), &ctx);
+
+        let data_row = &table.row_layouts[1];
+        // Short text should not wrap
+        assert_eq!(data_row.wrapped_cells[0].len(), 1);
+        assert_eq!(data_row.wrapped_cells[1].len(), 1);
     }
 }

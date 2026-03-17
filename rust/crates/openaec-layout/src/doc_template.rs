@@ -305,6 +305,7 @@ impl DocTemplate {
         let mut current_font: Option<&printpdf::IndirectFontRef> = None;
         let mut current_font_size: f32 = 10.0;
         let mut current_font_name = String::new();
+        let mut current_fill_rgb: (u8, u8, u8) = (255, 255, 255); // for alpha compositing
 
         for op in &draw_list.ops {
             match op {
@@ -391,6 +392,7 @@ impl DocTemplate {
                 }
 
                 DrawOp::SetFillColor(color) => {
+                    current_fill_rgb = (color.r, color.g, color.b);
                     let (r, g, b) = color.to_pdf_rgb();
                     layer.set_fill_color(printpdf::Color::Rgb(printpdf::Rgb::new(
                         r, g, b, None,
@@ -473,16 +475,29 @@ impl DocTemplate {
                     height,
                 } => {
                     if let Ok(dynamic_img) = ::image::load_from_memory(data) {
-                        let (img_w, img_h) = (
-                            dynamic_img.width() as f32,
-                            dynamic_img.height() as f32,
-                        );
-                        // Convert to raw RGB pixels for printpdf
-                        let rgb = dynamic_img.to_rgb8();
-                        let raw_pixels = rgb.into_raw();
+                        // If image has alpha, composite onto current fill color background
+                        let rgb = if dynamic_img.color().has_alpha() {
+                            let rgba = dynamic_img.to_rgba8();
+                            let (w, h) = (rgba.width(), rgba.height());
+                            let (bg_r, bg_g, bg_b) = current_fill_rgb;
+                            let mut out = Vec::with_capacity((w * h * 3) as usize);
+                            for pixel in rgba.pixels() {
+                                let a = pixel[3] as f32 / 255.0;
+                                let inv = 1.0 - a;
+                                out.push((pixel[0] as f32 * a + bg_r as f32 * inv) as u8);
+                                out.push((pixel[1] as f32 * a + bg_g as f32 * inv) as u8);
+                                out.push((pixel[2] as f32 * a + bg_b as f32 * inv) as u8);
+                            }
+                            (out, w as usize, h as usize)
+                        } else {
+                            let img = dynamic_img.to_rgb8();
+                            let (w, h) = (img.width() as usize, img.height() as usize);
+                            (img.into_raw(), w, h)
+                        };
+                        let (raw_pixels, img_w, img_h) = rgb;
                         let image_xobj = printpdf::ImageXObject {
-                            width: printpdf::Px(img_w as usize),
-                            height: printpdf::Px(img_h as usize),
+                            width: printpdf::Px(img_w),
+                            height: printpdf::Px(img_h),
                             color_space: printpdf::ColorSpace::Rgb,
                             bits_per_component: printpdf::ColorBits::Bit8,
                             interpolate: true,
@@ -493,9 +508,7 @@ impl DocTemplate {
                         };
                         let pdf_image = printpdf::Image::from(image_xobj);
                         let pdf_y = Pt(page_height.0 - y.0 - height.0);
-                        // At DPI=72, scale_x/y values map directly to points:
-                        // physical_width = scale_x / 72 * 25.4 mm = scale_x / 2.8346 mm
-                        // which equals scale_x points.
+                        // At DPI=72, scale_x/y values map directly to points
                         let transform = printpdf::ImageTransform {
                             translate_x: Some(to_pdf_mm(*x)),
                             translate_y: Some(to_pdf_mm(pdf_y)),

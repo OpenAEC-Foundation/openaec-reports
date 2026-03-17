@@ -408,6 +408,18 @@ fn setup_fonts(fonts: &SharedFontRegistry, tenant: &TenantConfig) {
             }
         }
     }
+
+    // Register CamelCase aliases: "Inter-Bold" → "Inter-Bold",
+    // "Inter-BookItalic" → "Inter-RegularItalic", etc.
+    // Brand.yaml uses CamelCase names, but font files use hyphens.
+    for name in &registered_names {
+        let no_hyphen = name.replace('-', "");
+        if no_hyphen != *name && registry.get(&no_hyphen).is_none() {
+            registry.register_alias(&no_hyphen, name);
+            tracing::info!(alias = %no_hyphen, target = %name, "Registered CamelCase alias");
+        }
+    }
+
 }
 
 // ── Defaults ────────────────────────────────────────────────────────────

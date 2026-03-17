@@ -18,6 +18,21 @@ fn to_pdf_mm(pt: Pt) -> printpdf::Mm {
     printpdf::Mm(mm.0)
 }
 
+/// Convert CamelCase font name to hyphenated form.
+/// "Inter-Bold" → "Inter-Bold", "Inter-RegularItalic" → "Inter-BookItalic"
+fn camel_to_hyphen(name: &str) -> String {
+    let mut result = String::with_capacity(name.len() + 2);
+    let mut prev_lower = false;
+    for ch in name.chars() {
+        if ch.is_uppercase() && prev_lower {
+            result.push('-');
+        }
+        result.push(ch);
+        prev_lower = ch.is_lowercase();
+    }
+    result
+}
+
 /// A rendered page (draw list + size).
 #[derive(Debug)]
 struct RenderedPage {
@@ -288,6 +303,24 @@ impl DocTemplate {
                             let base = name.split('-').next().unwrap_or(name);
                             fonts.get(base)
                                 .or_else(|| fonts.get(&format!("{}-Regular", base)))
+                        })
+                        .or_else(|| {
+                            // Fallback 3: insert hyphens at CamelCase boundaries
+                            // "Inter-Bold" → "Inter-Bold", "Inter-RegularItalic" → "Inter-BookItalic"
+                            let hyphenated = camel_to_hyphen(name);
+                            if hyphenated != *name {
+                                fonts.get(hyphenated.as_str())
+                            } else {
+                                None
+                            }
+                        })
+                        .or_else(|| {
+                            // Fallback 4: try any font containing the base family name
+                            let base = name.split('-').next().unwrap_or(name);
+                            let base_lower = base.to_lowercase();
+                            fonts.keys()
+                                .find(|k| k.to_lowercase().starts_with(&base_lower))
+                                .and_then(|k| fonts.get(k.as_str()))
                         });
                     if current_font.is_none() {
                         tracing::warn!(font = %name, "Font not found, text will be invisible");

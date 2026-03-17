@@ -21,6 +21,7 @@ pub struct TableStyleConfig {
     pub row_backgrounds: Vec<Option<Color>>,
     pub cell_padding: Padding,
     pub font_name: String,
+    pub header_font_name: String,
     pub font_size: Pt,
     pub header_font_size: Pt,
 }
@@ -35,6 +36,7 @@ impl Default for TableStyleConfig {
             row_backgrounds: vec![None, Some(Color::rgb(245, 245, 245))],
             cell_padding: Padding::new(Pt(3.0), Pt(4.0), Pt(3.0), Pt(4.0)),
             font_name: "LiberationSans".to_string(),
+            header_font_name: "LiberationSans-Bold".to_string(),
             font_size: Pt(9.0),
             header_font_size: Pt(9.0),
         }
@@ -257,7 +259,7 @@ impl Table {
         };
 
         let font_name = if row.is_header {
-            format!("{}-Bold", self.style.font_name)
+            self.style.header_font_name.clone()
         } else {
             self.style.font_name.clone()
         };

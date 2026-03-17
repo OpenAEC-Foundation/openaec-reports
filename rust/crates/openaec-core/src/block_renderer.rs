@@ -147,6 +147,7 @@ fn render_calculation(
             row_backgrounds: vec![None, Some(Color::rgb(248, 248, 248))],
             cell_padding: openaec_layout::Padding::new(Pt(2.0), Pt(4.0), Pt(2.0), Pt(4.0)),
             font_name: brand.resolve_font_name("body"),
+            header_font_name: brand.resolve_font_name("heading"),
             font_size: Pt(9.0),
             header_font_size: Pt(9.0),
         };
@@ -223,6 +224,7 @@ fn render_check(
         row_backgrounds: vec![None],
         cell_padding: openaec_layout::Padding::new(Pt(2.0), Pt(4.0), Pt(2.0), Pt(4.0)),
         font_name: brand.resolve_font_name("body"),
+        header_font_name: brand.resolve_font_name("heading"),
         font_size: Pt(9.0),
         header_font_size: Pt(9.0),
     };
@@ -276,6 +278,7 @@ fn render_table(
         row_backgrounds: vec![None, Some(Color::rgb(245, 245, 245))],
         cell_padding: openaec_layout::Padding::new(Pt(3.0), Pt(4.0), Pt(3.0), Pt(4.0)),
         font_name: brand.resolve_font_name("body"),
+        header_font_name: brand.resolve_font_name("heading"),
         font_size: Pt(9.0),
         header_font_size: Pt(9.0),
     };

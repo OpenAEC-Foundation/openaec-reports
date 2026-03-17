@@ -278,6 +278,22 @@ impl DocTemplate {
             .map_err(|e| LayoutError::PdfError(e.to_string()))
     }
 
+    /// Measure text width using the font registry.
+    fn measure_text_width(&self, font_name: &str, text: &str, size: f32) -> Pt {
+        if let Ok(mut reg) = self.fonts.lock() {
+            // Try original name, then CamelCase → hyphenated
+            let font_id = reg
+                .get(font_name)
+                .or_else(|| reg.get(&camel_to_hyphen(font_name)));
+
+            if let Some(id) = font_id {
+                return reg.text_width(id, text, Pt(size));
+            }
+        }
+        // Fallback: approximate average character width
+        Pt(text.chars().count() as f32 * size * 0.55)
+    }
+
     /// Render a draw list to a printpdf layer.
     fn render_draw_list(
         &self,
@@ -288,11 +304,13 @@ impl DocTemplate {
     ) {
         let mut current_font: Option<&printpdf::IndirectFontRef> = None;
         let mut current_font_size: f32 = 10.0;
+        let mut current_font_name = String::new();
 
         for op in &draw_list.ops {
             match op {
                 DrawOp::SetFont { name, size } => {
                     current_font_size = size.0;
+                    current_font_name = name.clone();
                     current_font = fonts.get(name.as_str())
                         .or_else(|| {
                             // Fallback 1: try with -Regular suffix
@@ -327,14 +345,46 @@ impl DocTemplate {
                     }
                 }
 
-                DrawOp::DrawText { x, y, text }
-                | DrawOp::DrawTextRight { x, y, text }
-                | DrawOp::DrawTextCenter { x, y, text } => {
+                DrawOp::DrawText { x, y, text } => {
                     if let Some(font) = current_font {
                         let pdf_y = page_height.0 - y.0;
                         layer.begin_text_section();
                         layer.set_font(font, current_font_size);
                         layer.set_text_cursor(to_pdf_mm(*x), to_pdf_mm(Pt(pdf_y)));
+                        layer.write_text(text, font);
+                        layer.end_text_section();
+                    }
+                }
+
+                DrawOp::DrawTextCenter { x, y, text } => {
+                    if let Some(font) = current_font {
+                        let tw = self.measure_text_width(
+                            &current_font_name,
+                            text,
+                            current_font_size,
+                        );
+                        let adjusted_x = Pt(x.0 - tw.0 / 2.0);
+                        let pdf_y = page_height.0 - y.0;
+                        layer.begin_text_section();
+                        layer.set_font(font, current_font_size);
+                        layer.set_text_cursor(to_pdf_mm(adjusted_x), to_pdf_mm(Pt(pdf_y)));
+                        layer.write_text(text, font);
+                        layer.end_text_section();
+                    }
+                }
+
+                DrawOp::DrawTextRight { x, y, text } => {
+                    if let Some(font) = current_font {
+                        let tw = self.measure_text_width(
+                            &current_font_name,
+                            text,
+                            current_font_size,
+                        );
+                        let adjusted_x = Pt(x.0 - tw.0);
+                        let pdf_y = page_height.0 - y.0;
+                        layer.begin_text_section();
+                        layer.set_font(font, current_font_size);
+                        layer.set_text_cursor(to_pdf_mm(adjusted_x), to_pdf_mm(Pt(pdf_y)));
                         layer.write_text(text, font);
                         layer.end_text_section();
                     }
@@ -443,11 +493,15 @@ impl DocTemplate {
                         };
                         let pdf_image = printpdf::Image::from(image_xobj);
                         let pdf_y = Pt(page_height.0 - y.0 - height.0);
+                        // At DPI=72, scale_x/y values map directly to points:
+                        // physical_width = scale_x / 72 * 25.4 mm = scale_x / 2.8346 mm
+                        // which equals scale_x points.
                         let transform = printpdf::ImageTransform {
                             translate_x: Some(to_pdf_mm(*x)),
                             translate_y: Some(to_pdf_mm(pdf_y)),
-                            scale_x: Some(width.0 / img_w),
-                            scale_y: Some(height.0 / img_h),
+                            scale_x: Some(width.0),
+                            scale_y: Some(height.0),
+                            dpi: Some(72.0),
                             ..Default::default()
                         };
                         pdf_image.add_to_layer(layer.clone(), transform);

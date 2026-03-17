@@ -128,7 +128,9 @@ pub fn build_cover_page(data: &ReportData, brand: &BrandConfig) -> RawPage {
         brand.page_f64("cover", "title_y_ref", 93.47),
         page_h.0,
     );
-    dl.set_fill_color(Color::WHITE);
+    // Title is on the white area above the purple rect → use text color
+    let title_color = brand_text(brand);
+    dl.set_fill_color(title_color);
     dl.set_font(&heading_font, title_size);
     dl.draw_text(title_x, title_y, &data.project);
 

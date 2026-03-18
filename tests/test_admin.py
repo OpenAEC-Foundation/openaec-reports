@@ -5,8 +5,8 @@ from __future__ import annotations
 import uuid
 
 import pytest
+from conftest import TEST_USERNAME
 from fastapi.testclient import TestClient
-from tests.conftest import TEST_USERNAME
 
 from openaec_reports.api import app
 from openaec_reports.auth.dependencies import get_user_db

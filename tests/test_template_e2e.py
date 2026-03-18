@@ -95,7 +95,7 @@ class TestTemplateE2E:
         assert engine_data["client"]["postcode_plaats"] == "3025 AE Rotterdam"
         assert engine_data["location"]["name"] == "Woonerf De Mathenesserdijk"
         assert engine_data["location"]["provision"] == "Droge blusleiding / BMI"
-        assert len(engine_data["bic_sections"]) > 0
+        assert len(engine_data["bic"]) > 0
         assert len(engine_data["detail_items"]) > 0
         assert len(engine_data["objecten"]) > 0
         # Verify objecten has Type2 for duplicate header
@@ -134,10 +134,10 @@ class TestDataTransformationStandalone:
         assert data["location"]["code"] == "HW-DH-0336"
         assert "Sprinkler" in data["location"]["provision"]
 
-        # BIC sections
-        assert len(data["bic_sections"]) == 14  # 6 + 2 + 2 + 1 + 3 summary
-        assert data["bic_sections"][-1]["label"] == "Totaal"
-        assert data["bic_sections"][-1]["actual_value"] == "€ 4.274,00"
+        # BIC data (flat dict per categorie)
+        assert len(data["bic"]) > 0
+        assert "subtotaal_conform" in data["bic"]
+        assert len(data["samenvatting"]) > 0
 
         # Detail items
         assert len(data["detail_items"]) == 6

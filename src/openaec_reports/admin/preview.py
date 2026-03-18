@@ -8,18 +8,14 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from reportlab.lib.colors import HexColor
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas as pdf_canvas
 
-from openaec_reports.core.document import MM_TO_PT
 from openaec_reports.core.stationery import StationeryRenderer
 from openaec_reports.core.template_config import PageType, parse_page_type
 from openaec_reports.core.template_engine import (
     _draw_line_zones,
     _draw_text_zones,
-    _resolve_color,
-    _resolve_font,
 )
 
 logger = logging.getLogger(__name__)
@@ -209,7 +205,7 @@ def render_page_type_preview(
 
 def _load_brand(tenant: str, tenants_dir: Path):
     """Laad brand config voor een tenant."""
-    from openaec_reports.core.brand import BrandConfig, BrandLoader
+    from openaec_reports.core.brand import BrandLoader
 
     brand_path = tenants_dir / tenant / "brand.yaml"
     if brand_path.exists():

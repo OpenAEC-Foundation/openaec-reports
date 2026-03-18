@@ -263,7 +263,10 @@ def _draw_line_zones(
         canvas.restoreState()
 
 
-def _truncate_text(canvas, text: str, max_width: float, font_name: str, size: float, padding: float = 2.0) -> str:
+def _truncate_text(
+    canvas, text: str, max_width: float,
+    font_name: str, size: float, padding: float = 2.0,
+) -> str:
     """Truncate tekst met ellipsis als deze breder is dan max_width.
 
     Args:

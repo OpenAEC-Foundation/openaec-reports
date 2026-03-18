@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
-import uuid
-
 import pytest
 from fastapi.testclient import TestClient
 
 from openaec_reports.api import app
 from openaec_reports.storage.models import Project, ReportDB, ReportMeta
-
 
 # ============================================================
 # Unit tests — ReportDB

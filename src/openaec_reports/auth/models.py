@@ -538,7 +538,10 @@ class OrganisationDB:
         Raises:
             ValueError: Als een niet-toegestaan veld wordt meegegeven.
         """
-        allowed = {"name", "address", "postal_code", "city", "phone", "email", "website", "kvk_number", "is_active"}
+        allowed = {
+            "name", "address", "postal_code", "city",
+            "phone", "email", "website", "kvk_number", "is_active",
+        }
         invalid = set(fields.keys()) - allowed
         if invalid:
             raise ValueError(f"Niet-toegestane velden: {invalid}")

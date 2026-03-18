@@ -292,6 +292,9 @@ class TestDrawTextZonesPageNumber:
 # ============================================================
 
 
+_PATCH_TARGET = "openaec_reports.core.template_engine.get_font_name"
+
+
 class TestResolveFont:
     """Verify _resolve_font lookup order for brand.fonts dict.
 
@@ -312,14 +315,14 @@ class TestResolveFont:
     def test_heading_from_brand(self) -> None:
         from unittest.mock import patch
         brand = self._make_brand({"heading": "Inter-Bold", "body": "Inter-Book"})
-        with patch("openaec_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+        with patch(_PATCH_TARGET, self._passthrough_get_font):
             result = _resolve_font("heading", brand)
         assert result == "Inter-Bold"
 
     def test_body_from_brand(self) -> None:
         from unittest.mock import patch
         brand = self._make_brand({"heading": "Helvetica-Bold", "body": "Helvetica"})
-        with patch("openaec_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+        with patch(_PATCH_TARGET, self._passthrough_get_font):
             result = _resolve_font("body", brand)
         assert result == "Helvetica"
 
@@ -331,7 +334,7 @@ class TestResolveFont:
             "heading_bold": "Helvetica-Bold",
             "body": "Helvetica",
         })
-        with patch("openaec_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+        with patch(_PATCH_TARGET, self._passthrough_get_font):
             result = _resolve_font("heading_bold", brand)
         assert result == "Helvetica-Bold"
 
@@ -339,7 +342,7 @@ class TestResolveFont:
         """heading_bold NOT in brand.fonts -> falls back to heading."""
         from unittest.mock import patch
         brand = self._make_brand({"heading": "Inter-Bold", "body": "Inter-Book"})
-        with patch("openaec_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+        with patch(_PATCH_TARGET, self._passthrough_get_font):
             result = _resolve_font("heading_bold", brand)
         assert result == "Inter-Bold"
 
@@ -351,7 +354,7 @@ class TestResolveFont:
             "body": "Helvetica",
             "body_bold": "Helvetica-Bold",
         })
-        with patch("openaec_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+        with patch(_PATCH_TARGET, self._passthrough_get_font):
             result = _resolve_font("body_bold", brand)
         assert result == "Helvetica-Bold"
 
@@ -359,7 +362,7 @@ class TestResolveFont:
         """body_bold NOT in brand.fonts -> body + '-Bold'."""
         from unittest.mock import patch
         brand = self._make_brand({"heading": "Helvetica-Bold", "body": "Helvetica"})
-        with patch("openaec_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+        with patch(_PATCH_TARGET, self._passthrough_get_font):
             result = _resolve_font("body_bold", brand)
         assert result == "Helvetica-Bold"
 
@@ -367,7 +370,7 @@ class TestResolveFont:
         """body is already Bold -> no double suffix."""
         from unittest.mock import patch
         brand = self._make_brand({"heading": "Inter-Bold", "body": "Inter-Bold"})
-        with patch("openaec_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+        with patch(_PATCH_TARGET, self._passthrough_get_font):
             result = _resolve_font("body_bold", brand)
         assert result == "Inter-Bold"
         assert "Bold-Bold" not in result
@@ -376,7 +379,7 @@ class TestResolveFont:
         """Unknown ref -> treated as literal font name."""
         from unittest.mock import patch
         brand = self._make_brand()
-        with patch("openaec_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+        with patch(_PATCH_TARGET, self._passthrough_get_font):
             result = _resolve_font("Courier", brand)
         assert result == "Courier"
 
@@ -388,6 +391,6 @@ class TestResolveFont:
             "body": "Helvetica",
             "medium": "Helvetica-Bold",
         })
-        with patch("openaec_reports.core.template_engine.get_font_name", self._passthrough_get_font):
+        with patch(_PATCH_TARGET, self._passthrough_get_font):
             result = _resolve_font("medium", brand)
         assert result == "Helvetica-Bold"

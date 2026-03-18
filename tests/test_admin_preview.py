@@ -10,8 +10,7 @@ from openaec_reports.admin.preview import (
     _placeholder_for_field,
     render_page_type_preview,
 )
-from openaec_reports.core.template_config import PageType, parse_page_type
-
+from openaec_reports.core.template_config import parse_page_type
 
 # ============================================================
 # Sample data generation tests

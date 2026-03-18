@@ -2,21 +2,17 @@
 
 from __future__ import annotations
 
-import json
 import time
-import uuid
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import jwt
 import pytest
-from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi.testclient import TestClient
 
-from openaec_reports.auth.models import User, UserDB, UserRole
+from openaec_reports.auth.models import User, UserDB
 from openaec_reports.auth.oidc import OidcClaims, clear_jwks_cache, validate_oidc_token
 from openaec_reports.auth.security import hash_password
-
 
 # ============================================================
 # Fixtures
@@ -523,4 +519,4 @@ class TestColofonAutoFill:
 
 
 # Importeer app voor TestClient (moet na alle patches)
-from openaec_reports.api import app
+from openaec_reports.api import app  # noqa: E402

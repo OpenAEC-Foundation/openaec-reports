@@ -1573,7 +1573,10 @@ async def get_organisation(org_id: str):
     db = get_organisation_db()
     org = db.get_by_id(org_id)
     if not org:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organisatie niet gevonden")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Organisatie niet gevonden",
+        )
     return {"organisation": org.to_dict()}
 
 
@@ -1592,7 +1595,10 @@ async def update_organisation(org_id: str, payload: UpdateOrganisationRequest):
     db = get_organisation_db()
     existing = db.get_by_id(org_id)
     if not existing:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organisatie niet gevonden")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Organisatie niet gevonden",
+        )
     fields = {k: v for k, v in payload.model_dump().items() if v is not None}
     if not fields:
         return {"organisation": existing.to_dict()}
@@ -1614,7 +1620,10 @@ async def delete_organisation(org_id: str):
     db = get_organisation_db()
     deleted = db.delete(org_id)
     if not deleted:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organisatie niet gevonden")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Organisatie niet gevonden",
+        )
     return {"detail": "Organisatie verwijderd"}
 
 

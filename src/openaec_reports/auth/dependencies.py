@@ -215,8 +215,9 @@ def _authenticate_via_oidc(token: str) -> User | None:
 
     # 3. Auto-provisioning: maak nieuwe user aan
     if user is None:
-        from openaec_reports.auth.security import hash_password
         import uuid
+
+        from openaec_reports.auth.security import hash_password
 
         user = User(
             id=uuid.uuid4().hex,

@@ -20,17 +20,16 @@ from starlette.background import BackgroundTask
 from openaec_reports import __version__
 from openaec_reports.admin.routes import admin_router
 from openaec_reports.auth.api_keys import ApiKeyDB
-from openaec_reports.auth.dependencies import get_current_user, init_api_key_db, init_organisation_db, init_user_db
+from openaec_reports.auth.dependencies import (
+    get_current_user,
+    init_api_key_db,
+    init_organisation_db,
+    init_user_db,
+)
 from openaec_reports.auth.models import OrganisationDB, User, UserDB
 from openaec_reports.auth.routes import auth_router
 from openaec_reports.auth.security import is_default_secret
 from openaec_reports.core.data_transform import transform_json_to_engine_data
-from openaec_reports.storage.models import ReportDB
-from openaec_reports.storage.routes import (
-    init_report_db,
-    project_router,
-    report_router,
-)
 from openaec_reports.core.engine import Report
 from openaec_reports.core.renderer_v2 import ReportGeneratorV2
 from openaec_reports.core.template_engine import TemplateEngine
@@ -39,6 +38,12 @@ from openaec_reports.core.tenant_resolver import (
     get_brand_loader,
     get_template_loader,
     get_tenant_config,
+)
+from openaec_reports.storage.models import ReportDB
+from openaec_reports.storage.routes import (
+    init_report_db,
+    project_router,
+    report_router,
 )
 
 logger = logging.getLogger(__name__)

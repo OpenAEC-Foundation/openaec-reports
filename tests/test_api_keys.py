@@ -6,8 +6,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 import pytest
+from conftest import TEST_ADMIN_USERNAME, TEST_USERNAME
 from fastapi.testclient import TestClient
-from tests.conftest import TEST_ADMIN_USERNAME, TEST_USERNAME
 
 from openaec_reports.api import app
 from openaec_reports.auth.api_keys import generate_api_key, hash_api_key

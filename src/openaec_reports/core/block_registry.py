@@ -215,9 +215,13 @@ def create_spreadsheet(data: dict[str, Any]) -> Flowable:
         rows=data.get("rows", []),
         title=data.get("title", ""),
         col_widths_mm=data.get("column_widths"),
+        row_heights_mm=data.get("row_heights"),
+        default_row_height_mm=data.get("default_row_height", 7.0),
         show_row_numbers=data.get("show_row_numbers", False),
         zebra=zebra,
         note=data.get("note", ""),
+        merged_cells=data.get("merged_cells"),
+        cell_styles=data.get("cell_styles"),
     )
 
 

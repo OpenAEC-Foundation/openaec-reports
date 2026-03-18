@@ -182,6 +182,22 @@ export interface RawFlowableBlock {
   kwargs?: Record<string, unknown>;
 }
 
+export interface CellStyle {
+  bold?: boolean;
+  italic?: boolean;
+  align?: 'left' | 'center' | 'right';
+  bg_color?: string;
+  text_color?: string;
+  font_size?: number;
+}
+
+export interface MergedCell {
+  row: number;
+  col: number;
+  rowspan: number;
+  colspan: number;
+}
+
 export interface SpreadsheetBlock {
   type: 'spreadsheet';
   title?: string;
@@ -189,6 +205,10 @@ export interface SpreadsheetBlock {
   rows: (string | number | null)[][];
   row_headers?: string[];
   column_widths?: number[];
+  row_heights?: number[];
+  default_row_height?: number;
+  merged_cells?: MergedCell[];
+  cell_styles?: Record<string, CellStyle>;
   show_grid?: boolean;
   zebra?: boolean;
 }

@@ -459,6 +459,12 @@ class TestVisualDiff:
         assert d.notes == []
 
     def test_file_not_found(self, tmp_path):
+        try:
+            import numpy as np  # noqa: F401
+            from PIL import Image  # noqa: F401
+        except ImportError:
+            pytest.skip("Pillow/numpy niet geinstalleerd")
+
         from openaec_reports.tools.visual_diff import compare_pdfs
         with pytest.raises(FileNotFoundError):
             compare_pdfs(tmp_path / "nope.pdf", tmp_path / "also_nope.pdf")

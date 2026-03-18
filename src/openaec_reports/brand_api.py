@@ -99,8 +99,10 @@ def _validate_filename(filename: str) -> str:
     Raises:
         HTTPException: Bij ongeldige bestandsnaam.
     """
+    if "\\" in filename or "/" in filename or ".." in filename:
+        raise HTTPException(status_code=400, detail="Ongeldige bestandsnaam")
     safe = Path(filename).name
-    if safe != filename or ".." in filename:
+    if safe != filename:
         raise HTTPException(status_code=400, detail="Ongeldige bestandsnaam")
     return safe
 
@@ -556,7 +558,7 @@ async def download_file(session_id: str, filename: str) -> FileResponse:
 
     # Zoek in output dir (direct of in brand subdir)
     file_path = session.output_dir / safe_name
-    if not file_path.exists():
+    if not file_path.exists() and session.output_dir.exists():
         # Zoek in brand subdirectories
         for subdir in session.output_dir.iterdir():
             if subdir.is_dir():

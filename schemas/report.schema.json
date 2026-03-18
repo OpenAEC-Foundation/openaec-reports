@@ -308,7 +308,7 @@
     "block_spreadsheet": {
       "type": "object",
       "required": ["type", "headers", "rows"],
-      "description": "Spreadsheet-achtige tabel met ondersteuning voor formule-annotaties, totaalrijen en rijlabels",
+      "description": "Excel-achtig spreadsheet blok met celstijlen, samenvoegen en aanpasbare afmetingen",
       "properties": {
         "type": { "const": "spreadsheet" },
         "title": { "type": "string", "description": "Tabel-/spreadsheet-titel (optioneel)" },
@@ -346,6 +346,45 @@
           "type": "array",
           "items": { "type": "number" },
           "description": "Kolombreedte in mm (optioneel, auto als weggelaten)"
+        },
+        "row_heights": {
+          "type": "array",
+          "items": { "type": "number" },
+          "description": "Rijhoogte in mm per data-rij (exclusief header, optioneel)"
+        },
+        "default_row_height": {
+          "type": "number",
+          "default": 7,
+          "description": "Standaard rijhoogte in mm"
+        },
+        "merged_cells": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["row", "col", "rowspan", "colspan"],
+            "properties": {
+              "row": { "type": "integer", "minimum": 0 },
+              "col": { "type": "integer", "minimum": 0 },
+              "rowspan": { "type": "integer", "minimum": 1 },
+              "colspan": { "type": "integer", "minimum": 1 }
+            }
+          },
+          "description": "Samengevoegde cellen (0-geïndexeerd t.o.v. data rijen)"
+        },
+        "cell_styles": {
+          "type": "object",
+          "description": "Per-cel styling, sleutel is 'rij,kolom' (0-geïndexeerd)",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "bold": { "type": "boolean" },
+              "italic": { "type": "boolean" },
+              "align": { "type": "string", "enum": ["left", "center", "right"] },
+              "bg_color": { "type": "string", "description": "Achtergrondkleur (#RRGGBB)" },
+              "text_color": { "type": "string", "description": "Tekstkleur (#RRGGBB)" },
+              "font_size": { "type": "number", "description": "Lettergrootte in pt" }
+            }
+          }
         },
         "style": {
           "type": "string",

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -19,6 +19,24 @@ import type { MetadataPanel } from '@/stores/reportStore';
 import { useApiStore } from '@/stores/apiStore';
 import { BlockIcon } from '@/components/shared/BlockIcons';
 import type { EditorSection, EditorAppendix } from '@/types/report';
+
+const SIDEBAR_MIN_WIDTH = 200;
+const SIDEBAR_MAX_WIDTH = 480;
+const SIDEBAR_DEFAULT_WIDTH = 288; // w-72
+const SIDEBAR_STORAGE_KEY = "openaec-sidebar-width";
+
+function loadSidebarWidth(): number {
+  try {
+    const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+    if (stored) {
+      const w = parseInt(stored, 10);
+      if (w >= SIDEBAR_MIN_WIDTH && w <= SIDEBAR_MAX_WIDTH) return w;
+    }
+  } catch {
+    // localStorage not available
+  }
+  return SIDEBAR_DEFAULT_WIDTH;
+}
 
 const BLOCK_TYPE_LABELS: Record<string, string> = {
   paragraph: 'Tekst',
@@ -353,6 +371,54 @@ export function Sidebar() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
+  // Resizable sidebar
+  const [width, setWidth] = useState(loadSidebarWidth);
+  const isResizing = useRef(false);
+  const startX = useRef(0);
+  const startWidth = useRef(0);
+  const widthRef = useRef(width);
+  widthRef.current = width;
+
+  useEffect(() => {
+    function handleResizeMove(e: MouseEvent) {
+      if (!isResizing.current) return;
+      const delta = e.clientX - startX.current;
+      const newWidth = Math.min(
+        SIDEBAR_MAX_WIDTH,
+        Math.max(SIDEBAR_MIN_WIDTH, startWidth.current + delta)
+      );
+      setWidth(newWidth);
+    }
+
+    function handleResizeEnd() {
+      if (!isResizing.current) return;
+      isResizing.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      try {
+        localStorage.setItem(SIDEBAR_STORAGE_KEY, String(widthRef.current));
+      } catch {
+        // localStorage not available
+      }
+    }
+
+    window.addEventListener("mousemove", handleResizeMove);
+    window.addEventListener("mouseup", handleResizeEnd);
+    return () => {
+      window.removeEventListener("mousemove", handleResizeMove);
+      window.removeEventListener("mouseup", handleResizeEnd);
+    };
+  }, []);
+
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isResizing.current = true;
+    startX.current = e.clientX;
+    startWidth.current = widthRef.current;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  }, []);
+
   // Auto-expand active section
   useEffect(() => {
     if (activeSection) {
@@ -423,7 +489,10 @@ export function Sidebar() {
     appendices.reduce((sum, a) => sum + a.content.length, 0);
 
   return (
-    <aside className="flex h-full w-72 flex-col border-r border-gray-200 bg-white">
+    <aside
+      className="relative flex h-full flex-col border-r border-gray-200 bg-white"
+      style={{ width, minWidth: SIDEBAR_MIN_WIDTH, maxWidth: SIDEBAR_MAX_WIDTH }}
+    >
       {/* Header */}
       <div className="border-b border-gray-200 px-4 py-3">
         {project ? (
@@ -656,6 +725,11 @@ export function Sidebar() {
           </div>
         </div>
       </div>
+      {/* Resize handle */}
+      <div
+        onMouseDown={handleResizeStart}
+        className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-brand-primary/30 active:bg-brand-primary/50 transition-colors z-10"
+      />
     </aside>
   );
 }

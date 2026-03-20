@@ -1,6 +1,6 @@
 use axum::{
     extract::{Path as AxumPath, State},
-    http::{header, StatusCode},
+    http::{header, HeaderMap, StatusCode},
     response::IntoResponse,
     routing::{get, post, put},
     Json, Router,
@@ -152,14 +152,8 @@ async fn main() {
             get(get_tenant_brand),
         )
         .route("/api/validate", post(validate))
-        // Auth mock
+        // Auth — reads X-Authentik-* headers from forward auth
         .route("/api/auth/me", get(auth_me))
-        .route("/api/auth/login", post(auth_login))
-        .route("/api/auth/logout", post(auth_logout))
-        .route("/api/auth/register", post(auth_register))
-        .route("/api/auth/registration-enabled", get(auth_registration))
-        .route("/api/auth/oidc/config", get(auth_oidc_config))
-        .route("/api/auth/oidc/code-exchange", post(auth_oidc_exchange))
         // Shared state
         .with_state(state)
         // SPA fallback
@@ -731,77 +725,44 @@ async fn move_report(
     Ok(Json(json!({"detail": "Report verplaatst"})))
 }
 
-// ── Auth mock ───────────────────────────────────────────────────────
+// ── Auth — reads X-Authentik-* headers from Caddy forward auth ──────
 
-async fn auth_me() -> Json<Value> {
+async fn auth_me(headers: HeaderMap) -> Json<Value> {
+    let get_header = |name: &str| -> String {
+        headers
+            .get(name)
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("")
+            .to_string()
+    };
+
+    let username = get_header("X-Authentik-Username");
+    let email = get_header("X-Authentik-Email");
+    let name = get_header("X-Authentik-Name");
+    let uid = get_header("X-Authentik-Uid");
+    let groups = get_header("X-Authentik-Groups");
+
     let tc = tenant_config();
     let tenant_name = tc
         .tenant_dir()
         .and_then(|p| p.file_name())
         .and_then(|n| n.to_str())
-        .unwrap_or("default");
+        .unwrap_or("default")
+        .to_string();
+
+    let is_authenticated = !username.is_empty();
 
     Json(json!({
         "user": {
-            "id": "rust-test-user",
-            "username": "testuser",
-            "email": "test@open-aec.com",
-            "display_name": "Rust Test User",
-            "role": "admin",
+            "id": uid,
+            "username": username,
+            "email": email,
+            "display_name": if name.is_empty() { username.clone() } else { name },
+            "role": if groups.contains("admins") { "admin" } else { "user" },
             "tenant": tenant_name,
-            "is_active": true,
-            "company": "OpenAEC",
-            "auth_provider": "local"
-        }
-    }))
-}
-
-async fn auth_login() -> Json<Value> {
-    auth_me().await
-}
-
-async fn auth_logout() -> Json<Value> {
-    Json(json!({"detail": "logged out"}))
-}
-
-async fn auth_register() -> (StatusCode, Json<Value>) {
-    (
-        StatusCode::CREATED,
-        Json(json!({
-            "user": {
-                "id": "new-user",
-                "username": "newuser",
-                "email": "new@example.com",
-                "display_name": "New User",
-                "role": "user",
-                "tenant": "default",
-                "is_active": true,
-                "auth_provider": "local"
-            }
-        })),
-    )
-}
-
-async fn auth_registration() -> Json<Value> {
-    Json(json!({"enabled": false}))
-}
-
-async fn auth_oidc_config() -> Json<Value> {
-    Json(json!({"enabled": false}))
-}
-
-async fn auth_oidc_exchange() -> Json<Value> {
-    // Mock: return test user (real OIDC not implemented yet)
-    Json(json!({
-        "user": {
-            "id": "rust-test-user",
-            "username": "testuser",
-            "email": "test@open-aec.com",
-            "display_name": "Rust Test User",
-            "role": "admin",
-            "tenant": "default",
-            "is_active": true,
-            "auth_provider": "oidc"
+            "is_active": is_authenticated,
+            "groups": groups,
+            "auth_provider": "authentik"
         }
     }))
 }

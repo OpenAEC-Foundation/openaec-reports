@@ -1,0 +1,50 @@
+{
+  "tabs": {
+    "file": "Bestand",
+    "home": "Start",
+    "insert": "Invoegen",
+    "view": "Beeld"
+  },
+  "home": {
+    "clipboard": "Klembord",
+    "blocks": "Blokken",
+    "page": "Pagina",
+    "control": "Controle",
+    "output": "Uitvoer",
+    "paste": "Plakken",
+    "copySection": "Kopieer sectie",
+    "paragraph": "Tekst",
+    "calculation": "Berekening",
+    "check": "Toets",
+    "table": "Tabel",
+    "spreadsheet": "Spreadsheet",
+    "image": "Afbeelding",
+    "map": "Kaart",
+    "bulletList": "Opsomming",
+    "heading2": "Subkop",
+    "spacer": "Witruimte",
+    "pageBreak": "Pagina-einde",
+    "validate": "Valideren",
+    "generatePdf": "PDF Genereren",
+    "downloadPdf": "Download PDF"
+  },
+  "insert": {
+    "sections": "Secties",
+    "content": "Inhoud",
+    "templates": "Sjablonen",
+    "newSection": "Nieuw hoofdstuk",
+    "newAppendix": "Nieuwe bijlage",
+    "fromTemplate": "Uit sjabloon"
+  },
+  "view": {
+    "display": "Weergave",
+    "panels": "Panelen",
+    "preview": "Preview",
+    "editor": "Editor",
+    "split": "Gesplitst",
+    "json": "JSON",
+    "previewView": "Preview",
+    "sidebar": "Zijpaneel",
+    "autoPreview": "Auto-preview"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "tabs": {
+    "file": "File",
+    "home": "Home",
+    "insert": "Insert",
+    "view": "View"
+  },
+  "home": {
+    "clipboard": "Clipboard",
+    "blocks": "Blocks",
+    "page": "Page",
+    "control": "Control",
+    "output": "Output",
+    "paste": "Paste",
+    "copySection": "Copy section",
+    "paragraph": "Text",
+    "calculation": "Calculation",
+    "check": "Check",
+    "table": "Table",
+    "spreadsheet": "Spreadsheet",
+    "image": "Image",
+    "map": "Map",
+    "bulletList": "Bullet list",
+    "heading2": "Subheading",
+    "spacer": "Spacer",
+    "pageBreak": "Page break",
+    "validate": "Validate",
+    "generatePdf": "Generate PDF",
+    "downloadPdf": "Download PDF"
+  },
+  "insert": {
+    "sections": "Sections",
+    "content": "Content",
+    "templates": "Templates",
+    "newSection": "New chapter",
+    "newAppendix": "New appendix",
+    "fromTemplate": "From template"
+  },
+  "view": {
+    "display": "Display",
+    "panels": "Panels",
+    "preview": "Preview",
+    "editor": "Editor",
+    "split": "Split",
+    "json": "JSON",
+    "previewView": "Preview",
+    "sidebar": "Sidebar",
+    "autoPreview": "Auto-preview"
+  }
+}

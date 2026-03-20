@@ -1,60 +1,63 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useReportStore } from '@/stores/reportStore';
-import { useApiStore } from '@/stores/apiStore';
-import { useAuthStore } from '@/stores/authStore';
-import { useProjectStore } from '@/stores/projectStore';
-import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
-import brand from '@/config/brand';
-import { Sidebar } from './Sidebar';
-import { MainPanel } from './MainPanel';
-import { ValidationBanner } from './ValidationBanner';
-import { ShortcutHelp } from './ShortcutHelp';
-import { AdminPanel } from '@/components/admin/AdminPanel';
-import { ProjectBrowser } from '@/components/projects/ProjectBrowser';
-import type { ViewMode } from '@/stores/reportStore';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useReportStore } from "@/stores/reportStore";
+import { useApiStore } from "@/stores/apiStore";
+import { useProjectStore } from "@/stores/projectStore";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { getSetting, setSetting } from "@/utils/settingsStore";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
+import TitleBar from "@/components/chrome/TitleBar";
+import Ribbon from "@/components/chrome/ribbon/Ribbon";
+import StatusBar from "@/components/chrome/StatusBar";
+import Backstage from "@/components/chrome/backstage/Backstage";
+import SettingsDialog, { applyTheme } from "@/components/chrome/settings/SettingsDialog";
+import { Sidebar } from "./Sidebar";
+import { MainPanel } from "./MainPanel";
+import { ValidationBanner } from "./ValidationBanner";
+import { ShortcutHelp } from "./ShortcutHelp";
+import { AdminPanel } from "@/components/admin/AdminPanel";
+import { ProjectBrowser } from "@/components/projects/ProjectBrowser";
 
-const EDITOR_TABS: { mode: ViewMode; label: string }[] = [
-  { mode: 'editor', label: 'Editor' },
-  { mode: 'split', label: 'Split' },
-  { mode: 'json', label: 'JSON' },
-  { mode: 'preview', label: 'Preview' },
-];
+const SIDEBAR_VISIBLE_KEY = "openaec-sidebar-visible";
 
 export function AppShell() {
   const viewMode = useReportStore((s) => s.viewMode);
   const setViewMode = useReportStore((s) => s.setViewMode);
-  const isDirty = useReportStore((s) => s.isDirty);
-  const lastSavedAt = useReportStore((s) => s.lastSavedAt);
   const exportJson = useReportStore((s) => s.exportJson);
   const importJson = useReportStore((s) => s.importJson);
   const report = useReportStore((s) => s.report);
 
-  const canUndo = useReportStore((s) => s.canUndo);
-  const canRedo = useReportStore((s) => s.canRedo);
-  const undo = useReportStore((s) => s.undo);
-  const redo = useReportStore((s) => s.redo);
-
-  const authUser = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
-
-  const connected = useApiStore((s) => s.connected);
-  const isValidating = useApiStore((s) => s.isValidating);
-  const isGenerating = useApiStore((s) => s.isGenerating);
-  const lastPdfUrl = useApiStore((s) => s.lastPdfUrl);
   const error = useApiStore((s) => s.error);
   const validateReport = useApiStore((s) => s.validateReport);
-  const generatePdf = useApiStore((s) => s.generatePdf);
-  const downloadPdf = useApiStore((s) => s.downloadPdf);
   const clearError = useApiStore((s) => s.clearError);
 
   const saveReport = useProjectStore((s) => s.saveReport);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [backstageOpen, setBackstageOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [theme, setTheme] = useState(() => getSetting("theme", "light"));
+  const [sidebarVisible, setSidebarVisible] = useState(() => {
+    try {
+      const stored = localStorage.getItem(SIDEBAR_VISIBLE_KEY);
+      return stored !== "false";
+    } catch {
+      return true;
+    }
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragCountRef = useRef(0);
+
+  // Persist sidebar visibility
+  const toggleSidebar = useCallback(() => {
+    setSidebarVisible((prev) => {
+      const next = !prev;
+      try { localStorage.setItem(SIDEBAR_VISIBLE_KEY, String(next)); } catch { /* noop */ }
+      return next;
+    });
+  }, []);
 
   // Auto-dismiss toast
   useEffect(() => {
@@ -66,84 +69,13 @@ export function AppShell() {
   // Show API errors as toast
   useEffect(() => {
     if (error) {
-      setToast({ message: error, type: 'error' });
+      setToast({ message: error, type: "error" });
       clearError();
     }
   }, [error, clearError]);
 
-  // Helper to add block to active section
-  const addBlockToActiveSection = useCallback((blockType: 'paragraph' | 'calculation' | 'table') => {
-    const state = useReportStore.getState();
-    if (state.activeSection) {
-      state.addNewBlock(state.activeSection, blockType);
-    } else if (state.activeAppendix) {
-      state.addNewAppendixBlock(state.activeAppendix, blockType);
-    }
-  }, []);
-
-  // Global keyboard shortcuts
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      const target = e.target as HTMLElement;
-      const isTyping = target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' || target.isContentEditable;
-
-      const mod = e.metaKey || e.ctrlKey;
-      const shift = e.shiftKey;
-
-      let key = '';
-      if (mod) key += 'ctrl+';
-      if (shift) key += 'shift+';
-      key += e.key.toLowerCase();
-
-      // Shortcuts that always work (even when typing)
-      const alwaysActive: Record<string, () => void> = {
-        'ctrl+s': () => handleSaveToServer(),
-        'ctrl+z': () => useReportStore.getState().undo(),
-        'ctrl+y': () => useReportStore.getState().redo(),
-        'ctrl+shift+z': () => useReportStore.getState().redo(),
-        'ctrl+enter': () => useApiStore.getState().generatePdf(),
-      };
-
-      const alwaysHandler = alwaysActive[key];
-      if (alwaysHandler) {
-        e.preventDefault();
-        alwaysHandler();
-        return;
-      }
-
-      // Shortcuts that only work when NOT typing
-      if (!isTyping) {
-        const contextual: Record<string, () => void> = {
-          'ctrl+1': () => useReportStore.getState().setViewMode('editor'),
-          'ctrl+2': () => useReportStore.getState().setViewMode('split'),
-          'ctrl+3': () => useReportStore.getState().setViewMode('json'),
-          'ctrl+4': () => useReportStore.getState().setViewMode('preview'),
-          'ctrl+shift+p': () => addBlockToActiveSection('paragraph'),
-          'ctrl+shift+k': () => addBlockToActiveSection('calculation'),
-          'ctrl+shift+t': () => addBlockToActiveSection('table'),
-          'escape': () => useReportStore.getState().setActiveBlock(null),
-        };
-
-        const contextHandler = contextual[key];
-        if (contextHandler) {
-          e.preventDefault();
-          contextHandler();
-          return;
-        }
-
-        // ? key for help (no modifier)
-        if (e.key === '?' && !mod && !e.altKey) {
-          e.preventDefault();
-          setShowShortcuts((v) => !v);
-        }
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [addBlockToActiveSection]);
-
-  async function handleSaveToServer() {
+  // Save to server
+  const handleSaveToServer = useCallback(async () => {
     if (isSaving) return;
     setIsSaving(true);
     try {
@@ -163,33 +95,46 @@ export function AppShell() {
     } finally {
       setIsSaving(false);
     }
-  }
+  }, [isSaving, saveReport]);
 
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onSave: handleSaveToServer,
+    onToggleShortcuts: () => setShowShortcuts((v) => !v),
+  });
+
+  // Export JSON
   function handleExport() {
     const json = exportJson();
-    const blob = new Blob([json], { type: 'application/json' });
+    const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `${report.project_number || 'rapport'}_${report.template}.json`;
+    a.download = `${report.project_number || "rapport"}_${report.template}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }
 
+  // Validate
   async function handleValidate() {
     const valid = await validateReport();
     if (valid) {
-      setToast({ message: 'Rapport is geldig', type: 'success' });
+      setToast({ message: "Rapport is geldig", type: "success" });
     }
   }
 
+  // Import
   function handleImportFile(json: string, filename: string) {
     const result = importJson(json);
     if (result.ok) {
-      setToast({ message: `Rapport "${filename}" geladen`, type: 'success' });
+      setToast({ message: `Rapport "${filename}" geladen`, type: "success" });
     } else {
-      setToast({ message: result.errors[0] ?? 'Import mislukt', type: 'error' });
+      setToast({ message: result.errors[0] ?? "Import mislukt", type: "error" });
     }
+  }
+
+  function handleImportClick() {
+    fileInputRef.current?.click();
   }
 
   function handleFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -198,9 +143,10 @@ export function AppShell() {
     const reader = new FileReader();
     reader.onload = () => handleImportFile(reader.result as string, file.name);
     reader.readAsText(file);
-    e.target.value = '';
+    e.target.value = "";
   }
 
+  // Drag-drop
   function handleDragEnter(e: React.DragEvent) {
     e.preventDefault();
     dragCountRef.current++;
@@ -218,15 +164,23 @@ export function AppShell() {
     dragCountRef.current = 0;
     setDragOver(false);
     const file = e.dataTransfer.files[0];
-    if (!file || !file.name.endsWith('.json')) return;
+    if (!file || !file.name.endsWith(".json")) return;
     const reader = new FileReader();
     reader.onload = () => handleImportFile(reader.result as string, file.name);
     reader.readAsText(file);
   }
 
+  // Theme change handler
+  function handleThemeChange(newTheme: string) {
+    setTheme(newTheme);
+    applyTheme(newTheme);
+    setSetting("theme", newTheme);
+  }
+
   return (
     <div
       className="flex h-screen flex-col relative"
+      data-theme={theme}
       onDragEnter={handleDragEnter}
       onDragOver={(e) => e.preventDefault()}
       onDragLeave={handleDragLeave}
@@ -251,199 +205,34 @@ export function AppShell() {
         onChange={handleFileInputChange}
       />
 
-      {/* Branded header */}
-      <header className="flex h-12 shrink-0 items-center justify-between bg-brand-header-bg px-4 border-b-2 border-brand-primary">
-        {/* Left: logo + view mode tabs */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-lg tracking-tight">
-              <span className="text-white">{brand.namePrefix}</span>
-              <span className="text-brand-primary">{brand.nameAccent}</span>
-            </span>
-            <span className="text-white/50 text-sm font-medium">{brand.productName}</span>
-          </div>
+      {/* Title bar */}
+      <TitleBar
+        onSave={handleSaveToServer}
+        onSettingsClick={() => setSettingsOpen(true)}
+        onHelpClick={() => setShowShortcuts(true)}
+        isSaving={isSaving}
+      />
 
-          <div className="flex rounded-lg bg-white/10 p-0.5">
-            {EDITOR_TABS.map((tab) => (
-              <button
-                key={tab.mode}
-                onClick={() => setViewMode(tab.mode)}
-                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                  viewMode === tab.mode
-                    ? 'bg-white/15 text-white'
-                    : 'text-white/50 hover:text-white/80'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-            <button
-              onClick={() => setViewMode('projects')}
-              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ml-1 border-l border-white/10 pl-2 ${
-                viewMode === 'projects'
-                  ? 'bg-white/15 text-white'
-                  : 'text-white/50 hover:text-white/80'
-              }`}
-            >
-              Projecten
-            </button>
-            {authUser?.role === 'admin' && (
-              <button
-                onClick={() => setViewMode('admin')}
-                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                  viewMode === 'admin'
-                    ? 'bg-white/15 text-white'
-                    : 'text-white/50 hover:text-white/80'
-                }`}
-              >
-                Admin
-              </button>
-            )}
-          </div>
-
-          {isDirty ? (
-            <span className="text-xs text-amber-400 font-medium">Onopgeslagen wijzigingen</span>
-          ) : lastSavedAt ? (
-            <span className="text-xs text-white/30">Opgeslagen</span>
-          ) : null}
-        </div>
-
-        {/* Right: action buttons */}
-        <div className="flex items-center gap-2">
-          {/* Help */}
-          <button
-            onClick={() => setShowShortcuts(true)}
-            title="Sneltoetsen (?)"
-            className="rounded-md px-2 py-1.5 text-xs text-white/40 hover:text-white/70 hover:bg-white/10 transition-colors"
-          >
-            ?
-          </button>
-
-          {/* Undo/Redo */}
-          <div className="flex items-center border-r border-white/10 pr-2 mr-1">
-            <button
-              onClick={undo}
-              disabled={!canUndo}
-              title="Ongedaan maken (Ctrl+Z)"
-              className="rounded-md px-2 py-1.5 text-white/40 hover:text-white/70 hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
-              </svg>
-            </button>
-            <button
-              onClick={redo}
-              disabled={!canRedo}
-              title="Opnieuw (Ctrl+Y)"
-              className="rounded-md px-2 py-1.5 text-white/40 hover:text-white/70 hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l6-6m0 0l-6-6m6 6H9a6 6 0 000 12h3" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Opslaan op server */}
-          <button
-            onClick={handleSaveToServer}
-            disabled={isSaving}
-            title="Opslaan (Ctrl+S)"
-            className="rounded-md border border-white/20 px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {isSaving ? (
-              <span className="flex items-center gap-1.5">
-                <Spinner light /> Opslaan...
-              </span>
-            ) : (
-              'Opslaan'
-            )}
-          </button>
-
-          {/* Import JSON */}
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="rounded-md border border-white/20 px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/10 transition-colors"
-          >
-            Import JSON
-          </button>
-
-          {/* Export JSON */}
-          <button
-            onClick={handleExport}
-            className="rounded-md border border-white/20 px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/10 transition-colors"
-          >
-            Export JSON
-          </button>
-
-          {/* Validate */}
-          <button
-            onClick={handleValidate}
-            disabled={!connected || isValidating}
-            className="rounded-md border border-white/20 px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {isValidating ? (
-              <span className="flex items-center gap-1.5">
-                <Spinner light /> Valideren...
-              </span>
-            ) : (
-              'Valideer'
-            )}
-          </button>
-
-          {/* Generate PDF */}
-          <button
-            onClick={generatePdf}
-            disabled={!connected || isGenerating}
-            className="rounded-md bg-brand-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-primary-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {isGenerating ? (
-              <span className="flex items-center gap-1.5">
-                <Spinner light /> Genereren...
-              </span>
-            ) : (
-              'Genereer PDF'
-            )}
-          </button>
-
-          {/* Download PDF */}
-          {lastPdfUrl && (
-            <button
-              onClick={downloadPdf}
-              className="rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 transition-colors"
-            >
-              Download PDF
-            </button>
-          )}
-
-          {/* User + Logout */}
-          {authUser && (
-            <div className="flex items-center gap-2 border-l border-white/10 pl-3 ml-1">
-              <span className="text-xs text-white/50">
-                {authUser.display_name || authUser.username}
-              </span>
-              <button
-                onClick={logout}
-                className="rounded-md px-2 py-1.5 text-xs text-white/40 hover:text-white/70 hover:bg-white/10 transition-colors"
-              >
-                Uitloggen
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
+      {/* Ribbon */}
+      <Ribbon
+        onFileTabClick={() => setBackstageOpen(true)}
+        onValidate={handleValidate}
+        sidebarVisible={sidebarVisible}
+        onToggleSidebar={toggleSidebar}
+      />
 
       {/* Validation banner */}
       <ValidationBanner />
 
       {/* Floating toast notifications */}
       {toast && (
-        <div className="fixed top-14 right-4 z-50 animate-slide-in-right">
+        <div className="fixed top-36 right-4 z-50 animate-slide-in-right">
           <div className={`rounded-lg shadow-lg px-4 py-3 flex items-center gap-2 ${
-            toast.type === 'success'
-              ? 'bg-green-600 text-white'
-              : 'bg-red-600 text-white'
+            toast.type === "success"
+              ? "bg-green-600 text-white"
+              : "bg-red-600 text-white"
           }`}>
-            {toast.type === 'success' ? (
+            {toast.type === "success" ? (
               <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
@@ -458,22 +247,44 @@ export function AppShell() {
       )}
 
       {/* Main content */}
-      {viewMode === 'projects' ? (
+      {viewMode === "projects" ? (
         <div className="flex-1 overflow-hidden">
-          <ProjectBrowser onOpenReport={() => setViewMode('editor')} />
+          <ProjectBrowser onOpenReport={() => setViewMode("editor")} />
         </div>
-      ) : viewMode === 'admin' ? (
+      ) : viewMode === "admin" ? (
         <div className="flex-1 overflow-auto">
           <AdminPanel />
         </div>
       ) : (
         <div className="flex flex-1 overflow-hidden">
-          <Sidebar />
+          {sidebarVisible && <Sidebar />}
           <ErrorBoundary context="MainPanel" fallback={<AppCrashFallback />}>
             <MainPanel />
           </ErrorBoundary>
         </div>
       )}
+
+      {/* Status bar */}
+      <StatusBar />
+
+      {/* Backstage */}
+      <Backstage
+        open={backstageOpen}
+        onClose={() => setBackstageOpen(false)}
+        onOpenSettings={() => setSettingsOpen(true)}
+        onSave={handleSaveToServer}
+        onImport={handleImportClick}
+        onExport={handleExport}
+        onOpenProjects={() => setViewMode("projects")}
+      />
+
+      {/* Settings dialog */}
+      <SettingsDialog
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        theme={theme}
+        onThemeChange={handleThemeChange}
+      />
 
       {/* Shortcut help dialog */}
       <ShortcutHelp open={showShortcuts} onClose={() => setShowShortcuts(false)} />
@@ -506,18 +317,5 @@ function AppCrashFallback() {
         </button>
       </div>
     </div>
-  );
-}
-
-function Spinner({ light }: { light?: boolean }) {
-  return (
-    <svg
-      className={`h-3 w-3 animate-spin ${light ? 'text-white/70' : 'text-gray-500'}`}
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-    </svg>
   );
 }

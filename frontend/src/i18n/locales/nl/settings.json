@@ -1,0 +1,30 @@
+{
+  "title": "Instellingen",
+  "resetToDefaults": "Standaardwaarden herstellen",
+  "resetConfirm": "Weet je zeker dat je alle instellingen wilt terugzetten naar de standaardwaarden?",
+  "tabs": {
+    "general": "Algemeen",
+    "appearance": "Uiterlijk",
+    "about": "Over"
+  },
+  "general": {
+    "application": "Applicatie",
+    "language": "Taal",
+    "autoPreview": "Auto-preview",
+    "autoPreviewDesc": "Automatisch PDF preview bijwerken bij wijzigingen"
+  },
+  "appearance": {
+    "theme": "Thema",
+    "themeDescription": "Kies een kleurthema voor de applicatie.",
+    "dark": "Donker",
+    "light": "Licht"
+  },
+  "about": {
+    "appName": "OpenAEC Reports",
+    "version": "Versie",
+    "framework": "Framework",
+    "license": "Licentie",
+    "backendVersion": "Backend versie",
+    "description": "Professionele rapport generator voor de AEC-sector. React + TypeScript frontend, Python + ReportLab backend."
+  }
+}

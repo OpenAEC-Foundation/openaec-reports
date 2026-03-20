@@ -1,0 +1,39 @@
+{
+  "file": "Bestand",
+  "new": "Nieuw",
+  "open": "Openen",
+  "save": "Opslaan",
+  "saveAs": "Opslaan als...",
+  "import": "Importeren",
+  "export": "Exporteren",
+  "projects": "Projecten",
+  "preferences": "Instellingen",
+  "account": "Account",
+  "about": "Over",
+  "logout": "Uitloggen",
+  "aboutPanel": {
+    "title": "Over",
+    "appName": "OpenAEC Reports",
+    "version": "Versie",
+    "tagline": "Professionele engineering rapporten",
+    "description": "Modulaire rapport generator voor constructieve berekeningen, daglichtanalyses, bouwbesluittoetsen en meer. Genereert PDF rapporten in huisstijl.",
+    "companyName": "OpenAEC Foundation",
+    "companyDescription": "Open source tools voor de bouwsector. Transparant, professioneel, en samenwerkend.",
+    "website": "Website",
+    "github": "GitHub"
+  },
+  "importPanel": {
+    "title": "Importeren",
+    "fromFile": "Importeren uit JSON-bestand",
+    "fromFileDesc": "Laad een eerder geëxporteerd rapport",
+    "fromTemplate": "Importeren uit sjabloon",
+    "fromTemplateDesc": "Start met een vooraf ingevuld sjabloon"
+  },
+  "exportPanel": {
+    "title": "Exporteren",
+    "asJson": "Exporteren als JSON",
+    "asJsonDesc": "Sla het rapport op als JSON-bestand",
+    "asPdf": "Exporteren als PDF",
+    "asPdfDesc": "Genereer en download het rapport als PDF"
+  }
+}

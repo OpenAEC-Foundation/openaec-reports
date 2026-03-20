@@ -102,3 +102,35 @@
 .titlebar-quick-btn:disabled {
   opacity: 0.35;
 }
+
+.titlebar-user {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding-left: 8px;
+}
+
+.titlebar-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--theme-accent);
+  color: var(--theme-accent-text);
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.titlebar-username {
+  font-size: 11px;
+  color: var(--theme-text-secondary);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

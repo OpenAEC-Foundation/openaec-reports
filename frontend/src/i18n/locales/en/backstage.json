@@ -1,0 +1,39 @@
+{
+  "file": "File",
+  "new": "New",
+  "open": "Open",
+  "save": "Save",
+  "saveAs": "Save As...",
+  "import": "Import",
+  "export": "Export",
+  "projects": "Projects",
+  "preferences": "Settings",
+  "account": "Account",
+  "about": "About",
+  "logout": "Log out",
+  "aboutPanel": {
+    "title": "About",
+    "appName": "OpenAEC Reports",
+    "version": "Version",
+    "tagline": "Professional engineering reports",
+    "description": "Modular report generator for structural calculations, daylight analysis, building code checks and more. Generates PDF reports in corporate identity.",
+    "companyName": "OpenAEC Foundation",
+    "companyDescription": "Open source tools for the AEC industry. Transparent, professional, and collaborative.",
+    "website": "Website",
+    "github": "GitHub"
+  },
+  "importPanel": {
+    "title": "Import",
+    "fromFile": "Import from JSON file",
+    "fromFileDesc": "Load a previously exported report",
+    "fromTemplate": "Import from template",
+    "fromTemplateDesc": "Start from a pre-filled template"
+  },
+  "exportPanel": {
+    "title": "Export",
+    "asJson": "Export as JSON",
+    "asJsonDesc": "Save the report as a JSON file",
+    "asPdf": "Export as PDF",
+    "asPdfDesc": "Generate and download the report as PDF"
+  }
+}

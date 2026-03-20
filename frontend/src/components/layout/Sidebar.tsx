@@ -16,7 +16,6 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { useReportStore } from '@/stores/reportStore';
 import type { MetadataPanel } from '@/stores/reportStore';
-import { useApiStore } from '@/stores/apiStore';
 import { BlockIcon } from '@/components/shared/BlockIcons';
 import type { EditorSection, EditorAppendix } from '@/types/report';
 
@@ -359,14 +358,8 @@ export function Sidebar() {
   const addNewAppendix = useReportStore((s) => s.addNewAppendix);
   const removeAppendix = useReportStore((s) => s.removeAppendix);
   const reorderAppendices = useReportStore((s) => s.reorderAppendices);
-  const isDirty = useReportStore((s) => s.isDirty);
-  const reset = useReportStore((s) => s.reset);
   const project = useReportStore((s) => s.report.project);
   const status = useReportStore((s) => s.report.status);
-
-  const connected = useApiStore((s) => s.connected);
-  const checking = useApiStore((s) => s.checking);
-  const backendVersion = useApiStore((s) => s.backendVersion);
 
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
@@ -484,10 +477,6 @@ export function Sidebar() {
 
   const isNavActive = activeSection === null && activeAppendix === null;
 
-  const totalBlocks =
-    sections.reduce((sum, s) => sum + s.content.length, 0) +
-    appendices.reduce((sum, a) => sum + a.content.length, 0);
-
   return (
     <aside
       className="relative flex h-full flex-col border-r border-gray-200 bg-white"
@@ -514,27 +503,6 @@ export function Sidebar() {
           </span>
         )}
       </div>
-
-      {/* Actions */}
-      <div className="px-3 pt-3 pb-1">
-        <button
-          onClick={() => {
-            if (isDirty) {
-              if (!confirm('Huidig rapport verwijderen? Onopgeslagen wijzigingen gaan verloren.')) return;
-            }
-            reset();
-          }}
-          className="w-full flex items-center gap-2 rounded-md px-2 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
-        >
-          <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          Nieuw rapport
-        </button>
-      </div>
-
-      {/* Divider */}
-      <div className="mx-4 border-t border-gray-100" />
 
       {/* Scrollable area */}
       <div className="flex-1 overflow-y-auto">
@@ -695,36 +663,6 @@ export function Sidebar() {
         </nav>
       </div>
 
-      {/* Footer with connection indicator */}
-      <div className="border-t border-gray-200 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-gray-400">
-            {sections.length} hoofdstuk{sections.length !== 1 ? 'ken' : ''} &middot;{' '}
-            {appendices.length > 0 && (
-              <>{appendices.length} bijlage{appendices.length !== 1 ? 'n' : ''} &middot; </>
-            )}
-            {totalBlocks} blocks
-          </p>
-          <div className="flex items-center gap-1.5">
-            <span
-              className={`h-2 w-2 rounded-full ${
-                checking
-                  ? 'bg-amber-400'
-                  : connected
-                    ? 'bg-green-400'
-                    : 'bg-red-400'
-              }`}
-            />
-            <span className="text-[10px] text-gray-400">
-              {checking
-                ? 'Verbinden...'
-                : connected
-                  ? `v${backendVersion}`
-                  : 'Offline'}
-            </span>
-          </div>
-        </div>
-      </div>
       {/* Resize handle */}
       <div
         onMouseDown={handleResizeStart}

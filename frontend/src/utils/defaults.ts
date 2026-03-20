@@ -71,15 +71,9 @@ const blockDefaults: Record<EditableBlockType, () => ContentBlock> = {
   spreadsheet: (): SpreadsheetBlock => ({
     type: 'spreadsheet',
     title: '',
-    headers: ['Kolom 1', 'Kolom 2', 'Kolom 3', 'Kolom 4', 'Kolom 5'],
-    rows: [
-      ['', '', '', '', ''],
-      ['', '', '', '', ''],
-      ['', '', '', '', ''],
-      ['', '', '', '', ''],
-      ['', '', '', '', ''],
-    ],
-    column_widths: [34, 34, 34, 34, 34],
+    headers: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'],
+    rows: Array.from({ length: 25 }, () => Array(10).fill('') as string[]),
+    column_widths: Array(10).fill(34) as number[],
     show_grid: true,
     zebra: false,
   }),

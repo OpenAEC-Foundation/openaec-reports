@@ -1,6 +1,51 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-15 (sessie: Rust implementatie Phase 1-4 + Special Pages + Dockerfile)
+> Laatst bijgewerkt: 2026-03-20 (sessie: Tauri v2 desktop app + GitHub Release)
+
+---
+
+## Desktop App — Tauri v2 (20 maart)
+
+| Component | Status |
+|-----------|--------|
+| **Scaffold** (`src-tauri/`) | ✅ Compleet |
+| — `tauri.conf.json` (v2, 1280×800, CSP, NSIS bundle) | ✅ |
+| — Rust wrapper (`lib.rs`, `main.rs`, `build.rs`) | ✅ |
+| — Shell plugin (externe links, SSO) | ✅ |
+| — Capabilities (`core:default`, `shell:allow-open`) | ✅ |
+| **Root Cargo.toml** (workspace, excludeert `rust/`) | ✅ |
+| **App icons** (PNG 32/128/256/1024, ICO) | ✅ Placeholder |
+| **GitHub Actions** (`release-desktop.yml`) | ✅ 4-platform builds |
+| — Windows (NSIS `.exe`) | ✅ Gebouwd |
+| — macOS ARM (`.dmg`) | ✅ Gebouwd |
+| — macOS Intel (`.dmg`, cross-compile via macos-14) | ✅ Gebouwd |
+| — Linux (`.deb`, `.AppImage`, `.rpm`) | ✅ Gebouwd |
+| **Release v0.2.0-alpha** | ✅ Draft op GitHub |
+| **Authentik redirect URI** (`http://tauri.localhost`) | ⏳ Handmatige actie |
+| **Code signing** | ⏳ Gepland voor v0.3+ |
+
+### Architectuur
+- Thin wrapper: frontend identiek aan web, PDF generatie via cloud API (`report.open-aec.com`)
+- `VITE_API_URL=https://report.open-aec.com` in productie build
+- OIDC redirect werkt automatisch (`window.location.origin` = `http://tauri.localhost` in Tauri)
+
+---
+
+## Frontend — Office-style Chrome (19-20 maart)
+
+| Component | Status |
+|-----------|--------|
+| **TitleBar** (logo, tabs, user dropdown, admin knop) | ✅ |
+| **Ribbon** (Home, Insert, View tabs met tool groups) | ✅ |
+| **Backstage** (full-screen overlay, New/Open/Save/Export/Admin) | ✅ |
+| **StatusBar** (zoom, preview toggle, validation count) | ✅ |
+| **Modal** (generieke modal component) | ✅ |
+| **SettingsDialog** (taal, theme, sneltoetsen) | ✅ |
+| **FeedbackDialog** (issue/bug rapportage) | ✅ |
+| **ShortcutHelp** (sneltoetsen overlay) | ✅ |
+| **Theme systeem** (~80 CSS custom properties, light + openaec) | ✅ |
+| **i18n** (5 namespaces, NL + EN) | ✅ |
+| **SSO** (Authentik, user dropdown met profiel link) | ✅ |
 
 ---
 

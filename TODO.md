@@ -1,7 +1,7 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-14
+> Laatst bijgewerkt: 2026-03-20
 
 ---
 
@@ -174,7 +174,21 @@ Zie `PLAN-rust-implementation.md` voor details.
 - [x] H2 — Dead code `src/bm_reports/` verwijderd + `docs/TENANT_GUIDE.md` verwijderd
 - [ ] H3 — `lessons_learned.md` aanmaken
 - [x] H4 — `fonts.py` herschreven met Liberation Sans documentatie (was: verouderde Inter pad instructies)
-- [ ] H5 — STATUS.md en frontend/STATUS.md actualiseren
+- [x] H5 — STATUS.md en TODO.md actualiseren (20 maart: Tauri + Chrome)
+
+---
+
+## 🟡 Desktop App — Tauri v2
+
+- [x] D1 — Tauri v2 scaffold (`src-tauri/`, thin wrapper, cloud API)
+- [x] D2 — GitHub Actions release workflow (4-platform matrix build)
+- [x] D3 — Release v0.2.0-alpha (draft op GitHub, alle artifacts)
+- [ ] D4 — Authentik: redirect URI `http://tauri.localhost/auth/callback` toevoegen
+- [ ] D5 — OA logo vervangen (huidige is Pillow-gegenereerd placeholder)
+- [ ] D6 — Code signing (Windows Authenticode, macOS notarization) — v0.3+
+- [ ] D7 — Auto-updater (`tauri-plugin-updater`) — v0.3+
+- [ ] D8 — Native file dialogs (`tauri-plugin-dialog`) — v0.3+
+- [ ] D9 — Offline modus / embedded Rust backend (Optie B) — v0.4+
 
 ---
 
@@ -184,7 +198,8 @@ Zie `PLAN-rust-implementation.md` voor details.
 - [ ] I1 — Caddyfile vereenvoudigen
 - [ ] I2 — fail2ban installeren
 - [ ] I3 — Portainer installeren
-- [ ] I4 — CI/CD pipeline (GitHub Actions: lint, test, build, deploy)
+- [x] I4 — CI/CD pipeline (GitHub Actions: lint, test, build, deploy + release-desktop)
+- [ ] I5 — Node.js 20 deprecation warnings fixen in CI (upgrade naar actions@v5)
 
 ---
 

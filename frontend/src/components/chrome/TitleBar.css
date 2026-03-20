@@ -159,15 +159,14 @@
 }
 
 .titlebar-user-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 2px;
+  position: fixed;
+  top: 32px;
+  right: 8px;
   min-width: 180px;
   background: var(--theme-bg);
   border: 1px solid var(--theme-border);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  z-index: 100;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 999;
   padding: 4px 0;
 }
 
@@ -184,6 +183,18 @@
   cursor: default;
   text-decoration: none;
   transition: background 0.1s;
+}
+
+.titlebar-menu-item,
+.titlebar-menu-item:link,
+.titlebar-menu-item:visited {
+  color: var(--theme-text);
+  text-decoration: none;
+}
+
+.titlebar-menu-item svg {
+  stroke: var(--theme-text);
+  flex-shrink: 0;
 }
 
 .titlebar-menu-item:hover {

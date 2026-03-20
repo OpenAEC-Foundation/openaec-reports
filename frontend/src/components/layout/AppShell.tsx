@@ -18,6 +18,7 @@ import { ValidationBanner } from "./ValidationBanner";
 import { ShortcutHelp } from "./ShortcutHelp";
 import { AdminPanel } from "@/components/admin/AdminPanel";
 import { ProjectBrowser } from "@/components/projects/ProjectBrowser";
+import FeedbackDialog from "@/components/feedback/FeedbackDialog";
 
 const SIDEBAR_VISIBLE_KEY = "openaec-sidebar-visible";
 
@@ -42,6 +43,7 @@ export function AppShell() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [saveAsOpen, setSaveAsOpen] = useState(false);
   const [openDialogOpen, setOpenDialogOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [theme, setTheme] = useState(() => getSetting("theme", "light"));
   const [sidebarVisible, setSidebarVisible] = useState(() => {
     try {
@@ -282,6 +284,7 @@ export function AppShell() {
         onOpenDialog={() => setOpenDialogOpen(true)}
         onOpenProjects={() => setViewMode("projects")}
         onAdmin={() => setViewMode("admin")}
+        onFeedback={() => setFeedbackOpen(true)}
       />
 
       {/* Save As dialog */}
@@ -307,6 +310,9 @@ export function AppShell() {
         theme={theme}
         onThemeChange={handleThemeChange}
       />
+
+      {/* Feedback dialog */}
+      <FeedbackDialog open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
 
       {/* Shortcut help dialog */}
       <ShortcutHelp open={showShortcuts} onClose={() => setShowShortcuts(false)} />

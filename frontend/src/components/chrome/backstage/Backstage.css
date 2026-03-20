@@ -224,3 +224,86 @@
   margin: 0;
   line-height: 1.5;
 }
+
+/* SaveAs / Open Dialog */
+.saveas-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.saveas-dialog {
+  background: var(--theme-bg);
+  border: 1px solid var(--theme-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  padding: 28px 32px;
+  min-width: 400px;
+  max-width: 480px;
+}
+
+.saveas-title {
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--theme-accent);
+  margin: 0 0 20px 0;
+}
+
+.saveas-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.saveas-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--theme-bg-lighter);
+  border: 1px solid var(--theme-border);
+  cursor: default;
+  text-align: left;
+  transition: all 0.15s;
+  width: 100%;
+}
+
+.saveas-card:hover {
+  border-color: var(--theme-accent);
+  background: var(--theme-hover);
+}
+
+.saveas-card-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--theme-accent);
+}
+
+.saveas-card-icon svg {
+  stroke: var(--theme-accent);
+}
+
+.saveas-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.saveas-card-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--theme-text);
+}
+
+.saveas-card-desc {
+  font-size: 11px;
+  color: var(--theme-text-secondary);
+  line-height: 1.4;
+}

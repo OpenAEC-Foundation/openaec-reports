@@ -45,6 +45,8 @@
     "json": "JSON",
     "previewView": "Preview",
     "sidebar": "Zijpaneel",
-    "autoPreview": "Auto-preview"
+    "autoPreview": "Auto-preview",
+    "management": "Beheer",
+    "admin": "Beheer"
   }
 }

@@ -91,3 +91,18 @@ export function isOidcPossiblyEnabled(): boolean {
   // Statische fallback check
   return !!(import.meta.env.VITE_OIDC_AUTHORITY && import.meta.env.VITE_OIDC_CLIENT_ID);
 }
+
+/**
+ * Geeft de Authentik user interface URL terug, afgeleid van de cached authority.
+ * Voorbeeld: "https://auth.open-aec.com/application/o/openaec-reports/" → "https://auth.open-aec.com/if/user/"
+ * Retourneert null als OIDC niet geconfigureerd is of er geen authority beschikbaar is.
+ */
+export function getAuthentikUserUrl(): string | null {
+  if (!_cachedConfig?.enabled || !_cachedConfig.authority) return null;
+  try {
+    const url = new URL(_cachedConfig.authority);
+    return `${url.origin}/if/user/`;
+  } catch {
+    return null;
+  }
+}

@@ -38,5 +38,6 @@
   "offline": "Offline",
   "unsavedChanges": "Unsaved changes",
   "saved": "Saved",
-  "logout": "Log out"
+  "logout": "Log out",
+  "myAccount": "My account"
 }

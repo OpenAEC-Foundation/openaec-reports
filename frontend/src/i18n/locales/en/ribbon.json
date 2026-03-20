@@ -45,6 +45,8 @@
     "json": "JSON",
     "previewView": "Preview",
     "sidebar": "Sidebar",
-    "autoPreview": "Auto-preview"
+    "autoPreview": "Auto-preview",
+    "management": "Management",
+    "admin": "Admin"
   }
 }

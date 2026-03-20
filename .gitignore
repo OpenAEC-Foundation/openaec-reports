@@ -83,5 +83,11 @@ frontend/tsconfig.tsbuildinfo
 data/
 
 # Rust
+target/
 rust/target/
 rust/Cargo.lock
+Cargo.lock
+
+# Tauri
+src-tauri/target/
+src-tauri/gen/

@@ -68,11 +68,6 @@ jobs:
         working-directory: frontend
         run: npm install
 
-      - name: Generate platform icons
-        if: startsWith(matrix.os, 'macos')
-        working-directory: frontend
-        run: npx tauri icon ../src-tauri/icons/icon.png
-
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:

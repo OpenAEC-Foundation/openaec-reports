@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useReportStore } from "@/stores/reportStore";
+import { useAuthStore } from "@/stores/authStore";
 import "./TitleBar.css";
 
 interface TitleBarProps {
@@ -16,6 +17,17 @@ export default function TitleBar({ onSave, onSettingsClick, onHelpClick, isSavin
   const undo = useReportStore((s) => s.undo);
   const redo = useReportStore((s) => s.redo);
   const isDirty = useReportStore((s) => s.isDirty);
+  const authUser = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+
+  const initials = authUser
+    ? (authUser.display_name || authUser.username)
+        .split(" ")
+        .map((w) => w[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+    : "";
 
   return (
     <div className="titlebar">
@@ -116,7 +128,29 @@ export default function TitleBar({ onSave, onSettingsClick, onHelpClick, isSavin
         {isDirty && <span className="titlebar-dirty"> *</span>}
       </span>
 
-      <div className="titlebar-controls" />
+      <div className="titlebar-controls">
+        {authUser && (
+          <div className="titlebar-user">
+            <div className="titlebar-avatar" title={authUser.display_name || authUser.username}>
+              {initials}
+            </div>
+            <span className="titlebar-username">{authUser.display_name || authUser.username}</span>
+            <button
+              className="titlebar-quick-btn"
+              title={t("logout")}
+              aria-label={t("logout")}
+              tabIndex={-1}
+              onClick={logout}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

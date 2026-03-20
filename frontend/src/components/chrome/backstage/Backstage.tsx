@@ -5,6 +5,7 @@ import { useAuthStore } from "@/stores/authStore";
 import "./Backstage.css";
 
 const ICONS = {
+  admin: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>',
   new: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6m-3 3h6"/></svg>',
   open: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>',
   save: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V7l-4-4z"/><path d="M17 3v4a1 1 0 01-1 1H8"/><path d="M7 14h10v7H7z"/></svg>',
@@ -50,6 +51,7 @@ interface BackstageProps {
   onSaveAs: () => void;
   onOpenDialog: () => void;
   onOpenProjects: () => void;
+  onAdmin: () => void;
 }
 
 export default function Backstage({
@@ -60,6 +62,7 @@ export default function Backstage({
   onSaveAs,
   onOpenDialog,
   onOpenProjects,
+  onAdmin,
 }: BackstageProps) {
   const { t } = useTranslation("backstage");
   const [activePanel, setActivePanel] = useState<string>("none");
@@ -119,6 +122,9 @@ export default function Backstage({
           <Divider />
           <MenuItem icon={ICONS.projects} label={t("projects")} onClick={() => actionAndClose(onOpenProjects)} />
           <MenuItem icon={ICONS.preferences} label={t("preferences")} shortcut="Ctrl+," onClick={() => actionAndClose(onOpenSettings)} />
+          {authUser?.role === "admin" && (
+            <MenuItem icon={ICONS.admin} label={t("admin")} onClick={() => actionAndClose(onAdmin)} />
+          )}
           <Divider />
           <MenuItem
             icon={ICONS.about}

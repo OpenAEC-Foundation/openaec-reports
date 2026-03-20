@@ -1,10 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { useReportStore } from "@/stores/reportStore";
-import { useAuthStore } from "@/stores/authStore";
 import type { ViewMode } from "@/stores/reportStore";
 import RibbonGroup from "./RibbonGroup";
 import RibbonButton from "./RibbonButton";
-import { editorIcon, splitIcon, jsonIcon, previewIcon, sidebarIcon, adminIcon } from "./icons";
+import { editorIcon, splitIcon, jsonIcon, previewIcon, sidebarIcon } from "./icons";
 
 interface ViewTabProps {
   sidebarVisible: boolean;
@@ -15,11 +14,8 @@ export default function ViewTab({ sidebarVisible, onToggleSidebar }: ViewTabProp
   const { t } = useTranslation("ribbon");
   const viewMode = useReportStore((s) => s.viewMode);
   const setViewMode = useReportStore((s) => s.setViewMode);
-  const authUser = useAuthStore((s) => s.user);
 
   const setMode = (mode: ViewMode) => setViewMode(mode);
-
-  const isAdmin = authUser?.role === "admin";
 
   return (
     <div className="ribbon-content">
@@ -39,17 +35,6 @@ export default function ViewTab({ sidebarVisible, onToggleSidebar }: ViewTabProp
             onClick={onToggleSidebar}
           />
         </RibbonGroup>
-
-        {isAdmin && (
-          <RibbonGroup label={t("view.management")}>
-            <RibbonButton
-              icon={adminIcon}
-              label={t("view.admin")}
-              active={viewMode === "admin"}
-              onClick={() => setMode("admin")}
-            />
-          </RibbonGroup>
-        )}
       </div>
     </div>
   );

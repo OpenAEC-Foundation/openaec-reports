@@ -956,7 +956,7 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
       </div>
 
       {/* Grid */}
-      <div className="overflow-auto border-x border-b border-gray-300 rounded-b" style={{ maxHeight: "500px" }}>
+      <div className="overflow-x-auto overflow-y-scroll border-x border-b border-gray-300 rounded-b" style={{ maxHeight: "500px" }}>
         <table className="border-collapse" style={{ tableLayout: "fixed" }}>
           <colgroup>
             <col style={{ width: "32px" }} />

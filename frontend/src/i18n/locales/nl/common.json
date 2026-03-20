@@ -39,5 +39,27 @@
   "unsavedChanges": "Onopgeslagen wijzigingen",
   "saved": "Opgeslagen",
   "logout": "Uitloggen",
-  "myAccount": "Mijn account"
+  "myAccount": "Mijn account",
+  "shortcuts": "Sneltoetsen",
+  "shortcutGroups": {
+    "document": "Document",
+    "view": "Weergave",
+    "addBlocks": "Blokken toevoegen",
+    "navigation": "Navigatie"
+  },
+  "shortcutActions": {
+    "new": "Nieuw rapport",
+    "save": "Opslaan op server",
+    "undo": "Ongedaan maken",
+    "redo": "Opnieuw",
+    "generatePdf": "Genereer PDF",
+    "editor": "Editor",
+    "split": "Split (editor + preview)",
+    "preview": "Preview",
+    "paragraph": "Tekst",
+    "calculation": "Berekening",
+    "table": "Tabel",
+    "deselect": "Block deselecteren",
+    "help": "Deze help"
+  }
 }

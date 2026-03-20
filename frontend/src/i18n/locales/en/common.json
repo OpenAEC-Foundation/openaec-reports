@@ -39,5 +39,27 @@
   "unsavedChanges": "Unsaved changes",
   "saved": "Saved",
   "logout": "Log out",
-  "myAccount": "My account"
+  "myAccount": "My account",
+  "shortcuts": "Keyboard Shortcuts",
+  "shortcutGroups": {
+    "document": "Document",
+    "view": "View",
+    "addBlocks": "Add blocks",
+    "navigation": "Navigation"
+  },
+  "shortcutActions": {
+    "new": "New report",
+    "save": "Save to server",
+    "undo": "Undo",
+    "redo": "Redo",
+    "generatePdf": "Generate PDF",
+    "editor": "Editor",
+    "split": "Split (editor + preview)",
+    "preview": "Preview",
+    "paragraph": "Text",
+    "calculation": "Calculation",
+    "table": "Table",
+    "deselect": "Deselect block",
+    "help": "This help"
+  }
 }

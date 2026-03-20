@@ -1,11 +1,16 @@
-# Frontend TODO — Report Generator UI
+# Frontend TODO — OpenAEC Reports UI
 
 > Prioriteit: 🔴 Hoog | 🟡 Middel | 🟢 Laag
-> Prompts staan klaar voor Claude Code uitvoering.
+> Laatst bijgewerkt: 2026-03-20
 
 ---
 
-## 🟢 P9 — Geavanceerde Features (Toekomst)
+## 🟡 Dark theme fine-tuning
+- [ ] Visueel testen van `openaec` (dark) thema op productie
+- [ ] Content area editors/formulieren controle op contrast
+- [ ] FeedbackDialog visueel verifiëren met themed CSS variabelen
+
+## 🟢 Geavanceerde Features (Toekomst)
 
 ### Block Copy/Paste
 - [ ] Kopieer block naar clipboard (Ctrl+C op geselecteerd block)
@@ -43,16 +48,16 @@
 
 | Fase | Wat | Wanneer |
 |------|-----|---------|
-| 1: Setup | Vite, Zustand, TypeScript, dnd-kit | Week 5 |
-| 2: Sidebar | Section CRUD, drag & drop | Week 5 |
-| 3: Block editors | 8 editors, alle block types | Week 6 |
-| 4: Metadata | Tabs, cover, colofon, options, templates | Week 6 |
-| 4fix: Bugfixes | Reordering, deletion, state sync | Week 7 |
-| 5: API integratie | Preview, generate, download, validation | Week 7 |
-| 6: Bijlagen | AppendixEditor, CRUD, reorder | Week 7 |
-| 7: UX | JSON import/export, split view, undo/redo, auto-save, live preview, shortcuts | Week 8 |
-| P5: Rich Text | Tiptap WYSIWYG editor in ParagraphEditor | Week 8 |
-| P6: Visual Polish | OpenAEC branding, SVG iconen, inklapbare secties, floating toasts | Week 8 |
-| P7: Tech Debt | Vitest tests, ErrorBoundary, env variables, build hardening | Week 8 |
-| P8: Brand Config | Huisstijl als data: brand.ts, CSS vars, generieke Tailwind classes | Week 8 |
-| F-FINAL: v2 Alignment | renderer_v2 alignment: bullet_list, heading_2, colofon, content_sections, API | Week 8 |
+| 1-7 | Core editor, sidebar, blocks, metadata, API, bijlagen, UX | Week 5-8 |
+| P5 | Rich text: Tiptap WYSIWYG editor | Week 8 |
+| P6 | Visual polish: branding, iconen, toasts | Week 8 |
+| P7 | Tech debt: Vitest, ErrorBoundary, env vars | Week 8 |
+| P8 | Brand config: CSS custom properties | Week 8 |
+| F-FINAL | renderer_v2 alignment | Week 8 |
+| Chrome | OpenAEC Design System: TitleBar, Ribbon, Backstage, StatusBar | Week 12 |
+| Auth | OIDC/Authentik SSO, user/role management | Week 12 |
+| Admin | Admin panel + knop in Backstage/TitleBar dropdown | Week 12 |
+| Save/Open | Server vs lokaal keuze dialogs (SaveAsDialog, OpenDialog) | Week 12 |
+| Feedback | FeedbackDialog (Open Feedback Studio API) | Week 12 |
+| i18n | Nederlands + Engels, 5 namespaces | Week 12 |
+| Shortcuts | Ctrl+N (nieuw), ShortcutHelp themed + i18n | Week 12 |

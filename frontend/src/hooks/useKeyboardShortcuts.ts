@@ -4,10 +4,11 @@ import { useApiStore } from "@/stores/apiStore";
 
 interface ShortcutHandlers {
   onSave: () => void;
+  onNew: () => void;
   onToggleShortcuts: () => void;
 }
 
-export function useKeyboardShortcuts({ onSave, onToggleShortcuts }: ShortcutHandlers) {
+export function useKeyboardShortcuts({ onSave, onNew, onToggleShortcuts }: ShortcutHandlers) {
   const addBlockToActiveSection = useCallback((blockType: "paragraph" | "calculation" | "table") => {
     const state = useReportStore.getState();
     if (state.activeSection) {
@@ -33,6 +34,7 @@ export function useKeyboardShortcuts({ onSave, onToggleShortcuts }: ShortcutHand
       // Shortcuts that always work (even when typing)
       const alwaysActive: Record<string, () => void> = {
         "ctrl+s": () => onSave(),
+        "ctrl+n": () => onNew(),
         "ctrl+z": () => useReportStore.getState().undo(),
         "ctrl+y": () => useReportStore.getState().redo(),
         "ctrl+shift+z": () => useReportStore.getState().redo(),

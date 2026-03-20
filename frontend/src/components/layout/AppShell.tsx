@@ -103,9 +103,19 @@ export function AppShell() {
     }
   }, [isSaving, saveReport]);
 
+  // New report
+  const handleNew = useCallback(() => {
+    const { isDirty, reset } = useReportStore.getState();
+    if (isDirty) {
+      if (!confirm("Huidig rapport verwijderen? Onopgeslagen wijzigingen gaan verloren.")) return;
+    }
+    reset();
+  }, []);
+
   // Keyboard shortcuts
   useKeyboardShortcuts({
     onSave: handleSaveToServer,
+    onNew: handleNew,
     onToggleShortcuts: () => setShowShortcuts((v) => !v),
   });
 

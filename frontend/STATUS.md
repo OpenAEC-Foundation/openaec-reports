@@ -1,45 +1,87 @@
-# Frontend Status — Report Generator UI
+# Frontend Status — OpenAEC Reports UI
 
-> Laatst bijgewerkt: 2026-02-20
+> Laatst bijgewerkt: 2026-03-20
 
 ## Deployment
 
 | Component | URL | Status |
 |-----------|-----|--------|
-| **Productie** | https://report.open-aec.com/ | ⏳ Build klaar, upload pending |
+| **Productie** | https://report.open-aec.com/ | ✅ Live |
 | **Backend API** | https://report.open-aec.com/api/* | ✅ Live |
 | **Lokaal dev** | http://localhost:5173 → http://localhost:8000 | ✅ |
 
-### Deploy stappen (morgen)
-1. `npm run build` (met `.env.production` → `VITE_API_URL=https://report.open-aec.com`)
-2. Upload `dist/` naar server: `/opt/openaec/openaec-reports-ui/dist/`
-3. Caddy serveert static files automatisch
+### Deploy procedure
+1. Commit + push naar `main`
+2. SSH naar Hetzner: `ssh jochem@46.224.215.142`
+3. `cd /opt/openaec/bm-reports-api && git pull`
+4. `cd /opt/openaec && docker compose build --no-cache bm-reports-api`
+5. `docker compose up -d bm-reports-api`
+6. Frontend kopiëren: `docker cp bm-reports-api:/app/static/. /tmp/fe/ && sudo cp -r /tmp/fe/* /opt/openaec/bm-reports-ui/dist/`
 
 ## Architectuur
 
 ```
 src/
 ├── components/
-│   ├── blocks/        # 10 block editors + RichTextEditor (Tiptap)
-│   ├── editor/        # BlockEditor (met ErrorBoundary), BlockToolbox, AppendixEditor
-│   ├── forms/         # MetadataTabs, CoverForm, ColofonForm, OptionsPanel, TemplateSelector
-│   ├── layout/        # AppShell (met ErrorBoundary), Sidebar, MainPanel, ShortcutHelp, ValidationBanner
-│   └── shared/        # ErrorBoundary, BlockIcons
+│   ├── blocks/          # 10 block editors + RichTextEditor (Tiptap)
+│   ├── editor/          # BlockEditor (met ErrorBoundary), BlockToolbox, AppendixEditor
+│   ├── forms/           # MetadataTabs, CoverForm, ColofonForm, OptionsPanel, TemplateSelector
+│   ├── chrome/          # OpenAEC Design System
+│   │   ├── TitleBar.tsx + .css        # Quick access, user dropdown, SSO link
+│   │   ├── StatusBar.tsx + .css       # Stats + connection indicator
+│   │   ├── Modal.tsx + .css           # Generieke dialog
+│   │   ├── ThemedSelect.tsx + .css    # Styled dropdown
+│   │   ├── ribbon/                    # Office-style tabbed toolbar
+│   │   │   ├── Ribbon.tsx + .css      # Container + animaties
+│   │   │   ├── RibbonTab/Button/Group/Stack.tsx
+│   │   │   ├── HomeTab.tsx            # Valideren
+│   │   │   ├── InsertTab.tsx          # Block invoegen
+│   │   │   ├── ViewTab.tsx            # Weergave + zijbalk
+│   │   │   └── icons.ts              # SVG iconen
+│   │   ├── backstage/                 # File menu overlay
+│   │   │   ├── Backstage.tsx + .css   # Nieuw/Openen/Opslaan/OpslaanAls/etc.
+│   │   │   ├── SaveAsDialog.tsx       # Server vs lokaal keuze
+│   │   │   └── OpenDialog.tsx         # Server vs lokaal keuze
+│   │   └── settings/
+│   │       └── SettingsDialog.tsx + .css  # Thema/taal
+│   ├── feedback/
+│   │   └── FeedbackDialog.tsx + .css  # Issue/bug rapportage
+│   ├── layout/
+│   │   ├── AppShell.tsx               # Root orchestratie
+│   │   ├── Sidebar.tsx                # Secties/bijlagen boom
+│   │   ├── MainPanel.tsx              # Editor/preview/JSON modes
+│   │   ├── ShortcutHelp.tsx           # Sneltoetsen dialog
+│   │   └── ValidationBanner.tsx       # Validatie errors banner
+│   ├── admin/
+│   │   └── AdminPanel.tsx             # Gebruikers/template beheer
+│   ├── projects/
+│   │   └── ProjectBrowser.tsx         # Server rapporten browser
+│   └── shared/
+│       ├── ErrorBoundary.tsx
+│       └── BlockIcons.tsx
+├── config/
+│   └── oidc.ts              # OIDC/Authentik SSO + getAuthentikUserUrl()
+├── hooks/
+│   └── useKeyboardShortcuts.ts  # Globale sneltoetsen
+├── i18n/
+│   ├── config.ts             # 5 namespaces: common, ribbon, backstage, settings, feedback
+│   └── locales/{en,nl}/      # Vertalingen (NL + EN)
 ├── services/
-│   └── api.ts         # Backend API client (VITE_API_URL env var)
+│   └── api.ts                # Backend API client
 ├── stores/
-│   ├── reportStore.ts # Zustand — rapport state (secties, metadata, bijlagen)
-│   ├── apiStore.ts    # Zustand — API state (preview, generation, templates, brands)
-│   └── __tests__/     # Store unit tests (19 tests)
-├── test/
-│   └── setup.ts       # Vitest setup (@testing-library/jest-dom)
+│   ├── reportStore.ts        # Rapport state (secties, metadata, bijlagen, undo/redo)
+│   ├── apiStore.ts           # API state (preview, generatie, templates, brands)
+│   ├── authStore.ts          # Authenticatie (OIDC, user, role)
+│   ├── projectStore.ts       # Server project/rapport CRUD
+│   └── adminStore.ts         # Admin panel state
+├── themes.css                # CSS custom properties (~80 tokens, 2 thema's)
 ├── types/
-│   └── report.ts      # TypeScript types (Report, Section, Block, Cover, Colofon, etc.)
+│   └── report.ts             # TypeScript types
 └── utils/
-    ├── conversion.ts  # Store → API JSON conversie
-    ├── defaults.ts    # Default block waarden
-    ├── idGenerator.ts # Unieke ID generator
-    └── __tests__/     # Conversion round-trip tests (6 tests)
+    ├── conversion.ts         # Store → API JSON
+    ├── defaults.ts           # Default block waarden
+    ├── idGenerator.ts        # Unieke ID generator
+    └── settingsStore.ts      # localStorage wrapper
 ```
 
 ## Tech Stack
@@ -47,79 +89,60 @@ src/
 - **React 18** + **TypeScript**
 - **Vite** — bundler
 - **Zustand** — state management
-- **Tailwind CSS** — styling (brand config + CSS custom properties)
+- **Tailwind CSS** — utility styling
 - **Tiptap** — rich text editor (paragraph blocks)
 - **dnd-kit** — drag & drop
+- **i18next** — internationalisatie (NL + EN)
 - **Vitest** + **React Testing Library** — tests
-- Backend API: `import.meta.env.VITE_API_URL` (default: `http://localhost:8000`)
+
+## Design System: OpenAEC Chrome
+
+Office-geïnspireerd design system met themed CSS custom properties.
+
+| Component | Hoogte | Functie |
+|-----------|--------|---------|
+| TitleBar | 32px | App icon, quick access (save/undo/redo/settings/help), user dropdown |
+| Ribbon tabs | 28px | File, Home, Insert, View — met sliding border animatie |
+| Ribbon content | 94px | Groepen met knoppen (large/medium/small) |
+| StatusBar | 22px | Document stats, connection indicator |
+
+### Thema's
+- `light` — Deep Forge (#36363E bg, #D97706 accent, #FAFAF9 text)
+- `openaec` — Darker variant (#27272A bg)
+
+### Features
+- User dropdown met SSO profiel link (Authentik)
+- Admin knop (conditional op `role === "admin"`) in Backstage + TitleBar dropdown
+- Backstage: Nieuw, Openen (server/lokaal), Opslaan, Opslaan als (server/lokaal), Projecten, Instellingen, Beheer, Feedback, Over
+- FeedbackDialog: issue/bug rapportage naar Open Feedback Studio API
+- SettingsDialog: thema + taal instellingen met live preview
+- 15+ keyboard shortcuts met i18n ShortcutHelp dialog
 
 ## Fasen — Afgerond
 
 | Fase | Wat | Status |
 |------|-----|--------|
-| **1** | Project setup, Zustand store, TypeScript types, drag & drop | ✅ |
-| **2** | Sidebar met secties, block toolbox, section CRUD | ✅ |
-| **3** | Block editors: Paragraph, Calculation, Check, Table, Image, Spacer, PageBreak | ✅ |
-| **3+** | MapEditor (PDOK layers, lat/lon, radius) | ✅ |
-| **4** | Metadata forms: MetadataTabs, CoverForm, ColofonForm, OptionsPanel, TemplateSelector | ✅ |
-| **4fix** | Bugfixes: section reordering, block deletion, form state sync | ✅ |
-| **5** | API integratie: preview, generate, download, template/brand loading, validation | ✅ |
-| **6** | Bijlagen: AppendixEditor, appendix CRUD, drag & drop reorder | ✅ |
-| **7** | UX: JSON import/export, split view, undo/redo, auto-save, live preview, shortcuts | ✅ |
-| **P5** | Rich text: Tiptap WYSIWYG editor in ParagraphEditor | ✅ |
-| **P6** | Visual polish: OpenAEC branding, SVG iconen, inklapbare secties, floating toasts | ✅ |
-| **P7** | Tech debt: Vitest tests, ErrorBoundary, env variables | ✅ |
-| **P8** | Brand config: huisstijl als data, CSS custom properties, generieke Tailwind classes | ✅ |
-| **F-FINAL** | renderer_v2 alignment: bullet_list, heading_2, colofon, content_sections, API v2 | ✅ |
+| **1-7** | Core editor, sidebar, blocks, metadata, API, bijlagen, UX | ✅ |
+| **P5** | Rich text (Tiptap WYSIWYG) | ✅ |
+| **P6** | Visual polish (branding, iconen, toasts) | ✅ |
+| **P7** | Tech debt (Vitest, ErrorBoundary, env vars) | ✅ |
+| **P8** | Brand config (CSS custom properties) | ✅ |
+| **F-FINAL** | renderer_v2 alignment | ✅ |
+| **Chrome** | OpenAEC Design System (TitleBar, Ribbon, Backstage, StatusBar) | ✅ |
+| **Auth** | OIDC/Authentik SSO, user/role management | ✅ |
+| **Admin** | Admin panel, knop in Backstage + TitleBar dropdown | ✅ |
+| **Save/Open** | Server vs lokaal keuze dialogs | ✅ |
+| **Feedback** | FeedbackDialog naar Open Feedback Studio | ✅ |
+| **i18n** | Nederlands + Engels, 5 namespaces | ✅ |
 
-## Componenten — Detail
+## Tests
 
-### Block Editors (`components/blocks/`)
-
-| Component | Props | Features |
-|-----------|-------|----------|
-| `ParagraphEditor` | text, style | Tiptap WYSIWYG (B/I/U/Sub/Sup/Lists), style selector |
-| `CalculationEditor` | title, formula, substitution, result, unit, reference | 6 velden, alle optioneel behalve title |
-| `CheckEditor` | description, required_value, calculated_value, unity_check, limit, result, reference | Auto UC berekening |
-| `TableEditor` | title, headers, rows, column_widths, style | Dynamic rows/columns, striped/minimal toggle |
-| `ImageEditor` | src, caption, width_mm, alignment | File upload → base64, preview thumbnail |
-| `MapEditor` | center.lat/lon, radius_m, layers, caption, width_mm, height_mm | PDOK layer checkboxes |
-| `SpacerEditor` | height_mm | Slider 5-50mm |
-| `PageBreakEditor` | — | Display only, no config |
-| `BulletListEditor` | items | Dynamic input list, Enter/Backspace shortcuts |
-| `Heading2Editor` | number, title | Inline number + titel velden |
-
-### Forms (`components/forms/`)
-
-| Component | Functie |
-|-----------|---------|
-| `MetadataTabs` | Tab container: Metadata / Cover / Colofon / Opties |
-| `MetadataForm` | project, project_number, client, author, report_type, date, version, status |
-| `CoverForm` | subtitle, image upload |
-| `ColofonForm` | Opdrachtgever (contact, naam, adres), Adviseur (bedrijf, naam), Document (normen, kenmerk, fase, status), revisiehistorie, disclaimer |
-| `OptionsPanel` | TOC enable/title/depth, backcover enable, format (A4/A3), orientation |
-| `TemplateSelector` | Dropdown met templates van API, laadt scaffold |
-
-### Layout (`components/layout/`)
-
-| Component | Functie |
-|-----------|---------|
-| `AppShell` | Root layout, keyboard shortcuts handler |
-| `Sidebar` | Sections list, drag & drop reorder, block toolbox per section |
-| `MainPanel` | Block editors, metadata tabs, PDF preview, JSON view |
-| `ShortcutHelp` | Keyboard shortcuts dialog (Ctrl+?) |
-| `ValidationBanner` | Toon API validatie errors |
-
-### Stores
-
-| Store | Slices |
-|-------|--------|
-| `reportStore` | sections, metadata, cover, colofon, toc, backcover, appendices, activeSection, activeBlock |
-| `apiStore` | previewUrl, isGenerating, templates, brands, selectedTemplate, selectedBrand, validationErrors |
+- **Tests:** 25 passing (2 test files)
+- **Conversion round-trip:** 6 tests
+- **Store unit tests:** 19 tests
+- **TypeScript:** 0 errors (`npx tsc -b`)
 
 ## API Contract
-
-Frontend communiceert met backend via:
 
 ```
 GET  /api/health              → { status, version }
@@ -131,5 +154,3 @@ POST /api/validate            → { valid, errors }
 POST /api/generate/v2         → application/pdf (binary)
 POST /api/upload              → { path: string }
 ```
-
-Conversie: `reportStore` state → API JSON via `utils/conversion.ts`

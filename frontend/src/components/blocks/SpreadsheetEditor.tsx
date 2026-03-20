@@ -235,14 +235,14 @@ function ColorPicker({ colors, value, onSelect, onClose }: ColorPickerProps) {
   return (
     <div
       ref={ref}
-      className="absolute top-full left-0 mt-1 z-20 bg-white border border-gray-200 rounded-md shadow-lg p-2 grid grid-cols-5 gap-1"
+      className="absolute bottom-full left-0 mb-1 z-50 bg-white border border-gray-200 rounded-md shadow-lg p-2.5 grid grid-cols-5 gap-1.5"
     >
       {colors.map((c) => (
         <button
           key={c}
           type="button"
           onClick={() => onSelect(c)}
-          className={`w-6 h-6 rounded border hover:ring-2 hover:ring-blue-300 ${
+          className={`w-8 h-8 rounded border hover:ring-2 hover:ring-blue-300 ${
             c === value ? "ring-2 ring-blue-500" : "border-gray-200"
           }`}
           style={{ backgroundColor: c }}

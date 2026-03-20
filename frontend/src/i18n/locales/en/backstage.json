@@ -10,6 +10,7 @@
   "preferences": "Settings",
   "account": "Account",
   "about": "About",
+  "admin": "Admin",
   "logout": "Log out",
   "aboutPanel": {
     "title": "About",

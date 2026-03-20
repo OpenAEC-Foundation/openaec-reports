@@ -214,6 +214,7 @@ export function AppShell() {
         onSave={handleSaveToServer}
         onSettingsClick={() => setSettingsOpen(true)}
         onHelpClick={() => setShowShortcuts(true)}
+        onAdmin={() => setViewMode("admin")}
         isSaving={isSaving}
       />
 
@@ -280,6 +281,7 @@ export function AppShell() {
         onSaveAs={() => setSaveAsOpen(true)}
         onOpenDialog={() => setOpenDialogOpen(true)}
         onOpenProjects={() => setViewMode("projects")}
+        onAdmin={() => setViewMode("admin")}
       />
 
       {/* Save As dialog */}

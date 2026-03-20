@@ -109,6 +109,7 @@
   gap: 6px;
   height: 100%;
   padding-left: 8px;
+  position: relative;
 }
 
 .titlebar-avatar {

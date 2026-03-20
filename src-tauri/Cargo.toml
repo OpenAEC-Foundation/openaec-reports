@@ -1,0 +1,20 @@
+[package]
+name = "openaec-reports-desktop"
+version = "0.2.0-alpha"
+edition = "2021"
+description = "OpenAEC Reports — Desktop application"
+authors = ["OpenAEC Foundation"]
+license = "MIT"
+
+[lib]
+name = "openaec_reports_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

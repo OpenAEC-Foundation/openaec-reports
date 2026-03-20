@@ -35,5 +35,17 @@
     "asJsonDesc": "Sla het rapport op als JSON-bestand",
     "asPdf": "Exporteren als PDF",
     "asPdfDesc": "Genereer en download het rapport als PDF"
+  },
+  "saveAsDialog": {
+    "server": "Op server opslaan",
+    "serverDesc": "Sla het rapport op in de cloud, gekoppeld aan je project",
+    "local": "Lokaal opslaan (JSON)",
+    "localDesc": "Download het rapport als JSON-bestand op je computer"
+  },
+  "openDialog": {
+    "server": "Van server openen",
+    "serverDesc": "Open een eerder opgeslagen rapport vanuit de projectbrowser",
+    "local": "Lokaal bestand openen",
+    "localDesc": "Laad een JSON-rapport vanaf je computer"
   }
 }

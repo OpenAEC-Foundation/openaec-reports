@@ -9,6 +9,8 @@ import TitleBar from "@/components/chrome/TitleBar";
 import Ribbon from "@/components/chrome/ribbon/Ribbon";
 import StatusBar from "@/components/chrome/StatusBar";
 import Backstage from "@/components/chrome/backstage/Backstage";
+import { SaveAsDialog } from "@/components/chrome/backstage/SaveAsDialog";
+import { OpenDialog } from "@/components/chrome/backstage/OpenDialog";
 import SettingsDialog, { applyTheme } from "@/components/chrome/settings/SettingsDialog";
 import { Sidebar } from "./Sidebar";
 import { MainPanel } from "./MainPanel";
@@ -38,6 +40,8 @@ export function AppShell() {
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [backstageOpen, setBackstageOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [saveAsOpen, setSaveAsOpen] = useState(false);
+  const [openDialogOpen, setOpenDialogOpen] = useState(false);
   const [theme, setTheme] = useState(() => getSetting("theme", "light"));
   const [sidebarVisible, setSidebarVisible] = useState(() => {
     try {
@@ -273,9 +277,25 @@ export function AppShell() {
         onClose={() => setBackstageOpen(false)}
         onOpenSettings={() => setSettingsOpen(true)}
         onSave={handleSaveToServer}
-        onImport={handleImportClick}
-        onExport={handleExport}
+        onSaveAs={() => setSaveAsOpen(true)}
+        onOpenDialog={() => setOpenDialogOpen(true)}
         onOpenProjects={() => setViewMode("projects")}
+      />
+
+      {/* Save As dialog */}
+      <SaveAsDialog
+        open={saveAsOpen}
+        onClose={() => setSaveAsOpen(false)}
+        onSaveServer={handleSaveToServer}
+        onSaveLocal={handleExport}
+      />
+
+      {/* Open dialog */}
+      <OpenDialog
+        open={openDialogOpen}
+        onClose={() => setOpenDialogOpen(false)}
+        onOpenServer={() => setViewMode("projects")}
+        onOpenLocal={handleImportClick}
       />
 
       {/* Settings dialog */}

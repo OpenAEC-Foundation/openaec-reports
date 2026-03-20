@@ -35,5 +35,17 @@
     "asJsonDesc": "Save the report as a JSON file",
     "asPdf": "Export as PDF",
     "asPdfDesc": "Generate and download the report as PDF"
+  },
+  "saveAsDialog": {
+    "server": "Save to server",
+    "serverDesc": "Save the report to the cloud, linked to your project",
+    "local": "Save locally (JSON)",
+    "localDesc": "Download the report as a JSON file to your computer"
+  },
+  "openDialog": {
+    "server": "Open from server",
+    "serverDesc": "Open a previously saved report from the project browser",
+    "local": "Open local file",
+    "localDesc": "Load a JSON report from your computer"
   }
 }

@@ -1,6 +1,8 @@
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useReportStore } from "@/stores/reportStore";
 import { useAuthStore } from "@/stores/authStore";
+import { getAuthentikUserUrl } from "@/config/oidc";
 import "./TitleBar.css";
 
 interface TitleBarProps {
@@ -20,6 +22,9 @@ export default function TitleBar({ onSave, onSettingsClick, onHelpClick, isSavin
   const authUser = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
   const initials = authUser
     ? (authUser.display_name || authUser.username)
         .split(" ")
@@ -28,6 +33,20 @@ export default function TitleBar({ onSave, onSettingsClick, onHelpClick, isSavin
         .join("")
         .toUpperCase()
     : "";
+
+  const authentikUrl = getAuthentikUserUrl();
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [menuOpen]);
 
   return (
     <div className="titlebar">
@@ -130,24 +149,55 @@ export default function TitleBar({ onSave, onSettingsClick, onHelpClick, isSavin
 
       <div className="titlebar-controls">
         {authUser && (
-          <div className="titlebar-user">
-            <div className="titlebar-avatar" title={authUser.display_name || authUser.username}>
-              {initials}
-            </div>
-            <span className="titlebar-username">{authUser.display_name || authUser.username}</span>
+          <div className="titlebar-user" ref={menuRef}>
             <button
-              className="titlebar-quick-btn"
-              title={t("logout")}
-              aria-label={t("logout")}
-              tabIndex={-1}
-              onClick={logout}
+              className="titlebar-user-trigger"
+              onClick={() => setMenuOpen((v) => !v)}
+              title={authUser.display_name || authUser.username}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
+              <div className="titlebar-avatar">
+                {initials}
+              </div>
+              <span className="titlebar-username">{authUser.display_name || authUser.username}</span>
+              <svg className="titlebar-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9" />
               </svg>
             </button>
+            {menuOpen && (
+              <div className="titlebar-user-menu">
+                {authentikUrl && (
+                  <a
+                    className="titlebar-menu-item"
+                    href={authentikUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    <span>{t("myAccount")}</span>
+                    <svg className="titlebar-menu-external" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                  </a>
+                )}
+                <button
+                  className="titlebar-menu-item"
+                  onClick={() => { setMenuOpen(false); logout(); }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  <span>{t("logout")}</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

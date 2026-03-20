@@ -233,3 +233,17 @@ path = resolve_image_source(src, base_dir=...)  # pad, base64, of URL
 - **Gotham fonts:** Plaats TTF/OTF bestanden in de tenant fonts/ directory (of `src/openaec_reports/assets/fonts/` als fallback) om 3BM huisstijl fonts te activeren. Zonder Gotham valt de library automatisch terug op Helvetica. Verwachte bestanden: `Gotham-Bold.ttf`, `Gotham-Book.ttf`, `Gotham-Medium.ttf`, `Gotham-BookItalic.ttf`
 - **Multi-tenant:** Zet `OPENAEC_TENANT_DIR` om klantspecifieke assets te laden. Zonder env var worden package defaults gebruikt (backward compatible)
 - **Brand kleuren:** primary=#40124A (paars), secondary=#38BDA0 (turquoise), text=#45243D. Moeten consistent zijn in `styles.py`, `default.yaml`, en `3bm_cooperatie.yaml`
+
+---
+
+## Orchestrator
+
+Bij sessie START → lees:
+- `X:\10_3BM_bouwkunde\50_Claude-Code-Projects\lessons_learned_global.md`
+- `C:\Users\JochemK\.claude\orchestrator\sessions\report-generator_latest.md` (indien aanwezig)
+
+Bij sessie EINDE → schrijf update naar:
+`C:\Users\JochemK\.claude\orchestrator\sessions\report-generator_latest.md`
+
+**Context:** `C:\Users\JochemK\.claude\orchestrator\context\report.md`
+**Registry:** `C:\Users\JochemK\.claude\orchestrator\project-registry.json`

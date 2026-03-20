@@ -20,7 +20,7 @@ jobs:
           - os: macos-latest
             target: aarch64-apple-darwin
             label: macOS-ARM
-          - os: macos-13
+          - os: macos-14
             target: x86_64-apple-darwin
             label: macOS-Intel
 
@@ -37,7 +37,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
@@ -66,7 +66,7 @@ jobs:
 
       - name: Install frontend dependencies
         working-directory: frontend
-        run: npm ci
+        run: npm install
 
       - name: Generate platform icons
         if: startsWith(matrix.os, 'macos')

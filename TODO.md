@@ -1,7 +1,7 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-20
+> Laatst bijgewerkt: 2026-03-21 (tenant resolution debug)
 
 ---
 
@@ -16,6 +16,35 @@
   - JSON schema uitgebreid, block_registry bijgewerkt
 - [ ] **#1** — ERPNext integratie
   - Projectinfo ophalen via API keys vanuit ERPNext
+
+---
+
+## 🔴 Tenant — User-Tenant Koppeling
+
+- [ ] **T-FIX** — Users krijgen geen correcte `tenant` claim via OIDC
+  - Symptoom: `Template 'bic_rapport' niet gevonden voor tenant 'default'`
+  - Oorzaak: Authentik stuurt geen `tenant` claim mee, user.tenant blijft leeg/default
+  - Oplossing: `tenant` claim toevoegen in Authentik custom scope (openaec_profile), OF handmatig tenant zetten in DB, OF request moet `brand: "customer"` meesturen
+  - Cross-tenant template scan is bewust NIET gewenst (tenant-isolatie)
+
+---
+
+## 🟡 Customer — Nieuwe Templates
+
+2 nieuwe Customer templates toevoegen (naast bestaande `bic_factuur`).
+Bestaande assets herbruikbaar: brand.yaml, stationery PDF's, fonts, modules.
+
+- [ ] S1 — **BIC Rapport** template
+  - Template YAML: `tenants/customer/templates/bic_rapport.yaml`
+  - Page types: hergebruik bestaande + nieuwe waar nodig
+  - Referentie-PDF nodig voor pixel-exacte coördinaten
+- [ ] S2 — **Sanering** template
+  - Template YAML: `tenants/customer/templates/sanering.yaml`
+  - Page types: hergebruik bestaande + nieuwe waar nodig
+  - Referentie-PDF nodig voor pixel-exacte coördinaten
+- [ ] S3 — Opruimen: 3 spook-templates in `src/openaec_reports/assets/templates/` verwijderen
+  - `customer_bic_factuur.yaml`, `customer_bic_rapport.yaml`, `customer_sanering.yaml`
+  - Zijn package defaults die voor elke tenant zichtbaar zijn op de server
 
 ---
 

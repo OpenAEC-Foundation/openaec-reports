@@ -7,6 +7,8 @@ import uuid
 
 # Secure cookie uitzetten voor tests (TestClient gebruikt HTTP, niet HTTPS)
 os.environ.setdefault("OPENAEC_COOKIE_SECURE", "false")
+# Lokale login inschakelen voor tests (productie is SSO-only)
+os.environ.setdefault("OPENAEC_LOCAL_AUTH_ENABLED", "true")
 
 import pytest
 from fastapi.testclient import TestClient

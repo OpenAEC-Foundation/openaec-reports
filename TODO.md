@@ -157,6 +157,7 @@ Zie `PLAN-rust-implementation.md` voor details.
 - [x] F3 — Multi-rapport beheer (lijst, dupliceren, verwijderen) — via ProjectBrowser
 - [ ] F4 — Visuele template editor (drag & drop sectie volgorde)
 - [ ] F5 — Revit bridge: WebSocket listener + auto-fill berekening blocks
+- [ ] F6 — Undo in tekstvelden: Ctrl+Z/Y verplaatsen van `alwaysActive` naar `contextual` in AppShell.tsx, zodat browser-native undo werkt binnen input/textarea
 
 ---
 

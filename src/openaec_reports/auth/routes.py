@@ -34,12 +34,23 @@ MIN_PASSWORD_LENGTH = 8
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
+def _is_local_auth_enabled() -> bool:
+    """Check of lokale (username/password) login is toegestaan.
+
+    Returns:
+        True als lokale authenticatie is ingeschakeld.
+    """
+    return os.environ.get("OPENAEC_LOCAL_AUTH_ENABLED", "false").lower() == "true"
+
+
 def _is_registration_enabled() -> bool:
     """Check of open registratie aan staat via environment variable.
 
     Returns:
         True als registratie is toegestaan.
     """
+    if not _is_local_auth_enabled():
+        return False
     return os.environ.get("OPENAEC_REGISTRATION_ENABLED", "true").lower() == "true"
 
 
@@ -53,6 +64,12 @@ async def login(request: Request):
     Returns:
         User data (zonder wachtwoord) + httpOnly cookie.
     """
+    if not _is_local_auth_enabled():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Lokale login is uitgeschakeld. Gebruik SSO.",
+        )
+
     body = await request.json()
     username = body.get("username", "").strip()
     password = body.get("password", "")
@@ -112,6 +129,12 @@ async def register(request: Request):
     Returns:
         User data (zonder wachtwoord) + httpOnly cookie (direct ingelogd).
     """
+    if not _is_local_auth_enabled():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Lokale registratie is uitgeschakeld. Gebruik SSO.",
+        )
+
     if not _is_registration_enabled():
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

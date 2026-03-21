@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 import pytest
 from conftest import TEST_PASSWORD, TEST_USERNAME
 from fastapi.testclient import TestClient
@@ -184,3 +186,37 @@ class TestBearerToken:
         """Geen cookie en geen Bearer → 401."""
         r = client.get("/api/auth/me")
         assert r.status_code == 401
+
+
+class TestSsoOnly:
+    """Tests dat lokale login standaard uitgeschakeld is."""
+
+    def test_login_blocked_when_local_auth_disabled(self, client, _ensure_test_users, monkeypatch):
+        """Login endpoint geeft 403 als OPENAEC_LOCAL_AUTH_ENABLED niet 'true' is."""
+        monkeypatch.setenv("OPENAEC_LOCAL_AUTH_ENABLED", "false")
+        r = client.post(
+            "/api/auth/login",
+            json={"username": TEST_USERNAME, "password": TEST_PASSWORD},
+        )
+        assert r.status_code == 403
+        assert "SSO" in r.json()["detail"]
+
+    def test_register_blocked_when_local_auth_disabled(self, client, monkeypatch):
+        """Register endpoint geeft 403 als OPENAEC_LOCAL_AUTH_ENABLED niet 'true' is."""
+        monkeypatch.setenv("OPENAEC_LOCAL_AUTH_ENABLED", "false")
+        r = client.post(
+            "/api/auth/register",
+            json={
+                "username": "nieuw",
+                "email": "nieuw@test.nl",
+                "password": "wachtwoord123",
+            },
+        )
+        assert r.status_code == 403
+        assert "SSO" in r.json()["detail"]
+
+    def test_registration_enabled_returns_false_when_local_auth_disabled(self, client, monkeypatch):
+        """Registration-enabled endpoint geeft false als lokale auth uit staat."""
+        monkeypatch.setenv("OPENAEC_LOCAL_AUTH_ENABLED", "false")
+        r = client.get("/api/auth/registration-enabled")
+        assert r.json()["enabled"] is False

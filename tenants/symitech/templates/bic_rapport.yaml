@@ -1,0 +1,64 @@
+# Symitech BIC Rapportage — documentstructuur
+# Gebaseerd op: 336.01-BIC Rapportage.pdf (17 pagina's)
+name: symitech_bic_rapport
+tenant: symitech
+
+pages:
+  - type: special
+    page_type: voorblad_bic
+    orientation: portrait
+
+  - type: fixed
+    page_type: inhoudsopgave
+    orientation: portrait
+
+  - type: fixed
+    page_type: locatie
+    orientation: portrait
+
+  - type: fixed
+    page_type: voorziening_object
+    orientation: portrait
+
+  - type: fixed
+    page_type: bic_rapport_details
+    orientation: portrait
+
+  - type: fixed
+    page_type: herstelwerkzaamheden
+    orientation: portrait
+
+  - type: fixed
+    page_type: tekening_pagina
+    orientation: portrait
+
+  - type: fixed
+    page_type: controlelijst_bic
+    orientation: landscape
+    repeat: auto
+
+  - type: fixed
+    page_type: onderhouds_inspecties
+    orientation: landscape
+
+  - type: fixed
+    page_type: historie_bic
+    orientation: landscape
+    repeat: auto
+
+  - type: fixed
+    page_type: historie_herstel
+    orientation: landscape
+    repeat: auto
+
+  - type: fixed
+    page_type: tekening_pagina
+    orientation: portrait
+
+  - type: fixed
+    page_type: foto_bijlage
+    orientation: portrait
+
+  - type: special
+    page_type: achterblad
+    orientation: portrait

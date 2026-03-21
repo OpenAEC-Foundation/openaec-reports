@@ -41,12 +41,14 @@ export function App() {
   const user = useAuthStore((s) => s.user);
   const isAuthLoading = useAuthStore((s) => s.isLoading);
   const checkSession = useAuthStore((s) => s.checkSession);
+  const checkOidcEnabled = useAuthStore((s) => s.checkOidcEnabled);
   const loadReport = useReportStore((s) => s.loadReport);
 
-  // Check bestaande sessie bij startup
+  // Check bestaande sessie + OIDC config bij startup
   useEffect(() => {
     checkSession();
-  }, [checkSession]);
+    checkOidcEnabled();
+  }, [checkSession, checkOidcEnabled]);
 
   // Restore from localStorage or load example data (alleen als ingelogd)
   useEffect(() => {

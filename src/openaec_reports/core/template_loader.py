@@ -76,6 +76,7 @@ class TemplateLoader:
         self,
         templates_dir: Path | None = None,
         templates_dirs: list[Path] | None = None,
+        tenant_slug: str = "",
     ):
         if templates_dirs:
             self._templates_dirs = templates_dirs
@@ -83,6 +84,7 @@ class TemplateLoader:
             self._templates_dirs = [templates_dir or TEMPLATES_DIR]
         # Backward compat: eerste directory is de "primaire"
         self.templates_dir = self._templates_dirs[0]
+        self._tenant_slug = tenant_slug
 
     def load(self, name: str) -> TemplateConfig:
         """Laad een template op naam.
@@ -135,9 +137,14 @@ class TemplateLoader:
         )
 
     def list_templates(self) -> list[dict[str, str]]:
-        """Lijst alle beschikbare templates (merged uit alle directories).
+        """Lijst beschikbare templates, strikt per tenant.
 
-        Tenant templates komen eerst; bij dubbele namen wint de eerste hit.
+        Als een tenant_slug is ingesteld, worden ALLEEN templates uit de
+        tenant-directory getoond (eerste dir in ``_templates_dirs``).
+        Fallback-directories worden niet gescand — een tenant ziet
+        uitsluitend eigen templates.
+
+        Zonder tenant_slug worden alle directories gescand (backward compat).
 
         Returns:
             Lijst van dicts met 'name' en 'report_type' per template.
@@ -145,7 +152,12 @@ class TemplateLoader:
         seen: set[str] = set()
         templates = []
 
-        for tdir in self._templates_dirs:
+        # Met tenant: alleen eerste directory (= tenant templates)
+        dirs_to_scan = self._templates_dirs
+        if self._tenant_slug and len(self._templates_dirs) > 1:
+            dirs_to_scan = self._templates_dirs[:1]
+
+        for tdir in dirs_to_scan:
             if not tdir.exists():
                 continue
             for path in sorted(tdir.glob("*.yaml")):

@@ -685,7 +685,11 @@ const SAVE_DEBOUNCE_MS = 1000;
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
 useReportStore.subscribe((state, prev) => {
-  if (state.report !== prev.report) {
+  const reportChanged = state.report !== prev.report;
+  const serverIdChanged = state.serverReportId !== prev.serverReportId
+    || state.serverProjectId !== prev.serverProjectId;
+
+  if (reportChanged || serverIdChanged) {
     // Auto-save to localStorage
     if (saveTimeout) clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
@@ -693,6 +697,8 @@ useReportStore.subscribe((state, prev) => {
         const data = {
           report: toReportDefinition(state.report),
           savedAt: new Date().toISOString(),
+          serverReportId: state.serverReportId,
+          serverProjectId: state.serverProjectId,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         useReportStore.setState({ lastSavedAt: data.savedAt });
@@ -700,7 +706,9 @@ useReportStore.subscribe((state, prev) => {
         console.warn('Auto-save mislukt:', e);
       }
     }, SAVE_DEBOUNCE_MS);
+  }
 
+  if (reportChanged) {
     // Auto-preview trigger (lazy import to avoid circular dependency)
     import('./apiStore').then(({ useApiStore }) => {
       useApiStore.getState().schedulePreview();

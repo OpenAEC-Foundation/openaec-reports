@@ -189,8 +189,10 @@ class BrandLoader:
         brands_dir: Path | None = None,
         tenant_config: TenantConfig | None = None,
         tenants_root: Path | None = None,
+        tenant_slug: str = "",
     ):
         self._tenant_config = tenant_config
+        self._tenant_slug = tenant_slug
         self.brands_dir = brands_dir or BRANDS_DIR
 
         # Tenants root: explicit → tenant_config → env var detectie
@@ -305,12 +307,12 @@ class BrandLoader:
         return self.load("default")
 
     def list_brands(self) -> list[dict[str, str]]:
-        """Lijst alle beschikbare brands.
+        """Lijst beschikbare brands, strikt per tenant.
 
-        Scant in volgorde (dedup op slug):
-        1. Primaire tenant brand (via TenantConfig)
-        2. Alle tenants in tenants_root
-        3. Package brands in assets/brands/
+        Als een tenant_slug is ingesteld, wordt ALLEEN de eigen tenant
+        brand getoond. Andere tenants' brands zijn nooit zichtbaar.
+
+        Zonder tenant_slug worden alle brands gescand (backward compat).
 
         Returns:
             Lijst van dicts met 'name' en 'slug' per brand.
@@ -318,7 +320,7 @@ class BrandLoader:
         brands: list[dict[str, str]] = []
         seen_slugs: set[str] = set()
 
-        # 1. Primaire tenant brand (als beschikbaar)
+        # 1. Primaire tenant brand (altijd)
         if self._tenant_config:
             tenant_brand = self._tenant_config.brand_path
             if tenant_brand.exists():
@@ -326,18 +328,20 @@ class BrandLoader:
                     tenant_brand, brands, seen_slugs,
                 )
 
-        # 2. Tenants root — scan alle tenant directories
+        # Met tenant: alleen eigen brand, geen cross-tenant scan
+        if self._tenant_slug:
+            return brands
+
+        # Zonder tenant (backward compat): scan alles
         if self._tenants_root and self._tenants_root.exists():
             for tenant_dir in sorted(self._tenants_root.iterdir()):
                 brand_file = tenant_dir / "brand.yaml"
                 if not tenant_dir.is_dir() or not brand_file.exists():
                     continue
-                # Skip test tenants
                 if tenant_dir.name.startswith("test_"):
                     continue
                 self._add_brand_from_file(brand_file, brands, seen_slugs)
 
-        # 3. Package brands
         if self.brands_dir.exists():
             for path in sorted(self.brands_dir.glob("*.yaml")):
                 self._add_brand_from_file(path, brands, seen_slugs)

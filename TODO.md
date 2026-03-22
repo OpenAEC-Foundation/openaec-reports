@@ -1,7 +1,144 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-21 (tenant resolution debug)
+> Laatst bijgewerkt: 2026-03-22 (security audit)
+
+---
+
+## 🔴 SEC — Security Audit Bevindingen (22 maart)
+
+Volledige code review uitgevoerd. Bevindingen per prioriteit:
+
+### SEC-K: Kritiek — Direct fixen
+
+- [ ] **SEC-K1** — `load()` / `_resolve_path()` bypass tenant-isolatie (template_loader.py + brand.py)
+  - `list_templates()` en `list_brands()` filteren correct op tenant
+  - Maar `load()` en `_resolve_path()` zoeken nog in ALLE directories
+  - Een user kan templates/brands laden van andere tenants als de naam bekend is
+  - **Fix:** `_resolve_path()` dezelfde tenant-logica geven als `list_templates()`:
+    - Met `tenant_slug` → alleen eerste directory (tenant dir) doorzoeken
+    - Zonder tenant_slug → backward compat (alle dirs)
+  - **Bestanden:** `core/template_loader.py:_resolve_path()`, `core/brand.py:load()+_resolve_path()`
+  - **Test:** Schrijf test die verifieert dat `loader.load("other_tenant_template")` faalt
+
+- [ ] **SEC-K2** — Brand-override in generate endpoints niet gevalideerd
+  - `/api/generate` en `/api/generate/v2` accepteren `data.get("brand")` uit request body
+  - User kan elke brand opgeven (bijv. `{"brand": "concurrent_bedrijf"}`)
+  - Geeft toegang tot andermans branding, logo's, fonts, stationery
+  - **Fix:** Valideer dat `brand == user.tenant` of reject met 403:
+    ```python
+    brand = data.get("brand")
+    if brand and user.tenant and brand != user.tenant:
+        raise HTTPException(403, "Brand niet toegestaan voor deze tenant")
+    brand = brand or user.tenant or _DEFAULT_BRAND
+    ```
+  - **Bestanden:** `api.py` regels 367-372 (`generate_report`) en 441-446 (`generate_report_v2`)
+
+- [ ] **SEC-K3** — Upload endpoint accepteert elk bestandstype
+  - `/api/upload` heeft geen allowlist voor extensies, geen size limit
+  - User kan `.exe`, `.php`, `.sh` etc. uploaden
+  - **Fix:** Allowlist + size limit toevoegen:
+    ```python
+    ALLOWED_UPLOAD_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.pdf'}
+    MAX_UPLOAD_SIZE = 10_485_760  # 10 MB
+    ```
+  - **Bestand:** `api.py` regels 600-622
+
+- [ ] **SEC-K4** — Path traversal in rapport opslag
+  - `_report_path()` valideert niet dat `user_id` en `report_id` veilige padcomponenten zijn
+  - `user_id = "../../etc"` zou buiten `reports_dir` kunnen schrijven
+  - **Fix:** Valideer dat IDs alleen hex-karakters bevatten (UUID formaat):
+    ```python
+    import re
+    _SAFE_ID = re.compile(r'^[a-f0-9]+$')
+    def _report_path(self, user_id, report_id):
+        if not _SAFE_ID.match(user_id) or not _SAFE_ID.match(report_id):
+            raise ValueError("Ongeldig ID formaat")
+        return self.reports_dir / user_id / f"{report_id}.json"
+    ```
+  - **Bestand:** `storage/models.py` regels 552-562
+
+- [ ] **SEC-K5** — Brand API sessies zonder tenant/user isolatie
+  - `/api/brand/diff/{session_id}/*` endpoints controleren alleen session_id
+  - Geen verificatie dat de aanvrager ook de sessie-eigenaar is
+  - Session IDs zijn hex strings → brute-forceable
+  - **Fix:** Session opslaan met `user_id`, bij elk verzoek eigendom checken
+  - **Bestand:** `brand_api.py` alle endpoints met `{session_id}`
+
+### SEC-H: Hoog — Snel oppakken
+
+- [ ] **SEC-H1** — IDOR op `list_reports` endpoint
+  - `GET /api/reports?project_id=X` valideert niet dat user eigenaar is van project X
+  - User kan `project_id` van een ander project invullen en rapporten zien
+  - **Fix:** In `list_reports()` check toevoegen: `db.get_project(project_id)` → `project.user_id == user.id`
+  - **Bestand:** `storage/routes.py` regels 210-224
+
+- [ ] **SEC-H2** — Admin endpoints missen tenant-check
+  - Admin van tenant A kan templates/assets van tenant B wijzigen
+  - `/api/admin/tenants/{tenant}/templates` → geen check `user.tenant == tenant`
+  - **Fix:** In admin routes: `if user.tenant and user.tenant != tenant: raise 403`
+  - **Bestand:** `admin/routes.py` alle endpoints met `{tenant}` parameter
+
+- [ ] **SEC-H3** — OIDC email-linking kwetsbaar voor account takeover
+  - Als OIDC claims `email=admin@company.com` bevatten, wordt user gekoppeld aan bestaand admin account
+  - Aanvaller met controle over OIDC claims kan elk account overnemen
+  - **Fix:** Email-linking uitschakelen of admin-goedkeuring vereisen
+  - **Bestand:** `auth/dependencies.py` regels 201-214
+
+- [ ] **SEC-H4** — `_resolve_brand_from_template()` valideert tenant niet
+  - Template kan `tenant: "andere_tenant"` bevatten → die brand wordt zonder check gebruikt
+  - **Fix:** Na resolve checken dat brand matcht met user.tenant
+  - **Bestand:** `api.py` regels 154-168
+
+### SEC-M: Medium — Plannen
+
+- [ ] **SEC-M1** — CORS te permissief
+  - `allow_methods=["*"]` en `allow_headers=["*"]` → zou expliciete lijst moeten zijn
+  - **Fix:** `allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]`
+  - **Bestand:** `api.py` regels 104-110
+
+- [ ] **SEC-M2** — Geen rate limiting op auth endpoints
+  - `/api/auth/login` en `/api/auth/register` → onbeperkte pogingen mogelijk
+  - **Fix:** Rate limiting middleware (bijv. `slowapi` of custom)
+  - **Bestand:** `auth/routes.py`
+
+- [ ] **SEC-M3** — Default JWT secret niet afgedwongen
+  - `JWT_SECRET_KEY` valt terug op `"CHANGE-ME-in-production"`
+  - Warning wordt gelogd maar server start gewoon op
+  - **Fix:** In productie (env var check) hard falen als secret default is
+  - **Bestand:** `auth/security.py` regels 14-17
+
+- [ ] **SEC-M4** — Exception type in API response
+  - `type(exc).__name__` wordt meegestuurd in 500 responses → info lekkage
+  - **Fix:** Alleen `{"detail": "Interne serverfout"}` retourneren, geen type
+  - **Bestand:** `api.py` regel 257
+
+- [ ] **SEC-M5** — Template namen niet gevalideerd tegen path traversal
+  - `load("../../../etc/passwd")` → Path objecten bieden enige bescherming maar niet waterdicht
+  - **Fix:** Regex validatie op template namen: `^[a-zA-Z0-9_-]+$`
+  - **Bestanden:** `core/template_loader.py:_resolve_path()`, `core/brand.py:_resolve_path()`
+
+- [ ] **SEC-M6** — Frontend: geen 401 interceptor
+  - Na token expiry blijft frontend "ingelogd" tonen met failing API calls
+  - **Fix:** In `apiFetch()` bij 401 response automatisch uitloggen + redirect naar login
+  - **Bestand:** `frontend/src/services/api.ts`
+
+- [ ] **SEC-M7** — Frontend: PKCE state validatie optioneel
+  - `if (state &&` → als OIDC server geen state retourneert wordt check geskipped
+  - **Fix:** State verplicht maken: `if (!state || !validateState(state))`
+  - **Bestand:** `frontend/src/components/auth/OidcCallback.tsx` regel 41
+
+- [ ] **SEC-M8** — Frontend: localStorage restore zonder schema validatie
+  - Rapport data wordt geladen met `as ReportDefinition` type cast zonder validatie
+  - Bij XSS kan kwaadaardige data geïnjecteerd worden
+  - **Fix:** Valideer restored data tegen JSON schema vóór laden
+  - **Bestand:** `frontend/src/App.tsx` regels 57-74
+
+- [ ] **SEC-M9** — Admin path validation onvoldoende
+  - `_validate_path_segment()` checkt op `..` en `/` maar doet geen `Path.resolve()` + `is_relative_to()` check
+  - Symlinks of unicode tricks kunnen validatie omzeilen
+  - **Fix:** Na pad-constructie: `filepath.resolve().is_relative_to(expected_base.resolve())`
+  - **Bestand:** `admin/routes.py` regel 141-162
 
 ---
 
@@ -34,10 +171,9 @@
 2 nieuwe Customer templates toevoegen (naast bestaande `bic_factuur`).
 Bestaande assets herbruikbaar: brand.yaml, stationery PDF's, fonts, modules.
 
-- [ ] S1 — **BIC Rapport** template
-  - Template YAML: `tenants/customer/templates/bic_rapport.yaml`
-  - Page types: hergebruik bestaande + nieuwe waar nodig
-  - Referentie-PDF nodig voor pixel-exacte coördinaten
+- [x] S1 — **BIC Rapport** template
+  - Template + 8 page_types aangemaakt, voorbeeld JSON, test-PDF succesvol
+  - Gepusht (982461e), deploy naar server nog nodig
 - [ ] S2 — **Sanering** template
   - Template YAML: `tenants/customer/templates/sanering.yaml`
   - Page types: hergebruik bestaande + nieuwe waar nodig
@@ -238,6 +374,11 @@ Zie `PLAN-rust-implementation.md` voor details.
 - [ ] Q1 — `usersError` was dead state — nu gefixt, maar review alle store slices voor vergelijkbare patronen
 - [ ] Q2 — Stringly-typed user roles → `UserRole` union type
 - [ ] Q3 — `formatDate` verplaatsen naar `frontend/src/utils/` als gedeelde utility
+- [ ] Q4 — Logging toevoegen aan `template_loader.py` en `brand.py` (audit trail voor template/brand loads)
+- [ ] Q5 — Type validatie in `TemplateConfig` constructor (margins als dict, format als string, etc.)
+- [ ] Q6 — YAML parse errors loggen i.p.v. stilletjes inslikken (`brand.py` regels 243-244)
+- [ ] Q7 — `organisation_id` op User model ofwel volledig implementeren (org-level isolatie) ofwel verwijderen (dead code)
+- [ ] Q8 — Default brand configureerbaar maken via `OPENAEC_DEFAULT_BRAND` env var (nu hardcoded `"default"`)
 
 ---
 

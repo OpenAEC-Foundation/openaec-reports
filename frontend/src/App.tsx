@@ -57,10 +57,14 @@ export function App() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        const { report: savedReport, savedAt } = JSON.parse(saved);
+        const { report: savedReport, savedAt, serverReportId, serverProjectId } = JSON.parse(saved);
         if (savedReport?.template && savedReport?.project) {
           loadReport(savedReport as ReportDefinition);
-          useReportStore.setState({ lastSavedAt: savedAt ?? null });
+          useReportStore.setState({
+            lastSavedAt: savedAt ?? null,
+            serverReportId: serverReportId ?? null,
+            serverProjectId: serverProjectId ?? null,
+          });
           console.log(`Rapport hersteld van ${savedAt}`);
           return;
         }

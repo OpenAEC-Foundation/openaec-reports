@@ -1,6 +1,132 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-20 (sessie: Tauri v2 desktop app + GitHub Release)
+> Laatst bijgewerkt: 2026-03-22 (sessie: Deploy + Admin Cleanup)
+
+---
+
+## Sessie 22 maart (2) — Deploy + Admin Cleanup
+
+- [x] **Deploy naar productie** — SSO-only login + BIC Rapport template live
+  - Server: `/opt/openaec/`, SSH alias `hetzner`, user `jochem`
+  - `docker compose build --no-cache` nodig (met cache pakt Docker oude frontend layers)
+- [x] **Organisaties tab verwijderd** uit admin panel
+  - `OrganisationManagement.tsx` verwijderd
+  - Tab, store state, en API client functies opgeruimd
+  - Backend endpoints blijven beschikbaar (API keys)
+  - Commit `eabd643`, gedeployed
+- [ ] **Admin-bug** — Customer user (role=user) zou admin panel niet moeten zien
+  - Backend: correct beveiligd (403 bij non-admin)
+  - Frontend: check `authUser.role === "admin"` is correct
+  - Server DB bevestigt `customer` user heeft `role=user`
+  - Mogelijke oorzaak: oud JWT token met admin claim, of browser cache → uitloggen + opnieuw inloggen
+
+---
+
+## Sessie 22 maart — Security Audit + Tenant Isolatie Fixes
+
+### Volledige code review uitgevoerd
+
+Alle bestanden geaudit op bugs, inconsistenties, security issues en code quality.
+Resultaat: **5 kritieke, 4 hoge, 9 medium** bevindingen. Zie `TODO.md` sectie `SEC`.
+
+### Bugs gefixt (deze sessie)
+
+**BUG-1: `serverReportId` niet bewaard in localStorage (GEFIXT)**
+- Symptoom: Na page refresh overschrijft elke save een willekeurig rapport; altijd maar 1 rapport in projecten
+- Oorzaak: localStorage auto-save bewaarde `serverReportId` en `serverProjectId` niet
+- Fix: 3 wijzigingen in `reportStore.ts` (auto-save + subscribe) en `App.tsx` (restore)
+
+**BUG-2: Templates van andere tenants zichtbaar (GEFIXT)**
+- Symptoom: Customer user ziet OpenAEC templates en vice versa
+- Oorzaak: `list_templates()` scande altijd package-wide `assets/templates/` als fallback
+- Fix: `template_loader.py` + `tenant_resolver.py` — met `tenant_slug` wordt alleen eigen tenant-directory gescand
+
+**BUG-3: Brands van alle tenants zichtbaar (GEFIXT)**
+- Symptoom: `/api/brands` toonde brands van alle tenants
+- Oorzaak: `list_brands()` scande alle tenant directories in `tenants_root`
+- Fix: `brand.py` + `tenant_resolver.py` — met `tenant_slug` alleen eigen brand tonen
+
+**BUG-4: Cross-tenant template generatie mogelijk (GEFIXT)**
+- Symptoom: User kon `customer_bic_factuur` template gebruiken vanuit OpenAEC tenant
+- Oorzaak: `_resolve_tenant_and_template()` scande alle tenant directories
+- Fix: `api.py` — tenant wordt nu altijd afgeleid uit `user.tenant`, geen cross-tenant scan
+
+**BUG-5: Stationery van alle brands zichtbaar (GEFIXT)**
+- Symptoom: `/api/stationery` toonde stationery van alle tenants in package
+- Oorzaak: Package-wide `assets/stationery/` werd volledig gescand
+- Fix: `api.py` — alleen eigen tenant stationery, fallback naar package stationery voor eigen tenant
+
+### Openstaande security bevindingen (TODO)
+
+| ID | Ernst | Omschrijving | Status |
+|----|-------|-------------|--------|
+| SEC-K1 | Kritiek | `load()` / `_resolve_path()` bypass tenant-isolatie | TODO |
+| SEC-K2 | Kritiek | Brand-override in generate endpoints | TODO |
+| SEC-K3 | Kritiek | Upload endpoint geen bestandstype validatie | TODO |
+| SEC-K4 | Kritiek | Path traversal in rapport opslag | TODO |
+| SEC-K5 | Kritiek | Brand API sessies geen user isolatie | TODO |
+| SEC-H1 | Hoog | IDOR op `list_reports` (project_id) | TODO |
+| SEC-H2 | Hoog | Admin endpoints missen tenant-check | TODO |
+| SEC-H3 | Hoog | OIDC email-linking account takeover | TODO |
+| SEC-H4 | Hoog | `_resolve_brand_from_template()` geen tenant check | TODO |
+| SEC-M1–M9 | Medium | CORS, rate limiting, JWT, 401 interceptor, etc. | TODO |
+
+### Gewijzigde bestanden
+
+| Bestand | Wijziging |
+|---------|-----------|
+| `frontend/src/stores/reportStore.ts` | `serverReportId` + `serverProjectId` in localStorage auto-save + subscribe |
+| `frontend/src/App.tsx` | Restore `serverReportId` + `serverProjectId` uit localStorage |
+| `src/openaec_reports/core/template_loader.py` | `tenant_slug` parameter, `list_templates()` strikt per tenant |
+| `src/openaec_reports/core/brand.py` | `tenant_slug` parameter, `list_brands()` alleen eigen tenant |
+| `src/openaec_reports/core/tenant_resolver.py` | `tenant_slug` doorgeven aan TemplateLoader + BrandLoader |
+| `src/openaec_reports/api.py` | `_resolve_tenant_and_template()` geen cross-tenant scan, `/api/stationery` tenant-only |
+
+---
+
+## Sessie 21 maart (3) — BIC Rapport Template + User Fixes
+
+- [x] **BIC Rapport template aangemaakt** — 8 nieuwe page_types + 1 template YAML
+  - `bic_rapport.yaml` template met 14 pagina's (portrait + landscape mix)
+  - Nieuwe page_types: inhoudsopgave, voorziening_object, bic_rapport_details, herstelwerkzaamheden, tekening_pagina, controlelijst_bic, onderhouds_inspecties, historie_bic, historie_herstel, foto_bijlage
+  - Hergebruikt: voorblad_bic, locatie, achterblad
+  - Coördinaten pixel-exact gemeten uit `336.01-BIC Rapportage.pdf`
+- [x] **Voorbeeld JSON** — `schemas/example_bic_rapport.json` met realistische BIC data
+- [x] **Test-PDF gegenereerd** — 14 pagina's, lokaal succesvol
+- [x] **User fixes op productie** (via admin API):
+  - OpenAEC user: tenant hersteld naar `default`
+  - jochem user: tenant gezet op `default`
+  - Nieuwe `customer` user aangemaakt (local, tenant=customer)
+- [x] **Gepusht naar GitHub** — commit `982461e`
+- [ ] **Deploy nog nodig** — `bic_rapport` template nog niet live op server
+  - Run `deploy.sh` op server, of: `cd /opt/openaec/bm-reports-api && git pull && cd /opt/openaec && docker compose build --no-cache bm-reports-api && docker compose up -d bm-reports-api`
+
+---
+
+## Sessie 21 maart (2) — Tenant Resolution Debug
+
+- **Probleem:** `Template 'bic_rapport' niet gevonden voor tenant 'default'` op productie
+- **Oorzaak:** User heeft `tenant: "default"` (of leeg) in profiel, maar roept template `bic_rapport` aan dat bij tenant `customer` hoort
+- **Overwogen en afgewezen:** Cross-tenant template fallback scan — templates zijn user-specifiek en mogen niet tenant-grenzen overschrijden
+- **Juiste fix (TODO):** De user moet de correcte tenant-toewijzing krijgen via:
+  1. Authentik OIDC token: `tenant` claim toevoegen aan de user's scope
+  2. Of handmatig in de database: `UPDATE users SET tenant='customer' WHERE ...`
+  3. Of de request moet `brand: "customer"` meesturen
+- **Code ongewijzigd** — geen cross-tenant leaking geïntroduceerd
+
+---
+
+## Sessie 21 maart (1) — SSO-only Auth + Fixes
+
+- [x] **Auth: SSO-only** — Lokale username/password login uitgeschakeld
+  - Backend: `/login` en `/register` endpoints afgesloten achter `OPENAEC_LOCAL_AUTH_ENABLED` (default `false`)
+  - Frontend: LoginPage vereenvoudigd naar alleen SSO-knop, registratiepagina verwijderd
+  - 3 nieuwe tests (`TestSsoOnly`), alle 22 auth tests passed
+  - Noodluk: `OPENAEC_LOCAL_AUTH_ENABLED=true` om lokale login tijdelijk weer aan te zetten
+- [x] **Fix: SSO-links in TitleBar** — `checkOidcEnabled()` toegevoegd aan App.tsx startup
+  - `getAuthentikUserUrl()` gaf `null` terug na page refresh omdat OIDC config alleen vanuit LoginPage werd opgehaald
+- [x] **TODO: F6** — Undo in tekstvelden genoteerd (Ctrl+Z/Y in `alwaysActive` blokkeert browser-native undo in inputs)
+- [x] **Deploy** — Gedeployed naar `report.open-aec.com` (redirect van `report.open-aec.com`)
 
 ---
 

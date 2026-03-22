@@ -483,24 +483,28 @@ def _resolve_tenant_and_template(
 ) -> tuple[str, str]:
     """Leid tenant en template naam af uit de template identifier.
 
-    Strategie:
-    1. Check of template_name begint met een bekende tenant prefix
-       bijv. "customer_bic_factuur" → tenant="customer", template="bic_factuur"
-    2. Fallback naar data["brand"]
-    3. Fallback naar user.tenant
-    4. Laatste fallback: "customer"
-    """
-    # Scan bestaande tenant directories
-    if tenants_dir and tenants_dir.exists():
-        for d in sorted(tenants_dir.iterdir(), key=lambda p: len(p.name), reverse=True):
-            if not d.is_dir():
-                continue
-            prefix = d.name + "_"
-            if template_name.startswith(prefix):
-                return d.name, template_name[len(prefix):]
+    Tenant-isolatie: de user mag ALLEEN templates van eigen tenant gebruiken.
+    Als het template een tenant-prefix heeft die matcht met user.tenant,
+    wordt de prefix gestript. Andere tenant-prefixes worden geweigerd.
 
-    # Geen prefix match → probeer data["brand"] of user.tenant als tenant
-    tenant = data.get("brand") or user.tenant or "customer"
+    Args:
+        template_name: Template naam (mogelijk met tenant prefix).
+        tenants_dir: Root directory met alle tenant subdirectories.
+        data: Request data dict.
+        user: De geauthenticeerde user.
+
+    Returns:
+        Tuple van (tenant, template_name).
+    """
+    tenant = user.tenant or data.get("brand") or ""
+
+    if not tenant:
+        return "", template_name
+
+    # Strip eigen tenant prefix als aanwezig
+    prefix = tenant + "_"
+    if template_name.startswith(prefix):
+        return tenant, template_name[len(prefix):]
 
     return tenant, template_name
 
@@ -619,9 +623,10 @@ async def upload_file(file: UploadFile = File(...)):
 
 @_protected.get("/api/stationery")
 async def list_stationery(user: User = Depends(get_current_user)):
-    """Retourneer beschikbare brands en hun stationery status.
+    """Retourneer stationery status voor de huidige tenant.
 
-    Controleert zowel tenant stationery als package stationery.
+    Toont uitsluitend de stationery van de eigen tenant. Andere
+    tenants' stationery is nooit zichtbaar.
 
     Returns:
         Dict met brands en per brand de beschikbare stationery bestanden.
@@ -640,21 +645,18 @@ async def list_stationery(user: User = Depends(get_current_user)):
                 "missing": [r for r in required if r not in files],
             }
 
-    # Tenant stationery
+    # Alleen tenant stationery — geen cross-tenant scan
     tc = get_tenant_config(user.tenant)
     tenant_stat = tc.stationery_dir
     if tenant_stat and tenant_stat.exists():
         _scan_stationery_dir(
             tenant_stat, tenant_stat.name if tenant_stat.name != "stationery" else "tenant"
         )
-
-    # Package stationery (als aanvulling)
-    stationery_base = ASSETS_DIR / "stationery"
-    if stationery_base.exists():
-        for brand_dir in sorted(stationery_base.iterdir()):
-            if not brand_dir.is_dir() or brand_dir.name in brands:
-                continue
-            _scan_stationery_dir(brand_dir, brand_dir.name)
+    elif user.tenant:
+        # Fallback: package stationery voor EIGEN tenant
+        brand_stationery = ASSETS_DIR / "stationery" / user.tenant
+        if brand_stationery.exists():
+            _scan_stationery_dir(brand_stationery, user.tenant)
 
     return {"brands": brands}
 

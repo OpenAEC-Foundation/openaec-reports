@@ -25,11 +25,11 @@ def get_tenant_config(tenant_slug: str) -> TenantConfig:
 def get_template_loader(tenant_slug: str) -> TemplateLoader:
     """Resolve TemplateLoader voor een tenant slug. Gecached."""
     tc = get_tenant_config(tenant_slug)
-    return TemplateLoader(templates_dirs=tc.templates_dirs)
+    return TemplateLoader(templates_dirs=tc.templates_dirs, tenant_slug=tenant_slug)
 
 
 @lru_cache(maxsize=32)
 def get_brand_loader(tenant_slug: str) -> BrandLoader:
     """Resolve BrandLoader voor een tenant slug. Gecached."""
     tc = get_tenant_config(tenant_slug)
-    return BrandLoader(tenant_config=tc)
+    return BrandLoader(tenant_config=tc, tenant_slug=tenant_slug)

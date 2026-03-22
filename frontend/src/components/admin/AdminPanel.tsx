@@ -5,13 +5,13 @@ import { UserManagement } from "./UserManagement";
 import { ApiKeyManagement } from "./ApiKeyManagement";
 import { TemplateManagement } from "./TemplateManagement";
 import { BrandManagement } from "./BrandManagement";
-import { OrganisationManagement } from "./OrganisationManagement";
+
 import { HelpPanel } from "./HelpPanel";
 
 const TABS = [
   { key: "tenants" as const, label: "Tenants" },
   { key: "users" as const, label: "Gebruikers" },
-  { key: "organisations" as const, label: "Organisaties" },
+
   { key: "api-keys" as const, label: "API Keys" },
   { key: "templates" as const, label: "YAML Bestanden" },
   { key: "brand" as const, label: "Brand" },
@@ -26,13 +26,10 @@ export function AdminPanel() {
   const loadUsers = useAdminStore((s) => s.loadUsers);
   const loadTenants = useAdminStore((s) => s.loadTenants);
 
-  const loadOrganisations = useAdminStore((s) => s.loadOrganisations);
-
   useEffect(() => {
     loadUsers();
     loadTenants();
-    loadOrganisations();
-  }, [loadUsers, loadTenants, loadOrganisations]);
+  }, [loadUsers, loadTenants]);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-6">
@@ -78,7 +75,7 @@ export function AdminPanel() {
       {/* Active panel */}
       {activeTab === "tenants" && <TenantManagement />}
       {activeTab === "users" && <UserManagement />}
-      {activeTab === "organisations" && <OrganisationManagement />}
+
       {activeTab === "api-keys" && <ApiKeyManagement />}
       {activeTab === "templates" && <TemplateManagement />}
       {activeTab === "brand" && <BrandManagement />}

@@ -1,6 +1,38 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-22 (sessie: Deploy + Admin Cleanup)
+> Laatst bijgewerkt: 2026-03-22 (sessie: Security Audit + Deploy)
+
+---
+
+## Sessie 22 maart (3) — Deploy + Verificatie
+
+### Gedeployed (commits `fac8545`, `beea126`)
+- [x] Tenant isolatie fixes (templates, brands, stationery)
+- [x] localStorage `serverReportId` fix
+- [x] `VITE_API_URL` leeggemaakt (was hardcoded `https://report.open-aec.com`)
+
+### SSO werkt weer na deploy
+- `report.open-aec.com` → redirect naar `report.open-aec.com` verloor het pad
+- Oorzaak: frontend had `VITE_API_URL=https://report.open-aec.com` gebaked in productie JS
+- Fix: `.env.production` → `VITE_API_URL=` (leeg = relatieve URLs, domein-onafhankelijk)
+- Server is GEEN git repo (`/opt/openaec/`) — deploy via eigen deploy script
+
+### Nog NIET geverifieerd op productie
+Alle fixes zijn gedeployed maar de volgende issues moeten morgen getest worden:
+
+- [ ] **Templates** — Customer user ziet alleen eigen templates (bic_factuur, bic_rapport)?
+- [ ] **Admin panel** — Customer user (role=user) mag admin panel niet zien
+  - Backend: correct beveiligd (403)
+  - Frontend: check `authUser.role === "admin"` is correct
+  - Mogelijke oorzaak: oud JWT token, browser cache → uitloggen + opnieuw inloggen testen
+- [ ] **Rapport opslag** — Meerdere rapporten opslaan zonder overschrijven
+  - localStorage fix deployed, maar testen met schone localStorage
+  - Stap: F12 → Application → Local Storage → verwijder `openaec-report-editor-state`, dan opnieuw testen
+- [ ] **Organisaties tab** — Moet verwijderd zijn uit admin panel (commit `eabd643`)
+
+### Openstaande security items (SEC-K1 t/m SEC-M9)
+Zie TODO.md sectie `🔴 SEC` — 18 bevindingen uit de code review, nog niet gefixt.
+Prioriteit voor morgen: SEC-K1 (`load()` bypass) en SEC-K2 (brand override).
 
 ---
 
@@ -14,15 +46,10 @@
   - Tab, store state, en API client functies opgeruimd
   - Backend endpoints blijven beschikbaar (API keys)
   - Commit `eabd643`, gedeployed
-- [ ] **Admin-bug** — Customer user (role=user) zou admin panel niet moeten zien
-  - Backend: correct beveiligd (403 bij non-admin)
-  - Frontend: check `authUser.role === "admin"` is correct
-  - Server DB bevestigt `customer` user heeft `role=user`
-  - Mogelijke oorzaak: oud JWT token met admin claim, of browser cache → uitloggen + opnieuw inloggen
 
 ---
 
-## Sessie 22 maart — Security Audit + Tenant Isolatie Fixes
+## Sessie 22 maart (1) — Security Audit + Tenant Isolatie Fixes
 
 ### Volledige code review uitgevoerd
 

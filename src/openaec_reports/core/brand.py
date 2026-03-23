@@ -378,6 +378,9 @@ class BrandLoader:
     def _resolve_path(self, name: str) -> Path:
         """Resolve brand naam naar bestandspad.
 
+        Met tenant_slug: zoekt ALLEEN eigen tenant brand in tenants_root.
+        Zonder tenant_slug: zoekt in alle locaties (backward compat).
+
         Zoekt in volgorde:
         1. Tenants root: ``<tenants_root>/<name>/brand.yaml``
         2. Package brands directory layout: ``brands/<name>/brand.yaml``
@@ -391,7 +394,20 @@ class BrandLoader:
         """
         if name.endswith(".yaml"):
             return self.brands_dir / name
-        # Tenants root (multi-tenant)
+
+        # Met tenant: alleen eigen tenant brand toestaan
+        if self._tenant_slug:
+            if name != self._tenant_slug:
+                # Probeer niet eens andermans brand te laden
+                return self.brands_dir / f"{name}.yaml"
+            # Eigen tenant brand uit tenants_root
+            if self._tenants_root:
+                tenant_brand = self._tenants_root / name / "brand.yaml"
+                if tenant_brand.exists():
+                    return tenant_brand
+            return self.brands_dir / f"{name}.yaml"
+
+        # Zonder tenant (backward compat): zoek overal
         if self._tenants_root:
             tenant_brand = self._tenants_root / name / "brand.yaml"
             if tenant_brand.exists():

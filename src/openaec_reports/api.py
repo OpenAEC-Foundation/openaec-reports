@@ -151,6 +151,41 @@ _protected = APIRouter(dependencies=[Depends(get_current_user)])
 # ============================================================
 
 
+def _resolve_brand_with_tenant_check(data: dict, user: User) -> str:
+    """Resolve brand met tenant-isolatie check.
+
+    Als de user een tenant heeft, mag alleen de eigen brand of een
+    template-afgeleide brand die matcht worden gebruikt. Andermans
+    brand is niet toegestaan.
+
+    Args:
+        data: Request data dict.
+        user: De geauthenticeerde user.
+
+    Returns:
+        Gevalideerde brand naam.
+
+    Raises:
+        HTTPException: Als de brand niet bij de tenant hoort.
+    """
+    requested_brand = data.get("brand")
+    template_brand = _resolve_brand_from_template(data, user.tenant)
+    tenant = user.tenant
+
+    # Geen tenant → geen restrictie (backward compat / admin)
+    if not tenant:
+        return requested_brand or template_brand or _DEFAULT_BRAND
+
+    # Expliciete brand in request → moet matchen met eigen tenant
+    if requested_brand and requested_brand != tenant:
+        raise HTTPException(
+            status_code=403,
+            detail="Brand niet toegestaan voor deze tenant",
+        )
+
+    return requested_brand or template_brand or tenant or _DEFAULT_BRAND
+
+
 def _resolve_brand_from_template(data: dict, tenant_slug: str = "") -> str | None:
     """Leid brand af uit het template's tenant veld.
 
@@ -364,12 +399,7 @@ async def generate_report(request: Request, user: User = Depends(get_current_use
     # Inject user profiel defaults in colofon
     _inject_user_profile_defaults(data, user)
 
-    brand = (
-        data.get("brand")
-        or _resolve_brand_from_template(data, user.tenant)
-        or user.tenant
-        or _DEFAULT_BRAND
-    )
+    brand = _resolve_brand_with_tenant_check(data, user)
     report = Report.from_dict(data, brand=brand)
 
     def build(output_path: Path) -> None:
@@ -438,12 +468,7 @@ async def generate_report_v2(request: Request, user: User = Depends(get_current_
     # Inject user profiel defaults in colofon
     _inject_user_profile_defaults(data, user)
 
-    brand = (
-        data.get("brand")
-        or _resolve_brand_from_template(data, user.tenant)
-        or user.tenant
-        or _DEFAULT_BRAND
-    )
+    brand = _resolve_brand_with_tenant_check(data, user)
 
     tc = get_tenant_config(user.tenant)
     stationery_dir = tc.stationery_dir or STATIONERY_DIR
@@ -538,7 +563,7 @@ async def generate_template_report(request: Request, user: User = Depends(get_cu
     logger.info("TemplateEngine: tenant=%s, template=%s", tenant, template_name)
 
     # Brand = tenant (Customer brand.yaml zit in tenants/customer/)
-    brand = data.get("brand") or tenant or _DEFAULT_BRAND
+    brand = _resolve_brand_with_tenant_check(data, user)
 
     # Transformeer JSON data naar engine formaat
     engine_data = transform_json_to_engine_data(data)
@@ -597,27 +622,49 @@ def _resolve_tenants_dir(tenant: str = "") -> Path | None:
     return None
 
 
+_ALLOWED_UPLOAD_EXTENSIONS = {
+    ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".pdf",
+}
+_MAX_UPLOAD_SIZE = 10_485_760  # 10 MB
+
+
 @_protected.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
     """Upload een afbeelding voor gebruik in rapporten.
 
     Returns:
         Dict met pad dat als `src` in JSON content gebruikt kan worden.
+
+    Raises:
+        HTTPException: Bij ongeldig bestandstype of te groot bestand.
     """
+    ext = Path(file.filename or "upload.png").suffix.lower() or ".png"
+    if ext not in _ALLOWED_UPLOAD_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Bestandstype '{ext}' niet toegestaan. "
+            f"Toegestaan: {', '.join(sorted(_ALLOWED_UPLOAD_EXTENSIONS))}",
+        )
+
+    # Lees content en check grootte
+    content = await file.read()
+    if len(content) > _MAX_UPLOAD_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Bestand te groot ({len(content)} bytes). Maximum: {_MAX_UPLOAD_SIZE} bytes (10 MB)",
+        )
+
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Genereer unieke bestandsnaam
-    ext = Path(file.filename or "upload.png").suffix or ".png"
     unique_name = f"{uuid.uuid4().hex}{ext}"
     dest = UPLOAD_DIR / unique_name
 
-    with open(dest, "wb") as f:
-        shutil.copyfileobj(file.file, f)
+    dest.write_bytes(content)
 
     return {
         "path": str(dest),
         "filename": unique_name,
-        "size": dest.stat().st_size,
+        "size": len(content),
     }
 
 

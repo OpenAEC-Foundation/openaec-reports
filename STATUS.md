@@ -1,6 +1,25 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-22 (sessie: Security Audit + Deploy)
+> Laatst bijgewerkt: 2026-03-23 (sessie: Security Fixes SEC-K1 t/m SEC-K5)
+
+---
+
+## Sessie 23 maart — Security Fixes (5 kritieke items)
+
+### Alle 5 kritieke bevindingen gefixt
+
+| ID | Fix | Bestand(en) | Tests |
+|----|-----|-------------|-------|
+| SEC-K1 | `_resolve_path()` respecteert `tenant_slug` | `template_loader.py`, `brand.py` | 5 |
+| SEC-K2 | `_resolve_brand_with_tenant_check()` helper | `api.py` | 2 |
+| SEC-K3 | Upload allowlist + 10 MB size limit | `api.py` | 6 |
+| SEC-K4 | `_SAFE_ID` regex + `is_relative_to()` | `storage/models.py` | 5 |
+| SEC-K5 | `owner_id` in session metadata + `verify_owner()` | `brand_api.py` | 3 |
+
+- 21 nieuwe security tests in `tests/test_security_fixes.py`
+- 239 tests passed, 0 regressies
+- Alle 3 generate endpoints beveiligd (V1, V2, template engine)
+- Alle 7 brand session endpoints hebben eigendom-check
 
 ---
 
@@ -30,9 +49,9 @@ Alle fixes zijn gedeployed maar de volgende issues moeten morgen getest worden:
   - Stap: F12 → Application → Local Storage → verwijder `openaec-report-editor-state`, dan opnieuw testen
 - [ ] **Organisaties tab** — Moet verwijderd zijn uit admin panel (commit `eabd643`)
 
-### Openstaande security items (SEC-K1 t/m SEC-M9)
-Zie TODO.md sectie `🔴 SEC` — 18 bevindingen uit de code review, nog niet gefixt.
-Prioriteit voor morgen: SEC-K1 (`load()` bypass) en SEC-K2 (brand override).
+### Security items
+- **SEC-K1 t/m SEC-K5 (kritiek):** GEFIXT in sessie 23 maart
+- **SEC-H1 t/m SEC-H4 (hoog) + SEC-M1 t/m SEC-M9 (medium):** Zie TODO.md, nog open
 
 ---
 
@@ -87,11 +106,11 @@ Resultaat: **5 kritieke, 4 hoge, 9 medium** bevindingen. Zie `TODO.md` sectie `S
 
 | ID | Ernst | Omschrijving | Status |
 |----|-------|-------------|--------|
-| SEC-K1 | Kritiek | `load()` / `_resolve_path()` bypass tenant-isolatie | TODO |
-| SEC-K2 | Kritiek | Brand-override in generate endpoints | TODO |
-| SEC-K3 | Kritiek | Upload endpoint geen bestandstype validatie | TODO |
-| SEC-K4 | Kritiek | Path traversal in rapport opslag | TODO |
-| SEC-K5 | Kritiek | Brand API sessies geen user isolatie | TODO |
+| SEC-K1 | Kritiek | `load()` / `_resolve_path()` bypass tenant-isolatie | ✅ GEFIXT |
+| SEC-K2 | Kritiek | Brand-override in generate endpoints | ✅ GEFIXT |
+| SEC-K3 | Kritiek | Upload endpoint geen bestandstype validatie | ✅ GEFIXT |
+| SEC-K4 | Kritiek | Path traversal in rapport opslag | ✅ GEFIXT |
+| SEC-K5 | Kritiek | Brand API sessies geen user isolatie | ✅ GEFIXT |
 | SEC-H1 | Hoog | IDOR op `list_reports` (project_id) | TODO |
 | SEC-H2 | Hoog | Admin endpoints missen tenant-check | TODO |
 | SEC-H3 | Hoog | OIDC email-linking account takeover | TODO |

@@ -32,6 +32,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 
 from openaec_reports.auth.dependencies import get_current_user
+from openaec_reports.auth.models import User
 from openaec_reports.tools.diff_engine import (
     DetectedField,
     DiffResult,
@@ -200,6 +201,23 @@ class BrandSession:
             return json.loads(path.read_text(encoding="utf-8"))
         return {}
 
+    def get_owner(self) -> str | None:
+        """Retourneer de user_id van de sessie-eigenaar."""
+        return self.load_metadata().get("owner_id")
+
+    def verify_owner(self, user_id: str) -> None:
+        """Verifieer dat de aanvrager de sessie-eigenaar is.
+
+        Raises:
+            HTTPException: Als de user niet de eigenaar is.
+        """
+        owner = self.get_owner()
+        if owner and owner != user_id:
+            raise HTTPException(
+                status_code=403,
+                detail="Geen toegang tot deze sessie",
+            )
+
     def save_diff_result(self, page_type: str, result: DiffResult) -> None:
         """Sla diff resultaat op als JSON.
 
@@ -321,6 +339,7 @@ async def upload_pairs(
     files: list[UploadFile] = File(...),
     brand_name: str = Form(""),
     brand_slug: str = Form(""),
+    user: User = Depends(get_current_user),
 ) -> JSONResponse:
     """Upload reference en stationery PDF paren.
 
@@ -347,10 +366,11 @@ async def upload_pairs(
     # Bepaal slug
     slug = brand_slug or _to_slug(brand_name)
 
-    # Sla metadata op
+    # Sla metadata op met eigenaar
     session.save_metadata({
         "brand_name": brand_name,
         "brand_slug": slug,
+        "owner_id": user.id,
     })
 
     # Detecteer paren
@@ -380,7 +400,11 @@ async def upload_pairs(
 
 
 @brand_router.post("/diff/{session_id}/{page_type}")
-async def diff_page(session_id: str, page_type: str) -> JSONResponse:
+async def diff_page(
+    session_id: str,
+    page_type: str,
+    user: User = Depends(get_current_user),
+) -> JSONResponse:
     """Draai de stationery diff op één reference/stationery paar.
 
     Args:
@@ -391,6 +415,7 @@ async def diff_page(session_id: str, page_type: str) -> JSONResponse:
     session = BrandSession(session_id)
     if not session.exists():
         raise HTTPException(status_code=404, detail="Sessie niet gevonden")
+    session.verify_owner(user.id)
 
     ref_path = session.get_pdf_path(page_type, "reference")
     stat_path = session.get_pdf_path(page_type, "stationery")
@@ -437,7 +462,11 @@ async def diff_page(session_id: str, page_type: str) -> JSONResponse:
 
 
 @brand_router.get("/diff-image/{session_id}/{page_type}")
-async def get_diff_image(session_id: str, page_type: str) -> FileResponse:
+async def get_diff_image(
+    session_id: str,
+    page_type: str,
+    user: User = Depends(get_current_user),
+) -> FileResponse:
     """Serveer de diff PNG met rode overlay boxes.
 
     Args:
@@ -446,6 +475,7 @@ async def get_diff_image(session_id: str, page_type: str) -> FileResponse:
     """
     _validate_session_id(session_id)
     session = BrandSession(session_id)
+    session.verify_owner(user.id)
     img_path = session.output_dir / f"{page_type}_diff.png"
 
     if not img_path.exists():
@@ -455,7 +485,11 @@ async def get_diff_image(session_id: str, page_type: str) -> FileResponse:
 
 
 @brand_router.get("/preview/{session_id}/{filename}")
-async def get_preview(session_id: str, filename: str) -> FileResponse:
+async def get_preview(
+    session_id: str,
+    filename: str,
+    user: User = Depends(get_current_user),
+) -> FileResponse:
     """Serveer een preview image (PNG render van een PDF pagina).
 
     Args:
@@ -465,6 +499,7 @@ async def get_preview(session_id: str, filename: str) -> FileResponse:
     _validate_session_id(session_id)
     safe_name = _validate_filename(filename)
     session = BrandSession(session_id)
+    session.verify_owner(user.id)
 
     img_path = session.output_dir / safe_name
 
@@ -479,6 +514,7 @@ async def update_fields(
     session_id: str,
     page_type: str,
     body: dict,
+    user: User = Depends(get_current_user),
 ) -> JSONResponse:
     """Update veld-rollen na handmatige toewijzing in de frontend.
 
@@ -491,6 +527,7 @@ async def update_fields(
     session = BrandSession(session_id)
     if not session.exists():
         raise HTTPException(status_code=404, detail="Sessie niet gevonden")
+    session.verify_owner(user.id)
 
     field_updates = body.get("fields", [])
     if not field_updates:
@@ -507,7 +544,11 @@ async def update_fields(
 
 
 @brand_router.post("/generate/{session_id}")
-async def generate_brand(session_id: str, body: dict) -> JSONResponse:
+async def generate_brand(
+    session_id: str,
+    body: dict,
+    user: User = Depends(get_current_user),
+) -> JSONResponse:
     """Genereer de volledige brand configuratie.
 
     Args:
@@ -518,6 +559,7 @@ async def generate_brand(session_id: str, body: dict) -> JSONResponse:
     session = BrandSession(session_id)
     if not session.exists():
         raise HTTPException(status_code=404, detail="Sessie niet gevonden")
+    session.verify_owner(user.id)
 
     try:
         session.generate_brand_package(body)
@@ -545,7 +587,11 @@ async def generate_brand(session_id: str, body: dict) -> JSONResponse:
 
 
 @brand_router.get("/download/{session_id}/{filename}")
-async def download_file(session_id: str, filename: str) -> FileResponse:
+async def download_file(
+    session_id: str,
+    filename: str,
+    user: User = Depends(get_current_user),
+) -> FileResponse:
     """Download gegenereerde bestanden (YAML, ZIP).
 
     Args:
@@ -555,6 +601,7 @@ async def download_file(session_id: str, filename: str) -> FileResponse:
     _validate_session_id(session_id)
     safe_name = _validate_filename(filename)
     session = BrandSession(session_id)
+    session.verify_owner(user.id)
 
     # Zoek in output dir (direct of in brand subdir)
     file_path = session.output_dir / safe_name
@@ -578,7 +625,10 @@ async def download_file(session_id: str, filename: str) -> FileResponse:
 
 
 @brand_router.delete("/session/{session_id}")
-async def delete_session(session_id: str) -> JSONResponse:
+async def delete_session(
+    session_id: str,
+    user: User = Depends(get_current_user),
+) -> JSONResponse:
     """Verwijder een sessie en al haar bestanden.
 
     Args:
@@ -588,6 +638,7 @@ async def delete_session(session_id: str) -> JSONResponse:
     session = BrandSession(session_id)
     if not session.exists():
         raise HTTPException(status_code=404, detail="Sessie niet gevonden")
+    session.verify_owner(user.id)
 
     session.cleanup()
     return JSONResponse({"status": "deleted", "session_id": session_id})

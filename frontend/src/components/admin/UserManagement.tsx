@@ -47,6 +47,10 @@ export function UserManagement() {
     await updateUser(user.id, { role });
   }
 
+  async function handleTenantChange(user: AdminUser, tenant: string) {
+    await updateUser(user.id, { tenant });
+  }
+
   async function handleResetPassword() {
     if (!resetId || !newPassword) return;
     const ok = await resetPassword(resetId, newPassword);
@@ -187,7 +191,20 @@ export function UserManagement() {
                     <option value="admin">Admin</option>
                   </select>
                 </Td>
-                <Td>{user.tenant || "-"}</Td>
+                <Td>
+                  <select
+                    value={user.tenant}
+                    onChange={(e) => handleTenantChange(user, e.target.value)}
+                    className="text-xs rounded border-gray-300 bg-transparent"
+                  >
+                    <option value="">(geen)</option>
+                    {tenants.map((t) => (
+                      <option key={t.name} value={t.name}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </Td>
                 <Td>
                   <button
                     onClick={() => handleToggleActive(user)}

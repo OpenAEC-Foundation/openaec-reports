@@ -12,7 +12,6 @@ stationery: colofon_stationery.pdf
 
 line_zones:
   # --- Dubbele lijn onder "Opdrachtgever" ---
-  # ref: y=125.1pt (dun 0.75), y=127.75pt (dun 0.75)
   - x0_mm: 17.5
     y_mm: 44.1
     x1_mm: 79.8
@@ -21,11 +20,10 @@ line_zones:
   - x0_mm: 17.5
     y_mm: 45.1
     x1_mm: 79.8
-    width_pt: 0.75
+    width_pt: 3.0
     color: "primary"
 
   # --- Dubbele lijn onder "Locatie van uitvoer" ---
-  # ref: y=198.6pt (dun 0.75), y=201.25pt (dun 0.75)
   - x0_mm: 17.5
     y_mm: 70.1
     x1_mm: 80.2
@@ -34,7 +32,7 @@ line_zones:
   - x0_mm: 17.5
     y_mm: 71.0
     x1_mm: 80.2
-    width_pt: 0.75
+    width_pt: 3.0
     color: "primary"
 
 text_zones:

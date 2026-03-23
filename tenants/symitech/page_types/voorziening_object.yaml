@@ -14,42 +14,39 @@ stationery: content_portrait_stationery.pdf
 
 line_zones:
   # --- Sectie "Voorziening details" dubbele lijn ---
-  # ref: y=112.0pt (dun 0.75), y=114.6pt (dik 3.0)
   - x0_mm: 17.5
-    y_mm: 39.5
+    y_mm: 48.3
     x1_mm: 80.2
     width_pt: 0.75
     color: "primary"
   - x0_mm: 17.5
-    y_mm: 40.4
+    y_mm: 49.2
     x1_mm: 80.2
     width_pt: 3.0
     color: "primary"
 
   # --- Sectie "Object details" dubbele lijn ---
-  # ref: y=243.7pt (dik 3.0), y=246.4pt (dun 0.75)
   - x0_mm: 17.5
-    y_mm: 86.0
-    x1_mm: 80.2
-    width_pt: 3.0
-    color: "primary"
-  - x0_mm: 17.5
-    y_mm: 86.9
+    y_mm: 94.8
     x1_mm: 80.2
     width_pt: 0.75
+    color: "primary"
+  - x0_mm: 17.5
+    y_mm: 95.7
+    x1_mm: 80.2
+    width_pt: 3.0
     color: "primary"
 
   # --- Sectie "VVV" dubbele lijn ---
-  # ref: y=328.7pt (dik 3.0), y=331.4pt (dun 0.75)
   - x0_mm: 17.5
-    y_mm: 116.0
-    x1_mm: 80.2
-    width_pt: 3.0
-    color: "primary"
-  - x0_mm: 17.5
-    y_mm: 116.9
+    y_mm: 124.8
     x1_mm: 80.2
     width_pt: 0.75
+    color: "primary"
+  - x0_mm: 17.5
+    y_mm: 125.7
+    x1_mm: 80.2
+    width_pt: 3.0
     color: "primary"
 
 text_zones:

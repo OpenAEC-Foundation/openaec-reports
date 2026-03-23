@@ -1,14 +1,41 @@
-# Symitech BIC Factuur — locatie detail (colofon)
+# Symitech BIC Rapportage — locatie detail (colofon)
 # Pixel-exact gemeten uit colofon_reference.pdf (2026-03-01)
 # Stationery bevat: "Locatie" heading, "Opdrachtgever"/"Locatie van uitvoer"/
-#   "Locatie code" labels, decoratieve dubbele blauwe lijnen
-# Engine rendert: waarden, dynamische labels, foto, footer
+#   "Locatie code" labels
+# Engine rendert: waarden, dynamische labels, dubbele lijnen, foto, footer
 #
 # Coördinaten: PyMuPDF top-down pt → mm (×0.352778)
 # Pagina: A4 portrait 595.3×841.9pt (210×297mm)
 
 name: locatie
 stationery: colofon_stationery.pdf
+
+line_zones:
+  # --- Dubbele lijn onder "Opdrachtgever" ---
+  # ref: y=125.1pt (dun 0.75), y=127.75pt (dun 0.75)
+  - x0_mm: 17.5
+    y_mm: 44.1
+    x1_mm: 79.8
+    width_pt: 0.75
+    color: "primary"
+  - x0_mm: 17.5
+    y_mm: 45.1
+    x1_mm: 79.8
+    width_pt: 0.75
+    color: "primary"
+
+  # --- Dubbele lijn onder "Locatie van uitvoer" ---
+  # ref: y=198.6pt (dun 0.75), y=201.25pt (dun 0.75)
+  - x0_mm: 17.5
+    y_mm: 70.1
+    x1_mm: 80.2
+    width_pt: 0.75
+    color: "primary"
+  - x0_mm: 17.5
+    y_mm: 71.0
+    x1_mm: 80.2
+    width_pt: 0.75
+    color: "primary"
 
 text_zones:
   # === Opdrachtgever waarden (rechterkolom) ===

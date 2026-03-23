@@ -1,6 +1,7 @@
 # Symitech BIC Factuur — documentstructuur
 name: symitech_bic_factuur
 tenant: symitech
+report_type: bic_factuur
 
 pages:
   - type: special

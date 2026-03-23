@@ -2,6 +2,7 @@
 # Gebaseerd op: 336.01-BIC Rapportage.pdf (17 pagina's)
 name: symitech_bic_rapport
 tenant: symitech
+report_type: bic_rapport
 
 pages:
   - type: special

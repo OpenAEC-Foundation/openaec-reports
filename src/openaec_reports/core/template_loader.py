@@ -381,29 +381,29 @@ class TemplateLoader:
 
     @staticmethod
     def _build_bic_flat_data() -> dict[str, Any]:
-        """Lege flat data-dicts voor BIC Rapport fixed page_types."""
+        """Sample data-dicts voor BIC Rapport fixed page_types."""
         return {
             "voorziening": {
-                "code": "",
-                "beschrijving": "",
-                "vereiste_status": "",
-                "huidige_status": "",
+                "code": "VZ-2026-001",
+                "beschrijving": "Vloeistofdichte voorziening",
+                "vereiste_status": "Vloeistofdicht",
+                "huidige_status": "Vloeistofdicht",
                 "notitie": "",
                 "foto": "",
             },
             "object": {
-                "code": "",
-                "beschrijving": "",
-                "ruimte": "",
-                "type": "",
+                "code": "OBJ-2026-001",
+                "beschrijving": "Opslagtank bovengronds",
+                "ruimte": "Buitenterrein",
+                "type": "Stalen tank 10.000 liter",
             },
             "vvv": {
-                "geldigheid": "",
-                "nummer": "",
-                "instantie": "",
+                "geldigheid": "31-12-2027",
+                "nummer": "VVV-2026-0142",
+                "instantie": "Kiwa N.V.",
                 "opmerkingen": "",
-                "onderhoudsdossier_ref": "",
-                "bijlage_ref": "",
+                "onderhoudsdossier_ref": "Zie hoofdstuk 7",
+                "bijlage_ref": "Zie bijlage 8.2",
             },
         }
 

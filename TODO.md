@@ -1,7 +1,7 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-22 (security audit)
+> Laatst bijgewerkt: 2026-03-23 (security fixes + OIDC tenant fix)
 
 ---
 
@@ -52,11 +52,11 @@ Volledige code review uitgevoerd. Bevindingen per prioriteit:
   - **Fix:** In admin routes: `if user.tenant and user.tenant != tenant: raise 403`
   - **Bestand:** `admin/routes.py` alle endpoints met `{tenant}` parameter
 
-- [ ] **SEC-H3** — OIDC email-linking kwetsbaar voor account takeover
-  - Als OIDC claims `email=admin@company.com` bevatten, wordt user gekoppeld aan bestaand admin account
-  - Aanvaller met controle over OIDC claims kan elk account overnemen
-  - **Fix:** Email-linking uitschakelen of admin-goedkeuring vereisen
-  - **Bestand:** `auth/dependencies.py` regels 201-214
+- [x] **SEC-H3** — OIDC email-linking kwetsbaar voor account takeover — GEFIXT (23 maart)
+  - Fix 1: Email-fallback koppelt alleen als PRECIES 1 user matcht (meerdere → skip + warning)
+  - Fix 2: Tenant wordt niet meer gesynct vanuit OIDC claims (admin-managed)
+  - Fix 3: Authentik sub_mode gewijzigd van `user_email` → `hashed_user_id`
+  - **Bestanden:** `auth/dependencies.py`, `auth/models.py` (get_all_by_email)
 
 - [ ] **SEC-H4** — `_resolve_brand_from_template()` valideert tenant niet
   - Template kan `tenant: "andere_tenant"` bevatten → die brand wordt zonder check gebruikt
@@ -131,11 +131,11 @@ Volledige code review uitgevoerd. Bevindingen per prioriteit:
 
 ## 🔴 Tenant — User-Tenant Koppeling
 
-- [ ] **T-FIX** — Users krijgen geen correcte `tenant` claim via OIDC
-  - Symptoom: `Template 'bic_rapport' niet gevonden voor tenant 'default'`
-  - Oorzaak: Authentik stuurt geen `tenant` claim mee, user.tenant blijft leeg/default
-  - Oplossing: `tenant` claim toevoegen in Authentik custom scope (openaec_profile), OF handmatig tenant zetten in DB, OF request moet `brand: "customer"` meesturen
-  - Cross-tenant template scan is bewust NIET gewenst (tenant-isolatie)
+- [x] **T-FIX** — Users krijgen geen correcte `tenant` claim via OIDC — GEFIXT (23 maart)
+  - Oplossing: Tenant wordt NIET meer gesynct vanuit OIDC — admin beheert tenant in DB
+  - Nieuwe SSO users krijgen `tenant=""`, admin wijst toe via admin panel
+  - Authentik sub_mode → `hashed_user_id` voor unieke user identificatie
+  - TODO: "tenant toewijzen" optie toevoegen in admin panel UI
 
 ---
 

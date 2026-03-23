@@ -1,12 +1,12 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-23 (sessie: Security Fixes SEC-K1 t/m SEC-K5)
+> Laatst bijgewerkt: 2026-03-23 (sessie: Security Fixes + OIDC tenant fix)
 
 ---
 
-## Sessie 23 maart — Security Fixes (5 kritieke items)
+## Sessie 23 maart — Security Fixes + OIDC Tenant Fix
 
-### Alle 5 kritieke bevindingen gefixt
+### 5 kritieke security items gefixt (SEC-K1 t/m K5)
 
 | ID | Fix | Bestand(en) | Tests |
 |----|-----|-------------|-------|
@@ -18,8 +18,22 @@
 
 - 21 nieuwe security tests in `tests/test_security_fixes.py`
 - 239 tests passed, 0 regressies
-- Alle 3 generate endpoints beveiligd (V1, V2, template engine)
-- Alle 7 brand session endpoints hebben eigendom-check
+
+### OIDC tenant koppeling gefixt (SEC-H3 + T-FIX)
+
+Root cause: Authentik `sub_mode=user_email` → meerdere users met zelfde email kregen zelfde `sub` claim → SSO login als Customer werd gekoppeld aan admin account.
+
+3 fixes doorgevoerd:
+1. **Authentik sub_mode** → `hashed_user_id` (unieke `sub` per user)
+2. **OIDC email-fallback** weigert koppeling als >1 user met zelfde email (`get_all_by_email()`)
+3. **Tenant sync gestopt** — tenant wordt niet meer overschreven door OIDC claims, admin beheert
+
+DB state gecorrigeerd: `customer` user gekoppeld aan Authentik Customer account via `oidc_subject`.
+
+### Geverifieerd op productie
+- [x] Customer user ziet alleen eigen templates (bic_factuur, bic_rapport)
+- [x] Customer user ziet geen admin panel (role=user)
+- [x] OpenAEC admin accounts werken correct met default tenant
 
 ---
 
@@ -36,18 +50,13 @@
 - Fix: `.env.production` → `VITE_API_URL=` (leeg = relatieve URLs, domein-onafhankelijk)
 - Server is GEEN git repo (`/opt/openaec/`) — deploy via eigen deploy script
 
-### Nog NIET geverifieerd op productie
-Alle fixes zijn gedeployed maar de volgende issues moeten morgen getest worden:
+### Productie verificatie (23 maart)
 
-- [ ] **Templates** — Customer user ziet alleen eigen templates (bic_factuur, bic_rapport)?
-- [ ] **Admin panel** — Customer user (role=user) mag admin panel niet zien
-  - Backend: correct beveiligd (403)
-  - Frontend: check `authUser.role === "admin"` is correct
-  - Mogelijke oorzaak: oud JWT token, browser cache → uitloggen + opnieuw inloggen testen
-- [ ] **Rapport opslag** — Meerdere rapporten opslaan zonder overschrijven
-  - localStorage fix deployed, maar testen met schone localStorage
-  - Stap: F12 → Application → Local Storage → verwijder `openaec-report-editor-state`, dan opnieuw testen
-- [ ] **Organisaties tab** — Moet verwijderd zijn uit admin panel (commit `eabd643`)
+- [x] **Templates** — Customer user ziet alleen eigen templates ✅
+- [x] **Admin panel** — Customer user (role=user) ziet geen admin panel ✅
+- [x] **OIDC login** — Customer en OpenAEC accounts resolven naar juiste DB users ✅
+- [ ] **Rapport opslag** — Meerdere rapporten opslaan zonder overschrijven (nog testen)
+- [ ] **Organisaties tab** — Moet verwijderd zijn uit admin panel
 
 ### Security items
 - **SEC-K1 t/m SEC-K5 (kritiek):** GEFIXT in sessie 23 maart
@@ -113,7 +122,7 @@ Resultaat: **5 kritieke, 4 hoge, 9 medium** bevindingen. Zie `TODO.md` sectie `S
 | SEC-K5 | Kritiek | Brand API sessies geen user isolatie | ✅ GEFIXT |
 | SEC-H1 | Hoog | IDOR op `list_reports` (project_id) | TODO |
 | SEC-H2 | Hoog | Admin endpoints missen tenant-check | TODO |
-| SEC-H3 | Hoog | OIDC email-linking account takeover | TODO |
+| SEC-H3 | Hoog | OIDC email-linking account takeover | ✅ GEFIXT |
 | SEC-H4 | Hoog | `_resolve_brand_from_template()` geen tenant check | TODO |
 | SEC-M1–M9 | Medium | CORS, rate limiting, JWT, 401 interceptor, etc. | TODO |
 

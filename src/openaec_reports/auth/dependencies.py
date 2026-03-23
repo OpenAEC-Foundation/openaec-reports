@@ -198,9 +198,12 @@ def _authenticate_via_oidc(token: str) -> User | None:
     user = db.get_by_oidc_subject(claims.subject)
 
     # 2. Fallback: email-matching (migratie van lokale user)
+    #    Alleen koppelen als er PRECIES één user met dit emailadres is.
+    #    Bij meerdere matches is niet duidelijk welke user bedoeld is.
     if user is None and claims.email:
-        user = db.get_by_email(claims.email)
-        if user is not None:
+        email_matches = db.get_all_by_email(claims.email)
+        if len(email_matches) == 1:
+            user = email_matches[0]
             # Koppel bestaande lokale user aan OIDC
             db.update(
                 user.id,
@@ -211,6 +214,13 @@ def _authenticate_via_oidc(token: str) -> User | None:
                 "Lokale user '%s' gekoppeld aan OIDC subject %s",
                 user.username,
                 claims.subject,
+            )
+        elif len(email_matches) > 1:
+            logger.warning(
+                "OIDC email '%s' matcht %d users — auto-koppeling overgeslagen. "
+                "Koppel handmatig via oidc_subject.",
+                claims.email,
+                len(email_matches),
             )
 
     # 3. Auto-provisioning: maak nieuwe user aan

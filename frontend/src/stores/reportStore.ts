@@ -637,6 +637,8 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
       _future: [],
       canUndo: false,
       canRedo: false,
+      serverReportId: null,
+      serverProjectId: null,
     });
   },
 
@@ -654,6 +656,8 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
       _future: [],
       canUndo: false,
       canRedo: false,
+      serverReportId: null,
+      serverProjectId: null,
     });
   },
 

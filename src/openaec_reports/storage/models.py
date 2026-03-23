@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import sqlite3
 import uuid
 from dataclasses import dataclass, field
@@ -549,17 +550,31 @@ class ReportDB:
     # Bestandssysteem helpers
     # ================================================================
 
+    _SAFE_ID = re.compile(r"^[a-zA-Z0-9_-]+$")
+
     def _report_path(self, user_id: str, report_id: str) -> Path:
         """Pad naar rapport JSON bestand.
 
+        Valideert dat IDs geen path traversal componenten bevatten
+        en dat het resulterende pad binnen reports_dir blijft.
+
         Args:
-            user_id: User UUID.
-            report_id: Rapport UUID.
+            user_id: User identifier.
+            report_id: Rapport identifier.
 
         Returns:
             Path naar het JSON bestand.
+
+        Raises:
+            ValueError: Bij ongeldig ID formaat of path traversal.
         """
-        return self.reports_dir / user_id / f"{report_id}.json"
+        if not self._SAFE_ID.match(user_id) or not self._SAFE_ID.match(report_id):
+            raise ValueError("Ongeldig ID formaat")
+        path = self.reports_dir / user_id / f"{report_id}.json"
+        # Verifieer dat resolved pad binnen reports_dir blijft
+        if not path.resolve().is_relative_to(self.reports_dir.resolve()):
+            raise ValueError("Pad buiten reports directory")
+        return path
 
     def _write_report_json(
         self,

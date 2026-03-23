@@ -290,11 +290,20 @@ class TemplateLoader:
     def _resolve_path(self, name: str) -> Path:
         """Resolve template naam naar bestandspad.
 
-        Zoekt in alle directories (tenant eerst). Bij niet gevonden,
-        retourneer het pad in de eerste directory (voor foutmelding).
+        Met tenant_slug: zoekt ALLEEN in de eerste directory (tenant dir).
+        Zonder tenant_slug: zoekt in alle directories (backward compat).
+
+        Bij niet gevonden, retourneer het pad in de eerste directory
+        (voor foutmelding).
         """
         filename = name if name.endswith(".yaml") else f"{name}.yaml"
-        for tdir in self._templates_dirs:
+
+        # Met tenant: alleen eigen tenant directory (= eerste dir)
+        dirs_to_search = self._templates_dirs
+        if self._tenant_slug and len(self._templates_dirs) > 1:
+            dirs_to_search = self._templates_dirs[:1]
+
+        for tdir in dirs_to_search:
             candidate = tdir / filename
             if candidate.exists():
                 return candidate

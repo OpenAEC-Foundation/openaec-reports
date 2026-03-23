@@ -9,61 +9,34 @@
 
 Volledige code review uitgevoerd. Bevindingen per prioriteit:
 
-### SEC-K: Kritiek — Direct fixen
+### SEC-K: Kritiek — GEFIXT (23 maart)
 
-- [ ] **SEC-K1** — `load()` / `_resolve_path()` bypass tenant-isolatie (template_loader.py + brand.py)
-  - `list_templates()` en `list_brands()` filteren correct op tenant
-  - Maar `load()` en `_resolve_path()` zoeken nog in ALLE directories
-  - Een user kan templates/brands laden van andere tenants als de naam bekend is
-  - **Fix:** `_resolve_path()` dezelfde tenant-logica geven als `list_templates()`:
-    - Met `tenant_slug` → alleen eerste directory (tenant dir) doorzoeken
-    - Zonder tenant_slug → backward compat (alle dirs)
-  - **Bestanden:** `core/template_loader.py:_resolve_path()`, `core/brand.py:load()+_resolve_path()`
-  - **Test:** Schrijf test die verifieert dat `loader.load("other_tenant_template")` faalt
+- [x] **SEC-K1** — `load()` / `_resolve_path()` tenant-isolatie
+  - Fix: `_resolve_path()` in template_loader.py en brand.py respecteert nu `tenant_slug`
+  - Met tenant: alleen eigen tenant directory doorzoeken, geen fallback naar andere tenants
+  - 5 unit tests in `test_security_fixes.py`
 
-- [ ] **SEC-K2** — Brand-override in generate endpoints niet gevalideerd
-  - `/api/generate` en `/api/generate/v2` accepteren `data.get("brand")` uit request body
-  - User kan elke brand opgeven (bijv. `{"brand": "concurrent_bedrijf"}`)
-  - Geeft toegang tot andermans branding, logo's, fonts, stationery
-  - **Fix:** Valideer dat `brand == user.tenant` of reject met 403:
-    ```python
-    brand = data.get("brand")
-    if brand and user.tenant and brand != user.tenant:
-        raise HTTPException(403, "Brand niet toegestaan voor deze tenant")
-    brand = brand or user.tenant or _DEFAULT_BRAND
-    ```
-  - **Bestanden:** `api.py` regels 367-372 (`generate_report`) en 441-446 (`generate_report_v2`)
+- [x] **SEC-K2** — Brand-override in generate endpoints
+  - Fix: `_resolve_brand_with_tenant_check()` helper in api.py
+  - Alle 3 generate endpoints (`/generate`, `/generate/v2`, `/generate/template`) gebruiken de check
+  - Expliciete brand die niet matcht met user.tenant → 403
+  - 2 tests in `test_security_fixes.py`
 
-- [ ] **SEC-K3** — Upload endpoint accepteert elk bestandstype
-  - `/api/upload` heeft geen allowlist voor extensies, geen size limit
-  - User kan `.exe`, `.php`, `.sh` etc. uploaden
-  - **Fix:** Allowlist + size limit toevoegen:
-    ```python
-    ALLOWED_UPLOAD_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.pdf'}
-    MAX_UPLOAD_SIZE = 10_485_760  # 10 MB
-    ```
-  - **Bestand:** `api.py` regels 600-622
+- [x] **SEC-K3** — Upload endpoint bestandstype + size validatie
+  - Fix: Allowlist extensies (.jpg, .jpeg, .png, .gif, .webp, .svg, .pdf) + max 10 MB
+  - Ongeldige extensie → 400, te groot → 413
+  - 6 tests in `test_security_fixes.py`
 
-- [ ] **SEC-K4** — Path traversal in rapport opslag
-  - `_report_path()` valideert niet dat `user_id` en `report_id` veilige padcomponenten zijn
-  - `user_id = "../../etc"` zou buiten `reports_dir` kunnen schrijven
-  - **Fix:** Valideer dat IDs alleen hex-karakters bevatten (UUID formaat):
-    ```python
-    import re
-    _SAFE_ID = re.compile(r'^[a-f0-9]+$')
-    def _report_path(self, user_id, report_id):
-        if not _SAFE_ID.match(user_id) or not _SAFE_ID.match(report_id):
-            raise ValueError("Ongeldig ID formaat")
-        return self.reports_dir / user_id / f"{report_id}.json"
-    ```
-  - **Bestand:** `storage/models.py` regels 552-562
+- [x] **SEC-K4** — Path traversal in rapport opslag
+  - Fix: `_SAFE_ID` regex (`^[a-zA-Z0-9_-]+$`) + `is_relative_to()` check in `_report_path()`
+  - `../` en `/` in IDs → ValueError
+  - 5 tests in `test_security_fixes.py`
 
-- [ ] **SEC-K5** — Brand API sessies zonder tenant/user isolatie
-  - `/api/brand/diff/{session_id}/*` endpoints controleren alleen session_id
-  - Geen verificatie dat de aanvrager ook de sessie-eigenaar is
-  - Session IDs zijn hex strings → brute-forceable
-  - **Fix:** Session opslaan met `user_id`, bij elk verzoek eigendom checken
-  - **Bestand:** `brand_api.py` alle endpoints met `{session_id}`
+- [x] **SEC-K5** — Brand sessies user-isolatie
+  - Fix: `owner_id` opgeslagen in session metadata bij creatie
+  - `verify_owner()` methode op BrandSession, aangeroepen in alle 7 session endpoints
+  - Andere user → 403
+  - 3 tests in `test_security_fixes.py`
 
 ### SEC-H: Hoog — Snel oppakken
 

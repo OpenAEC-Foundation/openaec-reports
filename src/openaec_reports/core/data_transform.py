@@ -10,6 +10,30 @@ from __future__ import annotations
 
 from typing import Any
 
+# Vaste inhoudsopgave voor BIC Rapport templates.
+# De BIC Rapportage heeft altijd dezelfde hoofdstukindeling.
+_BIC_RAPPORT_TOC: dict[str, str] = {
+    "item_1": "1  Locatie",
+    "item_2": "2  Voorziening",
+    "item_3": "3  Object",
+    "item_4": "4  Bedrijfsinterne controle (BIC)",
+    "item_5": "5  Herstelwerkzaamheden",
+    "item_6": "6  Tekeningen",
+    "item_6_1": "6.1  Regionale overzichtstekening",
+    "item_6_2": "6.2  Detailtekening",
+    "item_6_3": "6.3  Kadastrale kaart",
+    "item_7": "7  Onderhoudsdossier",
+    "item_7_1": "7.1  Controlelijst BIC",
+    "item_7_2": "7.2  Historie",
+    "item_7_2_1": "7.2.1  BIC controles",
+    "item_7_2_2": "7.2.2  Herstelwerkzaamheden",
+    "item_7_2_3": "7.2.3  Onderhouds- en inspectieoverzicht",
+    "item_8": "8  Bijlagen",
+    "item_8_1": "8.1  Fotobijlage",
+    "item_8_2": "8.2  Certificaten",
+    "item_8_3": "8.3  Overige documenten",
+}
+
 
 def _is_already_flat(data: dict[str, Any]) -> bool:
     """Detecteer of de JSON data al in flat engine formaat is.
@@ -40,9 +64,12 @@ def transform_json_to_engine_data(raw: dict[str, Any]) -> dict[str, Any]:
         Flat dict geschikt voor ``TemplateEngine.build(data=...)``.
     """
     if _is_already_flat(raw):
+        _inject_toc_if_needed(raw, raw)
         return raw
 
-    return _transform_nested(raw)
+    result = _transform_nested(raw)
+    _inject_toc_if_needed(result, raw)
+    return result
 
 
 def _transform_nested(raw: dict[str, Any]) -> dict[str, Any]:
@@ -169,6 +196,31 @@ def _transform_nested(raw: dict[str, Any]) -> dict[str, Any]:
         "detail_items": detail_items,
         "objecten": objecten,
     }
+
+
+def _inject_toc_if_needed(
+    result: dict[str, Any], raw: dict[str, Any]
+) -> None:
+    """Injecteer statische TOC data voor BIC Rapport templates.
+
+    BIC Rapporten hebben een vaste inhoudsopgave. De template definieert
+    text_zones (toc.item_1 t/m toc.item_8_3) maar de data moet ook de
+    bijbehorende waarden bevatten.
+
+    Muteert ``result`` in-place. Skipt als er al een ``toc`` dict met
+    ``item_*`` keys aanwezig is.
+    """
+    template = raw.get("template", "")
+    if "bic_rapport" not in template:
+        return
+
+    existing_toc = result.get("toc", {})
+    if isinstance(existing_toc, dict) and any(
+        k.startswith("item_") for k in existing_toc
+    ):
+        return
+
+    result["toc"] = dict(_BIC_RAPPORT_TOC)
 
 
 def _parse_bic_sections(sections: list[dict]) -> tuple[dict, dict, dict]:

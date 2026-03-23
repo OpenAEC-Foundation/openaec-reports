@@ -15,6 +15,7 @@ import type {
 import { createDefaultReport, createDefaultSection, createDefaultAppendix, createDefaultBlock } from '@/utils/defaults';
 import { toEditorReport, toReportDefinition } from '@/utils/conversion';
 import { generateId } from '@/utils/idGenerator';
+import { useAuthStore } from '@/stores/authStore';
 
 // ---------- Validation result ----------
 
@@ -699,6 +700,7 @@ useReportStore.subscribe((state, prev) => {
           savedAt: new Date().toISOString(),
           serverReportId: state.serverReportId,
           serverProjectId: state.serverProjectId,
+          userId: useAuthStore.getState().user?.id ?? null,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         useReportStore.setState({ lastSavedAt: data.savedAt });

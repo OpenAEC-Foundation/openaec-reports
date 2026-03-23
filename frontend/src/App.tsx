@@ -57,14 +57,19 @@ export function App() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        const { report: savedReport, savedAt, serverReportId, serverProjectId } = JSON.parse(saved);
+        const { report: savedReport, savedAt, serverReportId, serverProjectId, userId } = JSON.parse(saved);
         if (savedReport?.template && savedReport?.project) {
           loadReport(savedReport as ReportDefinition);
+          // Alleen server IDs herstellen als ze van dezelfde user zijn
+          const sameUser = userId === user.id;
           useReportStore.setState({
             lastSavedAt: savedAt ?? null,
-            serverReportId: serverReportId ?? null,
-            serverProjectId: serverProjectId ?? null,
+            serverReportId: sameUser ? (serverReportId ?? null) : null,
+            serverProjectId: sameUser ? (serverProjectId ?? null) : null,
           });
+          if (!sameUser && (serverReportId || serverProjectId)) {
+            console.log("Server IDs genegeerd — andere gebruiker");
+          }
           console.log(`Rapport hersteld van ${savedAt}`);
           return;
         }

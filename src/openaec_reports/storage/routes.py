@@ -244,13 +244,6 @@ async def save_report(
         Rapport metadata.
     """
     body = await request.json()
-    logger.info(
-        "save_report: user=%s, body keys=%s, id=%r",
-        user.id,
-        list(body.keys()),
-        body.get("id"),
-    )
-
     title = body.get("title", "").strip()
     if not title:
         raise HTTPException(
@@ -271,19 +264,18 @@ async def save_report(
     report_id = body.get("id", "")
     if report_id:
         existing = db.get_report_meta(report_id)
-        logger.info(
-            "save_report: ownership check report_id=%r, existing=%s, "
-            "existing.user_id=%s vs user.id=%s",
-            report_id,
-            existing is not None,
-            existing.user_id if existing else "N/A",
-            user.id,
-        )
         if existing and existing.user_id != user.id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Geen toegang tot dit rapport",
+            # Stale ID uit localStorage van een andere gebruiker/sessie.
+            # Behandel als nieuw rapport in plaats van 403 — het oude
+            # rapport wordt niet gewijzigd.
+            logger.info(
+                "save_report: stale report_id %s (eigendom %s, huidig %s) "
+                "→ opslaan als nieuw rapport",
+                report_id,
+                existing.user_id,
+                user.id,
             )
+            report_id = ""
 
     meta = ReportMeta(
         id=report_id if report_id else None,  # None → auto-generate

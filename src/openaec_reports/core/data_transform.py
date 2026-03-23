@@ -65,10 +65,12 @@ def transform_json_to_engine_data(raw: dict[str, Any]) -> dict[str, Any]:
     """
     if _is_already_flat(raw):
         _inject_toc_if_needed(raw, raw)
+        _inject_location_labels(raw)
         return raw
 
     result = _transform_nested(raw)
     _inject_toc_if_needed(result, raw)
+    _inject_location_labels(result)
     return result
 
 
@@ -124,13 +126,17 @@ def _transform_nested(raw: dict[str, Any]) -> dict[str, Any]:
                     "address": cl.get("address", ""),
                     "postcode_plaats": cl.get("city", ""),
                 }
+                provision = loc.get("provision", "")
+                obj = loc.get("object", "")
                 location_data = {
                     "name": loc.get("name", ""),
                     "address": loc.get("address", ""),
                     "postcode_plaats": loc.get("city", ""),
                     "code": loc.get("code", ""),
-                    "provision": loc.get("provision", ""),
-                    "object": loc.get("object", ""),
+                    "provision": provision,
+                    "provision_label": "Voorziening" if provision else "",
+                    "object": obj,
+                    "object_label": "Object" if obj else "",
                 }
 
             elif block_type == "bic_table":
@@ -221,6 +227,22 @@ def _inject_toc_if_needed(
         return
 
     result["toc"] = dict(_BIC_RAPPORT_TOC)
+
+
+def _inject_location_labels(result: dict[str, Any]) -> None:
+    """Voeg dynamische labels toe aan location dict indien nodig.
+
+    De locatie page_type bindt op ``location.provision_label`` en
+    ``location.object_label``. Deze worden alleen getoond als de
+    bijbehorende waarde niet leeg is.
+    """
+    loc = result.get("location")
+    if not isinstance(loc, dict):
+        return
+    if "provision_label" not in loc and loc.get("provision"):
+        loc["provision_label"] = "Voorziening"
+    if "object_label" not in loc and loc.get("object"):
+        loc["object_label"] = "Object"
 
 
 def _parse_bic_sections(sections: list[dict]) -> tuple[dict, dict, dict]:

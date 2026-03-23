@@ -241,6 +241,27 @@ class UserDB:
             ).fetchone()
             return self._row_to_user(row) if row else None
 
+    def get_all_by_email(self, email: str) -> list[User]:
+        """Zoek alle users met een bepaald e-mailadres.
+
+        Nodig voor OIDC email-fallback: alleen koppelen als er
+        precies één match is.
+
+        Args:
+            email: E-mailadres.
+
+        Returns:
+            Lijst van gevonden Users (kan leeg zijn).
+        """
+        if not email:
+            return []
+        with self._get_connection() as conn:
+            rows = conn.execute(
+                "SELECT * FROM users WHERE email = ? COLLATE NOCASE",
+                (email,),
+            ).fetchall()
+            return [self._row_to_user(row) for row in rows]
+
     def create(self, user: User) -> User:
         """Maak een nieuwe user aan.
 

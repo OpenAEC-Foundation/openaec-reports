@@ -287,6 +287,10 @@ class TemplateLoader:
             "metadata": {},
         }
 
+        # BIC Rapport: voeg flat data-dicts toe voor fixed page_types
+        if config.report_type == "bic_rapport":
+            scaffold.update(self._build_bic_flat_data())
+
         return scaffold
 
     def _build_scaffold_sections(
@@ -374,6 +378,34 @@ class TemplateLoader:
                 "content": [],
             },
         ]
+
+    @staticmethod
+    def _build_bic_flat_data() -> dict[str, Any]:
+        """Lege flat data-dicts voor BIC Rapport fixed page_types."""
+        return {
+            "voorziening": {
+                "code": "",
+                "beschrijving": "",
+                "vereiste_status": "",
+                "huidige_status": "",
+                "notitie": "",
+                "foto": "",
+            },
+            "object": {
+                "code": "",
+                "beschrijving": "",
+                "ruimte": "",
+                "type": "",
+            },
+            "vvv": {
+                "geldigheid": "",
+                "nummer": "",
+                "instantie": "",
+                "opmerkingen": "",
+                "onderhoudsdossier_ref": "",
+                "bijlage_ref": "",
+            },
+        }
 
     def _resolve_path(self, name: str) -> Path:
         """Resolve template naam naar bestandspad.

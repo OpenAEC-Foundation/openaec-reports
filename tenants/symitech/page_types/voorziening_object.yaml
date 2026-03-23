@@ -15,36 +15,36 @@ stationery: content_portrait_stationery.pdf
 line_zones:
   # --- Sectie "Voorziening details" dubbele lijn ---
   - x0_mm: 17.5
-    y_mm: 41.3
+    y_mm: 42.05
     x1_mm: 80.2
     width_pt: 0.75
     color: "primary"
   - x0_mm: 17.5
-    y_mm: 42.2
+    y_mm: 42.95
     x1_mm: 80.2
     width_pt: 3.0
     color: "primary"
 
   # --- Sectie "Object details" dubbele lijn ---
   - x0_mm: 17.5
-    y_mm: 87.8
+    y_mm: 88.55
     x1_mm: 80.2
     width_pt: 0.75
     color: "primary"
   - x0_mm: 17.5
-    y_mm: 88.7
+    y_mm: 89.45
     x1_mm: 80.2
     width_pt: 3.0
     color: "primary"
 
   # --- Sectie "VVV" dubbele lijn ---
   - x0_mm: 17.5
-    y_mm: 117.8
+    y_mm: 118.55
     x1_mm: 80.2
     width_pt: 0.75
     color: "primary"
   - x0_mm: 17.5
-    y_mm: 118.7
+    y_mm: 119.45
     x1_mm: 80.2
     width_pt: 3.0
     color: "primary"

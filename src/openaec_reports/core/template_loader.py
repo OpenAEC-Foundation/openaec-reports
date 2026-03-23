@@ -264,6 +264,8 @@ class TemplateLoader:
             "enabled": backcover_raw.get("enabled", True) if backcover_raw else False,
         }
 
+        sections = self._build_scaffold_sections(config)
+
         scaffold: dict[str, Any] = {
             "template": name,
             "format": config.format,
@@ -280,12 +282,98 @@ class TemplateLoader:
             "cover": cover,
             "colofon": colofon,
             "toc": toc,
-            "sections": [],
+            "sections": sections,
             "backcover": backcover,
             "metadata": {},
         }
 
         return scaffold
+
+    def _build_scaffold_sections(
+        self, config: TemplateConfig
+    ) -> list[dict[str, Any]]:
+        """Genereer default secties op basis van het template type.
+
+        BIC Rapport templates krijgen vaste secties die corresponderen met
+        de page_types in de YAML. Overige templates retourneren een lege
+        lijst (gebruiker voegt zelf secties toe).
+        """
+        if config.report_type != "bic_rapport":
+            return []
+
+        return [
+            {
+                "title": "Locatie",
+                "content": [
+                    {
+                        "type": "location_detail",
+                        "client": {
+                            "section_title": "Opdrachtgever",
+                            "name": "",
+                            "address": "",
+                            "city": "",
+                        },
+                        "location": {
+                            "section_title": "Locatie van uitvoer",
+                            "name": "",
+                            "address": "",
+                            "city": "",
+                            "code": "",
+                            "provision": "",
+                            "object": "",
+                        },
+                    }
+                ],
+            },
+            {
+                "title": "BIC Controles",
+                "content": [
+                    {
+                        "type": "bic_table",
+                        "location_name": "",
+                        "sections": [
+                            {
+                                "title": "BIC Controles",
+                                "rows": [],
+                            },
+                            {
+                                "title": "Reinigen tijdens BIC",
+                                "rows": [],
+                            },
+                            {
+                                "title": "Additioneel tijdens BIC",
+                                "rows": [],
+                            },
+                        ],
+                        "summary": {
+                            "title": "Overzicht samenvatting",
+                            "rows": [],
+                            "total": {
+                                "label": "Totaal excl. BTW",
+                                "ref_value": "",
+                                "actual_value": "",
+                            },
+                        },
+                    }
+                ],
+            },
+            {
+                "title": "Herstelwerkzaamheden",
+                "content": [],
+            },
+            {
+                "title": "Tekeningen",
+                "content": [],
+            },
+            {
+                "title": "Onderhoudsdossier",
+                "content": [],
+            },
+            {
+                "title": "Bijlagen",
+                "content": [],
+            },
+        ]
 
     def _resolve_path(self, name: str) -> Path:
         """Resolve template naam naar bestandspad.

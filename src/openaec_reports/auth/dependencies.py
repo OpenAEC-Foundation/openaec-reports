@@ -235,7 +235,7 @@ def _authenticate_via_oidc(token: str) -> User | None:
             email=claims.email,
             display_name=claims.name,
             role=UserRole.user,
-            tenant=claims.tenant,
+            tenant="",  # Admin wijst tenant toe na provisioning
             is_active=True,
             hashed_password=hash_password(uuid.uuid4().hex),  # Random, niet bruikbaar
             phone=claims.phone,
@@ -274,8 +274,9 @@ def _authenticate_via_oidc(token: str) -> User | None:
         sync_fields["registration_number"] = claims.registration_number
     if claims.company and claims.company != user.company:
         sync_fields["company"] = claims.company
-    if claims.tenant and claims.tenant != user.tenant:
-        sync_fields["tenant"] = claims.tenant
+    # Tenant wordt NIET gesynct vanuit OIDC — dat is een app-level
+    # instelling die door de admin wordt beheerd in de database.
+    # Authentik stuurt geen betrouwbare tenant claim.
 
     if sync_fields:
         db.update(user.id, **sync_fields)

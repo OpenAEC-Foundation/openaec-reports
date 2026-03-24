@@ -26,6 +26,10 @@ pages:
     orientation: portrait
 
   - type: fixed
+    page_type: bic_controles
+    orientation: portrait
+
+  - type: fixed
     page_type: herstelwerkzaamheden
     orientation: portrait
 

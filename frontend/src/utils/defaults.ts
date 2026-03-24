@@ -39,6 +39,8 @@ export function createDefaultReport(): EditorReport {
     appendices: [],
     backcover: { enabled: true },
     metadata: {},
+    field_groups: [],
+    flat_data: {},
   };
 }
 

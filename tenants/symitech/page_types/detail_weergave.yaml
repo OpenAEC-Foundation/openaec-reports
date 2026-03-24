@@ -1,113 +1,68 @@
-# Symitech BIC Factuur — detail weergave (landscape)
-# Pixel-exact uit extraction_results.json content_landscape + 1.0mm y-correctie
-# Pagina: A4 landscape 841.9×595.3pt (297×210mm)
-#
-# === REFERENTIE KOLOM X-POSITIES (left-aligned) ===
-# BIC Controle nummer: x0=62.2pt  → 21.9mm
-# Type:                x0=182.5pt → 64.4mm  (gap: 42.5mm)
-# Datum:               x0=288.9pt → 101.9mm (gap: 37.5mm)
-# BIC controle:        x0=338.0pt → 119.2mm (gap: 17.3mm)
-# Int. inspectie:      x0=399.4pt → 140.9mm (gap: 21.7mm)
-# Reiniging:           x0=466.1pt → 164.4mm (gap: 23.5mm)
-# Additioneel:         x0=515.7pt → 181.9mm (gap: 17.5mm)
-#
-# === LIJN PATRONEN ===
-# Boven headers (kort):     0.75pt+3.0pt, x=56.7→204.5pt (20.0→72.1mm)
-# Onder headers (full-width): 3.0pt+0.75pt, x=56.7→810.7pt (20.0→286.1mm)
-
 name: detail_weergave
 stationery: content_landscape_stationery.pdf
-
-# ============================================================
-# Decoratieve lijnen (+1.0mm y-correctie)
-# ============================================================
 line_zones:
-  # --- Dubbele lijn BOVEN kolom headers (kort, sectietitel) ---
-  # Ref: y=99.6pt → 35.1mm + 1.0 = 36.1mm (dun)
-  - x0_mm: 20.0
-    y_mm: 36.1
-    x1_mm: 72.1
-    width_pt: 0.75
-    color: "primary"
-  # Ref: y=102.2pt → 36.1mm + 1.0 = 37.1mm (dik)
-  - x0_mm: 20.0
-    y_mm: 37.1
-    x1_mm: 72.1
-    width_pt: 3.0
-    color: "primary"
-
-  # --- Dubbele lijn ONDER kolom headers (FULL WIDTH) ---
-  - x0_mm: 20.0
-    y_mm: 43.2
-    x1_mm: 286.1
-    width_pt: 3.0
-    color: "primary"
-  - x0_mm: 20.0
-    y_mm: 44.1
-    x1_mm: 286.1
-    width_pt: 0.75
-    color: "primary"
-
-# ============================================================
-# Tekst zones (+1.0mm behalve footer)
-# ============================================================
+- x0_mm: 20.0
+  y_mm: 36.1
+  x1_mm: 72.1
+  width_pt: 0.75
+  color: primary
+- x0_mm: 20.0
+  y_mm: 37.1
+  x1_mm: 72.1
+  width_pt: 3.0
+  color: primary
+- x0_mm: 20.0
+  y_mm: 43.2
+  x1_mm: 286.1
+  width_pt: 3.0
+  color: primary
+- x0_mm: 20.0
+  y_mm: 44.1
+  x1_mm: 286.1
+  width_pt: 0.75
+  color: primary
 text_zones:
-  # Sectietitel: "Detail weergave*"
-  # Ref: x0=62.2 y0=88.0pt → 31.0 + 1.0 = 32.0mm
-  - bind: _static.Detail weergave*
-    x_mm: 21.9
-    y_mm: 32.0
-    font: heading
-    size: 10
-    color: "secondary"
-
-  # [LOCATIENAAM] rechtsboven
-  - bind: location.name
-    x_mm: 275.0
-    y_mm: 32.0
-    font: heading
-    size: 10
-    color: "primary"
-    align: right
-
-  # Footnote net onder tabel (max_y_mm + marge)
-  - bind: _static.* Detail weergave exclusief reiskosten. Reiskosten zijn gebaseerd op het aantal unieke dagen met activiteiten op de locatie. Zie ook pagina 2 voor reiskosten overzicht.
-    x_mm: 21.9
-    y_mm: 174.0
-    font: body
-    size: 8
-    color: "secondary"
-    max_width_mm: 260
-
-  # === Footer (NIET verschoven) ===
-  - bind: client.name
-    x_mm: 13.5
-    y_mm: 185.0
-    font: heading
-    size: 10
-    color: "white"
-
-  - bind: _page_number
-    x_mm: 229.2
-    y_mm: 186.5
-    font: heading
-    size: 12
-    color: "white"
-    align: right
-
-  - bind: meta.rapportkop_locatie
-    x_mm: 13.5
-    y_mm: 193.1
-    font: heading
-    size: 10
-    color: "white"
-
-# ============================================================
-# Tabel configuratie
-# ============================================================
-# BELANGRIJK: field names moeten EXACT matchen met de header strings
-# uit de JSON, want data_transform gebruikt headers als dict keys.
-# ============================================================
+- bind: _static.Detail weergave*
+  x_mm: 21.9
+  y_mm: 32.0
+  font: heading
+  size: 10
+  color: secondary
+- bind: location.name
+  x_mm: 275.0
+  y_mm: 32.0
+  font: heading
+  size: 10
+  color: primary
+  align: right
+  max_width_mm: 63
+- bind: _static.* Detail weergave exclusief reiskosten. Reiskosten zijn gebaseerd op het aantal unieke dagen met activiteiten
+    op de locatie. Zie ook pagina 2 voor reiskosten overzicht.
+  x_mm: 21.9
+  y_mm: 174.0
+  font: body
+  size: 8
+  color: secondary
+  max_width_mm: 260
+- bind: client.name
+  x_mm: 13.5
+  y_mm: 185.0
+  font: heading
+  size: 10
+  color: white
+- bind: _page_number
+  x_mm: 229.2
+  y_mm: 186.5
+  font: heading
+  size: 12
+  color: white
+  align: right
+- bind: meta.rapportkop_locatie
+  x_mm: 13.5
+  y_mm: 193.1
+  font: heading
+  size: 10
+  color: white
 table:
   data_bind: detail_items
   origin:
@@ -118,22 +73,36 @@ table:
   show_header: true
   header_font: heading
   header_size: 8
-  header_color: "secondary"
+  header_color: secondary
   body_font: body
   body_size: 8
-  body_color: "text"
+  body_color: text
   columns:
-    # Ref: x0=62.2pt (21.9mm), gap tot volgende: 42.5mm
-    - { field: "BIC Controle nummer", header: "BIC Controle nummer", width_mm: 42, align: left }
-    # Ref: x0=182.5pt (64.4mm), gap: 37.5mm
-    - { field: "Type", header: "Type", width_mm: 38, align: left }
-    # Ref: x0=288.9pt (101.9mm), gap: 17.3mm
-    - { field: "Datum", header: "Datum", width_mm: 17, align: left }
-    # Ref: x0=338.0pt (119.2mm), gap: 21.7mm
-    - { field: "BIC controle", header: "BIC controle", width_mm: 22, align: center }
-    # Ref: x0=399.4pt (140.9mm), gap: 23.5mm
-    - { field: "Int. inspectie", header: "Int. inspectie", width_mm: 24, align: center }
-    # Ref: x0=466.1pt (164.4mm), gap: 17.5mm
-    - { field: "Reiniging", header: "Reiniging", width_mm: 18, align: center }
-    # Ref: x0=515.7pt (181.9mm), rest van pagina
-    - { field: "Additioneel", header: "Additioneel", width_mm: 100, align: left }
+  - field: BIC Controle nummer
+    header: BIC Controle nummer
+    width_mm: 42
+    align: left
+  - field: Type
+    header: Type
+    width_mm: 38
+    align: left
+  - field: Datum
+    header: Datum
+    width_mm: 17
+    align: left
+  - field: BIC controle
+    header: BIC controle
+    width_mm: 22
+    align: center
+  - field: Int. inspectie
+    header: Int. inspectie
+    width_mm: 24
+    align: center
+  - field: Reiniging
+    header: Reiniging
+    width_mm: 18
+    align: center
+  - field: Additioneel
+    header: Additioneel
+    width_mm: 100
+    align: left

@@ -142,6 +142,29 @@ def _resolve_color(color_ref: str, brand) -> HexColor:
     return HexColor(hex_val)
 
 
+def _wrap_text(text: str, font_name: str, font_size: float, max_width_pt: float) -> list[str]:
+    """Breek tekst af in regels die binnen max_width_pt passen."""
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+
+    words = text.split()
+    if not words:
+        return [text]
+
+    lines: list[str] = []
+    current_line = words[0]
+
+    for word in words[1:]:
+        test = current_line + " " + word
+        if stringWidth(test, font_name, font_size) <= max_width_pt:
+            current_line = test
+        else:
+            lines.append(current_line)
+            current_line = word
+
+    lines.append(current_line)
+    return lines
+
+
 def _draw_text_zones(
     canvas,
     text_zones: list[TextZone],
@@ -190,12 +213,26 @@ def _draw_text_zones(
         canvas.setFont(font_name, zone.size)
         canvas.setFillColor(color)
 
-        if zone.align == "right":
-            canvas.drawRightString(x, rl_y, text)
-        elif zone.align == "center":
-            canvas.drawCentredString(x, rl_y, text)
+        if zone.max_width_mm is not None:
+            # Multi-line: wrap tekst binnen max_width
+            max_w_pt = zone.max_width_mm * MM_TO_PT
+            lines = _wrap_text(text, font_name, zone.size, max_w_pt)
+            line_h = zone.line_height_mm * MM_TO_PT
+            for i, line in enumerate(lines):
+                ly = rl_y - (i * line_h)
+                if zone.align == "right":
+                    canvas.drawRightString(x, ly, line)
+                elif zone.align == "center":
+                    canvas.drawCentredString(x, ly, line)
+                else:
+                    canvas.drawString(x, ly, line)
         else:
-            canvas.drawString(x, rl_y, text)
+            if zone.align == "right":
+                canvas.drawRightString(x, rl_y, text)
+            elif zone.align == "center":
+                canvas.drawCentredString(x, rl_y, text)
+            else:
+                canvas.drawString(x, rl_y, text)
 
         canvas.restoreState()
 

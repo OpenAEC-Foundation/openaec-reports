@@ -1,374 +1,303 @@
-# Symitech BIC Rapportage — Voorziening + Object details (pagina 4)
-# Pixel-exact gemeten uit 336.01-BIC Rapportage.pdf
-# Pagina: A4 portrait 595.3×841.9pt (210×297mm)
-#
-# Layout: twee hoofdstukken op 1 pagina
-#   "2 Voorziening" — details + VVV
-#   "3 Object" — details + foto
-# Labels: x0=55.2pt (19.5mm), heading, secondary
-# Waarden: x0=374.4pt (132.1mm), body, text
-# Dubbele lijnen: (49.7→227.2pt) = (17.5→80.2mm)
-
 name: voorziening_object
 stationery: content_portrait_stationery.pdf
-
 line_zones:
-  # --- Sectie "Voorziening details" dubbele lijn ---
-  - x0_mm: 17.5
-    y_mm: 42.05
-    x1_mm: 80.2
-    width_pt: 0.75
-    color: "primary"
-  - x0_mm: 17.5
-    y_mm: 42.95
-    x1_mm: 80.2
-    width_pt: 3.0
-    color: "primary"
-
-  # --- Sectie "Object details" dubbele lijn ---
-  - x0_mm: 17.5
-    y_mm: 88.55
-    x1_mm: 80.2
-    width_pt: 0.75
-    color: "primary"
-  - x0_mm: 17.5
-    y_mm: 89.45
-    x1_mm: 80.2
-    width_pt: 3.0
-    color: "primary"
-
-  # --- Sectie "VVV" dubbele lijn ---
-  - x0_mm: 17.5
-    y_mm: 118.55
-    x1_mm: 80.2
-    width_pt: 0.75
-    color: "primary"
-  - x0_mm: 17.5
-    y_mm: 119.45
-    x1_mm: 80.2
-    width_pt: 3.0
-    color: "primary"
-
+- x0_mm: 17.5
+  y_mm: 42.05
+  x1_mm: 80.2
+  width_pt: 0.75
+  color: primary
+- x0_mm: 17.5
+  y_mm: 42.95
+  x1_mm: 80.2
+  width_pt: 3.0
+  color: primary
+- x0_mm: 17.5
+  y_mm: 88.55
+  x1_mm: 80.2
+  width_pt: 0.75
+  color: primary
+- x0_mm: 17.5
+  y_mm: 89.45
+  x1_mm: 80.2
+  width_pt: 3.0
+  color: primary
+- x0_mm: 17.5
+  y_mm: 118.55
+  x1_mm: 80.2
+  width_pt: 0.75
+  color: primary
+- x0_mm: 17.5
+  y_mm: 119.45
+  x1_mm: 80.2
+  width_pt: 3.0
+  color: primary
 text_zones:
-  # ========== HOOFDSTUK 2: Voorziening ==========
-  # ref: "2" x0=49.8pt y0=91.2pt  14pt primary
-  - bind: _static.2
-    x_mm: 17.6
-    y_mm: 32.2
-    font: heading
-    size: 14
-    color: "primary"
-
-  - bind: _static.Voorziening
-    x_mm: 25.2
-    y_mm: 32.2
-    font: heading
-    size: 14
-    color: "primary"
-
-  # --- Sectie: Voorziening details ---
-  # ref: "Voorziening details" x0=55.2pt y0=109.5pt
-  - bind: _static.Voorziening details
-    x_mm: 19.5
-    y_mm: 38.6
-    font: heading
-    size: 10
-    color: "secondary"
-
-  # Code
-  - bind: _static.Code
-    x_mm: 19.5
-    y_mm: 44.3
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: voorziening.code
-    x_mm: 132.1
-    y_mm: 44.3
-    font: body
-    size: 10
-    color: "text"
-
-  # Beschrijving
-  - bind: _static.Beschrijving
-    x_mm: 19.5
-    y_mm: 48.4
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: voorziening.beschrijving
-    x_mm: 132.1
-    y_mm: 48.4
-    font: body
-    size: 10
-    color: "text"
-
-  # Vereiste status
-  - bind: _static.Vereiste status
-    x_mm: 19.5
-    y_mm: 52.4
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: voorziening.vereiste_status
-    x_mm: 132.1
-    y_mm: 52.4
-    font: body
-    size: 10
-    color: "text"
-
-  # Huidige status
-  - bind: _static.Huidige status
-    x_mm: 19.5
-    y_mm: 60.5
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: voorziening.huidige_status
-    x_mm: 132.1
-    y_mm: 60.5
-    font: body
-    size: 10
-    color: "text"
-
-  # Notitie
-  - bind: _static.Notitie
-    x_mm: 19.5
-    y_mm: 64.6
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: voorziening.notitie
-    x_mm: 132.1
-    y_mm: 64.6
-    font: body
-    size: 10
-    color: "text"
-
-  # ========== HOOFDSTUK 3: Object ==========
-  # ref: "3" x0=49.8pt y0=221.8pt
-  - bind: _static.3
-    x_mm: 17.6
-    y_mm: 78.3
-    font: heading
-    size: 14
-    color: "primary"
-
-  - bind: _static.Object
-    x_mm: 25.2
-    y_mm: 78.3
-    font: heading
-    size: 14
-    color: "primary"
-
-  # --- Sectie: Object details ---
-  - bind: _static.Object details
-    x_mm: 19.5
-    y_mm: 84.7
-    font: heading
-    size: 10
-    color: "secondary"
-
-  # Code
-  - bind: _static.Code
-    x_mm: 19.5
-    y_mm: 90.4
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: object.code
-    x_mm: 132.1
-    y_mm: 90.4
-    font: body
-    size: 10
-    color: "text"
-
-  # Beschrijving
-  - bind: _static.Beschrijving
-    x_mm: 19.5
-    y_mm: 94.4
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: object.beschrijving
-    x_mm: 132.1
-    y_mm: 94.4
-    font: body
-    size: 10
-    color: "text"
-
-  # Ruimte
-  - bind: _static.Ruimte
-    x_mm: 19.5
-    y_mm: 98.5
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: object.ruimte
-    x_mm: 132.1
-    y_mm: 98.5
-    font: body
-    size: 10
-    color: "text"
-
-  # Type
-  - bind: _static.Type
-    x_mm: 19.5
-    y_mm: 102.6
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: object.type
-    x_mm: 132.1
-    y_mm: 102.6
-    font: body
-    size: 10
-    color: "text"
-
-  # --- Sectie: VVV ---
-  - bind: _static.Verklaring Vloeistofdichte
-    x_mm: 19.5
-    y_mm: 110.7
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: _static.Voorziening (VVV)
-    x_mm: 19.5
-    y_mm: 114.8
-    font: heading
-    size: 10
-    color: "secondary"
-
-  # Geldigheid
-  - bind: _static.Geldigheid
-    x_mm: 19.5
-    y_mm: 120.4
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: vvv.geldigheid
-    x_mm: 132.1
-    y_mm: 120.4
-    font: body
-    size: 10
-    color: "text"
-
-  # Nummer verklaring
-  - bind: _static.Nummer verklaring
-    x_mm: 19.5
-    y_mm: 124.5
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: vvv.nummer
-    x_mm: 132.1
-    y_mm: 124.5
-    font: body
-    size: 10
-    color: "text"
-
-  # Instantie uitgifte verklaring
-  - bind: _static.Instantie uitgifte verklaring
-    x_mm: 19.5
-    y_mm: 128.5
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: vvv.instantie
-    x_mm: 132.1
-    y_mm: 128.5
-    font: body
-    size: 10
-    color: "text"
-
-  # Opmerkingen
-  - bind: _static.Opmerkingen
-    x_mm: 19.5
-    y_mm: 132.6
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: vvv.opmerkingen
-    x_mm: 132.1
-    y_mm: 132.6
-    font: body
-    size: 10
-    color: "text"
-
-  # Onderhoudsdossier inspecties
-  - bind: _static.Onderhoudsdossier inspecties
-    x_mm: 19.5
-    y_mm: 140.7
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: vvv.onderhoudsdossier_ref
-    x_mm: 132.1
-    y_mm: 140.7
-    font: body
-    size: 10
-    color: "text"
-    max_width_mm: 65
-
-  # Bijlage verklaring
-  - bind: _static.Bijlage verklaring
-    x_mm: 19.5
-    y_mm: 148.8
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: vvv.bijlage_ref
-    x_mm: 132.1
-    y_mm: 148.8
-    font: body
-    size: 10
-    color: "text"
-    max_width_mm: 65
-
-  # === Footer ===
-  - bind: client.name
-    x_mm: 10.3
-    y_mm: 275.4
-    font: heading
-    size: 10
-    color: "white"
-
-  - bind: _page_number
-    x_mm: 137.5
-    y_mm: 277.3
-    font: heading
-    size: 12
-    color: "white"
-    align: right
-
-  - bind: meta.rapportkop_locatie
-    x_mm: 10.3
-    y_mm: 283.5
-    font: heading
-    size: 10
-    color: "white"
-
-# Voorziening foto
+- bind: _static.2
+  x_mm: 17.6
+  y_mm: 32.2
+  font: heading
+  size: 14
+  color: primary
+- bind: _static.Voorziening
+  x_mm: 25.2
+  y_mm: 32.2
+  font: heading
+  size: 14
+  color: primary
+- bind: _static.Voorziening details
+  x_mm: 19.5
+  y_mm: 38.6
+  font: heading
+  size: 10
+  color: secondary
+- bind: _static.Code
+  x_mm: 19.5
+  y_mm: 44.3
+  font: heading
+  size: 10
+  color: secondary
+- bind: voorziening.code
+  x_mm: 132.1
+  y_mm: 44.3
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Beschrijving
+  x_mm: 19.5
+  y_mm: 48.4
+  font: heading
+  size: 10
+  color: secondary
+- bind: voorziening.beschrijving
+  x_mm: 132.1
+  y_mm: 48.4
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Vereiste status
+  x_mm: 19.5
+  y_mm: 52.4
+  font: heading
+  size: 10
+  color: secondary
+- bind: voorziening.vereiste_status
+  x_mm: 132.1
+  y_mm: 52.4
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Huidige status
+  x_mm: 19.5
+  y_mm: 60.5
+  font: heading
+  size: 10
+  color: secondary
+- bind: voorziening.huidige_status
+  x_mm: 132.1
+  y_mm: 60.5
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Notitie
+  x_mm: 19.5
+  y_mm: 64.6
+  font: heading
+  size: 10
+  color: secondary
+- bind: voorziening.notitie
+  x_mm: 132.1
+  y_mm: 64.6
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.3
+  x_mm: 17.6
+  y_mm: 78.3
+  font: heading
+  size: 14
+  color: primary
+- bind: _static.Object
+  x_mm: 25.2
+  y_mm: 78.3
+  font: heading
+  size: 14
+  color: primary
+- bind: _static.Object details
+  x_mm: 19.5
+  y_mm: 84.7
+  font: heading
+  size: 10
+  color: secondary
+- bind: _static.Code
+  x_mm: 19.5
+  y_mm: 90.4
+  font: heading
+  size: 10
+  color: secondary
+- bind: object.code
+  x_mm: 132.1
+  y_mm: 90.4
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Beschrijving
+  x_mm: 19.5
+  y_mm: 94.4
+  font: heading
+  size: 10
+  color: secondary
+- bind: object.beschrijving
+  x_mm: 132.1
+  y_mm: 94.4
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Ruimte
+  x_mm: 19.5
+  y_mm: 98.5
+  font: heading
+  size: 10
+  color: secondary
+- bind: object.ruimte
+  x_mm: 132.1
+  y_mm: 98.5
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Type
+  x_mm: 19.5
+  y_mm: 102.6
+  font: heading
+  size: 10
+  color: secondary
+- bind: object.type
+  x_mm: 132.1
+  y_mm: 102.6
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Verklaring Vloeistofdichte
+  x_mm: 19.5
+  y_mm: 110.7
+  font: heading
+  size: 10
+  color: secondary
+- bind: _static.Voorziening (VVV)
+  x_mm: 19.5
+  y_mm: 114.8
+  font: heading
+  size: 10
+  color: secondary
+- bind: _static.Geldigheid
+  x_mm: 19.5
+  y_mm: 120.4
+  font: heading
+  size: 10
+  color: secondary
+- bind: vvv.geldigheid
+  x_mm: 132.1
+  y_mm: 120.4
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Nummer verklaring
+  x_mm: 19.5
+  y_mm: 124.5
+  font: heading
+  size: 10
+  color: secondary
+- bind: vvv.nummer
+  x_mm: 132.1
+  y_mm: 124.5
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Instantie uitgifte verklaring
+  x_mm: 19.5
+  y_mm: 128.5
+  font: heading
+  size: 10
+  color: secondary
+- bind: vvv.instantie
+  x_mm: 132.1
+  y_mm: 128.5
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Opmerkingen
+  x_mm: 19.5
+  y_mm: 132.6
+  font: heading
+  size: 10
+  color: secondary
+- bind: vvv.opmerkingen
+  x_mm: 132.1
+  y_mm: 132.6
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Onderhoudsdossier inspecties
+  x_mm: 19.5
+  y_mm: 140.7
+  font: heading
+  size: 10
+  color: secondary
+- bind: vvv.onderhoudsdossier_ref
+  x_mm: 132.1
+  y_mm: 140.7
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 65
+- bind: _static.Bijlage verklaring
+  x_mm: 19.5
+  y_mm: 148.8
+  font: heading
+  size: 10
+  color: secondary
+- bind: vvv.bijlage_ref
+  x_mm: 132.1
+  y_mm: 148.8
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 65
+- bind: client.name
+  x_mm: 10.3
+  y_mm: 275.4
+  font: heading
+  size: 10
+  color: white
+- bind: _page_number
+  x_mm: 137.5
+  y_mm: 277.3
+  font: heading
+  size: 12
+  color: white
+  align: right
+- bind: meta.rapportkop_locatie
+  x_mm: 10.3
+  y_mm: 283.5
+  font: heading
+  size: 10
+  color: white
 image_zones:
-  - bind: voorziening.foto
-    x_mm: 40.0
-    y_mm: 157.0
-    width_mm: 130
-    height_mm: 100
-    fallback: ""
+- bind: voorziening.foto
+  x_mm: 40.0
+  y_mm: 157.0
+  width_mm: 130
+  height_mm: 100
+  fallback: ''

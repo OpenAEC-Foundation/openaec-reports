@@ -1,89 +1,60 @@
-# Symitech BIC Factuur — voorzieningen en objecten overzicht (landscape)
-# Zelfde layout patroon als detail_weergave (landscape stationery)
-# Pagina: A4 landscape 841.9×595.3pt (297×210mm)
-#
-# === LIJN PATRONEN (identiek aan detail_weergave) ===
-# Boven headers (kort):      dun 0.75pt + dik 3.0pt, x=20.0→72.1mm
-# Onder headers (full-width): dik 3.0pt + dun 0.75pt, x=20.0→286.1mm
-
 name: objecten
 stationery: content_landscape_stationery.pdf
-
-# ============================================================
-# Decoratieve lijnen (zelfde posities als detail_weergave)
-# ============================================================
 line_zones:
-  # --- Dubbele lijn BOVEN kolom headers (kort, sectietitel) ---
-  - x0_mm: 20.0
-    y_mm: 36.1
-    x1_mm: 72.1
-    width_pt: 0.75
-    color: "primary"
-  - x0_mm: 20.0
-    y_mm: 37.1
-    x1_mm: 72.1
-    width_pt: 3.0
-    color: "primary"
-
-  # --- Dubbele lijn ONDER kolom headers (FULL WIDTH) ---
-  - x0_mm: 20.0
-    y_mm: 43.2
-    x1_mm: 286.1
-    width_pt: 3.0
-    color: "primary"
-  - x0_mm: 20.0
-    y_mm: 44.1
-    x1_mm: 286.1
-    width_pt: 0.75
-    color: "primary"
-
-# ============================================================
-# Tekst zones (+1.0mm behalve footer)
-# ============================================================
+- x0_mm: 20.0
+  y_mm: 36.1
+  x1_mm: 72.1
+  width_pt: 0.75
+  color: primary
+- x0_mm: 20.0
+  y_mm: 37.1
+  x1_mm: 72.1
+  width_pt: 3.0
+  color: primary
+- x0_mm: 20.0
+  y_mm: 43.2
+  x1_mm: 286.1
+  width_pt: 3.0
+  color: primary
+- x0_mm: 20.0
+  y_mm: 44.1
+  x1_mm: 286.1
+  width_pt: 0.75
+  color: primary
 text_zones:
-  # Sectietitel (bruin)
-  - bind: _static.Voorziening en objecten beschrijving
-    x_mm: 21.9
-    y_mm: 32.0
-    font: heading
-    size: 10
-    color: "secondary"
-
-  # Locatienaam rechtsboven
-  - bind: location.name
-    x_mm: 275.0
-    y_mm: 32.0
-    font: heading
-    size: 10
-    color: "primary"
-    align: right
-
-  # === Footer (NIET verschoven) ===
-  - bind: client.name
-    x_mm: 13.5
-    y_mm: 185.0
-    font: heading
-    size: 10
-    color: "white"
-
-  - bind: _page_number
-    x_mm: 229.2
-    y_mm: 186.5
-    font: heading
-    size: 12
-    color: "white"
-    align: right
-
-  - bind: meta.rapportkop_locatie
-    x_mm: 13.5
-    y_mm: 193.1
-    font: heading
-    size: 10
-    color: "white"
-
-# ============================================================
-# Tabel configuratie
-# ============================================================
+- bind: _static.Voorziening en objecten beschrijving
+  x_mm: 21.9
+  y_mm: 32.0
+  font: heading
+  size: 10
+  color: secondary
+- bind: location.name
+  x_mm: 275.0
+  y_mm: 32.0
+  font: heading
+  size: 10
+  color: primary
+  align: right
+  max_width_mm: 63
+- bind: client.name
+  x_mm: 13.5
+  y_mm: 185.0
+  font: heading
+  size: 10
+  color: white
+- bind: _page_number
+  x_mm: 229.2
+  y_mm: 186.5
+  font: heading
+  size: 12
+  color: white
+  align: right
+- bind: meta.rapportkop_locatie
+  x_mm: 13.5
+  y_mm: 193.1
+  font: heading
+  size: 10
+  color: white
 table:
   data_bind: objecten
   origin:
@@ -94,16 +65,40 @@ table:
   show_header: true
   header_font: heading
   header_size: 8
-  header_color: "secondary"
+  header_color: secondary
   body_font: body
   body_size: 8
-  body_color: "text"
+  body_color: text
   columns:
-    - { field: "Voorziening", header: "Voorziening", width_mm: 21, align: left }
-    - { field: "Type", header: "Type", width_mm: 34, align: left }
-    - { field: "Status", header: "Status", width_mm: 30, align: left }
-    - { field: "Object", header: "Object", width_mm: 18, align: left }
-    - { field: "Type2", header: "Type", width_mm: 28, align: left }
-    - { field: "Beschrijving", header: "Beschrijving", width_mm: 78, align: left }
-    - { field: "Gebouw", header: "Gebouw", width_mm: 23, align: left }
-    - { field: "Ruimte", header: "Ruimte", width_mm: 23, align: left }
+  - field: Voorziening
+    header: Voorziening
+    width_mm: 21
+    align: left
+  - field: Type
+    header: Type
+    width_mm: 34
+    align: left
+  - field: Status
+    header: Status
+    width_mm: 30
+    align: left
+  - field: Object
+    header: Object
+    width_mm: 18
+    align: left
+  - field: Type2
+    header: Type
+    width_mm: 28
+    align: left
+  - field: Beschrijving
+    header: Beschrijving
+    width_mm: 78
+    align: left
+  - field: Gebouw
+    header: Gebouw
+    width_mm: 23
+    align: left
+  - field: Ruimte
+    header: Ruimte
+    width_mm: 23
+    align: left

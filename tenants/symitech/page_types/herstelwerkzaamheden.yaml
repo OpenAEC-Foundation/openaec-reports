@@ -1,258 +1,208 @@
-# Symitech BIC Rapportage — Herstelwerkzaamheden (pagina 6)
-# Pixel-exact gemeten uit 336.01-BIC Rapportage.pdf
-# Pagina: A4 portrait 595.3×841.9pt (210×297mm)
-#
-# Layout: "5 Herstelwerkzaamheden"
-#   Secties: Herstelwerkzaamheden, Bijlage refs, Reiniging, Additioneel
-# Labels: x0=55.2pt (19.5mm), heading, secondary
-# Waarden: x0=374.4pt (132.1mm), body, text
-# Dubbele lijnen: (49.7→227.2pt) = (17.5→80.2mm)
-
 name: herstelwerkzaamheden
 stationery: content_portrait_stationery.pdf
-
 line_zones:
-  # --- Sectie "Herstelwerkzaamheden" dubbele lijn ---
-  # ref: y=123.5pt (dun 0.75), y=126.1pt (dik 3.0)
-  - x0_mm: 17.5
-    y_mm: 46.15
-    x1_mm: 80.2
-    width_pt: 0.75
-    color: "primary"
-  - x0_mm: 17.5
-    y_mm: 47.05
-    x1_mm: 80.2
-    width_pt: 3.0
-    color: "primary"
-
-  # --- Sectie "Object reiniging" dubbele lijn ---
-  # ref: y=244.1pt (dik 3.0), y=246.8pt (dun 0.75)
-  - x0_mm: 17.5
-    y_mm: 88.65
-    x1_mm: 80.2
-    width_pt: 3.0
-    color: "primary"
-  - x0_mm: 17.5
-    y_mm: 89.65
-    x1_mm: 80.2
-    width_pt: 0.75
-    color: "primary"
-
-  # --- Sectie "Additionele activiteiten" dubbele lijn ---
-  # ref: y=329.1pt (dik 3.0), y=331.8pt (dun 0.75)
-  - x0_mm: 17.5
-    y_mm: 118.65
-    x1_mm: 80.2
-    width_pt: 3.0
-    color: "primary"
-  - x0_mm: 17.5
-    y_mm: 119.65
-    x1_mm: 80.2
-    width_pt: 0.75
-    color: "primary"
-
+- x0_mm: 17.5
+  y_mm: 46.15
+  x1_mm: 80.2
+  width_pt: 0.75
+  color: primary
+- x0_mm: 17.5
+  y_mm: 47.05
+  x1_mm: 80.2
+  width_pt: 3.0
+  color: primary
+- x0_mm: 17.5
+  y_mm: 88.65
+  x1_mm: 80.2
+  width_pt: 3.0
+  color: primary
+- x0_mm: 17.5
+  y_mm: 89.65
+  x1_mm: 80.2
+  width_pt: 0.75
+  color: primary
+- x0_mm: 17.5
+  y_mm: 118.65
+  x1_mm: 80.2
+  width_pt: 3.0
+  color: primary
+- x0_mm: 17.5
+  y_mm: 119.65
+  x1_mm: 80.2
+  width_pt: 0.75
+  color: primary
 text_zones:
-  # ========== HOOFDSTUK 5: Herstelwerkzaamheden ==========
-  # ref: "5" x0=49.8pt y0=91.2pt
-  - bind: _static.5
-    x_mm: 17.6
-    y_mm: 32.2
-    font: heading
-    size: 14
-    color: "primary"
-
-  - bind: _static.Herstelwerkzaamheden
-    x_mm: 25.2
-    y_mm: 32.2
-    font: heading
-    size: 14
-    color: "primary"
-
-  # ========== Sectie: Herstelwerkzaamheden ==========
-  # ref: y0=121.0pt
-  - bind: _static.Herstelwerkzaamheden
-    x_mm: 19.5
-    y_mm: 42.7
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: herstel.nummer
-    x_mm: 132.1
-    y_mm: 42.7
-    font: body
-    size: 10
-    color: "text"
-
-  # Bijlage controlelijst BIC
-  - bind: _static.Bijlage controlelijst BIC
-    x_mm: 19.5
-    y_mm: 48.4
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: herstel.ref_controlelijst
-    x_mm: 132.1
-    y_mm: 48.4
-    font: body
-    size: 10
-    color: "text"
-    max_width_mm: 65
-
-  # Bijlage herstelwerkzaamheden
-  - bind: _static.Bijlage herstelwerkzaamheden
-    x_mm: 19.5
-    y_mm: 56.5
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: herstel.ref_historie
-    x_mm: 132.1
-    y_mm: 56.5
-    font: body
-    size: 10
-    color: "text"
-    max_width_mm: 65
-
-  # Bijlage ondersteunende foto's
-  - bind: _static.Bijlage ondersteunende foto's
-    x_mm: 19.5
-    y_mm: 64.6
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: herstel.ref_fotos
-    x_mm: 132.1
-    y_mm: 64.6
-    font: body
-    size: 10
-    color: "text"
-    max_width_mm: 65
-
-  # ========== Sectie: Object reiniging ==========
-  # ref: y0=240.5pt
-  - bind: _static.Object reiniging
-    x_mm: 19.5
-    y_mm: 84.9
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: herstel_reiniging.nummer
-    x_mm: 132.1
-    y_mm: 84.9
-    font: body
-    size: 10
-    color: "text"
-
-  - bind: _static.Omschrijving
-    x_mm: 19.5
-    y_mm: 90.5
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: herstel_reiniging.omschrijving
-    x_mm: 132.1
-    y_mm: 90.5
-    font: body
-    size: 10
-    color: "text"
-
-  - bind: _static.Type
-    x_mm: 19.5
-    y_mm: 94.6
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: herstel_reiniging.type
-    x_mm: 132.1
-    y_mm: 94.6
-    font: body
-    size: 10
-    color: "text"
-
-  - bind: _static.Datum
-    x_mm: 19.5
-    y_mm: 98.6
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: herstel_reiniging.datum
-    x_mm: 132.1
-    y_mm: 98.6
-    font: body
-    size: 10
-    color: "text"
-
-  # ========== Sectie: Additionele activiteiten ==========
-  # ref: y0=325.5pt
-  - bind: _static.Additionele activiteiten
-    x_mm: 19.5
-    y_mm: 114.9
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: herstel_additioneel.nummer
-    x_mm: 132.1
-    y_mm: 114.9
-    font: body
-    size: 10
-    color: "text"
-
-  - bind: _static.Omschrijving
-    x_mm: 19.5
-    y_mm: 120.5
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: herstel_additioneel.omschrijving
-    x_mm: 132.1
-    y_mm: 120.5
-    font: body
-    size: 10
-    color: "text"
-
-  - bind: _static.Datum
-    x_mm: 19.5
-    y_mm: 124.6
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: herstel_additioneel.datum
-    x_mm: 132.1
-    y_mm: 124.6
-    font: body
-    size: 10
-    color: "text"
-
-  # === Footer ===
-  - bind: client.name
-    x_mm: 10.3
-    y_mm: 275.4
-    font: heading
-    size: 10
-    color: "white"
-
-  - bind: _page_number
-    x_mm: 137.5
-    y_mm: 277.3
-    font: heading
-    size: 12
-    color: "white"
-    align: right
-
-  - bind: meta.rapportkop_locatie
-    x_mm: 10.3
-    y_mm: 283.5
-    font: heading
-    size: 10
-    color: "white"
+- bind: _static.5
+  x_mm: 17.6
+  y_mm: 32.2
+  font: heading
+  size: 14
+  color: primary
+- bind: _static.Herstelwerkzaamheden
+  x_mm: 25.2
+  y_mm: 32.2
+  font: heading
+  size: 14
+  color: primary
+- bind: _static.Herstelwerkzaamheden
+  x_mm: 19.5
+  y_mm: 42.7
+  font: heading
+  size: 10
+  color: secondary
+- bind: herstel.nummer
+  x_mm: 132.1
+  y_mm: 42.7
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Bijlage controlelijst BIC
+  x_mm: 19.5
+  y_mm: 48.4
+  font: heading
+  size: 10
+  color: secondary
+- bind: herstel.ref_controlelijst
+  x_mm: 132.1
+  y_mm: 48.4
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 65
+- bind: _static.Bijlage herstelwerkzaamheden
+  x_mm: 19.5
+  y_mm: 56.5
+  font: heading
+  size: 10
+  color: secondary
+- bind: herstel.ref_historie
+  x_mm: 132.1
+  y_mm: 56.5
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 65
+- bind: _static.Bijlage ondersteunende foto's
+  x_mm: 19.5
+  y_mm: 64.6
+  font: heading
+  size: 10
+  color: secondary
+- bind: herstel.ref_fotos
+  x_mm: 132.1
+  y_mm: 64.6
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 65
+- bind: _static.Object reiniging
+  x_mm: 19.5
+  y_mm: 84.9
+  font: heading
+  size: 10
+  color: secondary
+- bind: herstel_reiniging.nummer
+  x_mm: 132.1
+  y_mm: 84.9
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Omschrijving
+  x_mm: 19.5
+  y_mm: 90.5
+  font: heading
+  size: 10
+  color: secondary
+- bind: herstel_reiniging.omschrijving
+  x_mm: 132.1
+  y_mm: 90.5
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Type
+  x_mm: 19.5
+  y_mm: 94.6
+  font: heading
+  size: 10
+  color: secondary
+- bind: herstel_reiniging.type
+  x_mm: 132.1
+  y_mm: 94.6
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Datum
+  x_mm: 19.5
+  y_mm: 98.6
+  font: heading
+  size: 10
+  color: secondary
+- bind: herstel_reiniging.datum
+  x_mm: 132.1
+  y_mm: 98.6
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Additionele activiteiten
+  x_mm: 19.5
+  y_mm: 114.9
+  font: heading
+  size: 10
+  color: secondary
+- bind: herstel_additioneel.nummer
+  x_mm: 132.1
+  y_mm: 114.9
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Omschrijving
+  x_mm: 19.5
+  y_mm: 120.5
+  font: heading
+  size: 10
+  color: secondary
+- bind: herstel_additioneel.omschrijving
+  x_mm: 132.1
+  y_mm: 120.5
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Datum
+  x_mm: 19.5
+  y_mm: 124.6
+  font: heading
+  size: 10
+  color: secondary
+- bind: herstel_additioneel.datum
+  x_mm: 132.1
+  y_mm: 124.6
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: client.name
+  x_mm: 10.3
+  y_mm: 275.4
+  font: heading
+  size: 10
+  color: white
+- bind: _page_number
+  x_mm: 137.5
+  y_mm: 277.3
+  font: heading
+  size: 12
+  color: white
+  align: right
+- bind: meta.rapportkop_locatie
+  x_mm: 10.3
+  y_mm: 283.5
+  font: heading
+  size: 10
+  color: white

@@ -1,130 +1,94 @@
-# Symitech BIC Rapportage — Foto bijlage (pagina 15-16, portrait)
-# Pixel-exact gemeten uit 336.01-BIC Rapportage.pdf
-# Pagina: A4 portrait 595.3×841.9pt (210×297mm)
-#
-# Layout: sub-heading + context info + 2 foto's naast elkaar met captions
-# Links: x0=55.2pt (19.5mm), Rechts: x0=324.2pt (114.4mm)
-
 name: foto_bijlage
 stationery: content_portrait_stationery.pdf
-
 text_zones:
-  # === Sub-heading ===
-  # ref: x0=49.8pt y0=89.3pt  12pt primary
-  - bind: foto_bijlage.nummer
-    x_mm: 17.6
-    y_mm: 31.5
-    font: heading
-    size: 12
-    color: "primary"
-
-  - bind: foto_bijlage.titel
-    x_mm: 27.7
-    y_mm: 31.5
-    font: heading
-    size: 12
-    color: "primary"
-
-  # Context info regel 1
-  # ref: x0=49.8pt y0=101.2pt  10pt text
-  - bind: foto_bijlage.context_1
-    x_mm: 17.6
-    y_mm: 35.7
-    font: body
-    size: 10
-    color: "text"
-    max_width_mm: 170
-
-  # Context info regel 2
-  # ref: x0=49.8pt y0=112.7pt
-  - bind: foto_bijlage.context_2
-    x_mm: 17.6
-    y_mm: 39.8
-    font: body
-    size: 10
-    color: "text"
-    max_width_mm: 170
-
-  # Context info regel 3 (voor schadefoto's)
-  - bind: foto_bijlage.context_3
-    x_mm: 17.6
-    y_mm: 43.8
-    font: body
-    size: 10
-    color: "text"
-    max_width_mm: 170
-
-  # === Foto labels (links) ===
-  # ref: x0=55.2pt y0=133.8pt  8pt text
-  - bind: foto_bijlage.label_links
-    x_mm: 19.5
-    y_mm: 47.2
-    font: body
-    size: 8
-    color: "text"
-
-  # Caption links
-  - bind: foto_bijlage.caption_links
-    x_mm: 19.5
-    y_mm: 50.5
-    font: body
-    size: 8
-    color: "text"
-
-  # === Foto labels (rechts) ===
-  # ref: x0=324.2pt y0=133.8pt  8pt text
-  - bind: foto_bijlage.label_rechts
-    x_mm: 114.4
-    y_mm: 47.2
-    font: body
-    size: 8
-    color: "text"
-
-  # Caption rechts
-  - bind: foto_bijlage.caption_rechts
-    x_mm: 114.4
-    y_mm: 50.5
-    font: body
-    size: 8
-    color: "text"
-
-  # === Footer ===
-  - bind: client.name
-    x_mm: 10.0
-    y_mm: 275.1
-    font: heading
-    size: 10
-    color: "white"
-
-  - bind: _page_number
-    x_mm: 135.6
-    y_mm: 277.3
-    font: heading
-    size: 12
-    color: "white"
-    align: right
-
-  - bind: meta.rapportkop_locatie
-    x_mm: 10.0
-    y_mm: 283.2
-    font: heading
-    size: 10
-    color: "white"
-
-# Foto's
+- bind: foto_bijlage.nummer
+  x_mm: 17.6
+  y_mm: 31.5
+  font: heading
+  size: 12
+  color: primary
+- bind: foto_bijlage.titel
+  x_mm: 27.7
+  y_mm: 31.5
+  font: heading
+  size: 12
+  color: primary
+- bind: foto_bijlage.context_1
+  x_mm: 17.6
+  y_mm: 35.7
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 170
+- bind: foto_bijlage.context_2
+  x_mm: 17.6
+  y_mm: 39.8
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 170
+- bind: foto_bijlage.context_3
+  x_mm: 17.6
+  y_mm: 43.8
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 170
+- bind: foto_bijlage.label_links
+  x_mm: 19.5
+  y_mm: 47.2
+  font: body
+  size: 8
+  color: text
+- bind: foto_bijlage.caption_links
+  x_mm: 19.5
+  y_mm: 50.5
+  font: body
+  size: 8
+  color: text
+- bind: foto_bijlage.label_rechts
+  x_mm: 114.4
+  y_mm: 47.2
+  font: body
+  size: 8
+  color: text
+  max_width_mm: 63
+- bind: foto_bijlage.caption_rechts
+  x_mm: 114.4
+  y_mm: 50.5
+  font: body
+  size: 8
+  color: text
+  max_width_mm: 63
+- bind: client.name
+  x_mm: 10.0
+  y_mm: 275.1
+  font: heading
+  size: 10
+  color: white
+- bind: _page_number
+  x_mm: 135.6
+  y_mm: 277.3
+  font: heading
+  size: 12
+  color: white
+  align: right
+- bind: meta.rapportkop_locatie
+  x_mm: 10.0
+  y_mm: 283.2
+  font: heading
+  size: 10
+  color: white
 image_zones:
-  # Foto links
-  - bind: foto_bijlage.foto_links
-    x_mm: 19.5
-    y_mm: 53.0
-    width_mm: 90
-    height_mm: 200
-    fallback: ""
-
-  # Foto rechts
-  - bind: foto_bijlage.foto_rechts
-    x_mm: 114.4
-    y_mm: 53.0
-    width_mm: 90
-    height_mm: 200
-    fallback: ""
+- bind: foto_bijlage.foto_links
+  x_mm: 19.5
+  y_mm: 53.0
+  width_mm: 90
+  height_mm: 200
+  fallback: ''
+- bind: foto_bijlage.foto_rechts
+  x_mm: 114.4
+  y_mm: 53.0
+  width_mm: 90
+  height_mm: 200
+  fallback: ''

@@ -1,392 +1,324 @@
-# Symitech BIC Rapportage — BIC controle details (pagina 5)
-# Pixel-exact gemeten uit 336.01-BIC Rapportage.pdf
-# Pagina: A4 portrait 595.3×841.9pt (210×297mm)
-#
-# Layout: "4 Bedrijfsinterne controle (BIC)"
-#   Secties: Controlerend bedrijf, Controleur, BIC details,
-#   Onderhoudsdossier refs, Reiniging, Additioneel, Rapportagedatum
-# Labels: x0=55.2pt (19.5mm), heading, secondary
-# Waarden: x0=374.4pt (132.1mm), body, text
-# Dubbele lijnen: (49.7→227.2pt) = (17.5→80.2mm)
-
 name: bic_rapport_details
 stationery: content_portrait_stationery.pdf
-
 line_zones:
-  # --- Sectie "Controlerend bedrijf" dubbele lijn ---
-  # ref: y=124.6pt (dik 3.0), y=127.3pt (dun 0.75)
-  - x0_mm: 17.5
-    y_mm: 46.55
-    x1_mm: 80.2
-    width_pt: 3.0
-    color: "primary"
-  - x0_mm: 17.5
-    y_mm: 47.45
-    x1_mm: 80.2
-    width_pt: 0.75
-    color: "primary"
-
-  # --- Sectie "BIC details" dubbele lijn ---
-  # ref: y=232.6pt (dik 3.0), y=235.3pt (dun 0.75)
-  - x0_mm: 17.5
-    y_mm: 84.65
-    x1_mm: 80.2
-    width_pt: 3.0
-    color: "primary"
-  - x0_mm: 17.5
-    y_mm: 85.55
-    x1_mm: 80.2
-    width_pt: 0.75
-    color: "primary"
-
-  # --- Sectie "Object reiniging" dubbele lijn ---
-  # ref: y=409.6pt (dik 3.0), y=412.3pt (dun 0.75)
-  - x0_mm: 17.5
-    y_mm: 147.05
-    x1_mm: 80.2
-    width_pt: 3.0
-    color: "primary"
-  - x0_mm: 17.5
-    y_mm: 148.05
-    x1_mm: 80.2
-    width_pt: 0.75
-    color: "primary"
-
-  # --- Sectie "Additionele activiteiten" dubbele lijn ---
-  # ref: y=494.6pt (dik 3.0), y=497.3pt (dun 0.75)
-  - x0_mm: 17.5
-    y_mm: 177.05
-    x1_mm: 80.2
-    width_pt: 3.0
-    color: "primary"
-  - x0_mm: 17.5
-    y_mm: 177.95
-    x1_mm: 80.2
-    width_pt: 0.75
-    color: "primary"
-
+- x0_mm: 17.5
+  y_mm: 46.55
+  x1_mm: 80.2
+  width_pt: 3.0
+  color: primary
+- x0_mm: 17.5
+  y_mm: 47.45
+  x1_mm: 80.2
+  width_pt: 0.75
+  color: primary
+- x0_mm: 17.5
+  y_mm: 84.65
+  x1_mm: 80.2
+  width_pt: 3.0
+  color: primary
+- x0_mm: 17.5
+  y_mm: 85.55
+  x1_mm: 80.2
+  width_pt: 0.75
+  color: primary
+- x0_mm: 17.5
+  y_mm: 147.05
+  x1_mm: 80.2
+  width_pt: 3.0
+  color: primary
+- x0_mm: 17.5
+  y_mm: 148.05
+  x1_mm: 80.2
+  width_pt: 0.75
+  color: primary
+- x0_mm: 17.5
+  y_mm: 177.05
+  x1_mm: 80.2
+  width_pt: 3.0
+  color: primary
+- x0_mm: 17.5
+  y_mm: 177.95
+  x1_mm: 80.2
+  width_pt: 0.75
+  color: primary
 text_zones:
-  # ========== HOOFDSTUK 4: BIC ==========
-  # ref: "4" x0=49.8pt y0=91.2pt
-  - bind: _static.4
-    x_mm: 17.6
-    y_mm: 32.2
-    font: heading
-    size: 14
-    color: "primary"
-
-  - bind: _static.Bedrijfsinterne controle (BIC)
-    x_mm: 25.2
-    y_mm: 32.2
-    font: heading
-    size: 14
-    color: "primary"
-
-  # ========== Sectie: Controlerend bedrijf ==========
-  # ref: y0=121.0pt
-  - bind: _static.Controlerend bedrijf
-    x_mm: 19.5
-    y_mm: 42.7
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: controleur.bedrijf
-    x_mm: 132.1
-    y_mm: 42.7
-    font: body
-    size: 10
-    color: "text"
-
-  - bind: controleur.adres
-    x_mm: 132.1
-    y_mm: 48.4
-    font: body
-    size: 10
-    color: "text"
-
-  - bind: controleur.postcode_plaats
-    x_mm: 132.1
-    y_mm: 52.4
-    font: body
-    size: 10
-    color: "text"
-
-  - bind: controleur.telefoon
-    x_mm: 132.1
-    y_mm: 56.5
-    font: body
-    size: 10
-    color: "text"
-
-  - bind: controleur.email
-    x_mm: 132.1
-    y_mm: 60.5
-    font: body
-    size: 10
-    color: "text"
-
-  # Controleur naam
-  - bind: _static.Controleur
-    x_mm: 19.5
-    y_mm: 64.6
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: controleur.naam
-    x_mm: 132.1
-    y_mm: 64.6
-    font: body
-    size: 10
-    color: "text"
-
-  # ========== Sectie: BIC details ==========
-  # ref: y0=229.0pt
-  - bind: _static.BIC details
-    x_mm: 19.5
-    y_mm: 80.8
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: bic.nummer
-    x_mm: 132.1
-    y_mm: 80.8
-    font: body
-    size: 10
-    color: "text"
-
-  # Datum controle
-  - bind: _static.Datum controle
-    x_mm: 19.5
-    y_mm: 86.5
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: bic.datum_controle
-    x_mm: 132.1
-    y_mm: 86.5
-    font: body
-    size: 10
-    color: "text"
-
-  # Datum geldigheid
-  - bind: _static.Datum geldigheid
-    x_mm: 19.5
-    y_mm: 90.5
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: bic.datum_geldigheid
-    x_mm: 132.1
-    y_mm: 90.5
-    font: body
-    size: 10
-    color: "text"
-
-  # Bijzonderheden
-  - bind: _static.Bijzonderheden
-    x_mm: 19.5
-    y_mm: 94.6
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: bic.bijzonderheden
-    x_mm: 132.1
-    y_mm: 94.6
-    font: body
-    size: 10
-    color: "text"
-
-  # Onderhoudsdossier controlelijst
-  - bind: _static.Onderhoudsdossier controlelijst
-    x_mm: 19.5
-    y_mm: 102.7
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: bic.ref_controlelijst
-    x_mm: 132.1
-    y_mm: 102.7
-    font: body
-    size: 10
-    color: "text"
-    max_width_mm: 65
-
-  # Onderhoudsdossier BIC
-  - bind: _static.Onderhoudsdossier BIC
-    x_mm: 19.5
-    y_mm: 110.8
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: bic.ref_historie
-    x_mm: 132.1
-    y_mm: 110.8
-    font: body
-    size: 10
-    color: "text"
-    max_width_mm: 65
-
-  # Bijlage BIC foto's
-  - bind: _static.Bijlage BIC ondersteunende foto's
-    x_mm: 19.5
-    y_mm: 122.9
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: bic.ref_fotos
-    x_mm: 132.1
-    y_mm: 122.9
-    font: body
-    size: 10
-    color: "text"
-    max_width_mm: 65
-
-  # ========== Sectie: Object reiniging ==========
-  # ref: y0=406.0pt
-  - bind: _static.Object reiniging
-    x_mm: 19.5
-    y_mm: 143.3
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: reiniging.nummer
-    x_mm: 132.1
-    y_mm: 143.3
-    font: body
-    size: 10
-    color: "text"
-
-  - bind: _static.Omschrijving
-    x_mm: 19.5
-    y_mm: 149.0
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: reiniging.omschrijving
-    x_mm: 132.1
-    y_mm: 149.0
-    font: body
-    size: 10
-    color: "text"
-
-  - bind: _static.Type
-    x_mm: 19.5
-    y_mm: 153.0
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: reiniging.type
-    x_mm: 132.1
-    y_mm: 153.0
-    font: body
-    size: 10
-    color: "text"
-
-  - bind: _static.Datum
-    x_mm: 19.5
-    y_mm: 157.1
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: reiniging.datum
-    x_mm: 132.1
-    y_mm: 157.1
-    font: body
-    size: 10
-    color: "text"
-
-  # ========== Sectie: Additionele activiteiten ==========
-  # ref: y0=491.0pt
-  - bind: _static.Additionele activiteiten
-    x_mm: 19.5
-    y_mm: 173.3
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: additioneel.nummer
-    x_mm: 132.1
-    y_mm: 173.3
-    font: body
-    size: 10
-    color: "text"
-
-  - bind: _static.Omschrijving
-    x_mm: 19.5
-    y_mm: 179.0
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: additioneel.omschrijving
-    x_mm: 132.1
-    y_mm: 179.0
-    font: body
-    size: 10
-    color: "text"
-
-  - bind: _static.Datum
-    x_mm: 19.5
-    y_mm: 183.0
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: additioneel.datum
-    x_mm: 132.1
-    y_mm: 183.0
-    font: body
-    size: 10
-    color: "text"
-
-  # ========== Rapportagedatum ==========
-  # ref: y0=564.5pt
-  - bind: _static.Rapportagedatum
-    x_mm: 19.5
-    y_mm: 199.2
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: bic.rapportagedatum
-    x_mm: 132.1
-    y_mm: 199.2
-    font: body
-    size: 10
-    color: "text"
-
-  # === Footer ===
-  - bind: client.name
-    x_mm: 10.3
-    y_mm: 275.4
-    font: heading
-    size: 10
-    color: "white"
-
-  - bind: _page_number
-    x_mm: 137.5
-    y_mm: 277.3
-    font: heading
-    size: 12
-    color: "white"
-    align: right
-
-  - bind: meta.rapportkop_locatie
-    x_mm: 10.3
-    y_mm: 283.5
-    font: heading
-    size: 10
-    color: "white"
+- bind: _static.4
+  x_mm: 17.6
+  y_mm: 32.2
+  font: heading
+  size: 14
+  color: primary
+- bind: _static.Bedrijfsinterne controle (BIC)
+  x_mm: 25.2
+  y_mm: 32.2
+  font: heading
+  size: 14
+  color: primary
+- bind: _static.Controlerend bedrijf
+  x_mm: 19.5
+  y_mm: 42.7
+  font: heading
+  size: 10
+  color: secondary
+- bind: controleur.bedrijf
+  x_mm: 132.1
+  y_mm: 42.7
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: controleur.adres
+  x_mm: 132.1
+  y_mm: 48.4
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: controleur.postcode_plaats
+  x_mm: 132.1
+  y_mm: 52.4
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: controleur.telefoon
+  x_mm: 132.1
+  y_mm: 56.5
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: controleur.email
+  x_mm: 132.1
+  y_mm: 60.5
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Controleur
+  x_mm: 19.5
+  y_mm: 64.6
+  font: heading
+  size: 10
+  color: secondary
+- bind: controleur.naam
+  x_mm: 132.1
+  y_mm: 64.6
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.BIC details
+  x_mm: 19.5
+  y_mm: 80.8
+  font: heading
+  size: 10
+  color: secondary
+- bind: bic.nummer
+  x_mm: 132.1
+  y_mm: 80.8
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Datum controle
+  x_mm: 19.5
+  y_mm: 86.5
+  font: heading
+  size: 10
+  color: secondary
+- bind: bic.datum_controle
+  x_mm: 132.1
+  y_mm: 86.5
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Datum geldigheid
+  x_mm: 19.5
+  y_mm: 90.5
+  font: heading
+  size: 10
+  color: secondary
+- bind: bic.datum_geldigheid
+  x_mm: 132.1
+  y_mm: 90.5
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Bijzonderheden
+  x_mm: 19.5
+  y_mm: 94.6
+  font: heading
+  size: 10
+  color: secondary
+- bind: bic.bijzonderheden
+  x_mm: 132.1
+  y_mm: 94.6
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Onderhoudsdossier controlelijst
+  x_mm: 19.5
+  y_mm: 102.7
+  font: heading
+  size: 10
+  color: secondary
+- bind: bic.ref_controlelijst
+  x_mm: 132.1
+  y_mm: 102.7
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 65
+- bind: _static.Onderhoudsdossier BIC
+  x_mm: 19.5
+  y_mm: 110.8
+  font: heading
+  size: 10
+  color: secondary
+- bind: bic.ref_historie
+  x_mm: 132.1
+  y_mm: 110.8
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 65
+- bind: _static.Bijlage BIC ondersteunende foto's
+  x_mm: 19.5
+  y_mm: 122.9
+  font: heading
+  size: 10
+  color: secondary
+- bind: bic.ref_fotos
+  x_mm: 132.1
+  y_mm: 122.9
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 65
+- bind: _static.Object reiniging
+  x_mm: 19.5
+  y_mm: 143.3
+  font: heading
+  size: 10
+  color: secondary
+- bind: reiniging.nummer
+  x_mm: 132.1
+  y_mm: 143.3
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Omschrijving
+  x_mm: 19.5
+  y_mm: 149.0
+  font: heading
+  size: 10
+  color: secondary
+- bind: reiniging.omschrijving
+  x_mm: 132.1
+  y_mm: 149.0
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Type
+  x_mm: 19.5
+  y_mm: 153.0
+  font: heading
+  size: 10
+  color: secondary
+- bind: reiniging.type
+  x_mm: 132.1
+  y_mm: 153.0
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Datum
+  x_mm: 19.5
+  y_mm: 157.1
+  font: heading
+  size: 10
+  color: secondary
+- bind: reiniging.datum
+  x_mm: 132.1
+  y_mm: 157.1
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Additionele activiteiten
+  x_mm: 19.5
+  y_mm: 173.3
+  font: heading
+  size: 10
+  color: secondary
+- bind: additioneel.nummer
+  x_mm: 132.1
+  y_mm: 173.3
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Omschrijving
+  x_mm: 19.5
+  y_mm: 179.0
+  font: heading
+  size: 10
+  color: secondary
+- bind: additioneel.omschrijving
+  x_mm: 132.1
+  y_mm: 179.0
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Datum
+  x_mm: 19.5
+  y_mm: 183.0
+  font: heading
+  size: 10
+  color: secondary
+- bind: additioneel.datum
+  x_mm: 132.1
+  y_mm: 183.0
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: _static.Rapportagedatum
+  x_mm: 19.5
+  y_mm: 199.2
+  font: heading
+  size: 10
+  color: secondary
+- bind: bic.rapportagedatum
+  x_mm: 132.1
+  y_mm: 199.2
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 63
+- bind: client.name
+  x_mm: 10.3
+  y_mm: 275.4
+  font: heading
+  size: 10
+  color: white
+- bind: _page_number
+  x_mm: 137.5
+  y_mm: 277.3
+  font: heading
+  size: 12
+  color: white
+  align: right
+- bind: meta.rapportkop_locatie
+  x_mm: 10.3
+  y_mm: 283.5
+  font: heading
+  size: 10
+  color: white

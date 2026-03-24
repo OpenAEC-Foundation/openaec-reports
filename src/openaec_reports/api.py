@@ -755,6 +755,132 @@ async def serve_uitleg():
     return HTMLResponse(content=uitleg_path.read_text(encoding="utf-8"))
 
 # ============================================================
+# PDOK kaarten
+# ============================================================
+
+
+@_protected.get("/api/pdok/map")
+async def pdok_map(
+    lat: float,
+    lon: float,
+    radius: float = 500.0,
+    service: str = "luchtfoto",
+    layers: str | None = None,
+    width: int = 1600,
+    height: int = 1200,
+    user: User = Depends(get_current_user),
+):
+    """Haal een kaartafbeelding op via PDOK WMS.
+
+    Args:
+        lat: Breedtegraad (WGS84).
+        lon: Lengtegraad (WGS84).
+        radius: Straal rondom punt in meters (default 500).
+        service: PDOK service: luchtfoto, kadaster, bgt, bag.
+        layers: Laagnamen (komma-gescheiden). Default per service.
+        width: Breedte in pixels (max 4000).
+        height: Hoogte in pixels (max 4000).
+
+    Returns:
+        Kaartafbeelding als JPEG of PNG.
+    """
+    from fastapi.responses import Response
+
+    # Validatie
+    width = min(width, 4000)
+    height = min(height, 4000)
+    radius = min(max(radius, 10), 10000)
+
+    # Default layers per service
+    default_layers = {
+        "luchtfoto": "Actueel_orthoHR",
+        "kadaster": "Kadastralekaart",
+        "bag": "pand",
+    }
+    if not layers:
+        layers = default_layers.get(service, "Actueel_orthoHR")
+
+    # Formaat: luchtfoto als JPEG (kleiner), rest als PNG
+    img_format = "image/jpeg" if service == "luchtfoto" else "image/png"
+
+    try:
+        from openaec_reports.data.kadaster import KadasterClient
+
+        client = KadasterClient()
+        x, y = client.wgs84_to_rd(lat, lon)
+        bbox = f"{x - radius},{y - radius},{x + radius},{y + radius}"
+
+        import requests as req
+
+        # Kadaster v5 vereist uppercase params
+        url = client.WMS_SERVICES.get(service, client.WMS_SERVICES["luchtfoto"])
+        params = {
+            "SERVICE": "WMS",
+            "VERSION": "1.3.0",
+            "REQUEST": "GetMap",
+            "LAYERS": layers,
+            "CRS": "EPSG:28992",
+            "BBOX": bbox,
+            "WIDTH": width,
+            "HEIGHT": height,
+            "FORMAT": img_format,
+            "STYLES": "",
+        }
+        resp = req.get(url, params=params, timeout=30)
+        resp.raise_for_status()
+
+        # Check of het een echte afbeelding is (niet XML error)
+        ct = resp.headers.get("content-type", "")
+        if "xml" in ct:
+            raise HTTPException(
+                status_code=502,
+                detail="PDOK service retourneerde een fout",
+            )
+
+        media_type = "image/jpeg" if img_format == "image/jpeg" else "image/png"
+        return Response(content=resp.content, media_type=media_type)
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"PDOK fout: {exc}") from exc
+
+
+@_protected.get("/api/pdok/services")
+async def pdok_services(user: User = Depends(get_current_user)):
+    """Lijst beschikbare PDOK kaartservices.
+
+    Returns:
+        Lijst van services met naam, beschrijving en default layers.
+    """
+    return {
+        "services": [
+            {
+                "id": "luchtfoto",
+                "label": "Luchtfoto",
+                "description": "Actuele luchtfoto (PDOK)",
+                "default_layers": "Actueel_orthoHR",
+                "format": "image/jpeg",
+            },
+            {
+                "id": "kadaster",
+                "label": "Kadastrale kaart",
+                "description": "Perceelgrenzen en nummers",
+                "default_layers": "Kadastralekaart",
+                "format": "image/png",
+            },
+            {
+                "id": "bag",
+                "label": "BAG Bebouwing",
+                "description": "Panden uit de BAG",
+                "default_layers": "pand",
+                "format": "image/png",
+            },
+        ]
+    }
+
+
+# ============================================================
 # Static frontend (moet ONDERAAN staan, na alle API routes)
 # ============================================================
 

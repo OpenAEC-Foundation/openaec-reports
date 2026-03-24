@@ -1,182 +1,164 @@
-# Symitech BIC Rapportage — Onderhoudsoverzicht inspectie (pagina 11, landscape)
-# Pixel-exact gemeten uit 336.01-BIC Rapportage.pdf
-# Pagina: A4 landscape 841.9×595.3pt (297×210mm)
-#
-# Layout: "7.2 Onderhoudsoverzicht" + "7.2.1 Historie inspectie"
-#   Tabel: Inspectiebedrijf, Inspecteur, Aard, Onderdeel, Datum, SIKB, Uiterste datum
-
 name: onderhouds_inspecties
 stationery: content_landscape_stationery.pdf
-
 line_zones:
-  # --- Dubbele lijn onder headers ---
-  - x0_mm: 10.0
-    y_mm: 47.5
-    x1_mm: 286.1
-    width_pt: 3.0
-    color: "primary"
-  - x0_mm: 10.0
-    y_mm: 48.4
-    x1_mm: 286.1
-    width_pt: 0.75
-    color: "primary"
-
+- x0_mm: 10.0
+  y_mm: 47.5
+  x1_mm: 286.1
+  width_pt: 3.0
+  color: primary
+- x0_mm: 10.0
+  y_mm: 48.4
+  x1_mm: 286.1
+  width_pt: 0.75
+  color: primary
 text_zones:
-  # === Sub-heading ===
-  # ref: "7.2" x0=28.5pt y0=89.3pt  12pt primary
-  - bind: _static.7.2
-    x_mm: 10.1
-    y_mm: 31.5
-    font: heading
-    size: 12
-    color: "primary"
-
-  - bind: _static.Onderhoudsoverzicht
-    x_mm: 20.2
-    y_mm: 31.5
-    font: heading
-    size: 12
-    color: "primary"
-
-  # ref: "7.2.1" x0=28.5pt y0=103.2pt  10pt primary
-  - bind: _static.7.2.1
-    x_mm: 10.1
-    y_mm: 36.4
-    font: heading
-    size: 10
-    color: "primary"
-
-  - bind: _static.Historie initiële / zes jaarlijkse inspecties
-    x_mm: 22.7
-    y_mm: 36.4
-    font: heading
-    size: 10
-    color: "primary"
-
-  # === Tabel headers ===
-  # Rij 1: hoofdkoppen
-  # ref: y0=114.7pt
-  - bind: _static.Inspectie
-    x_mm: 11.9
-    y_mm: 40.5
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: _static.Inspectierapport
-    x_mm: 194.5
-    y_mm: 40.5
-    font: heading
-    size: 10
-    color: "secondary"
-
-  - bind: _static.Volgende inspectie
-    x_mm: 244.6
-    y_mm: 40.5
-    font: heading
-    size: 10
-    color: "secondary"
-
-  # Rij 2: subkoppen
-  # ref: y0=126.2pt
-  - bind: _static.Inspectiebedrijf
-    x_mm: 11.9
-    y_mm: 44.6
-    font: body
-    size: 10
-    color: "secondary"
-
-  - bind: _static.Inspecteur
-    x_mm: 64.4
-    y_mm: 44.6
-    font: body
-    size: 10
-    color: "secondary"
-
-  - bind: _static.Aard
-    x_mm: 104.5
-    y_mm: 44.6
-    font: body
-    size: 10
-    color: "secondary"
-
-  - bind: _static.Onderdeel
-    x_mm: 134.5
-    y_mm: 44.6
-    font: body
-    size: 10
-    color: "secondary"
-
-  - bind: _static.Datum
-    x_mm: 163.6
-    y_mm: 44.6
-    font: body
-    size: 10
-    color: "secondary"
-
-  - bind: _static.Registratienummer SIKB
-    x_mm: 194.5
-    y_mm: 44.6
-    font: body
-    size: 10
-    color: "secondary"
-
-  - bind: _static.Uiterste datum
-    x_mm: 244.6
-    y_mm: 44.6
-    font: body
-    size: 10
-    color: "secondary"
-
-  # Voetnoot VVV
-  - bind: inspecties.voetnoot
-    x_mm: 10.1
-    y_mm: 57.5
-    font: body
-    size: 10
-    color: "text"
-    max_width_mm: 270
-
-  # === Footer ===
-  - bind: client.name
-    x_mm: 10.2
-    y_mm: 189.2
-    font: heading
-    size: 10
-    color: "white"
-
-  - bind: _page_number
-    x_mm: 252.5
-    y_mm: 190.0
-    font: heading
-    size: 12
-    color: "white"
-    align: right
-
-  - bind: meta.rapportkop_locatie
-    x_mm: 10.2
-    y_mm: 197.3
-    font: heading
-    size: 10
-    color: "white"
-
-# Tabel
+- bind: _static.7.2
+  x_mm: 10.1
+  y_mm: 31.5
+  font: heading
+  size: 12
+  color: primary
+- bind: _static.Onderhoudsoverzicht
+  x_mm: 20.2
+  y_mm: 31.5
+  font: heading
+  size: 12
+  color: primary
+- bind: _static.7.2.1
+  x_mm: 10.1
+  y_mm: 36.4
+  font: heading
+  size: 10
+  color: primary
+- bind: _static.Historie initiële / zes jaarlijkse inspecties
+  x_mm: 22.7
+  y_mm: 36.4
+  font: heading
+  size: 10
+  color: primary
+- bind: _static.Inspectie
+  x_mm: 11.9
+  y_mm: 40.5
+  font: heading
+  size: 10
+  color: secondary
+- bind: _static.Inspectierapport
+  x_mm: 194.5
+  y_mm: 40.5
+  font: heading
+  size: 10
+  color: secondary
+- bind: _static.Volgende inspectie
+  x_mm: 244.6
+  y_mm: 40.5
+  font: heading
+  size: 10
+  color: secondary
+- bind: _static.Inspectiebedrijf
+  x_mm: 11.9
+  y_mm: 44.6
+  font: body
+  size: 10
+  color: secondary
+- bind: _static.Inspecteur
+  x_mm: 64.4
+  y_mm: 44.6
+  font: body
+  size: 10
+  color: secondary
+- bind: _static.Aard
+  x_mm: 104.5
+  y_mm: 44.6
+  font: body
+  size: 10
+  color: secondary
+- bind: _static.Onderdeel
+  x_mm: 134.5
+  y_mm: 44.6
+  font: body
+  size: 10
+  color: secondary
+- bind: _static.Datum
+  x_mm: 163.6
+  y_mm: 44.6
+  font: body
+  size: 10
+  color: secondary
+- bind: _static.Registratienummer SIKB
+  x_mm: 194.5
+  y_mm: 44.6
+  font: body
+  size: 10
+  color: secondary
+- bind: _static.Uiterste datum
+  x_mm: 244.6
+  y_mm: 44.6
+  font: body
+  size: 10
+  color: secondary
+- bind: inspecties.voetnoot
+  x_mm: 10.1
+  y_mm: 57.5
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 270
+- bind: client.name
+  x_mm: 10.2
+  y_mm: 189.2
+  font: heading
+  size: 10
+  color: white
+- bind: _page_number
+  x_mm: 252.5
+  y_mm: 190.0
+  font: heading
+  size: 12
+  color: white
+  align: right
+- bind: meta.rapportkop_locatie
+  x_mm: 10.2
+  y_mm: 197.3
+  font: heading
+  size: 10
+  color: white
 table:
   data_bind: inspecties_items
   origin:
     x_mm: 11.9
-    y_mm: 46.5
+    y_mm: 64
   row_height_mm: 5.6
   max_y_mm: 180
   show_header: false
   body_font: body
   body_size: 8
-  body_color: "text"
+  body_color: text
   columns:
-    - { field: "Inspectiebedrijf", header: "Inspectiebedrijf", width_mm: 52, align: left }
-    - { field: "Inspecteur", header: "Inspecteur", width_mm: 40, align: left }
-    - { field: "Aard", header: "Aard", width_mm: 30, align: left }
-    - { field: "Onderdeel", header: "Onderdeel", width_mm: 29, align: left }
-    - { field: "Datum", header: "Datum", width_mm: 31, align: left }
-    - { field: "SIKB", header: "Registratienummer SIKB", width_mm: 50, align: left }
-    - { field: "Uiterste datum", header: "Uiterste datum", width_mm: 40, align: left }
+  - field: Inspectiebedrijf
+    header: Inspectiebedrijf
+    width_mm: 52
+    align: left
+  - field: Inspecteur
+    header: Inspecteur
+    width_mm: 40
+    align: left
+  - field: Aard
+    header: Aard
+    width_mm: 30
+    align: left
+  - field: Onderdeel
+    header: Onderdeel
+    width_mm: 29
+    align: left
+  - field: Datum
+    header: Datum
+    width_mm: 31
+    align: left
+  - field: SIKB
+    header: Registratienummer SIKB
+    width_mm: 50
+    align: left
+  - field: Uiterste datum
+    header: Uiterste datum
+    width_mm: 40
+    align: left

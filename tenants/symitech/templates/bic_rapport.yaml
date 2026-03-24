@@ -1,69 +1,115 @@
 # Symitech BIC Rapportage — documentstructuur
 # Gebaseerd op: 336.01-BIC Rapportage.pdf (17 pagina's)
+# Geverifieerd met: BIC_Rapportage_UNIP0105-OBR01_B2401.pdf (ingevuld voorbeeld)
+#
+# Paginastructuur:
+#  1  Voorblad
+#  2  Inhoudsopgave
+#  3  1 Locatie
+#  4  2 Voorziening + 3 Object + VVV
+#  5  4 BIC Details (controleur, reiniging, additioneel)
+#  6  5 Herstelwerkzaamheden
+#  7  6.1 Regionale overzichtstekening
+#  8  6.2 Detailtekening
+#  9  6.3 Kadastrale kaart
+# 10  7.1 Controlelijst BIC (landscape, auto-repeat)
+# 11  7.2.1 Inspecties historie (landscape)
+# 12  7.2.2 BIC controles historie (landscape, auto-repeat)
+# 13  7.2.3 Herstelwerkzaamheden historie (landscape, auto-repeat)
+# 14  8.1 VVV Verklaring (bijlage afbeelding)
+# 15  8.2 BIC ondersteunende foto's
+# 16  8.3 Schade foto's herstelwerkzaamheden
+# 17  Achterblad
+
 name: symitech_bic_rapport
 tenant: symitech
 report_type: bic_rapport
 
 pages:
+  # --- Voorblad ---
   - type: special
     page_type: voorblad_bic
     orientation: portrait
 
+  # --- Inhoudsopgave ---
   - type: fixed
     page_type: inhoudsopgave
     orientation: portrait
 
+  # --- 1 Locatie ---
   - type: fixed
     page_type: locatie
     orientation: portrait
 
+  # --- 2+3 Voorziening, Object, VVV ---
   - type: fixed
     page_type: voorziening_object
     orientation: portrait
 
+  # --- 4 BIC Details ---
   - type: fixed
     page_type: bic_rapport_details
     orientation: portrait
 
-  - type: fixed
-    page_type: bic_controles
-    orientation: portrait
-
+  # --- 5 Herstelwerkzaamheden ---
   - type: fixed
     page_type: herstelwerkzaamheden
     orientation: portrait
 
+  # --- 6.1 Regionale overzichtstekening ---
   - type: fixed
-    page_type: tekening_pagina
+    page_type: tekening_overzicht
     orientation: portrait
 
+  # --- 6.2 Detailtekening ---
+  - type: fixed
+    page_type: tekening_detail
+    orientation: portrait
+
+  # --- 6.3 Kadastrale kaart ---
+  - type: fixed
+    page_type: tekening_kadaster
+    orientation: portrait
+
+  # --- 7.1 Controlelijst BIC ---
   - type: fixed
     page_type: controlelijst_bic
     orientation: landscape
     repeat: auto
 
+  # --- 7.2.1 Inspecties historie ---
   - type: fixed
     page_type: onderhouds_inspecties
     orientation: landscape
 
+  # --- 7.2.2 BIC controles historie ---
   - type: fixed
     page_type: historie_bic
     orientation: landscape
     repeat: auto
 
+  # --- 7.2.3 Herstelwerkzaamheden historie ---
   - type: fixed
     page_type: historie_herstel
     orientation: landscape
     repeat: auto
 
+  # --- 8.1 VVV Verklaring ---
   - type: fixed
-    page_type: tekening_pagina
+    page_type: vvv_verklaring
     orientation: portrait
 
+  # --- 8.2 BIC ondersteunende foto's ---
   - type: fixed
     page_type: foto_bijlage
     orientation: portrait
 
+  # --- 8.3 Schade foto's ---
+  - type: fixed
+    page_type: schade_fotos
+    orientation: portrait
+
+  # --- Achterblad ---
   - type: special
     page_type: achterblad
     orientation: portrait

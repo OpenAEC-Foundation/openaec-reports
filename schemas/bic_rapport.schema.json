@@ -1,0 +1,377 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://report.open-aec.com/schemas/bic_rapport.schema.json",
+  "title": "BIC Rapport",
+  "description": "JSON schema voor Symitech BIC (Bedrijfsinterne Controle) rapportage. Definieert alle velden die externe apps moeten meesturen voor het genereren van een BIC rapport PDF.",
+  "type": "object",
+  "required": ["template", "project", "meta", "client", "location", "voorziening", "object", "vvv", "controleur", "bic"],
+  "properties": {
+    "template": {
+      "const": "bic_rapport",
+      "description": "Template identifier, altijd 'bic_rapport'"
+    },
+    "tenant": {
+      "type": "string",
+      "default": "symitech",
+      "description": "Tenant identifier"
+    },
+    "format": {
+      "type": "string",
+      "default": "A4"
+    },
+    "project": {
+      "type": "string",
+      "description": "Projectnaam, bijv. 'Uniper Benelux N.V. Maasvlakte - BIC inspectie UNIP0105'"
+    },
+    "project_number": {
+      "type": "string",
+      "description": "Projectnummer / BIC nummer, bijv. 'B2401'"
+    },
+    "author": {
+      "type": "string",
+      "default": "Symitech B.V."
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Rapportdatum ISO 8601 (YYYY-MM-DD)"
+    },
+    "version": {
+      "type": "string",
+      "default": "1.0"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["CONCEPT", "DEFINITIEF", "REVISIE"]
+    },
+
+    "meta": {
+      "type": "object",
+      "description": "Voorblad metadata",
+      "required": ["factuur_kop", "datum", "factuurnummer"],
+      "properties": {
+        "factuur_kop": {
+          "type": "string",
+          "description": "Rapport titel op voorblad, bijv. 'Eindrapportage Bedrijfsinterne Controle'"
+        },
+        "datum": {
+          "type": "string",
+          "description": "Maand + jaar op voorblad, bijv. 'FEBRUARI 2025'"
+        },
+        "factuurnummer": {
+          "type": "string",
+          "description": "BIC nummer op voorblad, bijv. 'B2401'"
+        },
+        "type_offerte": {
+          "type": "string",
+          "description": "Label boven voorziening:object, bijv. 'Voorziening:Object'"
+        },
+        "offerte_regel": {
+          "type": "string",
+          "description": "Voorziening:Object beschrijving, bijv. 'UNIP0105:OBR01 Riolering tbv laad/losplaats ammonia'"
+        },
+        "rapportkop_locatie": {
+          "type": "string",
+          "description": "Footer tekst op elke pagina, bijv. 'Eindrapportage Bedrijfsinterne Controle: B2401'"
+        }
+      }
+    },
+
+    "client": {
+      "type": "object",
+      "description": "Opdrachtgever gegevens",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "description": "Bedrijfsnaam opdrachtgever" },
+        "address": { "type": "string", "description": "Straat + huisnummer" },
+        "postcode_plaats": { "type": "string", "description": "Postcode + plaatsnaam" }
+      }
+    },
+
+    "location": {
+      "type": "object",
+      "description": "Inspectielocatie gegevens",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "description": "Locatienaam" },
+        "address": { "type": "string" },
+        "postcode_plaats": { "type": "string" },
+        "code": { "type": "string", "description": "Locatiecode, bijv. 'UNIP0105'" },
+        "provision_label": { "type": "string", "default": "Voorziening" },
+        "provision": { "type": "string", "description": "Voorziening omschrijving" },
+        "object_label": { "type": "string", "default": "Object" },
+        "object": { "type": "string", "description": "Object code" },
+        "photo_path": { "type": "string", "description": "Pad of base64 van locatiefoto" }
+      }
+    },
+
+    "voorziening": {
+      "type": "object",
+      "description": "Hoofdstuk 2 — Voorziening details",
+      "required": ["code", "beschrijving"],
+      "properties": {
+        "code": { "type": "string", "description": "BIC code, bijv. 'UNIP0105'" },
+        "beschrijving": { "type": "string", "description": "Voorziening beschrijving" },
+        "vereiste_status": { "type": "string", "description": "Vereiste status, bijv. 'Vloeistofdicht'" },
+        "huidige_status": { "type": "string", "description": "Huidige status" },
+        "notitie": { "type": "string", "description": "Bevindingen/notities" },
+        "foto": { "type": "string", "description": "Pad of base64 van voorzieningfoto" }
+      }
+    },
+
+    "object": {
+      "type": "object",
+      "description": "Hoofdstuk 3 — Object details",
+      "required": ["code", "beschrijving"],
+      "properties": {
+        "code": { "type": "string", "description": "Object code, bijv. 'OBR01'" },
+        "beschrijving": { "type": "string", "description": "Object beschrijving" },
+        "ruimte": { "type": "string" },
+        "type": { "type": "string", "description": "Object type, bijv. 'Bedrijfsriolering'" }
+      }
+    },
+
+    "vvv": {
+      "type": "object",
+      "description": "Verklaring Vloeistofdichte Voorziening",
+      "properties": {
+        "geldigheid": { "type": "string", "description": "Geldigheidsdatum, bijv. '16-10-2030'" },
+        "nummer": { "type": "string", "description": "Verklaringsnummer" },
+        "instantie": { "type": "string", "description": "Uitgevende instantie" },
+        "opmerkingen": { "type": "string" },
+        "onderhoudsdossier_ref": { "type": "string", "description": "Referentie naar onderhoudsdossier sectie" },
+        "bijlage_ref": { "type": "string", "description": "Referentie naar bijlage sectie" }
+      }
+    },
+
+    "controleur": {
+      "type": "object",
+      "description": "Hoofdstuk 4 — Controlerend bedrijf",
+      "required": ["bedrijf", "naam"],
+      "properties": {
+        "bedrijf": { "type": "string" },
+        "adres": { "type": "string" },
+        "postcode_plaats": { "type": "string" },
+        "telefoon": { "type": "string" },
+        "email": { "type": "string" },
+        "naam": { "type": "string", "description": "Naam controleur" }
+      }
+    },
+
+    "bic": {
+      "type": "object",
+      "description": "Hoofdstuk 4 — BIC controle details",
+      "required": ["nummer", "datum_controle"],
+      "properties": {
+        "nummer": { "type": "string", "description": "BIC controlenummer" },
+        "datum_controle": { "type": "string", "description": "Datum uitvoering controle (DD-MM-YYYY)" },
+        "datum_geldigheid": { "type": "string", "description": "Geldigheidsdatum controle" },
+        "bijzonderheden": { "type": "string" },
+        "ref_controlelijst": { "type": "string" },
+        "ref_historie": { "type": "string" },
+        "ref_fotos": { "type": "string" },
+        "rapportagedatum": { "type": "string", "description": "Datum rapportage (DD-MM-YYYY)" }
+      }
+    },
+
+    "reiniging": {
+      "type": "object",
+      "description": "Object reiniging tijdens BIC",
+      "properties": {
+        "nummer": { "type": "string" },
+        "omschrijving": { "type": "string" },
+        "type": { "type": "string" },
+        "datum": { "type": "string" }
+      }
+    },
+
+    "additioneel": {
+      "type": "object",
+      "description": "Additionele activiteiten tijdens BIC",
+      "properties": {
+        "nummer": { "type": "string" },
+        "omschrijving": { "type": "string" },
+        "datum": { "type": "string" }
+      }
+    },
+
+    "herstel": {
+      "type": "object",
+      "description": "Hoofdstuk 5 — Herstelwerkzaamheden",
+      "properties": {
+        "nummer": { "type": "string" },
+        "ref_controlelijst": { "type": "string" },
+        "ref_historie": { "type": "string" },
+        "ref_fotos": { "type": "string" }
+      }
+    },
+
+    "herstel_reiniging": {
+      "type": "object",
+      "description": "Object reiniging bij herstel",
+      "properties": {
+        "nummer": { "type": "string" },
+        "omschrijving": { "type": "string" },
+        "type": { "type": "string" },
+        "datum": { "type": "string" }
+      }
+    },
+
+    "herstel_additioneel": {
+      "type": "object",
+      "description": "Additionele activiteiten bij herstel",
+      "properties": {
+        "nummer": { "type": "string" },
+        "omschrijving": { "type": "string" },
+        "datum": { "type": "string" }
+      }
+    },
+
+    "tekening_overzicht": {
+      "type": "object",
+      "description": "6.1 Regionale overzichtstekening",
+      "properties": {
+        "titel": { "type": "string", "description": "Sub-heading tekst, bijv. 'Regionale overzichtstekening (1: 12.500)'" },
+        "image": { "type": "string", "description": "Pad, URL, of base64 van overzichtstekening" }
+      }
+    },
+
+    "tekening_detail": {
+      "type": "object",
+      "description": "6.2 Detailtekening",
+      "properties": {
+        "titel": { "type": "string", "description": "Sub-heading tekst" },
+        "image": { "type": "string", "description": "Pad, URL, of base64 van detailtekening" }
+      }
+    },
+
+    "tekening_kadaster": {
+      "type": "object",
+      "description": "6.3 Kadastrale kaart",
+      "properties": {
+        "image": { "type": "string", "description": "Pad, URL, of base64 van kadastrale kaart" }
+      }
+    },
+
+    "controlelijst": {
+      "type": "object",
+      "description": "7.1 Controlelijst context",
+      "properties": {
+        "context": { "type": "string", "description": "Context header boven de controlelijst" }
+      }
+    },
+
+    "controlelijst_items": {
+      "type": "array",
+      "description": "7.1 Controlelijst rijen",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Onderdeel": { "type": "string" },
+          "Aspect": { "type": "string" },
+          "Antwoord": { "type": "string" },
+          "Bodemrisico": { "type": "string" },
+          "Schadenummer": { "type": "string" }
+        }
+      }
+    },
+
+    "inspecties": {
+      "type": "object",
+      "description": "7.2.1 Inspecties voetnoot",
+      "properties": {
+        "voetnoot": { "type": "string" }
+      }
+    },
+
+    "inspecties_items": {
+      "type": "array",
+      "description": "7.2.1 Inspecties historie rijen",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Inspectiebedrijf": { "type": "string" },
+          "Inspecteur": { "type": "string" },
+          "Aard": { "type": "string" },
+          "Onderdeel": { "type": "string" },
+          "Datum": { "type": "string" },
+          "SIKB": { "type": "string" },
+          "Uiterste datum": { "type": "string" }
+        }
+      }
+    },
+
+    "historie_bic_items": {
+      "type": "array",
+      "description": "7.2.2 BIC controles historie rijen",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Controlerend bedrijf": { "type": "string" },
+          "Controleur": { "type": "string" },
+          "Onderdeel": { "type": "string" },
+          "Datum": { "type": "string" },
+          "Controle nummer": { "type": "string" },
+          "Uiterste datum": { "type": "string" }
+        }
+      }
+    },
+
+    "historie_herstel_items": {
+      "type": "array",
+      "description": "7.2.3 Herstelwerkzaamheden historie rijen",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Uitvoerend bedrijf": { "type": "string" },
+          "Uitvoerder": { "type": "string" },
+          "Onderdeel": { "type": "string" },
+          "Hersteldatum": { "type": "string" },
+          "Schadenummer": { "type": "string" },
+          "Aard werkzaamheden": { "type": "string" }
+        }
+      }
+    },
+
+    "vvv_verklaring": {
+      "type": "object",
+      "description": "8.1 VVV verklaring bijlage",
+      "properties": {
+        "image": { "type": "string", "description": "Pad, URL, of base64 van VVV verklaring document" }
+      }
+    },
+
+    "foto_bijlage": {
+      "type": "object",
+      "description": "8.2 BIC ondersteunende foto's",
+      "properties": {
+        "nummer": { "type": "string", "default": "8.2" },
+        "titel": { "type": "string" },
+        "context_1": { "type": "string", "description": "Context header regel 1" },
+        "context_2": { "type": "string" },
+        "context_3": { "type": "string" },
+        "label_links": { "type": "string" },
+        "caption_links": { "type": "string" },
+        "label_rechts": { "type": "string" },
+        "caption_rechts": { "type": "string" },
+        "foto_links": { "type": "string", "description": "Pad, URL, of base64" },
+        "foto_rechts": { "type": "string", "description": "Pad, URL, of base64" }
+      }
+    },
+
+    "schade_fotos": {
+      "type": "object",
+      "description": "8.3 Herstelwerkzaamheden schade foto's",
+      "properties": {
+        "context_1": { "type": "string", "description": "Bijv. 'UNIP0105: Bedrijfsriolering Riolering tbv laad/losplaats ammonia'" },
+        "context_2": { "type": "string", "description": "Bijv. 'S-2026-002: Laadplaats 15-03-2026'" },
+        "schade_label": { "type": "string" },
+        "schade_caption": { "type": "string" },
+        "herstel_label": { "type": "string" },
+        "herstel_caption": { "type": "string" },
+        "schade_foto": { "type": "string", "description": "Pad, URL, of base64" },
+        "herstel_foto": { "type": "string", "description": "Pad, URL, of base64" }
+      }
+    }
+  }
+}

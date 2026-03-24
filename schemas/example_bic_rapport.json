@@ -138,7 +138,12 @@
 
   "tekening_overzicht": {
     "titel": "Regionale overzichtstekening (1: 10.000)",
-    "image": "tenants/customer/assets/example_images/bgt_overzicht.jpg"
+    "image": {
+      "lat": 51.8130,
+      "lon": 4.6690,
+      "radius": 600,
+      "service": "luchtfoto"
+    }
   },
 
   "tekening_detail": {
@@ -147,7 +152,12 @@
   },
 
   "tekening_kadaster": {
-    "image": "tenants/customer/assets/example_images/kadaster_kaart.png"
+    "image": {
+      "lat": 51.8130,
+      "lon": 4.6690,
+      "radius": 200,
+      "service": "kadaster"
+    }
   },
 
   "controlelijst": {

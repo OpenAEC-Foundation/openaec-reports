@@ -1,6 +1,71 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-23 (sessie: Security Fixes + OIDC tenant fix)
+> Laatst bijgewerkt: 2026-03-24 (sessie: BIC rapport field groups + layout fine-tuning)
+
+---
+
+## Sessie 24 maart — BIC Rapport: Field Groups, Layout, PDOK Kaarten
+
+### Architectuur: Page-type-driven field groups
+- **Backend:** `_extract_field_groups()` scant page_type YAML's, extraheert data_bind velden, groepeert per prefix, bepaalt input_type heuristisch
+- **Frontend:** `FieldGroupForm` component rendert formuliervelden + tabeleditors. Sidebar toont "Formulier" sectie met 25 groepen
+- **Conversie:** `toEditorReport()` extraheert flat_data uit onbekende top-level keys. `toReportDefinition()` schrijft flat_data + field_groups terug
+- **Auto-fetch:** Als field_groups ontbreken bij JSON import, worden ze automatisch opgehaald van scaffold API
+
+### BIC Template: 17 pagina's compleet
+- 5 nieuwe page_types: tekening_overzicht, tekening_detail, tekening_kadaster, vvv_verklaring, schade_fotos
+- Template matcht exact de originele 17-pagina Customer structuur
+- Formeel JSON schema: `schemas/bic_rapport.schema.json`
+- Voorbeeld JSON met realistische sample data (114/125 velden gevuld)
+
+### Text wrapping + layout fixes
+- `TextZone.max_width_mm` + `_wrap_text()` in template engine
+- 87 text_zones voorzien van max_width_mm
+- Rechterkolom 20mm naar links (132→112mm) op pagina 3-6
+- Tabel origin_y gecorrigeerd op pagina 10-13
+- Tabel body_color: secondary (oranje) op alle tabelpagina's
+- Paginanummers consistent uitgelijnd op alle pagina's
+- TOC: aparte rechts-uitgelijnde paginanummers
+
+### PDOK kaarten
+- `/api/pdok/map` endpoint: luchtfoto, kadaster, BAG via lat/lon
+- `/api/pdok/services` endpoint: beschikbare services
+- Template engine: image zones accepteren dict met lat/lon → PDOK kaart automatisch ophalen
+- Combinatie-modus: coördinaten + image override
+
+### Openstaand
+- [ ] Pagina 4-5: tekst overlap bij lange content (spacing fine-tuning)
+- [ ] Frontend: field groups tonen in UI (browser cache + auto-fetch fix gedeployed, nog testen)
+- [ ] PDOK luchtfoto service was tijdelijk down — 2025_orthoHR layer geconfigureerd
+- [ ] Deploy naar server (SSH connection issues)
+
+---
+
+## Sessie 24 maart (2) — Migratie-instructies verbeterd
+
+`migratie-instructies.md` in het `OpenAEC_stijlbook` repo herschreven op basis van lessons learned uit de openaec-reports frontend (de referentie-implementatie).
+
+### Nieuwe/verbeterde secties:
+- **Referentie-implementatie** — directe links naar werkende bestanden in openaec-reports
+- **CSS architectuur: twee lagen** — `--brand-*` (vast) vs `--theme-*` (per thema)
+- **Boot sequence** — exacte volgorde `injectBrandStyles() → applyTheme() → render`
+- **Chrome directory structuur** — complete bestandsboom met colocated CSS patroon
+- **`brand.ts` + `injectBrandStyles.ts`** — volledig uitgewerkt met hexToRgb uitleg
+- **Tailwind bridge** — concrete `tailwind.config.js` met `brand.*` en `chrome.*`
+- **`useKeyboardShortcuts` hook** — centraal keyboard shortcut patroon
+- **Zustand multi-store** — template met undo/redo patroon
+- **i18n setup** — complete `config.ts` met namespace imports
+- **Veelgemaakte fouten** — uitgebreid van 14 naar 28 items, gegroepeerd per categorie
+- **Validatie-checklist** — uitgebreid van ~30 naar ~50 items
+
+### Bestand gewijzigd:
+- `C:\Users\Joche\Documents\GitHub\OpenAEC_stijlbook\migratie-instructies.md`
+
+---
+
+## Sessie 24 maart (1) — BIC Lijnen Fix
+
+Blauwe lijnen op pagina 5 (bic_rapport_details) en pagina 6 (herstelwerkzaamheden) 2.55mm naar beneden verplaatst. Alle `line_zones` y_mm waarden aangepast. Gedeployd naar productie.
 
 ---
 

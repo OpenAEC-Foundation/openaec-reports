@@ -560,20 +560,38 @@ class TemplateLoader:
 
     @staticmethod
     def _load_sample_data(template_name: str) -> dict[str, Any]:
-        """Laad voorbeeld data uit schemas/ directory."""
-        schemas_dir = Path(__file__).parent.parent.parent.parent / "schemas"
-        candidates = [
-            schemas_dir / f"example_{template_name}.json",
-            schemas_dir / f"example_customer_{template_name}.json",
+        """Laad voorbeeld data uit schemas/ directory.
+
+        Zoekt in meerdere locaties om zowel source tree als
+        geïnstalleerd package (Docker) te ondersteunen.
+        """
+        import json as _json
+
+        search_dirs = [
+            # Source tree (lokaal development)
+            Path(__file__).parent.parent.parent.parent / "schemas",
+            # Docker: /app/schemas/
+            Path("/app/schemas"),
+            # CWD fallback
+            Path.cwd() / "schemas",
         ]
-        for path in candidates:
-            if path.exists():
-                import json
-                try:
-                    with path.open("r", encoding="utf-8") as f:
-                        return json.load(f)
-                except (json.JSONDecodeError, OSError):
-                    pass
+
+        filenames = [
+            f"example_{template_name}.json",
+            f"example_customer_{template_name}.json",
+        ]
+
+        for schemas_dir in search_dirs:
+            if not schemas_dir.is_dir():
+                continue
+            for filename in filenames:
+                path = schemas_dir / filename
+                if path.exists():
+                    try:
+                        with path.open("r", encoding="utf-8") as f:
+                            return _json.load(f)
+                    except (_json.JSONDecodeError, OSError):
+                        pass
         return {}
 
     @staticmethod

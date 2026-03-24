@@ -29,6 +29,7 @@ export interface ValidationResult {
 export type ViewMode = 'editor' | 'split' | 'json' | 'preview' | 'admin' | 'projects';
 
 export type MetadataPanel = 'rapport' | 'voorblad' | 'colofon' | 'opties';
+export type ActiveView = { type: 'panel' } | { type: 'section'; id: string } | { type: 'appendix'; id: string } | { type: 'fieldGroup'; key: string };
 
 // ---------- Undo/redo constants ----------
 
@@ -46,6 +47,7 @@ export interface ReportStore {
   activeAppendix: string | null;
   activeBlock: string | null;
   activePanel: MetadataPanel;
+  activeFieldGroup: string | null;
   viewMode: ViewMode;
   isDirty: boolean;
 
@@ -108,7 +110,14 @@ export interface ReportStore {
   setActiveAppendix: (id: string | null) => void;
   setActiveBlock: (id: string | null) => void;
   setActivePanel: (panel: MetadataPanel) => void;
+  setActiveFieldGroup: (key: string | null) => void;
   setViewMode: (mode: ViewMode) => void;
+
+  // Actions — flat data (BIC / template-driven)
+  setFlatField: (groupKey: string, fieldKey: string, value: unknown) => void;
+  setFlatTableRow: (tableKey: string, rowIndex: number, row: Record<string, unknown>) => void;
+  addFlatTableRow: (tableKey: string, row?: Record<string, unknown>) => void;
+  removeFlatTableRow: (tableKey: string, rowIndex: number) => void;
 
   // Actions — I/O
   importJson: (json: string) => ValidationResult;
@@ -158,6 +167,7 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
   activeAppendix: null,
   activeBlock: null,
   activePanel: 'rapport',
+  activeFieldGroup: null,
   viewMode: 'editor',
   isDirty: false,
 
@@ -581,11 +591,54 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
   },
 
   // --- UI ---
-  setActiveSection: (id) => set({ activeSection: id, activeAppendix: null, activeBlock: null }),
-  setActiveAppendix: (id) => set({ activeAppendix: id, activeSection: null, activeBlock: null }),
+  setActiveSection: (id) => set({ activeSection: id, activeAppendix: null, activeBlock: null, activeFieldGroup: null }),
+  setActiveAppendix: (id) => set({ activeAppendix: id, activeSection: null, activeBlock: null, activeFieldGroup: null }),
   setActiveBlock: (id) => set({ activeBlock: id }),
-  setActivePanel: (panel) => set({ activePanel: panel, activeSection: null, activeAppendix: null, activeBlock: null }),
+  setActivePanel: (panel) => set({ activePanel: panel, activeSection: null, activeAppendix: null, activeBlock: null, activeFieldGroup: null }),
+  setActiveFieldGroup: (key) => set({ activeFieldGroup: key, activeSection: null, activeAppendix: null, activeBlock: null }),
   setViewMode: (mode) => set({ viewMode: mode }),
+
+  // --- Flat data ---
+  setFlatField: (groupKey, fieldKey, value) => {
+    get()._pushHistory();
+    set((state) => {
+      const flat_data = { ...state.report.flat_data };
+      const group = { ...(flat_data[groupKey] as Record<string, unknown> || {}) };
+      group[fieldKey] = value;
+      flat_data[groupKey] = group;
+      return { report: { ...state.report, flat_data }, isDirty: true };
+    });
+  },
+  setFlatTableRow: (tableKey, rowIndex, row) => {
+    get()._pushHistory();
+    set((state) => {
+      const flat_data = { ...state.report.flat_data };
+      const rows = [...(flat_data[tableKey] as Record<string, unknown>[] || [])];
+      rows[rowIndex] = row;
+      flat_data[tableKey] = rows;
+      return { report: { ...state.report, flat_data }, isDirty: true };
+    });
+  },
+  addFlatTableRow: (tableKey, row) => {
+    get()._pushHistory();
+    set((state) => {
+      const flat_data = { ...state.report.flat_data };
+      const rows = [...(flat_data[tableKey] as Record<string, unknown>[] || [])];
+      rows.push(row ?? {});
+      flat_data[tableKey] = rows;
+      return { report: { ...state.report, flat_data }, isDirty: true };
+    });
+  },
+  removeFlatTableRow: (tableKey, rowIndex) => {
+    get()._pushHistory();
+    set((state) => {
+      const flat_data = { ...state.report.flat_data };
+      const rows = [...(flat_data[tableKey] as Record<string, unknown>[] || [])];
+      rows.splice(rowIndex, 1);
+      flat_data[tableKey] = rows;
+      return { report: { ...state.report, flat_data }, isDirty: true };
+    });
+  },
 
   // --- I/O ---
   importJson: (json) => {
@@ -632,6 +685,7 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
       activeAppendix: null,
       activeBlock: null,
       activePanel: 'rapport',
+      activeFieldGroup: null,
       isDirty: false,
       _past: [],
       _future: [],
@@ -651,6 +705,7 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
       activeAppendix: null,
       activeBlock: null,
       activePanel: 'rapport',
+      activeFieldGroup: null,
       isDirty: false,
       _past: [],
       _future: [],
@@ -669,6 +724,7 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
       activeAppendix: null,
       activeBlock: null,
       activePanel: 'rapport',
+      activeFieldGroup: null,
       viewMode: 'editor',
       isDirty: false,
       _past: [],

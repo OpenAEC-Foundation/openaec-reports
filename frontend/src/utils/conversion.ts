@@ -13,6 +13,7 @@ import type {
   AppendixSection,
   ContentBlock,
   Colofon,
+  FieldGroup,
 } from '@/types/report';
 import { generateId } from './idGenerator';
 import { createDefaultReport } from './defaults';
@@ -76,9 +77,36 @@ function flattenAppendixSections(sections: AppendixSection[]): EditorBlock[] {
   return blocks;
 }
 
+/** Top-level keys die NIET flat data zijn */
+const KNOWN_REPORT_KEYS = new Set([
+  'template', 'brand', 'format', 'orientation', 'project', 'project_number',
+  'client', 'author', 'report_type', 'date', 'version', 'status',
+  'cover', 'colofon', 'toc', 'sections', 'appendices', 'backcover',
+  'metadata', 'field_groups', 'tenant',
+]);
+
 /** Converteer een ReportDefinition (schema JSON) naar EditorReport (met IDs en defaults) */
 export function toEditorReport(def: ReportDefinition): EditorReport {
   const defaults = createDefaultReport();
+
+  // Extraheer flat data: alle top-level keys die niet in het standaard schema zitten
+  const flat_data: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(def)) {
+    if (!KNOWN_REPORT_KEYS.has(key) && value != null && typeof value === 'object') {
+      flat_data[key] = value;
+    }
+  }
+
+  // Client kan een string (standaard) of dict (BIC flat data) zijn
+  let clientStr = defaults.client;
+  if (typeof def.client === 'string') {
+    clientStr = def.client;
+  } else if (typeof def.client === 'object' && def.client !== null) {
+    // BIC formaat: client is een dict — bewaar als flat data
+    flat_data['client'] = def.client;
+    clientStr = (def.client as Record<string, string>).name ?? '';
+  }
+
   return {
     template: def.template,
     brand: def.brand ?? defaults.brand,
@@ -86,7 +114,7 @@ export function toEditorReport(def: ReportDefinition): EditorReport {
     orientation: def.orientation ?? defaults.orientation,
     project: def.project,
     project_number: def.project_number ?? defaults.project_number,
-    client: def.client ?? defaults.client,
+    client: clientStr,
     author: def.author ?? defaults.author,
     report_type: def.report_type ?? defaults.report_type,
     date: def.date ?? defaults.date,
@@ -99,6 +127,8 @@ export function toEditorReport(def: ReportDefinition): EditorReport {
     appendices: (def.appendices ?? []).map(toEditorAppendix),
     backcover: def.backcover ?? defaults.backcover,
     metadata: def.metadata ?? defaults.metadata,
+    field_groups: (def.field_groups ?? []) as FieldGroup[],
+    flat_data,
   };
 }
 
@@ -223,7 +253,12 @@ export function toReportDefinition(report: EditorReport): ReportDefinition {
   if (report.format !== 'A4') def.format = report.format;
   if (report.orientation !== 'portrait') def.orientation = report.orientation;
   if (report.project_number) def.project_number = report.project_number;
-  if (report.client) def.client = report.client;
+  // Als flat_data een 'client' dict heeft, gebruik die; anders de string
+  if (report.flat_data?.client && typeof report.flat_data.client === 'object') {
+    (def as Record<string, unknown>).client = report.flat_data.client;
+  } else if (report.client) {
+    def.client = report.client;
+  }
   if (report.author && report.author !== brand.fullName) def.author = report.author;
   if (report.report_type) def.report_type = report.report_type;
   if (report.date) def.date = report.date;
@@ -240,6 +275,14 @@ export function toReportDefinition(report: EditorReport): ReportDefinition {
   if (report.appendices.length > 0) def.appendices = report.appendices.map(toSchemaAppendix);
   if (report.backcover.enabled !== undefined) def.backcover = report.backcover;
   if (Object.keys(report.metadata).length > 0) def.metadata = report.metadata;
+
+  // Flat data dicts terugschrijven als top-level keys
+  if (report.flat_data) {
+    for (const [key, value] of Object.entries(report.flat_data)) {
+      if (key === 'client') continue;  // Al hierboven afgehandeld
+      (def as Record<string, unknown>)[key] = value;
+    }
+  }
 
   return def;
 }

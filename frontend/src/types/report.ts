@@ -264,6 +264,41 @@ export interface Appendix {
   content?: ContentBlock[];    // legacy flat content
 }
 
+// ---------- Field groups (BIC / template-driven forms) ----------
+
+export type FieldInputType = 'text' | 'number' | 'textarea' | 'image';
+
+export interface FieldDefinition {
+  bind: string;           // "controleur.bedrijf"
+  field: string;          // "bedrijf"
+  label: string;          // "Bedrijf"
+  input_type: FieldInputType;
+}
+
+export interface TableColumnDef {
+  field: string;
+  width_mm: number;
+  header: string;
+}
+
+export interface ScalarFieldGroup {
+  key: string;            // "controleur"
+  label: string;          // "Controleur"
+  page_type: string;      // "bic_rapport_details"
+  fields: FieldDefinition[];
+  type?: undefined;
+}
+
+export interface TableFieldGroup {
+  key: string;            // "controlelijst_items"
+  label: string;          // "Controlelijst BIC"
+  page_type: string;      // "controlelijst_bic"
+  type: 'table';
+  columns: TableColumnDef[];
+}
+
+export type FieldGroup = ScalarFieldGroup | TableFieldGroup;
+
 // ---------- Root report definition ----------
 
 export interface ReportDefinition {
@@ -286,6 +321,10 @@ export interface ReportDefinition {
   appendices?: Appendix[];
   backcover?: BackcoverConfig;
   metadata?: Record<string, unknown>;
+  field_groups?: FieldGroup[];
+  // Flat data dicts voor template-driven rapporten (bijv. BIC)
+  // Top-level keys zoals "voorziening", "controleur", "bic", etc.
+  [key: string]: unknown;
 }
 
 // ---------- Editor-internal types (met IDs) ----------
@@ -331,4 +370,8 @@ export interface EditorReport {
   appendices: EditorAppendix[];
   backcover: BackcoverConfig;
   metadata: Record<string, unknown>;
+  /** Veldgroep metadata vanuit scaffold (read-only, voor UI rendering) */
+  field_groups: FieldGroup[];
+  /** Flat data dicts voor template-driven rapporten (bijv. BIC) */
+  flat_data: Record<string, unknown>;
 }

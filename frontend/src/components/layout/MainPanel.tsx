@@ -23,6 +23,7 @@ import { MetadataForm } from '@/components/forms/MetadataForm';
 import { CoverForm } from '@/components/forms/CoverForm';
 import { ColofonForm } from '@/components/forms/ColofonForm';
 import { OptionsPanel } from '@/components/forms/OptionsPanel';
+import { FieldGroupForm } from '@/components/forms/FieldGroupForm';
 import { ToggleSwitch } from '@/components/forms/ToggleSwitch';
 import { BlockIcon } from '@/components/shared/BlockIcons';
 import type { EditorBlock, EditorSection } from '@/types/report';
@@ -445,7 +446,13 @@ function EditorContent({
   handleDragEnd: (event: DragEndEvent) => void;
 }) {
   const activePanel = useReportStore((s) => s.activePanel);
+  const activeFieldGroup = useReportStore((s) => s.activeFieldGroup);
   const sections = useReportStore((s) => s.report.sections);
+
+  // Field group editor (BIC forms)
+  if (activeFieldGroup) {
+    return <FieldGroupForm groupKey={activeFieldGroup} />;
+  }
 
   // Appendix editor
   if (activeAppendix) {

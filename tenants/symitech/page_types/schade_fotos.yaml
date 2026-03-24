@@ -60,8 +60,8 @@ text_zones:
   size: 10
   color: white
 - bind: _page_number
-  x_mm: 135.6
-  y_mm: 277.3
+  x_mm: 172.0
+  y_mm: 275.1
   font: heading
   size: 12
   color: white

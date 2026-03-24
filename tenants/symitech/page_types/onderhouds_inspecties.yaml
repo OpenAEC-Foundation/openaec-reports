@@ -2,12 +2,12 @@ name: onderhouds_inspecties
 stationery: content_landscape_stationery.pdf
 line_zones:
 - x0_mm: 10.0
-  y_mm: 47.5
+  y_mm: 49.5
   x1_mm: 286.1
   width_pt: 3.0
   color: primary
 - x0_mm: 10.0
-  y_mm: 48.4
+  y_mm: 50.4
   x1_mm: 286.1
   width_pt: 0.75
   color: primary
@@ -110,8 +110,8 @@ text_zones:
   size: 10
   color: white
 - bind: _page_number
-  x_mm: 252.5
-  y_mm: 190.0
+  x_mm: 263.5
+  y_mm: 189.2
   font: heading
   size: 12
   color: white
@@ -132,7 +132,7 @@ table:
   show_header: false
   body_font: body
   body_size: 8
-  body_color: text
+  body_color: secondary
   columns:
   - field: Inspectiebedrijf
     header: Inspectiebedrijf

@@ -1,200 +1,294 @@
-# Symitech BIC Rapportage — inhoudsopgave (TOC)
-# Pixel-exact gemeten uit 336.01-BIC Rapportage.pdf pagina 2
-# Pagina: A4 portrait 595.3×841.9pt (210×297mm)
-#
-# Layout: "INHOUDSOPGAVE" heading + genummerde items met puntjeslijnen
-# Items zijn statisch (vaste structuur per rapport)
-
 name: inhoudsopgave
 stationery: content_portrait_stationery.pdf
-
 text_zones:
-  # === Heading ===
-  # ref: x0=49.8pt y0=102.9pt  14pt Arial-BoldMT #006fab
-  - bind: _static.INHOUDSOPGAVE
-    x_mm: 17.6
-    y_mm: 36.3
-    font: heading
-    size: 14
-    color: "primary"
-
-  # === Niveau 1 items (spacing ~16.5pt ≈ 5.8mm) ===
-  # Item 1: "1  Locatie"
-  # ref: nummer x0=49.8pt, tekst x0=71.8pt, y0=116.5pt
-  - bind: toc.item_1
-    x_mm: 17.6
-    y_mm: 41.1
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 2: "2  Voorziening"
-  - bind: toc.item_2
-    x_mm: 17.6
-    y_mm: 46.9
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 3: "3  Object"
-  - bind: toc.item_3
-    x_mm: 17.6
-    y_mm: 52.7
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 4: "4  Bedrijfsinterne controle (BIC)"
-  - bind: toc.item_4
-    x_mm: 17.6
-    y_mm: 58.6
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 5: "5  Herstelwerkzaamheden"
-  - bind: toc.item_5
-    x_mm: 17.6
-    y_mm: 64.4
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 6: "6  Tekeningen"
-  - bind: toc.item_6
-    x_mm: 17.6
-    y_mm: 70.2
-    font: body
-    size: 10
-    color: "text"
-
-  # === Niveau 2 items (sub-items, indented) ===
-  # ref: nummer x0=59.8pt (21.1mm), tekst x0=85.8pt (30.3mm)
-
-  # Item 6.1: "Regionale overzichtstekening"
-  - bind: toc.item_6_1
-    x_mm: 21.1
-    y_mm: 76.0
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 6.2: "Detailtekening..."
-  - bind: toc.item_6_2
-    x_mm: 21.1
-    y_mm: 81.9
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 6.3: "Kadastrale kaart"
-  - bind: toc.item_6_3
-    x_mm: 21.1
-    y_mm: 87.7
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 7: "7  Onderhoudsdossier"
-  - bind: toc.item_7
-    x_mm: 17.6
-    y_mm: 93.5
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 7.1
-  - bind: toc.item_7_1
-    x_mm: 21.1
-    y_mm: 99.3
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 7.2
-  - bind: toc.item_7_2
-    x_mm: 21.1
-    y_mm: 105.2
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 7.2.1
-  # ref: nummer x0=69.8pt (24.6mm), tekst x0=109.8pt (38.7mm)
-  - bind: toc.item_7_2_1
-    x_mm: 24.6
-    y_mm: 111.0
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 7.2.2
-  - bind: toc.item_7_2_2
-    x_mm: 24.6
-    y_mm: 116.8
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 7.2.3
-  - bind: toc.item_7_2_3
-    x_mm: 24.6
-    y_mm: 122.6
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 8: "8  Bijlagen"
-  - bind: toc.item_8
-    x_mm: 17.6
-    y_mm: 128.5
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 8.1
-  - bind: toc.item_8_1
-    x_mm: 21.1
-    y_mm: 134.3
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 8.2
-  - bind: toc.item_8_2
-    x_mm: 21.1
-    y_mm: 140.1
-    font: body
-    size: 10
-    color: "text"
-
-  # Item 8.3
-  - bind: toc.item_8_3
-    x_mm: 21.1
-    y_mm: 145.9
-    font: body
-    size: 10
-    color: "text"
-
-  # === Footer ===
-  - bind: client.name
-    x_mm: 10.3
-    y_mm: 275.4
-    font: heading
-    size: 10
-    color: "white"
-
-  - bind: _page_number
-    x_mm: 137.5
-    y_mm: 277.3
-    font: heading
-    size: 12
-    color: "white"
-    align: right
-
-  - bind: meta.rapportkop_locatie
-    x_mm: 10.3
-    y_mm: 283.5
-    font: heading
-    size: 10
-    color: "white"
+- bind: _static.INHOUDSOPGAVE
+  x_mm: 17.6
+  y_mm: 36.3
+  font: heading
+  size: 14
+  color: primary
+- bind: toc.item_1
+  x_mm: 17.6
+  y_mm: 41.1
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 170
+- bind: toc.item_2
+  x_mm: 17.6
+  y_mm: 46.9
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 170
+- bind: toc.item_3
+  x_mm: 17.6
+  y_mm: 52.7
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 170
+- bind: toc.item_4
+  x_mm: 17.6
+  y_mm: 58.6
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 170
+- bind: toc.item_5
+  x_mm: 17.6
+  y_mm: 64.4
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 170
+- bind: toc.item_6
+  x_mm: 17.6
+  y_mm: 70.2
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 170
+- bind: toc.item_6_1
+  x_mm: 21.1
+  y_mm: 76.0
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 166
+- bind: toc.item_6_2
+  x_mm: 21.1
+  y_mm: 81.9
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 166
+- bind: toc.item_6_3
+  x_mm: 21.1
+  y_mm: 87.7
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 166
+- bind: toc.item_7
+  x_mm: 17.6
+  y_mm: 93.5
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 170
+- bind: toc.item_7_1
+  x_mm: 21.1
+  y_mm: 99.3
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 166
+- bind: toc.item_7_2
+  x_mm: 21.1
+  y_mm: 105.2
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 166
+- bind: toc.item_7_2_1
+  x_mm: 24.6
+  y_mm: 111.0
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 163
+- bind: toc.item_7_2_2
+  x_mm: 24.6
+  y_mm: 116.8
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 163
+- bind: toc.item_7_2_3
+  x_mm: 24.6
+  y_mm: 122.6
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 163
+- bind: toc.item_8
+  x_mm: 17.6
+  y_mm: 128.5
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 170
+- bind: toc.item_8_1
+  x_mm: 21.1
+  y_mm: 134.3
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 166
+- bind: toc.item_8_2
+  x_mm: 21.1
+  y_mm: 140.1
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 166
+- bind: toc.item_8_3
+  x_mm: 21.1
+  y_mm: 145.9
+  font: body
+  size: 10
+  color: text
+  max_width_mm: 166
+- bind: toc.page_1
+  x_mm: 192.0
+  y_mm: 41.1
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_2
+  x_mm: 192.0
+  y_mm: 46.9
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_3
+  x_mm: 192.0
+  y_mm: 52.7
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_4
+  x_mm: 192.0
+  y_mm: 58.6
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_5
+  x_mm: 192.0
+  y_mm: 64.4
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_6
+  x_mm: 192.0
+  y_mm: 70.2
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_6_1
+  x_mm: 192.0
+  y_mm: 76.0
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_6_2
+  x_mm: 192.0
+  y_mm: 81.9
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_6_3
+  x_mm: 192.0
+  y_mm: 87.7
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_7
+  x_mm: 192.0
+  y_mm: 93.5
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_7_1
+  x_mm: 192.0
+  y_mm: 99.3
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_7_2
+  x_mm: 192.0
+  y_mm: 105.2
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_7_2_1
+  x_mm: 192.0
+  y_mm: 111.0
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_7_2_2
+  x_mm: 192.0
+  y_mm: 116.8
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_7_2_3
+  x_mm: 192.0
+  y_mm: 122.6
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_8
+  x_mm: 192.0
+  y_mm: 128.5
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_8_1
+  x_mm: 192.0
+  y_mm: 134.3
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_8_2
+  x_mm: 192.0
+  y_mm: 140.1
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: toc.page_8_3
+  x_mm: 192.0
+  y_mm: 145.9
+  font: body
+  size: 10
+  color: text
+  align: right
+- bind: client.name
+  x_mm: 10.3
+  y_mm: 275.4
+  font: heading
+  size: 10
+  color: white
+- bind: _page_number
+  x_mm: 172.0
+  y_mm: 275.4
+  font: heading
+  size: 12
+  color: white
+  align: right
+- bind: meta.rapportkop_locatie
+  x_mm: 10.3
+  y_mm: 283.5
+  font: heading
+  size: 10
+  color: white

@@ -1,68 +1,53 @@
-# Symitech BIC Rapportage — 8.1 VVV Verklaring (portrait)
-# Full-page document/afbeelding bijlage
-# Pagina: A4 portrait 595.3×841.9pt (210×297mm)
-
 name: vvv_verklaring
 stationery: content_portrait_stationery.pdf
-
 text_zones:
-  # === Hoofdstuk heading ===
-  - bind: _static.8
-    x_mm: 17.6
-    y_mm: 32.2
-    font: heading
-    size: 14
-    color: "primary"
-
-  - bind: _static.Bijlagen
-    x_mm: 25.2
-    y_mm: 32.2
-    font: heading
-    size: 14
-    color: "primary"
-
-  # === Sub-heading ===
-  - bind: _static.8.1
-    x_mm: 17.6
-    y_mm: 39.3
-    font: heading
-    size: 12
-    color: "primary"
-
-  - bind: _static.Verklaring Vloeistofdichte Voorziening (VVV)
-    x_mm: 27.7
-    y_mm: 39.3
-    font: heading
-    size: 12
-    color: "primary"
-
-  # === Footer ===
-  - bind: client.name
-    x_mm: 10.3
-    y_mm: 275.4
-    font: heading
-    size: 10
-    color: "white"
-
-  - bind: _page_number
-    x_mm: 137.5
-    y_mm: 277.3
-    font: heading
-    size: 12
-    color: "white"
-    align: right
-
-  - bind: meta.rapportkop_locatie
-    x_mm: 10.3
-    y_mm: 283.5
-    font: heading
-    size: 10
-    color: "white"
-
+- bind: _static.8
+  x_mm: 17.6
+  y_mm: 32.2
+  font: heading
+  size: 14
+  color: primary
+- bind: _static.Bijlagen
+  x_mm: 25.2
+  y_mm: 32.2
+  font: heading
+  size: 14
+  color: primary
+- bind: _static.8.1
+  x_mm: 17.6
+  y_mm: 39.3
+  font: heading
+  size: 12
+  color: primary
+- bind: _static.Verklaring Vloeistofdichte Voorziening (VVV)
+  x_mm: 27.7
+  y_mm: 39.3
+  font: heading
+  size: 12
+  color: primary
+- bind: client.name
+  x_mm: 10.3
+  y_mm: 275.4
+  font: heading
+  size: 10
+  color: white
+- bind: _page_number
+  x_mm: 172.0
+  y_mm: 275.4
+  font: heading
+  size: 12
+  color: white
+  align: right
+- bind: meta.rapportkop_locatie
+  x_mm: 10.3
+  y_mm: 283.5
+  font: heading
+  size: 10
+  color: white
 image_zones:
-  - bind: vvv_verklaring.image
-    x_mm: 17.6
-    y_mm: 43.5
-    width_mm: 170
-    height_mm: 220
-    fallback: ""
+- bind: vvv_verklaring.image
+  x_mm: 17.6
+  y_mm: 43.5
+  width_mm: 170
+  height_mm: 220
+  fallback: ''

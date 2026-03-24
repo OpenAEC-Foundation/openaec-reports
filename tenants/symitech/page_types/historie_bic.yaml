@@ -2,12 +2,12 @@ name: historie_bic
 stationery: content_landscape_stationery.pdf
 line_zones:
 - x0_mm: 10.0
-  y_mm: 42.0
+  y_mm: 43.0
   x1_mm: 286.1
   width_pt: 3.0
   color: primary
 - x0_mm: 10.0
-  y_mm: 42.9
+  y_mm: 43.9
   x1_mm: 286.1
   width_pt: 0.75
   color: primary
@@ -79,8 +79,8 @@ text_zones:
   size: 10
   color: white
 - bind: _page_number
-  x_mm: 252.5
-  y_mm: 190.0
+  x_mm: 263.5
+  y_mm: 189.2
   font: heading
   size: 12
   color: white
@@ -95,13 +95,13 @@ table:
   data_bind: historie_bic_items
   origin:
     x_mm: 11.9
-    y_mm: 45
+    y_mm: 47
   row_height_mm: 5.6
   max_y_mm: 180
   show_header: false
   body_font: body
   body_size: 8
-  body_color: text
+  body_color: secondary
   columns:
   - field: Controlerend bedrijf
     header: Controlerend bedrijf

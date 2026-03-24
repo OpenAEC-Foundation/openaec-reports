@@ -23,54 +23,54 @@ line_zones:
   color: primary
 text_zones:
 - bind: client.name
-  x_mm: 132.0
+  x_mm: 112.0
   y_mm: 39.7
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: client.address
-  x_mm: 132.0
+  x_mm: 112.0
   y_mm: 45.3
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: client.postcode_plaats
-  x_mm: 132.0
+  x_mm: 112.0
   y_mm: 49.4
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: location.name
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 65.6
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: location.address
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 71.3
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: location.postcode_plaats
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 75.3
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: location.code
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 79.4
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: location.provision_label
   x_mm: 19.5
   y_mm: 83.4
@@ -78,12 +78,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: location.provision
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 83.4
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: location.object_label
   x_mm: 19.5
   y_mm: 87.5
@@ -91,12 +91,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: location.object
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 87.5
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: client.name
   x_mm: 10.0
   y_mm: 272.0
@@ -104,8 +104,8 @@ text_zones:
   size: 10
   color: white
 - bind: _page_number
-  x_mm: 140.1
-  y_mm: 273.5
+  x_mm: 172.0
+  y_mm: 272.0
   font: heading
   size: 12
   color: white

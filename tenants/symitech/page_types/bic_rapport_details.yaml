@@ -61,40 +61,40 @@ text_zones:
   size: 10
   color: secondary
 - bind: controleur.bedrijf
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 42.7
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: controleur.adres
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 48.4
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: controleur.postcode_plaats
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 52.4
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: controleur.telefoon
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 56.5
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: controleur.email
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 60.5
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: _static.Controleur
   x_mm: 19.5
   y_mm: 64.6
@@ -102,12 +102,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: controleur.naam
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 64.6
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: _static.BIC details
   x_mm: 19.5
   y_mm: 80.8
@@ -115,12 +115,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: bic.nummer
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 80.8
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: _static.Datum controle
   x_mm: 19.5
   y_mm: 86.5
@@ -128,12 +128,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: bic.datum_controle
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 86.5
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: _static.Datum geldigheid
   x_mm: 19.5
   y_mm: 90.5
@@ -141,12 +141,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: bic.datum_geldigheid
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 90.5
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: _static.Bijzonderheden
   x_mm: 19.5
   y_mm: 94.6
@@ -154,12 +154,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: bic.bijzonderheden
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 94.6
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: _static.Onderhoudsdossier controlelijst
   x_mm: 19.5
   y_mm: 102.7
@@ -167,12 +167,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: bic.ref_controlelijst
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 102.7
   font: body
   size: 10
   color: text
-  max_width_mm: 65
+  max_width_mm: 85
 - bind: _static.Onderhoudsdossier BIC
   x_mm: 19.5
   y_mm: 110.8
@@ -180,12 +180,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: bic.ref_historie
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 110.8
   font: body
   size: 10
   color: text
-  max_width_mm: 65
+  max_width_mm: 85
 - bind: _static.Bijlage BIC ondersteunende foto's
   x_mm: 19.5
   y_mm: 122.9
@@ -193,12 +193,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: bic.ref_fotos
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 122.9
   font: body
   size: 10
   color: text
-  max_width_mm: 65
+  max_width_mm: 85
 - bind: _static.Object reiniging
   x_mm: 19.5
   y_mm: 143.3
@@ -206,12 +206,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: reiniging.nummer
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 143.3
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: _static.Omschrijving
   x_mm: 19.5
   y_mm: 149.0
@@ -219,12 +219,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: reiniging.omschrijving
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 149.0
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: _static.Type
   x_mm: 19.5
   y_mm: 153.0
@@ -232,12 +232,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: reiniging.type
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 153.0
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: _static.Datum
   x_mm: 19.5
   y_mm: 157.1
@@ -245,12 +245,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: reiniging.datum
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 157.1
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: _static.Additionele activiteiten
   x_mm: 19.5
   y_mm: 173.3
@@ -258,12 +258,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: additioneel.nummer
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 173.3
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: _static.Omschrijving
   x_mm: 19.5
   y_mm: 179.0
@@ -271,12 +271,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: additioneel.omschrijving
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 179.0
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: _static.Datum
   x_mm: 19.5
   y_mm: 183.0
@@ -284,12 +284,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: additioneel.datum
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 183.0
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: _static.Rapportagedatum
   x_mm: 19.5
   y_mm: 199.2
@@ -297,12 +297,12 @@ text_zones:
   size: 10
   color: secondary
 - bind: bic.rapportagedatum
-  x_mm: 132.1
+  x_mm: 112.1
   y_mm: 199.2
   font: body
   size: 10
   color: text
-  max_width_mm: 63
+  max_width_mm: 83
 - bind: client.name
   x_mm: 10.3
   y_mm: 275.4
@@ -310,8 +310,8 @@ text_zones:
   size: 10
   color: white
 - bind: _page_number
-  x_mm: 137.5
-  y_mm: 277.3
+  x_mm: 172.0
+  y_mm: 275.4
   font: heading
   size: 12
   color: white

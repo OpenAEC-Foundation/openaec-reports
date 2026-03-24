@@ -6,7 +6,7 @@ import {
   type ValidationError,
   type ApiError,
 } from '@/services/api';
-import { useReportStore } from './reportStore';
+import { useReportStore, STORAGE_KEY } from './reportStore';
 import { toReportDefinition } from '@/utils/conversion';
 import type { ReportDefinition } from '@/types/report';
 
@@ -123,6 +123,8 @@ export const useApiStore = create<ApiStore>()((set, get) => ({
 
   loadScaffold: async (templateName) => {
     try {
+      // Wis localStorage zodat auto-restore niet interfereert met het nieuwe scaffold
+      try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
       const scaffold = await api.scaffold(templateName);
       useReportStore.getState().loadReport(scaffold);
       set({ error: null });

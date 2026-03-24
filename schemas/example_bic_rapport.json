@@ -138,7 +138,7 @@
 
   "tekening_overzicht": {
     "titel": "Regionale overzichtstekening (1: 10.000)",
-    "image": ""
+    "image": "tenants/customer/assets/example_images/bgt_overzicht.jpg"
   },
 
   "tekening_detail": {
@@ -147,7 +147,7 @@
   },
 
   "tekening_kadaster": {
-    "image": ""
+    "image": "tenants/customer/assets/example_images/kadaster_kaart.png"
   },
 
   "controlelijst": {

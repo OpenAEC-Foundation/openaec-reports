@@ -276,6 +276,11 @@ export function toReportDefinition(report: EditorReport): ReportDefinition {
   if (report.backcover.enabled !== undefined) def.backcover = report.backcover;
   if (Object.keys(report.metadata).length > 0) def.metadata = report.metadata;
 
+  // Field groups metadata bewaren (nodig voor localStorage round-trip)
+  if (report.field_groups.length > 0) {
+    def.field_groups = report.field_groups;
+  }
+
   // Flat data dicts terugschrijven als top-level keys
   if (report.flat_data) {
     for (const [key, value] of Object.entries(report.flat_data)) {

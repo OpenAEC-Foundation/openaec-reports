@@ -244,13 +244,24 @@ def _draw_image_zones(
     page_height: float,
     assets_dir: Path | None = None,
 ) -> None:
-    """Teken afbeeldingen op vaste posities op het canvas."""
+    """Teken afbeeldingen op vaste posities op het canvas.
+
+    Ondersteunt drie bronnen:
+    1. Bestandspad (string) → direct laden
+    2. Dict met lat/lon → PDOK kaart ophalen
+    3. Fallback afbeelding uit assets/
+    """
     for zone in image_zones:
         img_src = resolve_bind(data, zone.bind)
-        if not img_src and zone.fallback and assets_dir:
+
+        # Als img_src een dict is met lat/lon → PDOK kaart ophalen
+        if isinstance(img_src, dict) and "lat" in img_src and "lon" in img_src:
+            img_src = _fetch_pdok_map(img_src, zone)
+        elif not img_src and zone.fallback and assets_dir:
             fallback_path = assets_dir / zone.fallback
             if fallback_path.exists():
                 img_src = str(fallback_path)
+
         if not img_src:
             continue
 
@@ -271,6 +282,85 @@ def _draw_image_zones(
             )
         except Exception:
             logger.exception("Image zone render fout: %s", img_src)
+
+
+def _fetch_pdok_map(map_config: dict[str, Any], zone: ImageZone) -> str | None:
+    """Haal een PDOK kaart op en sla op als tijdelijk bestand.
+
+    map_config verwacht:
+        lat: float — breedtegraad WGS84
+        lon: float — lengtegraad WGS84
+        radius: float — straal in meters (default 500)
+        service: str — luchtfoto, kadaster, bag (default luchtfoto)
+        layers: str — laagnamen (optioneel, default per service)
+
+    Als er ook een "image" key is met een bestandspad, wordt dat
+    gebruikt als override (combinatie-modus).
+    """
+    # Override: als er een expliciet pad/base64 is meegegeven, gebruik dat
+    override = map_config.get("image", "")
+    if override and isinstance(override, str):
+        p = Path(override)
+        if p.exists():
+            return override
+
+    lat = map_config.get("lat")
+    lon = map_config.get("lon")
+    if lat is None or lon is None:
+        return None
+
+    radius = float(map_config.get("radius", 500))
+    service = map_config.get("service", "luchtfoto")
+    layers = map_config.get("layers")
+
+    default_layers = {
+        "luchtfoto": "Actueel_orthoHR",
+        "kadaster": "Kadastralekaart",
+        "bag": "pand",
+    }
+    if not layers:
+        layers = default_layers.get(service, "Actueel_orthoHR")
+
+    img_format = "image/jpeg" if service == "luchtfoto" else "image/png"
+    ext = ".jpg" if service == "luchtfoto" else ".png"
+
+    # Pixel resolutie gebaseerd op zone afmetingen (150 DPI)
+    width_px = max(int(zone.width_mm * 150 / 25.4), 800)
+    height_px = max(int(zone.height_mm * 150 / 25.4), 600)
+
+    try:
+        from openaec_reports.data.kadaster import KadasterClient
+        import requests as req
+
+        client = KadasterClient()
+        x, y = client.wgs84_to_rd(lat, lon)
+        bbox = f"{x - radius},{y - radius},{x + radius},{y + radius}"
+
+        url = client.WMS_SERVICES.get(service, client.WMS_SERVICES["luchtfoto"])
+        params = {
+            "SERVICE": "WMS", "VERSION": "1.3.0", "REQUEST": "GetMap",
+            "LAYERS": layers, "CRS": "EPSG:28992", "BBOX": bbox,
+            "WIDTH": width_px, "HEIGHT": height_px,
+            "FORMAT": img_format, "STYLES": "",
+        }
+        resp = req.get(url, params=params, timeout=30)
+        resp.raise_for_status()
+
+        if "xml" in resp.headers.get("content-type", ""):
+            logger.warning("PDOK retourneerde XML fout voor %s", service)
+            return None
+
+        # Sla op als tijdelijk bestand
+        import tempfile
+        tmp = tempfile.NamedTemporaryFile(suffix=ext, delete=False, prefix="pdok_")
+        tmp.write(resp.content)
+        tmp.close()
+        logger.info("PDOK kaart opgehaald: %s (%d bytes)", service, len(resp.content))
+        return tmp.name
+
+    except Exception:
+        logger.exception("PDOK kaart ophalen mislukt")
+        return None
 
 
 def _draw_line_zones(

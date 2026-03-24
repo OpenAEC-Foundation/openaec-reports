@@ -305,86 +305,12 @@ class TemplateLoader:
     ) -> list[dict[str, Any]]:
         """Genereer default secties op basis van het template type.
 
-        BIC Rapport templates krijgen vaste secties die corresponderen met
-        de page_types in de YAML. Overige templates retourneren een lege
-        lijst (gebruiker voegt zelf secties toe).
+        BIC Rapport templates gebruiken field_groups (formulier-velden),
+        niet content-block secties. Retourneert een lege lijst.
+        Overige templates retourneren ook een lege lijst
+        (gebruiker voegt zelf secties toe).
         """
-        if config.report_type != "bic_rapport":
-            return []
-
-        return [
-            {
-                "title": "Locatie",
-                "content": [
-                    {
-                        "type": "location_detail",
-                        "client": {
-                            "section_title": "Opdrachtgever",
-                            "name": "",
-                            "address": "",
-                            "city": "",
-                        },
-                        "location": {
-                            "section_title": "Locatie van uitvoer",
-                            "name": "",
-                            "address": "",
-                            "city": "",
-                            "code": "",
-                            "provision": "",
-                            "object": "",
-                        },
-                    }
-                ],
-            },
-            {
-                "title": "BIC Controles",
-                "content": [
-                    {
-                        "type": "bic_table",
-                        "location_name": "",
-                        "sections": [
-                            {
-                                "title": "BIC Controles",
-                                "rows": [],
-                            },
-                            {
-                                "title": "Reinigen tijdens BIC",
-                                "rows": [],
-                            },
-                            {
-                                "title": "Additioneel tijdens BIC",
-                                "rows": [],
-                            },
-                        ],
-                        "summary": {
-                            "title": "Overzicht samenvatting",
-                            "rows": [],
-                            "total": {
-                                "label": "Totaal excl. BTW",
-                                "ref_value": "",
-                                "actual_value": "",
-                            },
-                        },
-                    }
-                ],
-            },
-            {
-                "title": "Herstelwerkzaamheden",
-                "content": [],
-            },
-            {
-                "title": "Tekeningen",
-                "content": [],
-            },
-            {
-                "title": "Onderhoudsdossier",
-                "content": [],
-            },
-            {
-                "title": "Bijlagen",
-                "content": [],
-            },
-        ]
+        return []
 
     def _extract_field_groups(
         self,

@@ -2,37 +2,37 @@
   "template": "bic_rapport",
   "tenant": "customer",
   "format": "A4",
-  "project": "Uniper Benelux N.V. Maasvlakte - BIC inspectie UNIP0105",
-  "project_number": "B2401",
+  "project": "Depot Dordrecht - Jaarlijkse BIC inspectie VZ-042",
+  "project_number": "336.01-2026-0042",
   "author": "Customer B.V.",
-  "date": "2025-02-03",
+  "date": "2026-03-21",
   "version": "1.0",
   "status": "DEFINITIEF",
 
   "meta": {
     "factuur_kop": "Eindrapportage Bedrijfsinterne Controle",
-    "datum": "FEBRUARI 2025",
-    "factuurnummer": "B2401",
+    "datum": "MAART 2026",
+    "factuurnummer": "336.01-2026-0042",
     "type_offerte": "Voorziening:Object",
-    "offerte_regel": "UNIP0105:OBR01 Riolering tbv laad/losplaats ammonia",
-    "rapportkop_locatie": "Eindrapportage Bedrijfsinterne Controle: B2401"
+    "offerte_regel": "VZ-042:OBJ-042-A Vloeistofdichte vloer dieselopslagplaats",
+    "rapportkop_locatie": "Eindrapportage Bedrijfsinterne Controle: 336.01-2026-0042"
   },
 
   "client": {
-    "name": "Uniper Benelux N.V.",
-    "address": "Capelseweg 400",
-    "postcode_plaats": "3068 AX Rotterdam"
+    "name": "Rijkswaterstaat West-Nederland Zuid",
+    "address": "Boompjes 200",
+    "postcode_plaats": "3011 XD Rotterdam"
   },
 
   "location": {
-    "name": "Uniper Benelux N.V. Maasvlakte",
-    "address": "Coloradoweg 10",
-    "postcode_plaats": "3199 LA Maasvlakte Rotterdam",
-    "code": "UNIP0105",
+    "name": "Depot Dordrecht",
+    "address": "Industrieweg 42",
+    "postcode_plaats": "3316 AG Dordrecht",
+    "code": "VZ-042",
     "provision_label": "Voorziening",
-    "provision": "Laadlosplaats ammonia",
+    "provision": "Dieselopslagplaats",
     "object_label": "Object",
-    "object": "OBR01",
+    "object": "OBJ-042-A",
     "photo_path": ""
   },
 
@@ -43,7 +43,7 @@
     "item_4": "4    BedrijfsInterne Controle (BIC)........................................................................................3",
     "item_5": "5    Herstelwerkzaamheden...................................................................................................4",
     "item_6": "6    Tekeningen.....................................................................................................................5",
-    "item_6_1": "6.1    Regionale overzichtstekening (1: 12.500)...................................................................5",
+    "item_6_1": "6.1    Regionale overzichtstekening (1: 10.000)...................................................................5",
     "item_6_2": "6.2    Detailtekening naar aanleiding van BIC controle en/of herstelwerkzaamheden..........6",
     "item_6_3": "6.3    Kadastrale kaart.........................................................................................................7",
     "item_7": "7    Onderhoudsdossier.........................................................................................................8",
@@ -59,27 +59,27 @@
   },
 
   "voorziening": {
-    "code": "UNIP0105",
-    "beschrijving": "Laadlosplaats ammonia",
-    "vereiste_status": "Vloeistofdicht",
-    "huidige_status": "Vloeistofdicht",
-    "notitie": "",
+    "code": "VZ-042",
+    "beschrijving": "Vloeistofdichte vloer met epoxy coating, inclusief opstaande randen en goot",
+    "vereiste_status": "Vloeistofdicht conform PGS 28/30",
+    "huidige_status": "Vloeistofdicht - goedgekeurd",
+    "notitie": "Lichte slijtage coating nabij laadplaats geconstateerd. Geen doorslag naar ondergrond. Monitoring bij volgende BIC.",
     "foto": ""
   },
 
   "object": {
-    "code": "OBR01",
-    "beschrijving": "Riolering tbv laad/losplaats ammonia",
-    "ruimte": "",
-    "type": "Bedrijfsriolering"
+    "code": "OBJ-042-A",
+    "beschrijving": "Bovengrondse dubbelwandige opslagtank 10.000L diesel",
+    "ruimte": "Buitenterrein - zone A (dieselopslag)",
+    "type": "Bovengrondse tank (dubbelwandig, staal)"
   },
 
   "vvv": {
-    "geldigheid": "16-10-2030",
-    "nummer": "HA24.3199LA.105286-16.30",
-    "instantie": "ABV Haukes Inspectiediensten B.V.",
-    "opmerkingen": "",
-    "onderhoudsdossier_ref": "Zie: 7.2.1 Inspecties",
+    "geldigheid": "15-09-2028",
+    "nummer": "VVV-2022-7891",
+    "instantie": "KIWA Nederland B.V.",
+    "opmerkingen": "Verklaring afgegeven na herstel coating september 2022. Herkeuring gepland Q3 2028.",
+    "onderhoudsdossier_ref": "Zie: 7.2.1 Inspecties historie",
     "bijlage_ref": "Zie: 8.1 VVV verklaring"
   },
 
@@ -89,55 +89,55 @@
     "postcode_plaats": "3237 KG Vierpolders",
     "telefoon": "+31 (0) 181 390 036",
     "email": "info@customer.nl",
-    "naam": "E. van Anraat"
+    "naam": "M. van der Berg"
   },
 
   "bic": {
-    "nummer": "B2401",
-    "datum_controle": "15-05-2024",
-    "datum_geldigheid": "15-05-2025",
-    "bijzonderheden": "",
+    "nummer": "336.01-2026-0042",
+    "datum_controle": "12-03-2026",
+    "datum_geldigheid": "12-03-2027",
+    "bijzonderheden": "Lichte slijtage coating bij laadplaats geconstateerd (ca. 2m²). Geen directe bodembedreiging. Herstel ingepland binnen 30 dagen conform PGS 28.",
     "ref_controlelijst": "Zie: 7.1 Controlelijst",
-    "ref_historie": "Zie: 7.2.2 BedrijfsInterne Controles",
+    "ref_historie": "Zie: 7.2.2 BedrijfsInterne Controles historie",
     "ref_fotos": "Zie: 8.2 BedrijfsInterne Controle ondersteunende foto's",
-    "rapportagedatum": "03-02-2025"
+    "rapportagedatum": "21-03-2026"
   },
 
   "reiniging": {
-    "nummer": "R2401007",
-    "omschrijving": "Reiniging dmv HD",
-    "type": "Hoge druk riolering",
-    "datum": "16-10-2024"
+    "nummer": "RN-2026-0042",
+    "omschrijving": "Reiniging vloeistofdichte vloer middels hogedrukreiniger",
+    "type": "Hogedrukreiniging (200 bar)",
+    "datum": "12-03-2026"
   },
 
   "additioneel": {
-    "nummer": "Niet van toepassing",
-    "omschrijving": "Niet van toepassing",
-    "datum": "Niet van toepassing"
+    "nummer": "ADD-2026-0042",
+    "omschrijving": "Visuele inspectie leidingwerk, koppelingen en afsluiters",
+    "datum": "12-03-2026"
   },
 
   "herstel": {
-    "nummer": "Niet vereist",
+    "nummer": "HW-2026-0042",
     "ref_controlelijst": "Zie: 7.1 Controlelijst",
-    "ref_historie": "Zie: 7.2.3 Herstelwerkzaamheden",
+    "ref_historie": "Zie: 7.2.3 Herstelwerkzaamheden historie",
     "ref_fotos": "Zie: 8.3 Herstelwerkzaamheden ondersteunende schade foto's"
   },
 
   "herstel_reiniging": {
-    "nummer": "Niet vereist",
-    "omschrijving": "Niet van toepassing",
-    "type": "Niet van toepassing",
-    "datum": "Niet van toepassing"
+    "nummer": "HRN-2026-0042",
+    "omschrijving": "Reiniging oppervlak voor coatingherstel middels ontvetter",
+    "type": "Handmatig met ontvetter + schuurborstel",
+    "datum": "14-03-2026"
   },
 
   "herstel_additioneel": {
-    "nummer": "Niet van toepassing",
-    "omschrijving": "Niet van toepassing",
-    "datum": "Niet van toepassing"
+    "nummer": "HADD-2026-0042",
+    "omschrijving": "Aanbrengen nieuwe epoxy toplaag op slijtplek laadplaats (2m²)",
+    "datum": "15-03-2026"
   },
 
   "tekening_overzicht": {
-    "titel": "Regionale overzichtstekening (1: 12.500)",
+    "titel": "Regionale overzichtstekening (1: 10.000)",
     "image": ""
   },
 
@@ -151,16 +151,23 @@
   },
 
   "controlelijst": {
-    "context": "UNIP0105:OBR01 Bedrijfsriolering Riolering tbv laad/losplaats ammonia. Datum uitvoering controle: 15-05-2024"
+    "context": "VZ-042:OBJ-042-A Bovengrondse tank (dubbelwandig, staal) Vloeistofdichte vloer dieselopslagplaats. Datum uitvoering controle: 12-03-2026"
   },
 
   "controlelijst_items": [
-    {"Onderdeel": "1 Kolken", "Aspect": "1.1 Blijft er vloeistof in de kolken staan?", "Antwoord": "Nee", "Bodemrisico": "1", "Schadenummer": ""},
-    {"Onderdeel": "1 Kolken", "Aspect": "1.2 Stroomt er vloeistof uit de kolken over de vloer of verharding?", "Antwoord": "Nee", "Bodemrisico": "1", "Schadenummer": ""},
-    {"Onderdeel": "3 Wanden", "Aspect": "3.1 Is de olie-/benzineafscheider vuil?", "Antwoord": "Nee", "Bodemrisico": "1", "Schadenummer": ""},
-    {"Onderdeel": "3 Wanden", "Aspect": "3.2 Vertoont de olie-/benzineafscheider gebreken?", "Antwoord": "Nee", "Bodemrisico": "1", "Schadenummer": ""},
-    {"Onderdeel": "3 Wanden", "Aspect": "3.3 Vertoont de vlotter gebreken?", "Antwoord": "Nee", "Bodemrisico": "1", "Schadenummer": ""},
-    {"Onderdeel": "4 Algemene indruk", "Aspect": "4.1 Geeft het totaalbeeld aanleiding tot nader onderzoek?", "Antwoord": "Nee", "Bodemrisico": "1", "Schadenummer": ""}
+    {"Onderdeel": "1 Vloer", "Aspect": "1.1 Is de coating intact en hechtend?", "Antwoord": "Ja", "Bodemrisico": "1", "Schadenummer": ""},
+    {"Onderdeel": "1 Vloer", "Aspect": "1.2 Zijn er scheuren of barsten zichtbaar?", "Antwoord": "Nee", "Bodemrisico": "1", "Schadenummer": ""},
+    {"Onderdeel": "1 Vloer", "Aspect": "1.3 Zijn er plassen of vloeistofresten aanwezig?", "Antwoord": "Nee", "Bodemrisico": "1", "Schadenummer": ""},
+    {"Onderdeel": "1 Vloer", "Aspect": "1.4 Vertoont de vloer slijtage?", "Antwoord": "Ja", "Bodemrisico": "2", "Schadenummer": "S-2026-002"},
+    {"Onderdeel": "2 Opstaande rand", "Aspect": "2.1 Is de aansluiting vloer-wand intact?", "Antwoord": "Ja", "Bodemrisico": "1", "Schadenummer": ""},
+    {"Onderdeel": "2 Opstaande rand", "Aspect": "2.2 Zijn alle doorvoeren afgedicht?", "Antwoord": "Ja", "Bodemrisico": "1", "Schadenummer": ""},
+    {"Onderdeel": "3 Afvoer", "Aspect": "3.1 Is de afvoer afsluitbaar en afgesloten?", "Antwoord": "Ja", "Bodemrisico": "1", "Schadenummer": ""},
+    {"Onderdeel": "3 Afvoer", "Aspect": "3.2 Is de afvoer vrij van obstakels?", "Antwoord": "Nee", "Bodemrisico": "2", "Schadenummer": "S-2026-001"},
+    {"Onderdeel": "4 Tank", "Aspect": "4.1 Is er lekkage zichtbaar?", "Antwoord": "Nee", "Bodemrisico": "1", "Schadenummer": ""},
+    {"Onderdeel": "4 Tank", "Aspect": "4.2 Is de lekbak schoon en intact?", "Antwoord": "Ja", "Bodemrisico": "1", "Schadenummer": ""},
+    {"Onderdeel": "5 Leidingwerk", "Aspect": "5.1 Zijn de koppelingen lekvrij?", "Antwoord": "Ja", "Bodemrisico": "1", "Schadenummer": ""},
+    {"Onderdeel": "5 Leidingwerk", "Aspect": "5.2 Is er corrosie zichtbaar?", "Antwoord": "Nee", "Bodemrisico": "1", "Schadenummer": ""},
+    {"Onderdeel": "6 Algemene indruk", "Aspect": "6.1 Geeft het totaalbeeld aanleiding tot nader onderzoek?", "Antwoord": "Nee", "Bodemrisico": "1", "Schadenummer": ""}
   ],
 
   "inspecties": {
@@ -168,19 +175,22 @@
   },
 
   "inspecties_items": [
-    {"Inspectiebedrijf": "ABV Haukes Inspectiediensten B.V.", "Inspecteur": "Onbekend", "Aard": "", "Onderdeel": "Bedrijfsriolering", "Datum": "10-08-2018", "SIKB": "HA18.3199LA.71513-37.24", "Uiterste datum": "10-08-2024"},
-    {"Inspectiebedrijf": "ABV Haukes Inspectiediensten B.V.", "Inspecteur": "N Janssen", "Aard": "", "Onderdeel": "Bedrijfsriolering", "Datum": "16-10-2024", "SIKB": "HA24.3199LA.105286-16.30", "Uiterste datum": "16-10-2030"}
+    {"Inspectiebedrijf": "KIWA Nederland B.V.", "Inspecteur": "A. de Groot", "Aard": "Initieel", "Onderdeel": "Geheel", "Datum": "15-09-2016", "SIKB": "SIKB-2016-4521", "Uiterste datum": "15-09-2022"},
+    {"Inspectiebedrijf": "KIWA Nederland B.V.", "Inspecteur": "R. Jansen", "Aard": "6-jaarlijks", "Onderdeel": "Geheel", "Datum": "10-09-2022", "SIKB": "SIKB-2022-7891", "Uiterste datum": "10-09-2028"}
   ],
 
   "historie_bic_items": [
-    {"Controlerend bedrijf": "Customer B.V.", "Controleur": "E. van Anraat", "Onderdeel": "Bedrijfsriolering", "Datum": "20-04-2020", "Controle nummer": "B2008", "Uiterste datum": "20-04-2021"},
-    {"Controlerend bedrijf": "Customer B.V.", "Controleur": "E. van Anraat", "Onderdeel": "Bedrijfsriolering", "Datum": "19-04-2021", "Controle nummer": "B2112", "Uiterste datum": "19-04-2022"},
-    {"Controlerend bedrijf": "Customer B.V.", "Controleur": "E. van Anraat", "Onderdeel": "Bedrijfsriolering", "Datum": "25-05-2022", "Controle nummer": "B2212", "Uiterste datum": "25-05-2023"},
-    {"Controlerend bedrijf": "Customer B.V.", "Controleur": "M. van Anraat", "Onderdeel": "Bedrijfsriolering", "Datum": "22-05-2023", "Controle nummer": "B2312", "Uiterste datum": "22-05-2024"},
-    {"Controlerend bedrijf": "Customer B.V.", "Controleur": "E. van Anraat", "Onderdeel": "Bedrijfsriolering", "Datum": "15-05-2024", "Controle nummer": "B2401", "Uiterste datum": "15-05-2025"}
+    {"Controlerend bedrijf": "Customer B.V.", "Controleur": "P. Hendriks", "Onderdeel": "Geheel", "Datum": "18-03-2023", "Controle nummer": "336.01-2023-0031", "Uiterste datum": "18-03-2024"},
+    {"Controlerend bedrijf": "Customer B.V.", "Controleur": "M. van der Berg", "Onderdeel": "Geheel", "Datum": "14-03-2024", "Controle nummer": "336.01-2024-0038", "Uiterste datum": "14-03-2025"},
+    {"Controlerend bedrijf": "Customer B.V.", "Controleur": "P. Hendriks", "Onderdeel": "Geheel", "Datum": "11-03-2025", "Controle nummer": "336.01-2025-0040", "Uiterste datum": "11-03-2026"},
+    {"Controlerend bedrijf": "Customer B.V.", "Controleur": "M. van der Berg", "Onderdeel": "Geheel", "Datum": "12-03-2026", "Controle nummer": "336.01-2026-0042", "Uiterste datum": "12-03-2027"}
   ],
 
-  "historie_herstel_items": [],
+  "historie_herstel_items": [
+    {"Uitvoerend bedrijf": "Coating Solutions B.V.", "Uitvoerder": "K. Bakker", "Onderdeel": "Vloer", "Hersteldatum": "22-09-2022", "Schadenummer": "S-2022-003", "Aard werkzaamheden": "Volledige epoxy toplaag vernieuwd na 6-jaarlijkse inspectie"},
+    {"Uitvoerend bedrijf": "Coating Solutions B.V.", "Uitvoerder": "J. Smit", "Onderdeel": "Opstaande rand", "Hersteldatum": "05-04-2024", "Schadenummer": "S-2024-001", "Aard werkzaamheden": "Lokaal coatingherstel aansluiting vloer-wand (scheurtje 15cm)"},
+    {"Uitvoerend bedrijf": "Coating Solutions B.V.", "Uitvoerder": "K. Bakker", "Onderdeel": "Laadplaats", "Hersteldatum": "15-03-2026", "Schadenummer": "S-2026-002", "Aard werkzaamheden": "Nieuwe epoxy toplaag op slijtplek laadplaats (2m²)"}
+  ],
 
   "vvv_verklaring": {
     "image": ""
@@ -189,24 +199,24 @@
   "foto_bijlage": {
     "nummer": "8.2",
     "titel": "BedrijfsInterne Controle ondersteunende foto's",
-    "context_1": "UNIP0105:OBR01 Bedrijfsriolering Riolering tbv laad/losplaats ammonia. Datum uitvoering controle: 15-05-2024",
-    "context_2": "",
+    "context_1": "VZ-042:OBJ-042-A Bovengrondse tank (dubbelwandig, staal) Vloeistofdichte vloer dieselopslagplaats.",
+    "context_2": "Datum uitvoering controle: 12-03-2026",
     "context_3": "",
-    "label_links": "",
-    "caption_links": "Geen fotos beschikbaar",
-    "label_rechts": "",
-    "caption_rechts": "",
+    "label_links": "[Foto 1]",
+    "caption_links": "Overzicht vloeistofdichte vloer en tank",
+    "label_rechts": "[Foto 2]",
+    "caption_rechts": "Detail slijtage coating bij laadplaats (S-2026-002)",
     "foto_links": "",
     "foto_rechts": ""
   },
 
   "schade_fotos": {
-    "context_1": "UNIP0105: Bedrijfsriolering Riolering tbv laad/losplaats ammonia",
-    "context_2": "Niet van toepassing",
-    "schade_label": "",
-    "schade_caption": "",
-    "herstel_label": "",
-    "herstel_caption": "",
+    "context_1": "VZ-042: Bovengrondse tank (dubbelwandig, staal) Vloeistofdichte vloer dieselopslagplaats",
+    "context_2": "S-2026-002: Laadplaats 15-03-2026",
+    "schade_label": "[Schade foto]",
+    "schade_caption": "Slijtage epoxy coating laadplaats voor herstel",
+    "herstel_label": "[Herstel foto]",
+    "herstel_caption": "Nieuwe epoxy toplaag na herstel (2m²)",
     "schade_foto": "",
     "herstel_foto": ""
   }

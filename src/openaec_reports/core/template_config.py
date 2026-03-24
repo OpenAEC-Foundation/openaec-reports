@@ -22,6 +22,8 @@ class TextZone:
     size: float = 10.0
     color: str = "text"                # "primary", "secondary", "text", of hex
     align: Literal["left", "right", "center"] = "left"
+    max_width_mm: float | None = None  # Maximale breedte — tekst wraps bij overschrijding
+    line_height_mm: float = 4.2        # Regelafstand voor multi-line tekst
 
 
 @dataclass
@@ -132,6 +134,7 @@ class TemplateConfig:
 
 def parse_text_zone(data: dict[str, Any]) -> TextZone:
     """Parse een text zone dict naar TextZone dataclass."""
+    max_w = data.get("max_width_mm")
     return TextZone(
         bind=data["bind"],
         x_mm=float(data.get("x_mm", 0)),
@@ -140,6 +143,8 @@ def parse_text_zone(data: dict[str, Any]) -> TextZone:
         size=float(data.get("size", 10)),
         color=data.get("color", "text"),
         align=data.get("align", "left"),
+        max_width_mm=float(max_w) if max_w is not None else None,
+        line_height_mm=float(data.get("line_height_mm", 4.2)),
     )
 
 

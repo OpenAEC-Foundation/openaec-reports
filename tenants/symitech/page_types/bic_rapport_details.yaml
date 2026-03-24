@@ -16,12 +16,12 @@ line_zones:
   # --- Sectie "Controlerend bedrijf" dubbele lijn ---
   # ref: y=124.6pt (dik 3.0), y=127.3pt (dun 0.75)
   - x0_mm: 17.5
-    y_mm: 44.0
+    y_mm: 46.55
     x1_mm: 80.2
     width_pt: 3.0
     color: "primary"
   - x0_mm: 17.5
-    y_mm: 44.9
+    y_mm: 47.45
     x1_mm: 80.2
     width_pt: 0.75
     color: "primary"
@@ -29,12 +29,12 @@ line_zones:
   # --- Sectie "BIC details" dubbele lijn ---
   # ref: y=232.6pt (dik 3.0), y=235.3pt (dun 0.75)
   - x0_mm: 17.5
-    y_mm: 82.1
+    y_mm: 84.65
     x1_mm: 80.2
     width_pt: 3.0
     color: "primary"
   - x0_mm: 17.5
-    y_mm: 83.0
+    y_mm: 85.55
     x1_mm: 80.2
     width_pt: 0.75
     color: "primary"
@@ -42,12 +42,12 @@ line_zones:
   # --- Sectie "Object reiniging" dubbele lijn ---
   # ref: y=409.6pt (dik 3.0), y=412.3pt (dun 0.75)
   - x0_mm: 17.5
-    y_mm: 144.5
+    y_mm: 147.05
     x1_mm: 80.2
     width_pt: 3.0
     color: "primary"
   - x0_mm: 17.5
-    y_mm: 145.5
+    y_mm: 148.05
     x1_mm: 80.2
     width_pt: 0.75
     color: "primary"
@@ -55,12 +55,12 @@ line_zones:
   # --- Sectie "Additionele activiteiten" dubbele lijn ---
   # ref: y=494.6pt (dik 3.0), y=497.3pt (dun 0.75)
   - x0_mm: 17.5
-    y_mm: 174.5
+    y_mm: 177.05
     x1_mm: 80.2
     width_pt: 3.0
     color: "primary"
   - x0_mm: 17.5
-    y_mm: 175.4
+    y_mm: 177.95
     x1_mm: 80.2
     width_pt: 0.75
     color: "primary"

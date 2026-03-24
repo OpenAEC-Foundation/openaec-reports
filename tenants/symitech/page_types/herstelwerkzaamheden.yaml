@@ -15,12 +15,12 @@ line_zones:
   # --- Sectie "Herstelwerkzaamheden" dubbele lijn ---
   # ref: y=123.5pt (dun 0.75), y=126.1pt (dik 3.0)
   - x0_mm: 17.5
-    y_mm: 43.6
+    y_mm: 46.15
     x1_mm: 80.2
     width_pt: 0.75
     color: "primary"
   - x0_mm: 17.5
-    y_mm: 44.5
+    y_mm: 47.05
     x1_mm: 80.2
     width_pt: 3.0
     color: "primary"
@@ -28,12 +28,12 @@ line_zones:
   # --- Sectie "Object reiniging" dubbele lijn ---
   # ref: y=244.1pt (dik 3.0), y=246.8pt (dun 0.75)
   - x0_mm: 17.5
-    y_mm: 86.1
+    y_mm: 88.65
     x1_mm: 80.2
     width_pt: 3.0
     color: "primary"
   - x0_mm: 17.5
-    y_mm: 87.1
+    y_mm: 89.65
     x1_mm: 80.2
     width_pt: 0.75
     color: "primary"
@@ -41,12 +41,12 @@ line_zones:
   # --- Sectie "Additionele activiteiten" dubbele lijn ---
   # ref: y=329.1pt (dik 3.0), y=331.8pt (dun 0.75)
   - x0_mm: 17.5
-    y_mm: 116.1
+    y_mm: 118.65
     x1_mm: 80.2
     width_pt: 3.0
     color: "primary"
   - x0_mm: 17.5
-    y_mm: 117.1
+    y_mm: 119.65
     x1_mm: 80.2
     width_pt: 0.75
     color: "primary"

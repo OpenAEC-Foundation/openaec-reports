@@ -657,12 +657,19 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
         activeAppendix: null,
         activeBlock: null,
         activePanel: 'rapport',
+        activeFieldGroup: null,
         isDirty: false,
         _past: [],
         _future: [],
         canUndo: false,
         canRedo: false,
       });
+
+      // Auto-fetch field_groups als ze ontbreken maar er wel flat_data is
+      if (editorReport.field_groups.length === 0 && Object.keys(editorReport.flat_data).length > 0) {
+        _fetchFieldGroups(editorReport.template);
+      }
+
       return { ok: true, errors: [] };
     } catch (e) {
       return {
@@ -694,6 +701,11 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
       serverReportId: null,
       serverProjectId: null,
     });
+
+    // Auto-fetch field_groups als ze ontbreken maar er wel flat_data is
+    if (editorReport.field_groups.length === 0 && Object.keys(editorReport.flat_data).length > 0) {
+      _fetchFieldGroups(editorReport.template);
+    }
   },
 
   loadTemplate: (templateName) => {
@@ -737,6 +749,28 @@ export const useReportStore = create<ReportStore>()((set, get) => ({
     });
   },
 }));
+
+// ---------- Auto-fetch field_groups ----------
+
+/**
+ * Haal field_groups op van de scaffold API en merge ze in het huidige rapport.
+ * Wordt aangeroepen wanneer een rapport geladen wordt dat flat_data heeft
+ * maar geen field_groups (bijv. bij JSON import of localStorage restore).
+ */
+async function _fetchFieldGroups(templateName: string) {
+  try {
+    const { api } = await import('@/services/api');
+    const scaffold = await api.scaffold(templateName);
+    const fieldGroups = (scaffold as Record<string, unknown>).field_groups;
+    if (Array.isArray(fieldGroups) && fieldGroups.length > 0) {
+      useReportStore.setState((state) => ({
+        report: { ...state.report, field_groups: fieldGroups as EditorReport['field_groups'] },
+      }));
+    }
+  } catch {
+    // Scaffold niet beschikbaar (offline, andere tenant) — field_groups blijven leeg
+  }
+}
 
 // ---------- Auto-save to localStorage ----------
 

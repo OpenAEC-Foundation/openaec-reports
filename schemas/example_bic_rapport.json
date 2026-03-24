@@ -33,7 +33,7 @@
     "provision": "Dieselopslagplaats",
     "object_label": "Object",
     "object": "OBJ-042-A",
-    "photo_path": ""
+    "photo_path": "tenants/customer/assets/example_images/pag03.png"
   },
 
   "toc": {
@@ -64,7 +64,7 @@
     "vereiste_status": "Vloeistofdicht conform PGS 28/30",
     "huidige_status": "Vloeistofdicht - goedgekeurd",
     "notitie": "Lichte slijtage coating nabij laadplaats geconstateerd. Geen doorslag naar ondergrond. Monitoring bij volgende BIC.",
-    "foto": ""
+    "foto": "tenants/customer/assets/example_images/pag04.png"
   },
 
   "object": {
@@ -143,7 +143,7 @@
 
   "tekening_detail": {
     "titel": "Detailtekening naar aanleiding van BIC controle en/of herstelwerkzaamheden",
-    "image": ""
+    "image": "tenants/customer/assets/example_images/pag08.jpg"
   },
 
   "tekening_kadaster": {
@@ -193,7 +193,7 @@
   ],
 
   "vvv_verklaring": {
-    "image": ""
+    "image": "tenants/customer/assets/example_images/pag14.jpg"
   },
 
   "foto_bijlage": {

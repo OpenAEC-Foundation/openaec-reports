@@ -142,6 +142,15 @@ app.include_router(admin_router)
 app.include_router(project_router)
 app.include_router(report_router)
 
+# Cloud storage routes (Nextcloud WebDAV) — alleen als geconfigureerd
+from openaec_reports.cloud import cloud_router, is_cloud_configured
+
+if is_cloud_configured():
+    app.include_router(cloud_router)
+    logger.info("Nextcloud cloud storage enabled")
+else:
+    logger.info("Nextcloud cloud storage disabled (env vars not set)")
+
 # Protected router — alle business endpoints vereisen authenticatie
 _protected = APIRouter(dependencies=[Depends(get_current_user)])
 

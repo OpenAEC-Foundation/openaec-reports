@@ -292,11 +292,21 @@ class TemplateLoader:
             "metadata": {},
         }
 
-        # BIC Rapport: extract field groups uit page_types en voeg flat data toe
-        if config.report_type == "bic_rapport":
-            field_groups, flat_data = self._extract_field_groups(name, config.tenant)
-            scaffold["field_groups"] = field_groups
-            scaffold.update(flat_data)
+        # Template engine templates: extract field groups uit page_types
+        # Detectie: pages is lijst van dicts (V3), niet strings (legacy)
+        raw_pages = config.raw.get("pages", [])
+        is_template_engine = (
+            raw_pages
+            and isinstance(raw_pages, list)
+            and isinstance(raw_pages[0], dict)
+        )
+        if is_template_engine:
+            field_groups, flat_data = self._extract_field_groups(
+                name, config.tenant,
+            )
+            if field_groups:
+                scaffold["field_groups"] = field_groups
+                scaffold.update(flat_data)
 
         return scaffold
 

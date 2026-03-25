@@ -1,7 +1,7 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-23 (security fixes + OIDC tenant fix)
+> Laatst bijgewerkt: 2026-03-25
 
 ---
 
@@ -115,6 +115,15 @@ Volledige code review uitgevoerd. Bevindingen per prioriteit:
 
 ---
 
+## 🟡 UX — Frontend
+
+- [ ] **UX-1** — Template wisselen behoudt bestaande content
+  - Nu wordt alles leeggegooid bij template switch (`loadTemplate()` maakt nieuw leeg rapport)
+  - Gewenst: secties/metadata behouden, alleen template-specifieke instellingen overschrijven (format, margins, cover/colofon config)
+  - **Bestanden:** `frontend/src/stores/reportStore.ts` (`loadTemplate`, `loadScaffold`), `apiStore.ts`
+
+---
+
 ## 🔴 Features — Hoog
 
 - [x] **#13** — MCP-server toevoegen
@@ -144,9 +153,11 @@ Volledige code review uitgevoerd. Bevindingen per prioriteit:
 2 nieuwe Customer templates toevoegen (naast bestaande `bic_factuur`).
 Bestaande assets herbruikbaar: brand.yaml, stationery PDF's, fonts, modules.
 
-- [x] S1 — **BIC Rapport** template
-  - Template + 8 page_types aangemaakt, voorbeeld JSON, test-PDF succesvol
-  - Gepusht (982461e), deploy naar server nog nodig
+- [x] S1 — **BIC Rapport** template ✅ Compleet (24 maart)
+  - 17 pagina's, field groups, PDOK kaarten, text wrapping, layout fine-tuning
+  - Formeel JSON schema: `schemas/bic_rapport.schema.json`
+  - Voorbeeld JSON: 114/125 velden gevuld
+  - 5 nieuwe page_types: tekening_overzicht, tekening_detail, tekening_kadaster, vvv_verklaring, schade_fotos
 - [ ] S2 — **Sanering** template
   - Template YAML: `tenants/customer/templates/sanering.yaml`
   - Page types: hergebruik bestaande + nieuwe waar nodig

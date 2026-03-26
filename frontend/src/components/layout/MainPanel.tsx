@@ -708,6 +708,7 @@ function PdfPreview() {
   const isGenerating = useApiStore((s) => s.isGenerating);
   const generatePdf = useApiStore((s) => s.generatePdf);
   const connected = useApiStore((s) => s.connected);
+  const apiError = useApiStore((s) => s.error);
   const autoPreview = useApiStore((s) => s.autoPreview);
   const setAutoPreview = useApiStore((s) => s.setAutoPreview);
   const previewPage = useApiStore((s) => s.previewPage);
@@ -754,6 +755,14 @@ function PdfPreview() {
         </button>
       </div>
 
+      {/* API error banner — persistent in preview panel */}
+      {apiError && !lastPdfUrl && (
+        <div className="mx-4 mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-3">
+          <p className="text-sm font-medium text-red-800">PDF generatie mislukt</p>
+          <p className="mt-1 text-xs text-red-600">{apiError}</p>
+        </div>
+      )}
+
       {/* Preview content */}
       {lastPdfUrl ? (
         <div className="relative flex-1">
@@ -766,19 +775,33 @@ function PdfPreview() {
         </div>
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center text-gray-400 gap-4">
-          <div className="rounded-full bg-gray-100 p-4">
-            <svg className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-            </svg>
-          </div>
-          <p className="text-sm font-medium text-gray-500">Nog geen PDF gegenereerd</p>
-          <button
-            onClick={generatePdf}
-            disabled={!connected}
-            className="rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Genereer PDF
-          </button>
+          {!connected ? (
+            <>
+              <div className="rounded-full bg-orange-100 p-4">
+                <svg className="h-10 w-10 text-orange-400" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-orange-600">Geen verbinding met API server</p>
+              <p className="text-xs text-gray-400">Start de backend: openaec-report serve --port 8000</p>
+            </>
+          ) : (
+            <>
+              <div className="rounded-full bg-gray-100 p-4">
+                <svg className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-gray-500">Nog geen PDF gegenereerd</p>
+              <button
+                onClick={generatePdf}
+                disabled={isGenerating}
+                className="rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Genereer PDF
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>

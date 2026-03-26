@@ -508,14 +508,18 @@ export const api = {
     }),
 
   generate: async (data: ReportDefinition): Promise<Blob> => {
-    const res = await fetch(`${API_BASE}/api/generate/v2`, {
+    const url = `${API_BASE}/api/generate/v2`;
+    console.log('[api.generate] POST', url);
+    const res = await fetch(url, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
+    console.log('[api.generate] Response:', res.status, res.statusText, 'Content-Type:', res.headers.get('Content-Type'));
     if (!res.ok) {
       const body = await res.json().catch(() => ({ detail: res.statusText }));
+      console.error('[api.generate] Error body:', body);
       const err: ApiError = {
         status: res.status,
         detail: body.detail ?? res.statusText,
@@ -527,14 +531,18 @@ export const api = {
   },
 
   generateTemplate: async (data: ReportDefinition): Promise<Blob> => {
-    const res = await fetch(`${API_BASE}/api/generate/template`, {
+    const url = `${API_BASE}/api/generate/template`;
+    console.log('[api.generateTemplate] POST', url);
+    const res = await fetch(url, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
+    console.log('[api.generateTemplate] Response:', res.status, res.statusText, 'Content-Type:', res.headers.get('Content-Type'));
     if (!res.ok) {
       const body = await res.json().catch(() => ({ detail: res.statusText }));
+      console.error('[api.generateTemplate] Error body:', body);
       const err: ApiError = {
         status: res.status,
         detail: body.detail ?? res.statusText,

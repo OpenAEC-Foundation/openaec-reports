@@ -156,9 +156,27 @@ export const useApiStore = create<ApiStore>()((set, get) => ({
       const definition = toReportDefinition(report);
       // Smart endpoint routing: TemplateEngine voor YAML-driven templates
       const isTemplateEngine = _isTemplateEngineReport(definition);
+
+      console.group('[generatePdf] Request');
+      console.log('Template:', definition.template);
+      console.log('Brand:', definition.brand);
+      console.log('Engine:', isTemplateEngine ? 'TemplateEngine' : 'renderer_v2');
+      console.log('Sections:', definition.sections?.length ?? 0);
+      console.log('Flat data keys:', Object.keys(definition).filter(
+        (k) => !['template','brand','format','orientation','project','project_number',
+                  'client','author','report_type','date','version','status',
+                  'cover','colofon','toc','sections','appendices','backcover',
+                  'metadata','field_groups','tenant'].includes(k)
+      ));
+      console.log('Full payload:', JSON.stringify(definition).length, 'chars');
+      console.log('Definition:', definition);
+      console.groupEnd();
+
       const blob = isTemplateEngine
         ? await api.generateTemplate(definition)
         : await api.generate(definition);
+
+      console.log('[generatePdf] Response: blob size =', blob.size, 'bytes, type =', blob.type);
 
       // Revoke previous URL if exists
       const prev = get().lastPdfUrl;
@@ -178,7 +196,16 @@ export const useApiStore = create<ApiStore>()((set, get) => ({
         useReportStore.getState().setViewMode('preview');
       }
     } catch (e) {
-      const detail = isApiError(e) ? e.detail : 'PDF generatie mislukt';
+      console.error('[generatePdf] Error:', e);
+      let detail: string;
+      if (isApiError(e)) {
+        detail = `[${e.status}] ${e.detail}`;
+      } else if (e instanceof TypeError) {
+        // Network error (CORS, server down, etc.)
+        detail = `Netwerkfout: ${e.message}. Is de API server actief op localhost:8000?`;
+      } else {
+        detail = `PDF generatie mislukt: ${String(e)}`;
+      }
       set({ isGenerating: false, error: detail });
     }
   },

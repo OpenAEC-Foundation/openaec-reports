@@ -165,6 +165,145 @@ def _wrap_text(text: str, font_name: str, font_size: float, max_width_pt: float)
     return lines
 
 
+def _apply_flow_layout(
+    text_zones: list[TextZone],
+    line_zones: list[LineZone],
+    image_zones: list[ImageZone],
+    data: dict[str, Any],
+    brand,
+    footer_y_mm: float,
+) -> tuple[list[TextZone], list[LineZone], list[ImageZone]]:
+    """Verschuif zones naar beneden wanneer text wrapping extra ruimte nodig heeft.
+
+    Algoritme:
+    1. Splits content vs footer zones (y >= footer_y_mm = footer, blijft vast).
+    2. Groepeer content text_zones per y_mm (±0.5mm tolerantie) → "rijen".
+    3. Per rij met max_width_mm zones: bereken wrapped hoogte.
+    4. Als wrapped hoogte > natural gap naar volgende rij → accumuleer offset.
+    5. Pas offset toe op alle zones (text, line, image) onder die rij.
+    """
+    from dataclasses import replace
+
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+
+    # Splits content vs footer text zones
+    content_tz = [z for z in text_zones if z.y_mm < footer_y_mm]
+    footer_tz = [z for z in text_zones if z.y_mm >= footer_y_mm]
+
+    if not content_tz:
+        return text_zones, line_zones, image_zones
+
+    # Verzamel unieke y-posities (±0.5mm tolerantie)
+    y_values: list[float] = sorted({z.y_mm for z in content_tz})
+    rows: list[list[float]] = []
+    for y in y_values:
+        merged = False
+        for row in rows:
+            if abs(y - row[0]) <= 0.5:
+                row.append(y)
+                merged = True
+                break
+        if not merged:
+            rows.append([y])
+
+    # Representatieve y per rij (minimum)
+    row_ys = sorted(min(r) for r in rows)
+
+    if len(row_ys) < 2:
+        return text_zones, line_zones, image_zones
+
+    # Bereken per rij de extra ruimte door wrapping
+    accumulated_offset = 0.0
+    # Map: originele y → offset toe te passen op zones MET die y
+    # We bouwen een lijst van (threshold_y, offset) — zones met y > threshold krijgen offset
+    shifts: list[tuple[float, float]] = []  # (rij_y, accumulated_offset na die rij)
+
+    for idx, row_y in enumerate(row_ys):
+        # Zones in deze rij (content text zones op ~row_y)
+        row_zones = [
+            z for z in content_tz if abs(z.y_mm - row_y) <= 0.5
+        ]
+
+        # Bereken max wrapped hoogte voor zones met max_width_mm
+        max_wrapped_h = 0.0
+        for z in row_zones:
+            if z.max_width_mm is None:
+                continue
+            value = resolve_bind(data, z.bind)
+            if not value:
+                continue
+            text = str(value)
+            font_name = _resolve_font(z.font, brand)
+            max_w_pt = z.max_width_mm * MM_TO_PT
+            lines = _wrap_text(text, font_name, z.size, max_w_pt)
+            if len(lines) > 1:
+                wrapped_h = len(lines) * z.line_height_mm
+                max_wrapped_h = max(max_wrapped_h, wrapped_h)
+
+        if max_wrapped_h <= 0:
+            shifts.append((row_y, accumulated_offset))
+            continue
+
+        # Natural gap: afstand tot volgende rij
+        if idx + 1 < len(row_ys):
+            natural_gap = row_ys[idx + 1] - row_y
+        else:
+            natural_gap = footer_y_mm - row_y
+
+        # Extra offset als wrapped hoogte > natural gap
+        extra = max_wrapped_h - natural_gap
+        if extra > 0:
+            accumulated_offset += extra
+
+        shifts.append((row_y, accumulated_offset))
+
+    if accumulated_offset <= 0:
+        return text_zones, line_zones, image_zones
+
+    def _get_offset(y_mm: float) -> float:
+        """Bepaal de offset voor een zone op basis van y positie.
+
+        Offset geldt alleen voor zones ONDER de rij die overflow veroorzaakte.
+        De rij zelf behoudt zijn originele positie.
+        """
+        if y_mm >= footer_y_mm:
+            return 0.0
+        result = 0.0
+        for row_y, offset in shifts:
+            if y_mm > row_y + 0.5:  # strict: alleen zones onder de rij
+                result = offset
+        return result
+
+    # Pas offsets toe op text zones
+    new_text_zones = []
+    for z in text_zones:
+        offset = _get_offset(z.y_mm)
+        if offset > 0:
+            new_text_zones.append(replace(z, y_mm=z.y_mm + offset))
+        else:
+            new_text_zones.append(z)
+
+    # Pas offsets toe op line zones
+    new_line_zones = []
+    for z in line_zones:
+        offset = _get_offset(z.y_mm)
+        if offset > 0:
+            new_line_zones.append(replace(z, y_mm=z.y_mm + offset))
+        else:
+            new_line_zones.append(z)
+
+    # Pas offsets toe op image zones
+    new_image_zones = []
+    for z in image_zones:
+        offset = _get_offset(z.y_mm)
+        if offset > 0:
+            new_image_zones.append(replace(z, y_mm=z.y_mm + offset))
+        else:
+            new_image_zones.append(z)
+
+    return new_text_zones, new_line_zones, new_image_zones
+
+
 def _draw_text_zones(
     canvas,
     text_zones: list[TextZone],
@@ -765,12 +904,22 @@ class TemplateEngine:
             canvas.setPageSize((_pw, _ph))
             if _pt.stationery:
                 _ctx.stationery.draw(canvas, _pt.stationery, _pw, _ph)
-            if _pt.line_zones:
-                _draw_line_zones(canvas, _pt.line_zones, _ctx.brand, _ph)
-            _draw_text_zones(canvas, _pt.text_zones, _ctx.data, _ctx.brand, _ph, _ctx)
-            if _pt.image_zones:
+
+            # Flow layout: verschuif zones bij text wrapping overflow
+            if _pt.flow_layout:
+                tz, lz, iz = _apply_flow_layout(
+                    _pt.text_zones, _pt.line_zones, _pt.image_zones,
+                    _ctx.data, _ctx.brand, _pt.flow_footer_y_mm,
+                )
+            else:
+                tz, lz, iz = _pt.text_zones, _pt.line_zones, _pt.image_zones
+
+            if lz:
+                _draw_line_zones(canvas, lz, _ctx.brand, _ph)
+            _draw_text_zones(canvas, tz, _ctx.data, _ctx.brand, _ph, _ctx)
+            if iz:
                 assets_dir = _ctx.stationery_dir.parent / "assets"
-                _draw_image_zones(canvas, _pt.image_zones, _ctx.data, _ph, assets_dir)
+                _draw_image_zones(canvas, iz, _ctx.data, _ph, assets_dir)
             # Fixed zonder repeat: tabel direct tekenen
             if _pd.type == "fixed" and _pt.table:
                 rows = resolve_bind(_ctx.data, _pt.table.data_bind)
@@ -830,12 +979,22 @@ class TemplateEngine:
             canvas.setPageSize((_pw, _ph))
             if _pt.stationery:
                 _ctx.stationery.draw(canvas, _pt.stationery, _pw, _ph)
-            if _pt.line_zones:
-                _draw_line_zones(canvas, _pt.line_zones, _ctx.brand, _ph)
-            _draw_text_zones(canvas, _pt.text_zones, _ctx.data, _ctx.brand, _ph, _ctx)
-            if _pt.image_zones:
+
+            # Flow layout: verschuif zones bij text wrapping overflow
+            if _pt.flow_layout:
+                tz, lz, iz = _apply_flow_layout(
+                    _pt.text_zones, _pt.line_zones, _pt.image_zones,
+                    _ctx.data, _ctx.brand, _pt.flow_footer_y_mm,
+                )
+            else:
+                tz, lz, iz = _pt.text_zones, _pt.line_zones, _pt.image_zones
+
+            if lz:
+                _draw_line_zones(canvas, lz, _ctx.brand, _ph)
+            _draw_text_zones(canvas, tz, _ctx.data, _ctx.brand, _ph, _ctx)
+            if iz:
                 assets_dir = _ctx.stationery_dir.parent / "assets"
-                _draw_image_zones(canvas, _pt.image_zones, _ctx.data, _ph, assets_dir)
+                _draw_image_zones(canvas, iz, _ctx.data, _ph, assets_dir)
             if _pt.table and _chunk:
                 _draw_table(canvas, _pt.table, _chunk, _ctx.brand, _ph)
 

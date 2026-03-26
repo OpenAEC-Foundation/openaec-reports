@@ -106,6 +106,8 @@ class PageType:
     line_zones: list[LineZone] = field(default_factory=list)
     table: TableConfig | None = None
     content_frame: ContentFrame | None = None  # voor flow mode
+    flow_layout: bool = False                  # text zones verschuiven bij wrapping
+    flow_footer_y_mm: float = 260.0            # zones >= deze y zijn footer (vast)
 
 
 @dataclass
@@ -240,6 +242,11 @@ def parse_page_type(data: dict[str, Any]) -> PageType:
 
     if "content_frame" in data:
         pt.content_frame = parse_content_frame(data["content_frame"])
+
+    if "flow_layout" in data:
+        pt.flow_layout = bool(data["flow_layout"])
+    if "flow_footer_y_mm" in data:
+        pt.flow_footer_y_mm = float(data["flow_footer_y_mm"])
 
     return pt
 

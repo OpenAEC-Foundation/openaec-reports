@@ -1,5 +1,7 @@
 name: locatie
 stationery: colofon_stationery.pdf
+flow_layout: true
+flow_footer_y_mm: 260.0
 line_zones:
 - x0_mm: 17.5
   y_mm: 44.1

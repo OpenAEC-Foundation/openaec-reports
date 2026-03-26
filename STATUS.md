@@ -1,21 +1,37 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-25
+> Laatst bijgewerkt: 2026-03-26
 > Sessie-historie ouder dan 2 sessies: zie `git log` of `git show <commit>:STATUS.md`
 
 ---
 
 ## Huidige Staat
 
-- **1217 tests** collected
-- **BIC Rapport:** 17 pagina's compleet, field groups, PDOK kaarten, formeel JSON schema
+- **1230 tests** collected (1180 passed, 50 skipped)
+- **BIC Rapport:** 17 pagina's compleet, field groups, PDOK kaarten, flow layout voor tekst overlap
 - **Security:** 5 kritieke + 1 hoge items gefixt, 2 hoge + 9 medium open (zie TODO.md)
 - **Productie:** `report.open-aec.com` / `report.open-aec.com` — SSO-only, multi-tenant
-- **Open:** deploy BIC rapport + field groups naar server, tekst overlap pag 4-5, S2 Sanering template
+- **Open:** deploy BIC rapport + field groups naar server, S2 Sanering template
 
 ---
 
-## Laatste Sessie — 24 maart
+## Laatste Sessie — 26 maart
+
+### Flow Layout voor Template Engine Text Zones
+- **Probleem:** Tekst overlap op pagina 4-5 van BIC rapporten wanneer waarde-velden wrappen naar meerdere regels
+- **Oplossing:** `_apply_flow_layout()` pre-processing in `template_engine.py` — berekent extra ruimte door text wrapping en verschuift onderliggende zones (tekst, lijnen, afbeeldingen) automatisch
+- **PageType config:** `flow_layout: bool` + `flow_footer_y_mm: float` velden toegevoegd
+- **YAML:** 4 page_types geactiveerd: voorziening_object, bic_rapport_details, herstelwerkzaamheden, locatie
+- **Tests:** 13 unit tests in `test_flow_layout.py`
+
+### Openstaand uit vorige sessies
+- [ ] Frontend: field groups UI testen na deploy
+- [ ] PDOK luchtfoto: 2025_orthoHR layer geconfigureerd (service was down)
+- [ ] Deploy naar server (SSH connection issues)
+
+---
+
+## Vorige Sessie — 24 maart
 
 ### BIC Rapport: Field Groups, Layout, PDOK Kaarten
 - **Field groups:** `_extract_field_groups()` scant page_type YAML's → `FieldGroupForm` component in sidebar (25 groepen)
@@ -23,12 +39,6 @@
 - **Text wrapping:** `TextZone.max_width_mm` + `_wrap_text()`, 87 text_zones voorzien
 - **PDOK kaarten:** `/api/pdok/map` + `/api/pdok/services` endpoints, image zones met lat/lon → automatisch kaart
 - **Layout fixes:** rechterkolom verschoven, tabel origin_y gecorrigeerd, paginanummers consistent, TOC paginanummers rechts
-
-### Openstaand uit deze sessie
-- [ ] Pagina 4-5: tekst overlap bij lange content
-- [ ] Frontend: field groups UI testen na deploy
-- [ ] PDOK luchtfoto: 2025_orthoHR layer geconfigureerd (service was down)
-- [ ] Deploy naar server (SSH connection issues)
 
 ---
 

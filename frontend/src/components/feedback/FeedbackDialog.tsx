@@ -1,26 +1,23 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import Modal from "../chrome/Modal";
 import "./FeedbackDialog.css";
 
-const CATEGORIES = ["general", "bug", "feature"] as const;
+const GITHUB_REPO = "OpenAEC-Foundation/openaec-reports";
+const GITHUB_NEW_ISSUE_URL = `https://github.com/${GITHUB_REPO}/issues/new`;
+
+const CATEGORIES = ["bug", "feature", "general"] as const;
 type Category = (typeof CATEGORIES)[number];
 
-const SENTIMENTS = [
-  { id: "frustrated", emoji: "\u{1F61E}" },
-  { id: "neutral", emoji: "\u{1F610}" },
-  { id: "happy", emoji: "\u{1F60A}" },
-] as const;
-type Sentiment = (typeof SENTIMENTS)[number]["id"] | null;
+const CATEGORY_LABELS: Record<Category, string> = {
+  bug: "bug",
+  feature: "enhancement",
+  general: "feedback",
+};
 
-const MAX_CHARS = 5000;
-const MIN_CHARS = 10;
-const MAX_IMAGES = 3;
-const MAX_TOTAL_SIZE = 1024 * 1024; // 1MB
-
-const FEEDBACK_API_URL = "https://open-feedback-studio.pages.dev/api/feedback";
-const APP_ID = "openaec-reports";
-const APP_VERSION = "0.1.0";
+const MIN_TITLE_CHARS = 5;
+const MIN_DESC_CHARS = 10;
+const MAX_DESC_CHARS = 5000;
 
 interface FeedbackDialogProps {
   open: boolean;
@@ -31,137 +28,54 @@ export default function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
   const { t } = useTranslation("feedback");
   const { t: tCommon } = useTranslation("common");
 
-  const [email, setEmail] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [category, setCategory] = useState<Category>("general");
-  const [message, setMessage] = useState("");
-  const [sentiment, setSentiment] = useState<Sentiment>(null);
-  const [images, setImages] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState("");
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState<Category>("bug");
+  const [description, setDescription] = useState("");
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Reset state when dialog opens
   useEffect(() => {
     if (open) {
-      setEmail("");
-      setFullName("");
-      setCategory("general");
-      setMessage("");
-      setSentiment(null);
-      setImages([]);
-      setPreviews([]);
-      setSubmitting(false);
-      setSubmitted(false);
-      setError("");
+      setTitle("");
+      setCategory("bug");
+      setDescription("");
     }
   }, [open]);
 
-  // Cleanup preview URLs
-  useEffect(() => {
-    return () => {
-      previews.forEach((url) => URL.revokeObjectURL(url));
-    };
-  }, [previews]);
-
-  const handleImageAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-
-    const currentSize = images.reduce((sum, f) => sum + f.size, 0);
-    const newImages: File[] = [];
-    const newPreviews: string[] = [];
-
-    for (const file of files) {
-      if (images.length + newImages.length >= MAX_IMAGES) break;
-      if (currentSize + newImages.reduce((s, f) => s + f.size, 0) + file.size > MAX_TOTAL_SIZE) break;
-      newImages.push(file);
-      newPreviews.push(URL.createObjectURL(file));
+  const handleSubmit = () => {
+    const trimmedTitle = title.trim();
+    const trimmedDesc = description.trim();
+    if (trimmedTitle.length < MIN_TITLE_CHARS || trimmedDesc.length < MIN_DESC_CHARS) {
+      return;
     }
 
-    setImages((prev) => [...prev, ...newImages]);
-    setPreviews((prev) => [...prev, ...newPreviews]);
-    e.target.value = "";
+    const label = CATEGORY_LABELS[category];
+    const categoryName = t(`category${category.charAt(0).toUpperCase() + category.slice(1)}`);
+
+    const body = [
+      `## ${t("descriptionHeading")}`,
+      "",
+      trimmedDesc,
+      "",
+      "---",
+      `**${t("categoryLabel")}:** ${categoryName}`,
+      `*${t("issueFooter")}*`,
+    ].join("\n");
+
+    const params = new URLSearchParams({
+      title: trimmedTitle,
+      body,
+      labels: label,
+    });
+
+    window.open(`${GITHUB_NEW_ISSUE_URL}?${params}`, "_blank");
+    onClose();
   };
 
-  const handleImageRemove = (index: number) => {
-    const url = previews[index];
-    if (url) URL.revokeObjectURL(url);
-    setImages((prev) => prev.filter((_, i) => i !== index));
-    setPreviews((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
-
-  const handleSubmit = async () => {
-    if (!isValidEmail(email) || message.trim().length < MIN_CHARS) return;
-    setSubmitting(true);
-    setError("");
-
-    try {
-      const emailVal = email.trim();
-      const nameVal = fullName.trim() || undefined;
-      const ua = `OpenAEC-Reports/${APP_VERSION}`;
-
-      const payload: Record<string, string | null | undefined> = {
-        app: APP_ID,
-        email: emailVal,
-        fullname: nameVal,
-        category,
-        message: message.trim(),
-        sentiment,
-        appVersion: APP_VERSION,
-      };
-
-      let res: Response;
-      if (images.length > 0) {
-        const formData = new FormData();
-        for (const [key, val] of Object.entries(payload)) {
-          if (val != null) formData.append(key, val);
-        }
-        images.forEach((img) => formData.append("images", img));
-        res = await fetch(FEEDBACK_API_URL, {
-          method: "POST",
-          headers: { "User-Agent": ua },
-          body: formData,
-        });
-      } else {
-        res = await fetch(FEEDBACK_API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "User-Agent": ua },
-          body: JSON.stringify(payload),
-        });
-      }
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setSubmitted(true);
-    } catch {
-      setError(t("errorGeneric"));
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleSendAnother = () => {
-    setEmail("");
-    setFullName("");
-    setCategory("general");
-    setMessage("");
-    setSentiment(null);
-    setImages([]);
-    setPreviews([]);
-    setSubmitted(false);
-    setError("");
-  };
-
-  const canSubmit = isValidEmail(email) && message.trim().length >= MIN_CHARS && !submitting;
-  const charCount = message.length;
+  const canSubmit = title.trim().length >= MIN_TITLE_CHARS
+    && description.trim().length >= MIN_DESC_CHARS;
+  const charCount = description.length;
   const charWarning = charCount >= 4500;
 
-  const footer = !submitted ? (
+  const footer = (
     <>
       <button className="feedback-btn feedback-btn-secondary" onClick={onClose}>
         {tCommon("cancel")}
@@ -171,137 +85,71 @@ export default function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
         onClick={handleSubmit}
         disabled={!canSubmit}
       >
-        {submitting ? t("submitting") : t("submit")}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+        </svg>
+        {t("submit")}
       </button>
     </>
-  ) : undefined;
+  );
 
   return (
     <Modal open={open} onClose={onClose} title={t("title")} width={480} className="feedback-dialog" footer={footer}>
-      {submitted ? (
-        <div className="feedback-success">
-          <div className="feedback-success-emoji">{"\u{2705}"}</div>
-          <h3>{t("successTitle")}</h3>
-          <p>{t("successMessage")}</p>
-          <button className="feedback-btn feedback-btn-primary" onClick={handleSendAnother}>
-            {t("sendAnother")}
-          </button>
-        </div>
-      ) : (
-        <div className="feedback-content">
-          {/* Email & Name */}
-          <div className="feedback-section">
-            <div className="feedback-field-row">
-              <label className="feedback-field-label">
-                {t("email")} <span className="feedback-required">*</span>
-              </label>
-              <input
-                type="email"
-                className="feedback-input"
-                placeholder={t("emailPlaceholder")}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="feedback-field-row">
-              <label className="feedback-field-label">{t("fullName")}</label>
-              <input
-                type="text"
-                className="feedback-input"
-                placeholder={t("fullNamePlaceholder")}
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-              />
-            </div>
-          </div>
+      <div className="feedback-content">
+        <p className="feedback-intro">{t("intro")}</p>
 
-          <div className="feedback-section">
-            <div className="feedback-categories">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  className={`feedback-category${category === cat ? " active" : ""}`}
-                  onClick={() => setCategory(cat)}
-                >
-                  {t(`category${cat.charAt(0).toUpperCase() + cat.slice(1)}`)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="feedback-section">
-            <textarea
-              className="feedback-textarea"
-              placeholder={t("messagePlaceholder")}
-              value={message}
-              onChange={(e) => setMessage(e.target.value.slice(0, MAX_CHARS))}
-              rows={6}
-            />
-            <div className={`feedback-char-count${charWarning ? " warning" : ""}`}>
-              {charCount}/{MAX_CHARS}
-            </div>
-          </div>
-
-          <div className="feedback-section">
-            <div className="feedback-images-row">
+        <div className="feedback-section">
+          <div className="feedback-categories">
+            {CATEGORIES.map((cat) => (
               <button
-                className="feedback-attach-btn"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={images.length >= MAX_IMAGES}
+                key={cat}
+                className={`feedback-category${category === cat ? " active" : ""}`}
+                onClick={() => setCategory(cat)}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21 15 16 10 5 21" />
-                </svg>
-                {t("attachImages")}
+                {t(`category${cat.charAt(0).toUpperCase() + cat.slice(1)}`)}
               </button>
-              <span className="feedback-image-limit">{t("imageLimit")}</span>
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              style={{ display: "none" }}
-              onChange={handleImageAdd}
-            />
-            {previews.length > 0 && (
-              <div className="feedback-previews">
-                {previews.map((src, i) => (
-                  <div key={i} className="feedback-preview">
-                    <img src={src} alt="" />
-                    <button className="feedback-preview-remove" onClick={() => handleImageRemove(i)}>
-                      &times;
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            ))}
           </div>
-
-          <div className="feedback-section">
-            <div className="feedback-sentiment-label">{t("sentiment")}</div>
-            <div className="feedback-sentiments">
-              {SENTIMENTS.map((s) => (
-                <button
-                  key={s.id}
-                  className={`feedback-sentiment${sentiment === s.id ? " active" : ""}`}
-                  onClick={() => setSentiment(sentiment === s.id ? null : s.id)}
-                  title={t(`sentiment${s.id.charAt(0).toUpperCase() + s.id.slice(1)}`)}
-                >
-                  <span className="feedback-sentiment-emoji">{s.emoji}</span>
-                  <span className="feedback-sentiment-text">
-                    {t(`sentiment${s.id.charAt(0).toUpperCase() + s.id.slice(1)}`)}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {error && <div className="feedback-error">{error}</div>}
         </div>
-      )}
+
+        <div className="feedback-section">
+          <label className="feedback-field-label">
+            {t("issueTitle")} <span className="feedback-required">*</span>
+          </label>
+          <input
+            type="text"
+            className="feedback-input"
+            placeholder={t("issueTitlePlaceholder")}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+
+        <div className="feedback-section">
+          <label className="feedback-field-label">
+            {t("issueDescription")} <span className="feedback-required">*</span>
+          </label>
+          <textarea
+            className="feedback-textarea"
+            placeholder={t("descriptionPlaceholder")}
+            value={description}
+            onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESC_CHARS))}
+            rows={6}
+          />
+          <div className={`feedback-char-count${charWarning ? " warning" : ""}`}>
+            {charCount}/{MAX_DESC_CHARS}
+          </div>
+        </div>
+
+        <div className="feedback-gh-note">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+          <span>{t("ghNote")}</span>
+        </div>
+      </div>
     </Modal>
   );
 }

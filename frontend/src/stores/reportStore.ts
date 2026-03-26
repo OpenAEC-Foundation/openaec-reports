@@ -804,8 +804,12 @@ useReportStore.subscribe((state, prev) => {
     }, SAVE_DEBOUNCE_MS);
   }
 
-  if (reportChanged) {
-    // Auto-preview trigger (lazy import to avoid circular dependency)
+  // Auto-preview: bij report wijziging OF bij switch naar preview/split mode
+  const viewModeChanged = state.viewMode !== prev.viewMode;
+  const switchedToPreview = viewModeChanged
+    && (state.viewMode === 'split' || state.viewMode === 'preview');
+
+  if (reportChanged || switchedToPreview) {
     import('./apiStore').then(({ useApiStore }) => {
       useApiStore.getState().schedulePreview();
     });

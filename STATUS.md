@@ -1,37 +1,47 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-26
+> Laatst bijgewerkt: 2026-03-27
 > Sessie-historie ouder dan 2 sessies: zie `git log` of `git show <commit>:STATUS.md`
 
 ---
 
 ## Huidige Staat
 
-- **1230 tests** collected (1180 passed, 50 skipped)
-- **BIC Rapport:** 17 pagina's compleet, field groups, PDOK kaarten, flow layout voor tekst overlap
+- **1243 tests** collected (1193 passed, 50 skipped)
+- **BIC Rapport:** 17 pagina's compleet, field groups, PDOK kaarten, flow layout met auto page-break
 - **Security:** 5 kritieke + 1 hoge items gefixt, 2 hoge + 9 medium open (zie TODO.md)
 - **Productie:** `report.open-aec.com` / `report.open-aec.com` — SSO-only, multi-tenant
-- **Open:** deploy BIC rapport + field groups naar server, S2 Sanering template
+- **Open:** S2 Sanering template
 
 ---
 
-## Laatste Sessie — 26 maart
+## Laatste Sessie — 27 maart
 
-### Flow Layout voor Template Engine Text Zones
-- **Probleem:** Tekst overlap op pagina 4-5 van BIC rapporten wanneer waarde-velden wrappen naar meerdere regels
-- **Oplossing:** `_apply_flow_layout()` pre-processing in `template_engine.py` — berekent extra ruimte door text wrapping en verschuift onderliggende zones (tekst, lijnen, afbeeldingen) automatisch
-- **PageType config:** `flow_layout: bool` + `flow_footer_y_mm: float` velden toegevoegd
-- **YAML:** 4 page_types geactiveerd: voorziening_object, bic_rapport_details, herstelwerkzaamheden, locatie
-- **Tests:** 13 unit tests in `test_flow_layout.py`
+### Flow Layout Auto Page-Break bij Overflow
+- **Probleem:** Dynamische velden die veel wrappen duwden content zones voorbij de footer grens (260mm), tekst viel over voettekst heen
+- **Oplossing:** `_paginate_flow_zones()` — splitst overflow zones automatisch naar vervolg-pagina's
+- **Mechanisme:** Zones die na shifting y >= `flow_footer_y_mm` hebben → nieuwe pagina, herpositionering vanaf `flow_content_start_y_mm` (default 32mm), footer zones herhaald op elke pagina
+- **Config:** `flow_content_start_y_mm: float` veld toegevoegd aan PageType
+- **Engine:** Flow layout pagina's worden als chunks behandeld (zelfde patroon als tabel-paginering), inclusief correcte paginanummering
+- **Tests:** 26 tests in `test_flow_layout.py` (13 bestaand + 13 nieuw)
+- **Deployed:** `2a413a8` naar `report.open-aec.com`
 
 ### Openstaand uit vorige sessies
 - [ ] Frontend: field groups UI testen na deploy
 - [ ] PDOK luchtfoto: 2025_orthoHR layer geconfigureerd (service was down)
-- [ ] Deploy naar server (SSH connection issues)
 
 ---
 
-## Vorige Sessie — 24 maart
+## Vorige Sessie — 26 maart
+
+### Flow Layout voor Template Engine Text Zones
+- `_apply_flow_layout()` pre-processing — berekent extra ruimte door text wrapping en verschuift onderliggende zones automatisch
+- PageType config: `flow_layout: bool` + `flow_footer_y_mm: float`
+- 4 page_types geactiveerd: voorziening_object, bic_rapport_details, herstelwerkzaamheden, locatie
+
+---
+
+## Sessie — 24 maart
 
 ### BIC Rapport: Field Groups, Layout, PDOK Kaarten
 - **Field groups:** `_extract_field_groups()` scant page_type YAML's → `FieldGroupForm` component in sidebar (25 groepen)

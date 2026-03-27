@@ -153,9 +153,10 @@ Volledige code review uitgevoerd. Bevindingen per prioriteit:
 2 nieuwe Customer templates toevoegen (naast bestaande `bic_factuur`).
 Bestaande assets herbruikbaar: brand.yaml, stationery PDF's, fonts, modules.
 
-- [x] S1 — **BIC Rapport** template ✅ Compleet (24 maart), flow layout fix (26 maart)
+- [x] S1 — **BIC Rapport** template ✅ Compleet (24 maart), flow layout fix (26 maart), auto page-break (27 maart)
   - 17 pagina's, field groups, PDOK kaarten, text wrapping, layout fine-tuning
   - Flow layout: text zones verschuiven automatisch bij wrapping overflow (pag 4-5 overlap opgelost)
+  - Auto page-break: overflow zones splitsen naar vervolg-pagina's met footer herhaling
   - Formeel JSON schema: `schemas/bic_rapport.schema.json`
   - Voorbeeld JSON: 114/125 velden gevuld
   - 5 nieuwe page_types: tekening_overzicht, tekening_detail, tekening_kadaster, vvv_verklaring, schade_fotos

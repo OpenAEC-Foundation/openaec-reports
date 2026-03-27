@@ -8,6 +8,8 @@ import os
 import re
 import shutil
 import uuid
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
@@ -28,7 +30,7 @@ from openaec_reports.auth.dependencies import (
 )
 from openaec_reports.auth.models import OrganisationDB, User, UserDB
 from openaec_reports.auth.routes import auth_router
-from openaec_reports.auth.security import is_default_secret
+from openaec_reports.auth.security import enforce_jwt_secret, is_default_secret
 from openaec_reports.core.data_transform import transform_json_to_engine_data
 from openaec_reports.core.engine import Report
 from openaec_reports.core.renderer_v2 import ReportGeneratorV2
@@ -80,10 +82,29 @@ UPLOAD_DIR = Path(os.environ.get("OPENAEC_UPLOAD_DIR", _default_uploads))
 ASSETS_DIR = Path(__file__).parent / "assets"
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """Startup/shutdown lifecycle voor de FastAPI app.
+
+    Startup:
+    - JWT secret enforcement (RuntimeError in productie bij default secret)
+    - Brand session cleanup (verwijder sessies ouder dan 24 uur)
+    """
+    # --- Startup ---
+    enforce_jwt_secret()
+
+    from openaec_reports.brand_api import cleanup_stale_sessions
+    cleanup_stale_sessions()
+
+    yield
+    # --- Shutdown ---
+
+
 app = FastAPI(
     title="OpenAEC Report Generator API",
     description="HTTP API voor het genereren van professionele engineering rapporten.",
     version=__version__,
+    lifespan=lifespan,
 )
 
 # ============================================================
@@ -121,12 +142,6 @@ init_api_key_db(_api_key_db)
 
 _organisation_db = OrganisationDB()
 init_organisation_db(_organisation_db)
-
-if is_default_secret():
-    logger.warning(
-        "OPENAEC_JWT_SECRET staat op de default waarde! "
-        "Stel een veilige secret in via de OPENAEC_JWT_SECRET environment variable."
-    )
 
 # Report/project storage (zelfde database als auth)
 _report_db = ReportDB(db_path=_user_db.db_path)

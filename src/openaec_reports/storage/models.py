@@ -11,6 +11,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
+from openaec_reports.storage.sql_utils import quote_identifier
+
 logger = logging.getLogger(__name__)
 
 # Maximale rapport JSON grootte (10 MB)
@@ -258,8 +260,8 @@ class ReportDB:
         if not fields:
             return self.get_project(project_id)
 
-        set_clauses = [f"{k} = ?" for k in fields]
-        set_clauses.append("updated_at = ?")
+        set_clauses = [f"{quote_identifier(k)} = ?" for k in fields]
+        set_clauses.append('"updated_at" = ?')
         values = list(fields.values()) + [_now_iso(), project_id, user_id]
 
         sql = (
@@ -472,8 +474,8 @@ class ReportDB:
         if not fields:
             return self.get_report_meta(report_id)
 
-        set_clauses = [f"{k} = ?" for k in fields]
-        set_clauses.append("updated_at = ?")
+        set_clauses = [f"{quote_identifier(k)} = ?" for k in fields]
+        set_clauses.append('"updated_at" = ?')
         values = list(fields.values()) + [_now_iso(), report_id, user_id]
 
         sql = (

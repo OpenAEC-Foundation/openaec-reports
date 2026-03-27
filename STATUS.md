@@ -7,15 +7,27 @@
 
 ## Huidige Staat
 
-- **1243 tests** collected (1193 passed, 50 skipped)
+- **1264 tests** collected (1214 passed, 50 skipped)
 - **BIC Rapport:** 17 pagina's compleet, field groups, PDOK kaarten, flow layout met auto page-break
-- **Security:** 5 kritieke + 1 hoge items gefixt, 2 hoge + 9 medium open (zie TODO.md)
+- **Security:** Alle 6 kritieke items gefixt (K1-K6), 1 hoge + 8 medium open (zie TODO.md)
 - **Productie:** `report.open-aec.com` / `report.open-aec.com` — SSO-only, multi-tenant
 - **Open:** S2 Sanering template
 
 ---
 
-## Laatste Sessie — 27 maart
+## Laatste Sessie — 28 maart
+
+### CR-K Security Fixes (4 van 6 resterende kritieke items)
+- **CR-K6:** Nextcloud credentials lazy loading — `_get_nextcloud_*()` functies i.p.v. module-level constanten (8 tests)
+- **CR-K2:** JWT default secret enforcement — `enforce_jwt_secret()` in FastAPI `lifespan` startup, productie → RuntimeError (3 tests)
+- **CR-K5:** SQL identifier quoting — `quote_identifier()` helper met regex validatie, 4 locaties geupdate (11 tests)
+- **CR-K3:** Brand session cleanup — `cleanup_stale_sessions()` verwijdert sessies >24u bij startup (8 tests)
+- **CR-K4:** False positive — SVG icons zijn hardcoded constanten, geen XSS-vector
+- **Totaal:** 30 nieuwe tests, 1214 passed, 50 skipped, 0 failures
+
+---
+
+## Sessie — 27 maart
 
 ### Flow Layout Auto Page-Break bij Overflow
 - **Probleem:** Dynamische velden die veel wrappen duwden content zones voorbij de footer grens (260mm), tekst viel over voettekst heen

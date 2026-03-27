@@ -568,7 +568,8 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resizingCol, resizingRow]);
 
   // Commit widths/heights after resize ends
   const prevResizingCol = useRef(resizingCol);
@@ -582,7 +583,8 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
     }
     prevResizingCol.current = resizingCol;
     prevResizingRow.current = resizingRow;
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resizingCol, resizingRow]);
 
   // --- Insert / Delete at position ---
   function insertRowAt(index: number) {

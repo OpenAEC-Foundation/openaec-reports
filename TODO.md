@@ -1,7 +1,250 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-28
+> Laatst bijgewerkt: 2026-03-27
+
+---
+
+## 🔴 CR — Code Review Bevindingen (27 maart)
+
+Uitgebreide code review over 3 domeinen (Python backend, Frontend, Config/Infra).
+86 bevindingen, gededupliceerd en geordend per ernst.
+
+### CR-K: Kritiek — Direct oppakken
+
+- [x] **CR-K1** — Dockerfile draait als root — GEFIXT (27 maart)
+  - Geen `USER` directive, container draait als root → bij container escape direct root op host
+  - **Fix:** `RUN adduser --disabled-password appuser && chown -R appuser:appuser /app` + `USER appuser`
+  - **Bestand:** `Dockerfile`
+
+- [ ] **CR-K2** — JWT default secret niet afgedwongen in productie (=SEC-M3)
+  - `"CHANGE-ME-in-production"` → server start gewoon op, iedereen kan geldige tokens genereren
+  - **Fix:** Hard falen bij startup wanneer `OPENAEC_ENV=production` en secret is default
+  - **Bestand:** `auth/security.py:16-17`, `api.py:125-129`
+
+- [ ] **CR-K3** — Brand session temp directory zonder cleanup (DoS vector)
+  - `bm_brand_sessions` in tempdir, geen TTL, geen max sessies → disk vullen mogelijk
+  - **Fix:** Achtergrondtaak: sessies > 24u auto-verwijderen, max sessies per user
+  - **Bestand:** `brand_api.py:45`
+
+- [ ] **CR-K4** — `dangerouslySetInnerHTML` voor SVG icons (XSS-vector)
+  - 6+ locaties met `__html: icon` — nu hardcoded, maar gevaarlijk bij toekomstige refactoring
+  - **Fix:** Vervang door React SVG componenten of icon library (lucide-react)
+  - **Bestanden:** `Backstage.tsx:36`, `SaveAsDialog.tsx:24`, `RibbonButton.tsx:29`
+
+- [ ] **CR-K5** — SQL queries via f-string in storage models
+  - `f"UPDATE projects SET {', '.join(set_clauses)}"` — safe by convention, niet by construction
+  - **Fix:** Gebruik consequent parameterized queries, geen dynamische SQL constructie
+  - **Bestand:** `storage/models.py:261-268, 475-482`
+
+- [ ] **CR-K6** — Nextcloud credentials als module-level constanten
+  - `NEXTCLOUD_PASS = os.getenv(...)` — zichtbaar bij exception dumps, persistent in geheugen
+  - **Fix:** Lazy credentials via functie, niet module-level
+  - **Bestand:** `cloud.py:32-34`
+
+### CR-H: Hoog — Snel oppakken
+
+- [ ] **CR-H1** — 15+ hardcoded "default" / "OpenAEC" in codebase
+  - Default brand, author, stationery paden — schendt multi-tenant architectuur
+  - **Fix:** Centraal config-bestand of env var `OPENAEC_DEFAULT_BRAND`, author zonder default
+  - **Bestanden:** `api.py:52,74`, `renderer_v2.py:81,1910`, `template_loader.py:282`, `engine.py:83,580`, `document.py:75`
+
+- [ ] **CR-H2** — Cookie naam nog "bm_access_token" (oude branding)
+  - Inconsistent met alle `OPENAEC_*` variabelen, breaking change bij rename
+  - **Fix:** Rename naar `openaec_access_token`, plan als coordinated deploy
+  - **Bestand:** `auth/security.py:25`
+
+- [ ] **CR-H3** — 6+ bare `except Exception: pass` die alle errors silencen
+  - MemoryError, TypeError etc. worden onzichtbaar ingeslikt
+  - **Fix:** Vang specifieke exceptions, log altijd, nooit `pass` op bare except
+  - **Bestanden:** `modules/yaml_module.py:673,802`, `template_engine.py:130,434,509`, `auth/dependencies.py:254`
+
+- [ ] **CR-H4** — God files: api.py (890+), admin/routes.py (1776+), renderer_v2.py (2191+)
+  - Monolithische bestanden met mixed responsibilities, moeilijk te onderhouden/testen
+  - **Fix:** Split api.py → api/generate.py + api/pdok.py + api/templates.py
+  - Split admin/routes.py → admin/users.py + admin/tenants.py + admin/brands.py
+  - renderer_v2.py → renderer_v2/ package met builder/page_renderer/font_manager
+
+- [ ] **CR-H5** — 10+ Python modules zonder tests
+  - `cloud.py`, `brand_api.py`, `map_generator.py`, `title_block.py`, `base_report.py`, `visual_diff.py`, `pattern_detector.py`, `page_classifier.py`, `config_generator.py`, `diff_engine.py`, `pdf_extractor.py`, `auth/seed.py`
+  - **Fix:** Prioriteit: `cloud.py` (security-gevoelig), `brand_api.py`, `data_transform.py`
+
+- [x] **CR-H6** — `uploads/` directory met user content in repo (niet in .gitignore) — GEFIXT (27 maart)
+  - 10 bestanden (PDF's, PNG's) — `git add .` stuurt ze mee
+  - **Fix:** Toevoegen aan `.gitignore`, bestanden uit tracking verwijderen
+
+- [ ] **CR-H7** — Geen Docker layer caching in CI
+  - Elke build from scratch (~5-10 min), geen `cache-from: type=gha`
+  - **Fix:** `cache-from: type=gha` + `cache-to: type=gha,mode=max` in workflow
+  - **Bestand:** `.github/workflows/ci.yml:68-76`
+
+- [ ] **CR-H8** — Frontend: Object URL memory leak bij herhaald PDF genereren
+  - Blob URL revoke is fragiel (regex replace op hash), geen cleanup bij unmount
+  - **Fix:** Bewaar raw blob URL apart, revoke altijd raw URL, cleanup actie in store
+  - **Bestand:** `frontend/src/stores/apiStore.ts:182-184`
+
+- [x] **CR-H9** — Frontend: console.log met volledige rapport payload in productie — GEFIXT (27 maart)
+  - Klantdata zichtbaar in browser console — information leakage
+  - **Fix:** Verwijder of wrap in `if (import.meta.env.DEV)` guard
+  - **Bestanden:** `apiStore.ts:160-173`, `api.ts:512-546`
+
+- [x] **CR-H10** — Frontend: useEffect zonder dependency array in SpreadsheetEditor — GEFIXT (27 maart)
+  - Resize handlers draaien op ELKE render — performance hit bij grote spreadsheets
+  - **Fix:** Voeg `[resizingCol, resizingRow]` toe als dependency array
+  - **Bestand:** `SpreadsheetEditor.tsx:534-571, 576-585`
+
+- [ ] **CR-H11** — Temp files lekken bij PDOK kaart ophalen
+  - `NamedTemporaryFile(delete=False, prefix="pdok_")` — nooit opgeruimd
+  - **Fix:** Cleanup-mechanisme na build, of context manager
+  - **Bestand:** `core/template_engine.py:579-585`
+
+- [ ] **CR-H12** — SQLite connecties per call zonder pooling
+  - `_get_connection()` maakt bij ELKE call een nieuwe connectie → "database is locked" risico
+  - **Fix:** Connectie-pool of thread-local connectie, overweeg aiosqlite
+  - **Bestand:** `storage/models.py:113-123`
+
+- [ ] **CR-H13** — brand_api upload_pairs: geen file size validatie
+  - PDF uploads zonder max grootte check → disk filling mogelijk
+  - **Fix:** Max 25 MB check voordat content gelezen wordt
+  - **Bestand:** `brand_api.py:359-364`
+
+### CR-M: Middel — Plannen
+
+- [ ] **CR-M1** — Frontend: ~50+ hardcoded Nederlandse strings buiten i18n
+  - Editor, block editors, admin panel, forms — alles buiten chrome componenten
+  - **Fix:** Nieuwe `editor` i18n namespace, geleidelijke migratie
+  - **Bestanden:** `MainPanel.tsx`, `BlockToolbox.tsx`, `TableEditor.tsx`, `MapEditor.tsx`, `AdminPanel.tsx`, `LoginPage.tsx`
+
+- [ ] **CR-M2** — Frontend: click-outside hook gedupliceerd op 6+ plaatsen
+  - Zelfde `useRef` + `useEffect` + `mousedown` patroon steeds opnieuw
+  - **Fix:** Extraheer `useClickOutside(ref, callback)` hook
+
+- [ ] **CR-M3** — Frontend: SpreadsheetEditor is god component (1127 regels)
+  - 30+ state variabelen, inline sub-componenten, resize/merge/paste logica
+  - **Fix:** Split in SpreadsheetToolbar, SpreadsheetGrid, useSpreadsheetSelection, useSpreadsheetResize
+
+- [ ] **CR-M4** — Frontend: SectionHeader state raakt out-of-sync na undo/redo
+  - Lokale `useState(section.title)` synchroniseert niet bij externe changes
+  - **Fix:** `useEffect(() => setTitle(section.title), [section.title])` of `key={section.id}`
+  - **Bestand:** `MainPanel.tsx:278-346`
+
+- [ ] **CR-M5** — Frontend: TableEditor/SpreadsheetEditor props sync probleem
+  - Zelfde als CR-M4: lokale state initialiseert vanuit props maar synchroniseert niet
+  - **Bestanden:** `TableEditor.tsx:23-27`, `SpreadsheetEditor.tsx:263-276`
+
+- [ ] **CR-M6** — Frontend: `confirm()` in Backstage (blocking browser API)
+  - Native browser dialoog inconsistent met custom Modal componenten
+  - **Fix:** Vervang door custom confirmatie-dialog
+  - **Bestand:** `Backstage.tsx:101`
+
+- [ ] **CR-M7** — Frontend: MapEditor debounce timer niet opgeruimd bij unmount
+  - setState op unmounted component mogelijk
+  - **Fix:** `useEffect(() => () => clearTimeout(debounceRef.current), [])`
+  - **Bestand:** `MapEditor.tsx:64,101-103`
+
+- [ ] **CR-M8** — Frontend: `as unknown as ReportDefinition` unsafe type assertion
+  - Alle type checking uitgeschakeld, crash downstream bij verkeerde data
+  - **Fix:** Runtime validatie (Zod schema) vóór laden in editor store
+  - **Bestand:** `ProjectBrowser.tsx:60`
+
+- [ ] **CR-M9** — Frontend: hardcoded versie "0.1.0" op 2 plekken
+  - Bij version bump moeten beide handmatig geupdate worden
+  - **Fix:** Centraliseer in package.json, importeer via Vite define
+  - **Bestanden:** `Backstage.tsx:177`, `SettingsDialog.tsx:253`
+
+- [ ] **CR-M10** — JSON Schema: `$id` en `title` nog "OpenAEC" in report.schema.json
+  - Niet hernoemd bij OpenAEC rebranding
+  - **Fix:** Hernoem `$id` → `report.open-aec.com/...`, `title` → `"OpenAEC Report Definition"`
+  - **Bestand:** `schemas/report.schema.json:3-5`
+
+- [ ] **CR-M11** — JSON Schema: draft-07 vs draft/2020-12 inconsistentie
+  - `report.schema.json` = draft-07, `bic_rapport.schema.json` = draft/2020-12
+  - **Fix:** Kies één draft (2020-12) en migreer de ander
+
+- [x] **CR-M12** — Spook-templates in package assets (=S3, nog steeds open) — GEFIXT (27 maart)
+  - `customer_bic_factuur.yaml`, `customer_bic_rapport.yaml`, `customer_sanering.yaml`
+  - Tenant-specifieke templates zichtbaar voor ALLE tenants op de API
+  - **Fix:** Verwijder deze 3 bestanden uit `src/openaec_reports/assets/templates/`
+
+- [ ] **CR-M13** — `test_tenant_brand/` in productie tenants directory
+  - Test fixture met `primary_color: '#FF0000'` — bereikt de server via Docker
+  - **Fix:** Verplaats naar `tests/fixtures/` of `.gitignore`
+
+- [ ] **CR-M14** — pyproject.toml: `pymupdf` dubbel (core + optional), `httpx` dubbel (core + dev)
+  - Misleidende optional dependency, inconsistente versiespecificatie
+  - **Fix:** Verwijder duplicaten
+
+- [ ] **CR-M15** — pyproject.toml: ruff `line-length = 100` vs CLAUDE.md "max 88"
+  - Configuratie en documentatie spreken elkaar tegen
+  - **Fix:** Synchroniseer (100 als bewuste keuze → CLAUDE.md aanpassen)
+
+- [ ] **CR-M16** — Dockerfile: geen pip dependency caching
+  - Elke codewijziging invalideert pip cache → langzame builds
+  - **Fix:** Split `COPY pyproject.toml` + `pip install` vóór `COPY src/`
+
+- [ ] **CR-M17** — CI: geen matrix testing voor Python 3.10/3.11
+  - pyproject.toml declareert 3.10+, tests draaien alleen op 3.12
+  - **Fix:** Matrix: `python-version: ["3.10", "3.11", "3.12"]`
+
+- [ ] **CR-M18** — CI: geen coverage report of threshold
+  - pytest-cov in deps maar niet in CI, geen coverage gating
+  - **Fix:** `--cov=openaec_reports --cov-fail-under=70` in pytest command
+
+- [ ] **CR-M19** — Circular import risico: cloud.py importeert private functies uit api.py
+  - `from openaec_reports.api import _generate_and_respond` — private API, fragiel
+  - **Fix:** Verplaats gedeelde logica naar `core/report_service.py`
+  - **Bestand:** `cloud.py:233-234`
+
+- [ ] **CR-M20** — `format_value()` gedupliceerd in template_engine.py en yaml_module.py
+  - Exact dezelfde currency_nl formatting op twee plekken
+  - **Fix:** Extraheer naar `core/formatting.py`
+
+- [ ] **CR-M21** — CORS met `allow_methods=["*"]` en `allow_headers=["*"]` (=SEC-M1)
+  - Te permissief voor productie
+  - **Fix:** Expliciet `["GET", "POST", "PUT", "DELETE", "OPTIONS"]` + `["Content-Type", "Authorization", "X-API-Key"]`
+  - **Bestand:** `api.py:108-109`
+
+- [ ] **CR-M22** — ValueError globaal gevangen → maskeert echte programmeerfouten
+  - `int("abc")` in interne logica wordt 422 i.p.v. 500
+  - **Fix:** Custom `ValidationError` voor input validatie, alleen die door handler vangen
+  - **Bestand:** `api.py:286-292`
+
+- [ ] **CR-M23** — `__init__.py` docstring noemt nog "OpenAEC Report Generator"
+  - **Fix:** Update naar "OpenAEC Report Generator"
+  - **Bestand:** `src/openaec_reports/__init__.py:1`
+
+- [ ] **CR-M24** — brand_api.py SESSIONS_DIR nog "bm_brand_sessions"
+  - **Fix:** Rename naar "openaec_brand_sessions"
+  - **Bestand:** `brand_api.py:45`
+
+- [ ] **CR-M25** — Geen `.env.example` in project root
+  - Developer krijgt geen overzicht van beschikbare env vars
+  - **Fix:** Root `.env.example` met alle variabelen voor lokale dev
+
+### CR-L: Laag — Nice-to-have
+
+- [ ] **CR-L1** — Frontend: geen focus trap in dialogen (WCAG 2.1 AA)
+  - Tab-navigatie kan "achter" de dialoog komen
+  - **Bestanden:** `ShortcutHelp.tsx`, `SaveAsDialog.tsx`, `OpenDialog.tsx`
+- [ ] **CR-L2** — Frontend: inconsistente export patterns (default vs named)
+  - Chrome componenten: default export, editor componenten: named export
+- [ ] **CR-L3** — Frontend: SpreadsheetEditor BG_COLORS bevat hardcoded OpenAEC kleuren (#40124A)
+  - **Fix:** Importeer uit brand config
+- [ ] **CR-L4** — Frontend: MetadataTabs.tsx mogelijk dead code (nergens geimporteerd)
+- [ ] **CR-L5** — Frontend: RegisterPage.tsx niet zichtbaar in routing (dead code?)
+- [ ] **CR-L6** — JSON Schema: geen `additionalProperties: false` — typo's in veldnamen worden genegeerd
+- [ ] **CR-L7** — `schemas/PYREVIT_GUIDE.md` hoort in `docs/`, verouderde naming
+- [ ] **CR-L8** — Customer brand.yaml: fonts refereren Helvetica maar font_files laden Arial
+- [ ] **CR-L9** — scripts/ bevat verouderde eenmalige scripts (naar _archive/)
+- [ ] **CR-L10** — docs/ bevat duplicaat voorbeeld JSON's (al in examples/)
+- [ ] **CR-L11** — `BMFlowable`, `BM_COLORS`, `BM_FONTS` class namen zijn "BM" branding restanten
+- [ ] **CR-L12** — `ASSETS_DIR` op 3+ plekken gedefinieerd met zelfde resultaat
+- [ ] **CR-L13** — Geen Dependabot of CodeQL security scanning
+- [ ] **CR-L14** — SVG wordt twee keer geladen in ImageBlock (geen caching van svg2rlg)
+- [ ] **CR-L15** — Environment variabelen niet centraal gedocumenteerd
+- [ ] **CR-L16** — English vs Dutch inconsistentie in docstrings/comments
+- [ ] **CR-L17** — `_KNOWN_PAGE_TYPES` in brand_api.py gedefinieerd maar nooit gebruikt
+- [ ] **CR-L18** — `_content` als mutable class variable in BMFlowable i.p.v. instance variable
 
 ---
 
@@ -164,7 +407,7 @@ Bestaande assets herbruikbaar: brand.yaml, stationery PDF's, fonts, modules.
   - Template YAML: `tenants/customer/templates/sanering.yaml`
   - Page types: hergebruik bestaande + nieuwe waar nodig
   - Referentie-PDF nodig voor pixel-exacte coördinaten
-- [ ] S3 — Opruimen: 3 spook-templates in `src/openaec_reports/assets/templates/` verwijderen
+- [x] S3 — Opruimen: 3 spook-templates in `src/openaec_reports/assets/templates/` verwijderen — GEFIXT (27 maart, zie CR-M12)
   - `customer_bic_factuur.yaml`, `customer_bic_rapport.yaml`, `customer_sanering.yaml`
   - Zijn package defaults die voor elke tenant zichtbaar zijn op de server
 

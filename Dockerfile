@@ -26,11 +26,15 @@ RUN pip install --no-cache-dir .
 # Frontend dist van stage 1
 COPY --from=frontend-build /app/frontend/dist /app/static
 
-RUN mkdir -p /app/uploads /app/data
+# Non-root user voor security
+RUN adduser --disabled-password --gecos '' appuser
+RUN mkdir -p /app/uploads /app/data && chown -R appuser:appuser /app
 
 # Multi-tenant: alle tenant directories beschikbaar voor brand resolution
 ENV OPENAEC_TENANTS_ROOT=/app/tenants
 ENV OPENAEC_TENANT_DIR=/app/tenants/default
+
+USER appuser
 
 EXPOSE 8000
 

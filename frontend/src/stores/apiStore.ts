@@ -157,26 +157,23 @@ export const useApiStore = create<ApiStore>()((set, get) => ({
       // Smart endpoint routing: TemplateEngine voor YAML-driven templates
       const isTemplateEngine = _isTemplateEngineReport(definition);
 
-      console.group('[generatePdf] Request');
-      console.log('Template:', definition.template);
-      console.log('Brand:', definition.brand);
-      console.log('Engine:', isTemplateEngine ? 'TemplateEngine' : 'renderer_v2');
-      console.log('Sections:', definition.sections?.length ?? 0);
-      console.log('Flat data keys:', Object.keys(definition).filter(
-        (k) => !['template','brand','format','orientation','project','project_number',
-                  'client','author','report_type','date','version','status',
-                  'cover','colofon','toc','sections','appendices','backcover',
-                  'metadata','field_groups','tenant'].includes(k)
-      ));
-      console.log('Full payload:', JSON.stringify(definition).length, 'chars');
-      console.log('Definition:', definition);
-      console.groupEnd();
+      if (import.meta.env.DEV) {
+        console.group('[generatePdf] Request');
+        console.log('Template:', definition.template);
+        console.log('Brand:', definition.brand);
+        console.log('Engine:', isTemplateEngine ? 'TemplateEngine' : 'renderer_v2');
+        console.log('Sections:', definition.sections?.length ?? 0);
+        console.log('Full payload:', JSON.stringify(definition).length, 'chars');
+        console.groupEnd();
+      }
 
       const blob = isTemplateEngine
         ? await api.generateTemplate(definition)
         : await api.generate(definition);
 
-      console.log('[generatePdf] Response: blob size =', blob.size, 'bytes, type =', blob.type);
+      if (import.meta.env.DEV) {
+        console.log('[generatePdf] Response: blob size =', blob.size, 'bytes, type =', blob.type);
+      }
 
       // Revoke previous URL if exists
       const prev = get().lastPdfUrl;

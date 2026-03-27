@@ -46,6 +46,9 @@ data/auth.db-shm
 
 # Output
 output/
+
+# User uploads
+uploads/
 *.pdf
 # Stationery PDF's zijn wél nodig
 !tenants/**/stationery/*.pdf

@@ -304,6 +304,93 @@ def _apply_flow_layout(
     return new_text_zones, new_line_zones, new_image_zones
 
 
+def _paginate_flow_zones(
+    text_zones: list[TextZone],
+    line_zones: list[LineZone],
+    image_zones: list[ImageZone],
+    data: dict[str, Any],
+    brand,
+    footer_y_mm: float,
+    content_start_y_mm: float = 32.0,
+) -> list[tuple[list[TextZone], list[LineZone], list[ImageZone]]]:
+    """Pas flow layout toe en splits in pagina's als content voorbij footer valt.
+
+    Returns:
+        Lijst van (text_zones, line_zones, image_zones) tuples, één per pagina.
+        Footer zones worden op elke pagina herhaald.
+        Overflow zones worden herpositioneerd vanaf content_start_y_mm.
+    """
+    from dataclasses import replace
+
+    # 1. Identificeer footer zone indices op basis van ORIGINELE y posities
+    footer_tz_idx = {i for i, z in enumerate(text_zones) if z.y_mm >= footer_y_mm}
+    footer_lz_idx = {i for i, z in enumerate(line_zones) if z.y_mm >= footer_y_mm}
+    footer_iz_idx = {i for i, z in enumerate(image_zones) if z.y_mm >= footer_y_mm}
+
+    # 2. Pas flow layout toe (verschuift content zones, footer zones ongewijzigd)
+    shifted_tz, shifted_lz, shifted_iz = _apply_flow_layout(
+        text_zones, line_zones, image_zones, data, brand, footer_y_mm,
+    )
+
+    # 3. Scheid footer en content zones (index-based, volgorde behouden)
+    footer_tz = [z for i, z in enumerate(shifted_tz) if i in footer_tz_idx]
+    content_tz = [z for i, z in enumerate(shifted_tz) if i not in footer_tz_idx]
+
+    footer_lz = [z for i, z in enumerate(shifted_lz) if i in footer_lz_idx]
+    content_lz = [z for i, z in enumerate(shifted_lz) if i not in footer_lz_idx]
+
+    footer_iz = [z for i, z in enumerate(shifted_iz) if i in footer_iz_idx]
+    content_iz = [z for i, z in enumerate(shifted_iz) if i not in footer_iz_idx]
+
+    # 4. Check of er overflow is
+    has_overflow = (
+        any(z.y_mm >= footer_y_mm for z in content_tz)
+        or any(z.y_mm >= footer_y_mm for z in content_lz)
+        or any(z.y_mm >= footer_y_mm for z in content_iz)
+    )
+
+    if not has_overflow:
+        return [(shifted_tz, shifted_lz, shifted_iz)]
+
+    # 5. Splits iteratief in pagina's
+    pages: list[tuple[list[TextZone], list[LineZone], list[ImageZone]]] = []
+    remaining_tz = content_tz
+    remaining_lz = content_lz
+    remaining_iz = content_iz
+    max_pages = 20  # veiligheid tegen oneindige loop
+
+    for _ in range(max_pages):
+        # Wat past op deze pagina?
+        fits_tz = [z for z in remaining_tz if z.y_mm < footer_y_mm]
+        fits_lz = [z for z in remaining_lz if z.y_mm < footer_y_mm]
+        fits_iz = [z for z in remaining_iz if z.y_mm < footer_y_mm]
+
+        overflow_tz = [z for z in remaining_tz if z.y_mm >= footer_y_mm]
+        overflow_lz = [z for z in remaining_lz if z.y_mm >= footer_y_mm]
+        overflow_iz = [z for z in remaining_iz if z.y_mm >= footer_y_mm]
+
+        # Pagina toevoegen: passende content + footer zones
+        pages.append((fits_tz + footer_tz, fits_lz + footer_lz, fits_iz + footer_iz))
+
+        if not overflow_tz and not overflow_lz and not overflow_iz:
+            break
+
+        # Herpositioneer overflow voor volgende pagina
+        all_ys = (
+            [z.y_mm for z in overflow_tz]
+            + [z.y_mm for z in overflow_lz]
+            + [z.y_mm for z in overflow_iz]
+        )
+        min_y = min(all_ys)
+        reposition = min_y - content_start_y_mm
+
+        remaining_tz = [replace(z, y_mm=z.y_mm - reposition) for z in overflow_tz]
+        remaining_lz = [replace(z, y_mm=z.y_mm - reposition) for z in overflow_lz]
+        remaining_iz = [replace(z, y_mm=z.y_mm - reposition) for z in overflow_iz]
+
+    return pages
+
+
 def _draw_text_zones(
     canvas,
     text_zones: list[TextZone],
@@ -799,6 +886,14 @@ class TemplateEngine:
             if page_def.type == "special" and cover_pages == 0:
                 # Eerste special page = cover (telt niet mee)
                 cover_pages = 1
+            elif pt.flow_layout and page_def.type in ("special", "fixed"):
+                # Flow layout kan overflow pagina's genereren
+                zone_pages = _paginate_flow_zones(
+                    pt.text_zones, pt.line_zones, pt.image_zones,
+                    data, brand_config, pt.flow_footer_y_mm,
+                    pt.flow_content_start_y_mm,
+                )
+                content_pages += len(zone_pages)
             elif page_def.type == "fixed" and page_def.repeat == "auto" and pt.table:
                 table_data = resolve_bind(data, pt.table.data_bind) or []
                 chunks = _paginate_table_data(table_data, pt.table)
@@ -856,6 +951,9 @@ class TemplateEngine:
 
             if page_def.type == "fixed" and page_def.repeat == "auto":
                 # Chunk templates worden in _build_elements aangemaakt
+                template_info.append((template_id, None, page_def, page_type))
+            elif page_def.type in ("special", "fixed") and page_type.flow_layout:
+                # Flow layout paginering: uitgesteld naar _build_elements
                 template_info.append((template_id, None, page_def, page_type))
             elif page_def.type in ("special", "fixed"):
                 pt = self._make_special_fixed_pt(
@@ -1002,6 +1100,44 @@ class TemplateEngine:
             id=template_id, frames=[frame], pagesize=pagesize, onPage=on_page,
         )
 
+    def _make_zone_page_pt(
+        self,
+        template_id: str,
+        page_def: PageDef,
+        page_type: PageType,
+        pagesize: tuple[float, float],
+        ctx: _BuildContext,
+        text_zones: list[TextZone],
+        line_zones: list[LineZone],
+        image_zones: list[ImageZone],
+    ) -> PageTemplate:
+        """PageTemplate met vooraf berekende zones (flow layout overflow pagina's)."""
+        pw, ph = pagesize
+        frame = Frame(0, 0, pw, ph, id=f"f_{template_id}",
+                       leftPadding=0, rightPadding=0,
+                       topPadding=0, bottomPadding=0)
+
+        def on_page(canvas, doc, _pt=page_type, _pw=pw, _ph=ph, _ctx=ctx,
+                     _tz=text_zones, _lz=line_zones, _iz=image_zones):
+            canvas.setPageSize((_pw, _ph))
+            if _pt.stationery:
+                _ctx.stationery.draw(canvas, _pt.stationery, _pw, _ph)
+            if _lz:
+                _draw_line_zones(canvas, _lz, _ctx.brand, _ph)
+            _draw_text_zones(canvas, _tz, _ctx.data, _ctx.brand, _ph, _ctx)
+            if _iz:
+                assets_dir = _ctx.stationery_dir.parent / "assets"
+                _draw_image_zones(canvas, _iz, _ctx.data, _ph, assets_dir)
+            # Fixed tabel: niet op overflow pagina's (tabel staat op originele pagina)
+            if page_def.type == "fixed" and _pt.table:
+                rows = resolve_bind(_ctx.data, _pt.table.data_bind)
+                if rows:
+                    _draw_table(canvas, _pt.table, rows, _ctx.brand, _ph)
+
+        return PageTemplate(
+            id=template_id, frames=[frame], pagesize=pagesize, onPage=on_page,
+        )
+
     # ----------------------------------------------------------
     # Elements builder
     # ----------------------------------------------------------
@@ -1017,7 +1153,28 @@ class TemplateEngine:
 
         for template_id, pt, page_def, page_type in template_info:
 
-            if page_def.type == "special":
+            if page_def.type in ("special", "fixed") and page_type.flow_layout:
+                # Flow layout met auto page-break bij overflow
+                zone_pages = _paginate_flow_zones(
+                    page_type.text_zones, page_type.line_zones,
+                    page_type.image_zones, ctx.data, ctx.brand,
+                    page_type.flow_footer_y_mm, page_type.flow_content_start_y_mm,
+                )
+                pagesize = _get_pagesize(page_def.orientation)
+                for pi, (tz, lz, iz) in enumerate(zone_pages):
+                    chunk_id = f"{template_id}_fp{pi}"
+                    chunk_pt = self._make_zone_page_pt(
+                        chunk_id, page_def, page_type, pagesize, ctx,
+                        tz, lz, iz,
+                    )
+                    self._pending_chunk_templates.append(chunk_pt)
+                    elements.append(NextPageTemplate(chunk_id))
+                    if not first:
+                        elements.append(PageBreak())
+                    elements.append(Spacer(1, 1))
+                    first = False
+
+            elif page_def.type == "special":
                 elements.append(NextPageTemplate(template_id))
                 if not first:
                     elements.append(PageBreak())

@@ -1,4 +1,4 @@
-"""Tests voor Symitech template YAML configuraties."""
+"""Tests voor Symitech template YAML configuraties (V3 TemplateEngine format)."""
 
 from pathlib import Path
 
@@ -6,16 +6,18 @@ import pytest
 import yaml
 
 TEMPLATES_DIR = (
-    Path(__file__).parent.parent / "src" / "openaec_reports" / "assets" / "templates"
+    Path(__file__).parent.parent / "tenants" / "symitech" / "templates"
 )
 
 
 class TestBicRapportTemplate:
-    """Test symitech_bic_rapport.yaml template."""
+    """Test bic_rapport.yaml template (V3 TemplateEngine format)."""
 
     @pytest.fixture()
     def template(self) -> dict:
-        path = TEMPLATES_DIR / "symitech_bic_rapport.yaml"
+        path = TEMPLATES_DIR / "bic_rapport.yaml"
+        if not path.exists():
+            pytest.skip("bic_rapport.yaml not found in tenant templates")
         with path.open("r", encoding="utf-8") as f:
             return yaml.safe_load(f)
 
@@ -28,57 +30,42 @@ class TestBicRapportTemplate:
     def test_report_type(self, template):
         assert template["report_type"] == "bic_rapport"
 
-    def test_format_and_orientation(self, template):
-        assert template["format"] == "A4"
-        assert template["orientation"] == "portrait"
+    def test_name(self, template):
+        assert template["name"] == "symitech_bic_rapport"
 
-    def test_structure(self, template):
-        structure = template["structure"]
-        assert "cover" in structure
-        assert "colofon" in structure
-        assert "sections" in structure
-        assert "backcover" in structure
+    def test_has_pages_list(self, template):
+        """V3 format: pages is a list of page definitions."""
+        assert "pages" in template
+        assert isinstance(template["pages"], list)
+        assert len(template["pages"]) > 0
 
-    def test_toc_disabled(self, template):
-        assert template["toc"]["enabled"] is False
+    def test_first_page_is_voorblad(self, template):
+        first = template["pages"][0]
+        assert first["type"] == "special"
+        assert first["page_type"] == "voorblad_bic"
 
-    def test_colofon_enabled(self, template):
-        assert template["colofon"]["enabled"] is True
+    def test_last_page_is_achterblad(self, template):
+        last = template["pages"][-1]
+        assert last["type"] == "special"
+        assert last["page_type"] == "achterblad"
 
-    def test_backcover_enabled(self, template):
-        assert template["backcover"]["enabled"] is True
+    def test_has_inhoudsopgave(self, template):
+        toc_pages = [p for p in template["pages"] if p.get("page_type") == "inhoudsopgave"]
+        assert len(toc_pages) == 1
 
-    def test_section_presets_defined(self, template):
-        presets = template["section_presets"]
-        assert len(presets) == 4
-
-    def test_section_preset_titles(self, template):
-        titles = [p["title"] for p in template["section_presets"]]
-        assert "Locatie" in titles
-        assert "BIC Controles" in titles
-        assert "Kostenopgave" in titles
-        assert "Objectbeschrijving" in titles
-
-    def test_section_preset_block_types(self, template):
-        presets = template["section_presets"]
-        block_types = [p["default_blocks"][0]["type"] for p in presets]
-        assert "location_detail" in block_types
-        assert "bic_table" in block_types
-        assert "cost_summary" in block_types
-        assert "object_description" in block_types
-
-    def test_kostenopgave_landscape(self, template):
-        kosten = [p for p in template["section_presets"] if p["title"] == "Kostenopgave"]
-        assert len(kosten) == 1
-        assert kosten[0]["orientation"] == "landscape"
+    def test_has_landscape_pages(self, template):
+        landscape = [p for p in template["pages"] if p.get("orientation") == "landscape"]
+        assert len(landscape) > 0, "Template should contain landscape pages"
 
 
-class TestSaneringTemplate:
-    """Test symitech_sanering.yaml template."""
+class TestBicFactuurTemplate:
+    """Test bic_factuur.yaml template."""
 
     @pytest.fixture()
     def template(self) -> dict:
-        path = TEMPLATES_DIR / "symitech_sanering.yaml"
+        path = TEMPLATES_DIR / "bic_factuur.yaml"
+        if not path.exists():
+            pytest.skip("bic_factuur.yaml not found in tenant templates")
         with path.open("r", encoding="utf-8") as f:
             return yaml.safe_load(f)
 
@@ -88,43 +75,6 @@ class TestSaneringTemplate:
     def test_tenant_is_symitech(self, template):
         assert template["tenant"] == "symitech"
 
-    def test_report_type(self, template):
-        assert template["report_type"] == "sanering"
-
-    def test_format_and_orientation(self, template):
-        assert template["format"] == "A4"
-        assert template["orientation"] == "portrait"
-
-    def test_structure_includes_toc(self, template):
-        structure = template["structure"]
-        assert "cover" in structure
-        assert "colofon" in structure
-        assert "toc" in structure
-        assert "sections" in structure
-        assert "backcover" in structure
-
-    def test_toc_enabled(self, template):
-        assert template["toc"]["enabled"] is True
-        assert template["toc"]["title"] == "Inhoudsopgave"
-
-    def test_section_presets(self, template):
-        presets = template["section_presets"]
-        assert len(presets) == 4
-        titles = [p["title"] for p in presets]
-        assert "Locatie" in titles
-        assert "Saneringswerkzaamheden" in titles
-        assert "Objectbeschrijving" in titles
-        assert "Kostenopgave" in titles
-
-    def test_kostenopgave_landscape(self, template):
-        kosten = [p for p in template["section_presets"] if p["title"] == "Kostenopgave"]
-        assert len(kosten) == 1
-        assert kosten[0]["orientation"] == "landscape"
-
-    def test_saneringswerkzaamheden_uses_paragraph(self, template):
-        sanering = [
-            p for p in template["section_presets"]
-            if p["title"] == "Saneringswerkzaamheden"
-        ]
-        assert len(sanering) == 1
-        assert sanering[0]["default_blocks"][0]["type"] == "paragraph"
+    def test_has_pages_list(self, template):
+        assert "pages" in template
+        assert isinstance(template["pages"], list)

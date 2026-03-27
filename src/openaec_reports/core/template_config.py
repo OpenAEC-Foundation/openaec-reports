@@ -108,6 +108,7 @@ class PageType:
     content_frame: ContentFrame | None = None  # voor flow mode
     flow_layout: bool = False                  # text zones verschuiven bij wrapping
     flow_footer_y_mm: float = 260.0            # zones >= deze y zijn footer (vast)
+    flow_content_start_y_mm: float = 32.0      # y-start voor overflow vervolg-pagina's
 
 
 @dataclass
@@ -247,6 +248,8 @@ def parse_page_type(data: dict[str, Any]) -> PageType:
         pt.flow_layout = bool(data["flow_layout"])
     if "flow_footer_y_mm" in data:
         pt.flow_footer_y_mm = float(data["flow_footer_y_mm"])
+    if "flow_content_start_y_mm" in data:
+        pt.flow_content_start_y_mm = float(data["flow_content_start_y_mm"])
 
     return pt
 

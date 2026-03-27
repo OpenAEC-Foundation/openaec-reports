@@ -9,7 +9,7 @@ from openaec_reports.core.template_config import (
     LineZone,
     TextZone,
 )
-from openaec_reports.core.template_engine import _apply_flow_layout
+from openaec_reports.core.template_engine import _apply_flow_layout, _paginate_flow_zones
 
 
 def _make_brand():
@@ -306,3 +306,234 @@ class TestParseFlowLayoutConfig:
         pt = parse_page_type(data)
         assert pt.flow_layout is False
         assert pt.flow_footer_y_mm == 260.0
+
+    def test_parse_flow_content_start_y_mm(self) -> None:
+        from openaec_reports.core.template_config import parse_page_type
+
+        data = {
+            "name": "test_page",
+            "flow_layout": True,
+            "flow_content_start_y_mm": 40.0,
+        }
+        pt = parse_page_type(data)
+        assert pt.flow_content_start_y_mm == 40.0
+
+    def test_parse_flow_content_start_y_mm_default(self) -> None:
+        from openaec_reports.core.template_config import parse_page_type
+
+        data = {"name": "test_page"}
+        pt = parse_page_type(data)
+        assert pt.flow_content_start_y_mm == 32.0
+
+
+# ============================================================
+# Pagination tests
+# ============================================================
+
+
+VERY_LONG_TEXT = (
+    "Dit is een extreem lange beschrijving die heel veel regels nodig heeft "
+    "om volledig weer te geven. De tekst is zo lang dat het onmogelijk is "
+    "om deze in een paar regels te plaatsen bij 83mm breedte en 10pt font. "
+    "Er moet zeker gewrapped worden over meerdere regels en dat zorgt voor "
+    "extra ruimte die de zones eronder naar beneden duwt. Deze tekst wordt "
+    "herhaald voor meerdere velden zodat de cumulatieve offset groot genoeg "
+    "wordt om content voorbij de footer grens te duwen."
+)
+
+
+def _build_page_zones(
+    num_rows: int,
+    start_y: float = 44.3,
+    gap: float = 4.1,
+    footer_y: float = FOOTER_Y,
+) -> tuple[list[TextZone], list[LineZone]]:
+    """Bouw een realistische set zones: label + waarde per rij, + footer."""
+    text_zones = []
+    line_zones = []
+    for i in range(num_rows):
+        y = start_y + i * gap
+        text_zones.append(_tz(f"_static.Label{i}", y))
+        text_zones.append(_tz(f"field.val{i}", y, max_width_mm=83))
+    # Footer zones
+    text_zones.append(
+        TextZone(bind="client.name", x_mm=10.3, y_mm=275.4, font="heading", size=10)
+    )
+    text_zones.append(
+        TextZone(
+            bind="_page_number", x_mm=172.0, y_mm=275.4,
+            font="heading", size=12, align="right",
+        )
+    )
+    return text_zones, line_zones
+
+
+class TestPaginateNoOverflow:
+    """Geen overflow → één pagina."""
+
+    def test_short_text_single_page(self) -> None:
+        text_zones, _ = _build_page_zones(5)
+        data = {f"field": {f"val{i}": "Kort" for i in range(5)}}
+
+        pages = _paginate_flow_zones(
+            text_zones, [], [], data, _make_brand(), FOOTER_Y,
+        )
+
+        assert len(pages) == 1
+        # Alle zones inclusief footer op pagina 1
+        tz, lz, iz = pages[0]
+        assert len(tz) == len(text_zones)
+
+    def test_no_wrapping_single_page(self) -> None:
+        text_zones = [_tz("_static.A", 44.3), _tz("_static.B", 200.0)]
+        footer_tz = [TextZone(bind="client.name", x_mm=10, y_mm=275, font="body", size=10)]
+
+        pages = _paginate_flow_zones(
+            text_zones + footer_tz, [], [], {}, _make_brand(), FOOTER_Y,
+        )
+
+        assert len(pages) == 1
+
+
+class TestPaginateOverflow:
+    """Content overflowt voorbij footer → meerdere pagina's."""
+
+    def test_overflow_creates_two_pages(self) -> None:
+        """Veel rijen met lange tekst → overflow naar pagina 2."""
+        # 50 rijen met start_y=44.3 en gap=4.1 → laatste rij op y=245.2
+        # Na wrapping kan accumulated offset >15mm zijn → zones voorbij 260
+        text_zones, _ = _build_page_zones(50)
+        data = {"field": {f"val{i}": VERY_LONG_TEXT for i in range(50)}}
+
+        pages = _paginate_flow_zones(
+            text_zones, [], [], data, _make_brand(), FOOTER_Y,
+        )
+
+        assert len(pages) >= 2
+
+    def test_footer_on_all_pages(self) -> None:
+        """Footer zones (client.name, _page_number) staan op elke pagina."""
+        text_zones, _ = _build_page_zones(50)
+        data = {"field": {f"val{i}": VERY_LONG_TEXT for i in range(50)}}
+
+        pages = _paginate_flow_zones(
+            text_zones, [], [], data, _make_brand(), FOOTER_Y,
+        )
+
+        for page_tz, _, _ in pages:
+            footer = [z for z in page_tz if z.y_mm >= FOOTER_Y]
+            assert len(footer) == 2, "Footer zones moeten op elke pagina staan"
+            binds = {z.bind for z in footer}
+            assert "client.name" in binds
+            assert "_page_number" in binds
+
+    def test_overflow_zones_repositioned(self) -> None:
+        """Overflow zones worden herpositioneerd op vervolg-pagina."""
+        text_zones, _ = _build_page_zones(50)
+        data = {"field": {f"val{i}": VERY_LONG_TEXT for i in range(50)}}
+        content_start = 32.0
+
+        pages = _paginate_flow_zones(
+            text_zones, [], [], data, _make_brand(), FOOTER_Y,
+            content_start_y_mm=content_start,
+        )
+
+        assert len(pages) >= 2
+        # Op pagina 2: content zones moeten starten rond content_start_y_mm
+        page2_tz, _, _ = pages[1]
+        content_zones = [z for z in page2_tz if z.y_mm < FOOTER_Y]
+        assert content_zones, "Pagina 2 moet content zones bevatten"
+        min_y = min(z.y_mm for z in content_zones)
+        assert abs(min_y - content_start) < 1.0, (
+            f"Content op pagina 2 moet starten rond {content_start}mm, niet {min_y}mm"
+        )
+
+    def test_no_content_above_footer_on_any_page(self) -> None:
+        """Geen content zone mag y >= footer_y_mm hebben op enige pagina."""
+        text_zones, _ = _build_page_zones(50)
+        data = {"field": {f"val{i}": VERY_LONG_TEXT for i in range(50)}}
+
+        pages = _paginate_flow_zones(
+            text_zones, [], [], data, _make_brand(), FOOTER_Y,
+        )
+
+        for page_idx, (page_tz, page_lz, page_iz) in enumerate(pages):
+            # Footer zones zijn OK (die staan altijd >= FOOTER_Y)
+            footer_binds = {"client.name", "_page_number"}
+            for z in page_tz:
+                if z.bind not in footer_binds:
+                    assert z.y_mm < FOOTER_Y, (
+                        f"Content zone '{z.bind}' op pagina {page_idx + 1} "
+                        f"staat op y={z.y_mm}mm >= footer {FOOTER_Y}mm"
+                    )
+
+
+class TestPaginateLineZones:
+    """Line zones splitsen mee met content."""
+
+    def test_line_zones_split(self) -> None:
+        """Line zones boven footer blijven, rest gaat naar pagina 2."""
+        text_zones, _ = _build_page_zones(50)
+        # Lijnen bij begin, midden en eind van content
+        line_zones = [_lz(42.0), _lz(130.0), _lz(250.0)]
+        data = {"field": {f"val{i}": VERY_LONG_TEXT for i in range(50)}}
+
+        pages = _paginate_flow_zones(
+            text_zones, line_zones, [], data, _make_brand(), FOOTER_Y,
+        )
+
+        assert len(pages) >= 2
+        # Pagina 1 moet minstens de eerste lijn bevatten
+        _, p1_lz, _ = pages[0]
+        assert len(p1_lz) >= 1
+
+
+class TestPaginateImageZones:
+    """Image zones splitsen mee met content."""
+
+    def test_image_zone_on_overflow_page(self) -> None:
+        """Image zone die overflowt komt op vervolg-pagina."""
+        text_zones, _ = _build_page_zones(50)
+        # Image zone ver naar beneden → overflowt bij veel wrapping
+        image_zones = [_iz("foto", 255.0)]
+        data = {"field": {f"val{i}": VERY_LONG_TEXT for i in range(50)}}
+
+        pages = _paginate_flow_zones(
+            text_zones, [], image_zones, data, _make_brand(), FOOTER_Y,
+        )
+
+        # Image moet ergens staan (pagina 1 of 2 afhankelijk van shift)
+        total_images = sum(len(iz) for _, _, iz in pages)
+        assert total_images >= 1
+
+
+class TestPaginateEdgeCases:
+    """Randgevallen voor paginering."""
+
+    def test_empty_zones(self) -> None:
+        pages = _paginate_flow_zones([], [], [], {}, _make_brand(), FOOTER_Y)
+        assert len(pages) == 1
+        assert pages[0] == ([], [], [])
+
+    def test_only_footer_zones(self) -> None:
+        """Alleen footer zones → één pagina."""
+        footer = [TextZone(bind="x", x_mm=10, y_mm=275, font="body", size=10)]
+        pages = _paginate_flow_zones(footer, [], [], {}, _make_brand(), FOOTER_Y)
+        assert len(pages) == 1
+
+    def test_custom_content_start(self) -> None:
+        """Aangepaste content_start_y_mm wordt gebruikt voor herpositionering."""
+        text_zones, _ = _build_page_zones(50)
+        data = {"field": {f"val{i}": VERY_LONG_TEXT for i in range(50)}}
+
+        pages = _paginate_flow_zones(
+            text_zones, [], [], data, _make_brand(), FOOTER_Y,
+            content_start_y_mm=50.0,
+        )
+
+        if len(pages) >= 2:
+            page2_tz, _, _ = pages[1]
+            content_zones = [z for z in page2_tz if z.y_mm < FOOTER_Y]
+            if content_zones:
+                min_y = min(z.y_mm for z in content_zones)
+                assert abs(min_y - 50.0) < 1.0

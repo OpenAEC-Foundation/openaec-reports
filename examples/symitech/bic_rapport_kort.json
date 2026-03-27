@@ -1,0 +1,1266 @@
+{
+  "template": "bic_rapport",
+  "format": "A4",
+  "brand": "symitech",
+  "project": "Jaarlijkse BIC controle 2026",
+  "project_number": "336.01",
+  "client": "Haagwonen",
+  "author": "Symitech B.V.",
+  "date": "2026-03-15",
+  "version": "1.0",
+  "status": "DEFINITIEF",
+  "report_type": "BIC Rapportage",
+  "cover": {
+    "subtitle": "BIC Rapportage",
+    "extra_fields": {
+      "Datum": "Maart 2026",
+      "Factuurnummer": "BIC-2026-0336-003",
+      "Type offerte": "Voorziening:Object",
+      "Offertecode": "DBL-A",
+      "Offertenaam": "Stijgleiding 1 Droge blusleiding"
+    }
+  },
+  "colofon": {
+    "enabled": false
+  },
+  "toc": {
+    "enabled": false
+  },
+  "sections": [
+    {
+      "title": "Locatie",
+      "level": 1,
+      "content": [
+        {
+          "type": "location_detail",
+          "client": {
+            "section_title": "Opdrachtgever",
+            "name": "Haagwonen",
+            "address": "Wielingenstraat 22",
+            "city": "2584 XZ Den Haag"
+          },
+          "location": {
+            "section_title": "Locatie van uitvoer",
+            "name": "Strandbaak Kijkduin",
+            "address": "Kijkduinsestraat 730-798",
+            "city": "2554 EB Den Haag",
+            "code": "HW-DH-0336",
+            "provision": "Droge blusleiding / BMI",
+            "object": "Toren A t/m D (730-798)"
+          },
+          "photo_path": null
+        }
+      ]
+    },
+    {
+      "title": "BIC Controles",
+      "level": 1,
+      "content": [
+        {
+          "type": "bic_table",
+          "location_name": "Strandbaak Kijkduin",
+          "sections": [
+            {
+              "title": "BIC controles",
+              "rows": [
+                {
+                  "label": "Aantal BIC controles",
+                  "ref_value": "16",
+                  "actual_value": "16"
+                },
+                {
+                  "label": "Kosten",
+                  "ref_value": "€ 4.960,00",
+                  "actual_value": "€ 4.960,00"
+                },
+                {
+                  "label": "Aantal interne inspecties",
+                  "ref_value": "8",
+                  "actual_value": "8"
+                },
+                {
+                  "label": "Kosten",
+                  "ref_value": "€ 1.920,00",
+                  "actual_value": "€ 1.920,00"
+                },
+                {
+                  "label": "Reiskosten",
+                  "ref_value": "€ 720,00",
+                  "actual_value": "€ 864,00"
+                },
+                {
+                  "label": "Subtotaal",
+                  "ref_value": "€ 7.600,00",
+                  "actual_value": "€ 7.744,00"
+                }
+              ]
+            },
+            {
+              "title": "Reinigen tijdens BIC",
+              "rows": [
+                {
+                  "label": "Aantal reinigingen",
+                  "ref_value": "8",
+                  "actual_value": "10"
+                },
+                {
+                  "label": "Kosten",
+                  "ref_value": "€ 1.400,00",
+                  "actual_value": "€ 1.750,00"
+                }
+              ]
+            },
+            {
+              "title": "Additioneel tijdens BIC",
+              "rows": [
+                {
+                  "label": "Aantal additionele activiteiten",
+                  "ref_value": "",
+                  "actual_value": "5"
+                },
+                {
+                  "label": "Kosten",
+                  "ref_value": "",
+                  "actual_value": "€ 925,00"
+                }
+              ]
+            }
+          ],
+          "summary": {
+            "title": "Overzicht samenvatting",
+            "rows": [
+              {
+                "label": "BIC controles",
+                "ref_value": "€ 7.600,00",
+                "actual_value": "€ 7.744,00"
+              },
+              {
+                "label": "Reinigen tijdens BIC",
+                "ref_value": "€ 1.400,00",
+                "actual_value": "€ 1.750,00"
+              },
+              {
+                "label": "Additioneel tijdens BIC",
+                "ref_value": "",
+                "actual_value": "€ 925,00"
+              }
+            ],
+            "total": {
+              "label": "Totaal",
+              "ref_value": "€ 9.000,00",
+              "actual_value": "€ 10.419,00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Detail weergave",
+      "level": 1,
+      "orientation": "landscape",
+      "content": [
+        {
+          "type": "table",
+          "title": "Detail weergave",
+          "headers": [
+            "BIC Controle nummer",
+            "Type",
+            "Datum",
+            "BIC controle",
+            "Int. inspectie",
+            "Reiniging",
+            "Additioneel"
+          ],
+          "rows": [
+            [
+              "BIC-2024-0336-001",
+              "Droge blusleiding (DBL-A)",
+              "15-01-2024",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2024-0336-002",
+              "Droge blusleiding (DBL-B)",
+              "22-01-2024",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2024-0336-003",
+              "Droge blusleiding (DBL-C)",
+              "05-02-2024",
+              "€ 310,00",
+              "",
+              "€ 175,00",
+              ""
+            ],
+            [
+              "BIC-2024-0336-004",
+              "Droge blusleiding (DBL-D)",
+              "12-02-2024",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2024-0336-005",
+              "BMI (BMI-01)",
+              "10-04-2024",
+              "€ 310,00",
+              "€ 240,00",
+              "",
+              ""
+            ],
+            [
+              "BIC-2024-0336-006",
+              "BMI (BMI-02)",
+              "17-04-2024",
+              "€ 310,00",
+              "€ 240,00",
+              "€ 175,00",
+              ""
+            ],
+            [
+              "BIC-2024-0336-007",
+              "BMI (BMI-03)",
+              "08-05-2024",
+              "€ 310,00",
+              "€ 240,00",
+              "",
+              "€ 185,00"
+            ],
+            [
+              "BIC-2024-0336-008",
+              "BMI (BMI-04)",
+              "15-05-2024",
+              "€ 310,00",
+              "€ 240,00",
+              "",
+              ""
+            ],
+            [
+              "BIC-2024-0336-009",
+              "Sprinkler (SPR-A)",
+              "09-07-2024",
+              "€ 310,00",
+              "",
+              "€ 175,00",
+              ""
+            ],
+            [
+              "BIC-2024-0336-010",
+              "Sprinkler (SPR-B)",
+              "16-07-2024",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2024-0336-011",
+              "Noodverlichting (NVL-01)",
+              "06-08-2024",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2024-0336-012",
+              "Noodverlichting (NVL-02)",
+              "13-08-2024",
+              "€ 310,00",
+              "",
+              "€ 175,00",
+              ""
+            ],
+            [
+              "BIC-2024-0336-013",
+              "Brandslang (BSL-A)",
+              "08-10-2024",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2024-0336-014",
+              "Brandslang (BSL-B)",
+              "15-10-2024",
+              "€ 310,00",
+              "",
+              "",
+              "€ 185,00"
+            ],
+            [
+              "BIC-2024-0336-015",
+              "Brandslang (BSL-C)",
+              "05-11-2024",
+              "€ 310,00",
+              "",
+              "€ 175,00",
+              ""
+            ],
+            [
+              "BIC-2024-0336-016",
+              "Brandslang (BSL-D)",
+              "12-11-2024",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2025-0336-017",
+              "Droge blusleiding (DBL-A)",
+              "15-01-2025",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2025-0336-018",
+              "Droge blusleiding (DBL-B)",
+              "22-01-2025",
+              "€ 310,00",
+              "",
+              "€ 175,00",
+              ""
+            ],
+            [
+              "BIC-2025-0336-019",
+              "Droge blusleiding (DBL-C)",
+              "05-02-2025",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2025-0336-020",
+              "Droge blusleiding (DBL-D)",
+              "12-02-2025",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2025-0336-021",
+              "BMI (BMI-01)",
+              "10-04-2025",
+              "€ 310,00",
+              "€ 240,00",
+              "€ 175,00",
+              "€ 185,00"
+            ],
+            [
+              "BIC-2025-0336-022",
+              "BMI (BMI-02)",
+              "17-04-2025",
+              "€ 310,00",
+              "€ 240,00",
+              "",
+              ""
+            ],
+            [
+              "BIC-2025-0336-023",
+              "BMI (BMI-03)",
+              "08-05-2025",
+              "€ 310,00",
+              "€ 240,00",
+              "",
+              ""
+            ],
+            [
+              "BIC-2025-0336-024",
+              "BMI (BMI-04)",
+              "15-05-2025",
+              "€ 310,00",
+              "€ 240,00",
+              "€ 175,00",
+              ""
+            ],
+            [
+              "BIC-2025-0336-025",
+              "Sprinkler (SPR-A)",
+              "09-07-2025",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2025-0336-026",
+              "Sprinkler (SPR-B)",
+              "16-07-2025",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2025-0336-027",
+              "Noodverlichting (NVL-01)",
+              "06-08-2025",
+              "€ 310,00",
+              "",
+              "€ 175,00",
+              ""
+            ],
+            [
+              "BIC-2025-0336-028",
+              "Noodverlichting (NVL-02)",
+              "13-08-2025",
+              "€ 310,00",
+              "",
+              "",
+              "€ 185,00"
+            ],
+            [
+              "BIC-2025-0336-029",
+              "Brandslang (BSL-A)",
+              "08-10-2025",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2025-0336-030",
+              "Brandslang (BSL-B)",
+              "15-10-2025",
+              "€ 310,00",
+              "",
+              "€ 175,00",
+              ""
+            ],
+            [
+              "BIC-2025-0336-031",
+              "Brandslang (BSL-C)",
+              "05-11-2025",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2025-0336-032",
+              "Brandslang (BSL-D)",
+              "12-11-2025",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2026-0336-033",
+              "Droge blusleiding (DBL-A)",
+              "15-01-2026",
+              "€ 310,00",
+              "",
+              "€ 175,00",
+              ""
+            ],
+            [
+              "BIC-2026-0336-034",
+              "Droge blusleiding (DBL-B)",
+              "22-01-2026",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2026-0336-035",
+              "Droge blusleiding (DBL-C)",
+              "05-02-2026",
+              "€ 310,00",
+              "",
+              "",
+              "€ 185,00"
+            ],
+            [
+              "BIC-2026-0336-036",
+              "Droge blusleiding (DBL-D)",
+              "12-02-2026",
+              "€ 310,00",
+              "",
+              "€ 175,00",
+              ""
+            ],
+            [
+              "BIC-2026-0336-037",
+              "BMI (BMI-01)",
+              "10-04-2026",
+              "€ 310,00",
+              "€ 240,00",
+              "",
+              ""
+            ],
+            [
+              "BIC-2026-0336-038",
+              "BMI (BMI-02)",
+              "17-04-2026",
+              "€ 310,00",
+              "€ 240,00",
+              "",
+              ""
+            ],
+            [
+              "BIC-2026-0336-039",
+              "BMI (BMI-03)",
+              "08-05-2026",
+              "€ 310,00",
+              "€ 240,00",
+              "€ 175,00",
+              ""
+            ],
+            [
+              "BIC-2026-0336-040",
+              "BMI (BMI-04)",
+              "15-05-2026",
+              "€ 310,00",
+              "€ 240,00",
+              "",
+              ""
+            ],
+            [
+              "BIC-2026-0336-041",
+              "Sprinkler (SPR-A)",
+              "09-07-2026",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2026-0336-042",
+              "Sprinkler (SPR-B)",
+              "16-07-2026",
+              "€ 310,00",
+              "",
+              "€ 175,00",
+              "€ 185,00"
+            ],
+            [
+              "BIC-2026-0336-043",
+              "Noodverlichting (NVL-01)",
+              "06-08-2026",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2026-0336-044",
+              "Noodverlichting (NVL-02)",
+              "13-08-2026",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2026-0336-045",
+              "Brandslang (BSL-A)",
+              "08-10-2026",
+              "€ 310,00",
+              "",
+              "€ 175,00",
+              ""
+            ],
+            [
+              "BIC-2026-0336-046",
+              "Brandslang (BSL-B)",
+              "15-10-2026",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2026-0336-047",
+              "Brandslang (BSL-C)",
+              "05-11-2026",
+              "€ 310,00",
+              "",
+              "",
+              ""
+            ],
+            [
+              "BIC-2026-0336-048",
+              "Brandslang (BSL-D)",
+              "12-11-2026",
+              "€ 310,00",
+              "",
+              "€ 175,00",
+              ""
+            ]
+          ],
+          "footer_note": "* Detail weergave exclusief reiskosten."
+        }
+      ]
+    },
+    {
+      "title": "Voorziening en objecten beschrijving",
+      "level": 1,
+      "orientation": "landscape",
+      "content": [
+        {
+          "type": "table",
+          "title": "Voorziening en objecten beschrijving",
+          "headers": [
+            "Voorziening",
+            "Type",
+            "Status",
+            "Object",
+            "Type",
+            "Beschrijving",
+            "Gebouw",
+            "Ruimte"
+          ],
+          "rows": [
+            [
+              "Droge blusleiding",
+              "DBL-A",
+              "Actief",
+              "Stijgleiding 1",
+              "Stijgleiding",
+              "Stijgleiding trapportaal links",
+              "Toren A (730-752)",
+              "Trappenhuis"
+            ],
+            [
+              "Droge blusleiding",
+              "DBL-A",
+              "Actief",
+              "Voedingsaansluiting 1",
+              "Voedingsaansluiting",
+              "Siamese aansluiting gevel links",
+              "Toren A (730-752)",
+              "Gevel BG"
+            ],
+            [
+              "Droge blusleiding",
+              "DBL-A",
+              "Actief",
+              "BSA BG-1",
+              "Aansluitpunt",
+              "Brandslangaansluiting begane grond",
+              "Toren A (730-752)",
+              "Hal BG"
+            ],
+            [
+              "Droge blusleiding",
+              "DBL-A",
+              "Actief",
+              "BSA 5e-1",
+              "Aansluitpunt",
+              "Brandslangaansluiting 5e verdieping",
+              "Toren A (730-752)",
+              "Overloop 5"
+            ],
+            [
+              "BMI",
+              "BMI-01",
+              "Actief",
+              "Centrale BMI-1",
+              "Brandmeldcentrale",
+              "Esser IQ8Control M",
+              "Toren A (730-752)",
+              "Hal BG"
+            ],
+            [
+              "BMI",
+              "BMI-01",
+              "Actief",
+              "Doormelding-1",
+              "Doormelding",
+              "KPN doormelding RAC",
+              "Toren A (730-752)",
+              "Hal BG"
+            ],
+            [
+              "BMI",
+              "BMI-01",
+              "Actief",
+              "Lus 1-1",
+              "Detectielus",
+              "Rookmelders trappenhuis + galerij",
+              "Toren A (730-752)",
+              "Diverse"
+            ],
+            [
+              "BMI",
+              "BMI-01",
+              "Actief",
+              "Lus 1-2",
+              "Detectielus",
+              "Rookmelders bergingen + parkeergarage",
+              "Toren A (730-752)",
+              "Kelder"
+            ],
+            [
+              "Sprinkler",
+              "SPR-A",
+              "Actief",
+              "Sprinklerkop 1-1",
+              "Sprinklerkop",
+              "Sprinklerkoppen parkeergarage",
+              "Toren A (730-752)",
+              "Parkeergarage"
+            ],
+            [
+              "Sprinkler",
+              "SPR-A",
+              "Actief",
+              "Sprinklerkop 1-2",
+              "Sprinklerkop",
+              "Sprinklerkoppen berging",
+              "Toren A (730-752)",
+              "Berging"
+            ],
+            [
+              "Noodverlichting",
+              "NVL-01",
+              "Actief",
+              "NVL armatuur 1-T",
+              "Armatuur",
+              "Noodverlichting trappenhuis",
+              "Toren A (730-752)",
+              "Trappenhuis"
+            ],
+            [
+              "Noodverlichting",
+              "NVL-01",
+              "Actief",
+              "NVL armatuur 1-G",
+              "Armatuur",
+              "Noodverlichting galerij",
+              "Toren A (730-752)",
+              "Galerij"
+            ],
+            [
+              "Brandslang",
+              "BSL-A",
+              "Actief",
+              "Haspel BG-1",
+              "Brandslanghaspel",
+              "Brandslanghaspel begane grond",
+              "Toren A (730-752)",
+              "Hal BG"
+            ],
+            [
+              "Brandslang",
+              "BSL-A",
+              "Actief",
+              "Haspel 3e-1",
+              "Brandslanghaspel",
+              "Brandslanghaspel 3e verdieping",
+              "Toren A (730-752)",
+              "Overloop 3"
+            ],
+            [
+              "Brandslang",
+              "BSL-A",
+              "Actief",
+              "Haspel 5e-1",
+              "Brandslanghaspel",
+              "Brandslanghaspel 5e verdieping",
+              "Toren A (730-752)",
+              "Overloop 5"
+            ],
+            [
+              "Droge blusleiding",
+              "DBL-B",
+              "Actief",
+              "Stijgleiding 2",
+              "Stijgleiding",
+              "Stijgleiding trapportaal rechts",
+              "Toren B (754-770)",
+              "Trappenhuis"
+            ],
+            [
+              "Droge blusleiding",
+              "DBL-B",
+              "Actief",
+              "Voedingsaansluiting 2",
+              "Voedingsaansluiting",
+              "Siamese aansluiting gevel rechts",
+              "Toren B (754-770)",
+              "Gevel BG"
+            ],
+            [
+              "Droge blusleiding",
+              "DBL-B",
+              "Actief",
+              "BSA BG-2",
+              "Aansluitpunt",
+              "Brandslangaansluiting begane grond",
+              "Toren B (754-770)",
+              "Hal BG"
+            ],
+            [
+              "Droge blusleiding",
+              "DBL-B",
+              "Actief",
+              "BSA 5e-2",
+              "Aansluitpunt",
+              "Brandslangaansluiting 5e verdieping",
+              "Toren B (754-770)",
+              "Overloop 5"
+            ],
+            [
+              "BMI",
+              "BMI-02",
+              "Defect",
+              "Centrale BMI-2",
+              "Brandmeldcentrale",
+              "Handbrandmelder hoofdingang - defect gemeld 12-04",
+              "Toren B (754-770)",
+              "Hal BG"
+            ],
+            [
+              "BMI",
+              "BMI-02",
+              "Actief",
+              "Doormelding-2",
+              "Doormelding",
+              "KPN doormelding RAC",
+              "Toren B (754-770)",
+              "Hal BG"
+            ],
+            [
+              "BMI",
+              "BMI-02",
+              "Actief",
+              "Lus 2-1",
+              "Detectielus",
+              "Rookmelders trappenhuis + galerij",
+              "Toren B (754-770)",
+              "Diverse"
+            ],
+            [
+              "BMI",
+              "BMI-02",
+              "Actief",
+              "Lus 2-2",
+              "Detectielus",
+              "Rookmelders bergingen + parkeergarage",
+              "Toren B (754-770)",
+              "Kelder"
+            ],
+            [
+              "Sprinkler",
+              "SPR-B",
+              "Actief",
+              "Sprinklerkop 2-1",
+              "Sprinklerkop",
+              "Sprinklerkoppen parkeergarage",
+              "Toren B (754-770)",
+              "Parkeergarage"
+            ],
+            [
+              "Sprinkler",
+              "SPR-B",
+              "Actief",
+              "Sprinklerkop 2-2",
+              "Sprinklerkop",
+              "Sprinklerkoppen berging",
+              "Toren B (754-770)",
+              "Berging"
+            ],
+            [
+              "Noodverlichting",
+              "NVL-02",
+              "Actief",
+              "NVL armatuur 2-T",
+              "Armatuur",
+              "Noodverlichting trappenhuis",
+              "Toren B (754-770)",
+              "Trappenhuis"
+            ],
+            [
+              "Noodverlichting",
+              "NVL-02",
+              "Actief",
+              "NVL armatuur 2-G",
+              "Armatuur",
+              "Noodverlichting galerij",
+              "Toren B (754-770)",
+              "Galerij"
+            ],
+            [
+              "Brandslang",
+              "BSL-B",
+              "Actief",
+              "Haspel BG-2",
+              "Brandslanghaspel",
+              "Brandslanghaspel begane grond",
+              "Toren B (754-770)",
+              "Hal BG"
+            ],
+            [
+              "Brandslang",
+              "BSL-B",
+              "Actief",
+              "Haspel 3e-2",
+              "Brandslanghaspel",
+              "Brandslanghaspel 3e verdieping",
+              "Toren B (754-770)",
+              "Overloop 3"
+            ],
+            [
+              "Brandslang",
+              "BSL-B",
+              "Actief",
+              "Haspel 5e-2",
+              "Brandslanghaspel",
+              "Brandslanghaspel 5e verdieping",
+              "Toren B (754-770)",
+              "Overloop 5"
+            ],
+            [
+              "Droge blusleiding",
+              "DBL-C",
+              "Actief",
+              "Stijgleiding 3",
+              "Stijgleiding",
+              "Stijgleiding trapportaal links",
+              "Toren C (772-784)",
+              "Trappenhuis"
+            ],
+            [
+              "Droge blusleiding",
+              "DBL-C",
+              "Actief",
+              "Voedingsaansluiting 3",
+              "Voedingsaansluiting",
+              "Siamese aansluiting gevel links",
+              "Toren C (772-784)",
+              "Gevel BG"
+            ],
+            [
+              "Droge blusleiding",
+              "DBL-C",
+              "Actief",
+              "BSA BG-3",
+              "Aansluitpunt",
+              "Brandslangaansluiting begane grond",
+              "Toren C (772-784)",
+              "Hal BG"
+            ],
+            [
+              "Droge blusleiding",
+              "DBL-C",
+              "Actief",
+              "BSA 5e-3",
+              "Aansluitpunt",
+              "Brandslangaansluiting 5e verdieping",
+              "Toren C (772-784)",
+              "Overloop 5"
+            ],
+            [
+              "BMI",
+              "BMI-03",
+              "Actief",
+              "Centrale BMI-3",
+              "Brandmeldcentrale",
+              "Esser IQ8Control M",
+              "Toren C (772-784)",
+              "Hal BG"
+            ],
+            [
+              "BMI",
+              "BMI-03",
+              "Actief",
+              "Doormelding-3",
+              "Doormelding",
+              "KPN doormelding RAC",
+              "Toren C (772-784)",
+              "Hal BG"
+            ],
+            [
+              "BMI",
+              "BMI-03",
+              "Actief",
+              "Lus 3-1",
+              "Detectielus",
+              "Rookmelders trappenhuis + galerij",
+              "Toren C (772-784)",
+              "Diverse"
+            ],
+            [
+              "BMI",
+              "BMI-03",
+              "Actief",
+              "Lus 3-2",
+              "Detectielus",
+              "Rookmelders bergingen + parkeergarage",
+              "Toren C (772-784)",
+              "Kelder"
+            ],
+            [
+              "Sprinkler",
+              "SPR-C",
+              "Actief",
+              "Sprinklerkop 3-1",
+              "Sprinklerkop",
+              "Sprinklerkoppen parkeergarage",
+              "Toren C (772-784)",
+              "Parkeergarage"
+            ],
+            [
+              "Sprinkler",
+              "SPR-C",
+              "Actief",
+              "Sprinklerkop 3-2",
+              "Sprinklerkop",
+              "Sprinklerkoppen berging",
+              "Toren C (772-784)",
+              "Berging"
+            ],
+            [
+              "Noodverlichting",
+              "NVL-03",
+              "Actief",
+              "NVL armatuur 3-T",
+              "Armatuur",
+              "Noodverlichting trappenhuis",
+              "Toren C (772-784)",
+              "Trappenhuis"
+            ],
+            [
+              "Noodverlichting",
+              "NVL-03",
+              "Actief",
+              "NVL armatuur 3-G",
+              "Armatuur",
+              "Noodverlichting galerij",
+              "Toren C (772-784)",
+              "Galerij"
+            ],
+            [
+              "Brandslang",
+              "BSL-C",
+              "Actief",
+              "Haspel BG-3",
+              "Brandslanghaspel",
+              "Brandslanghaspel begane grond",
+              "Toren C (772-784)",
+              "Hal BG"
+            ],
+            [
+              "Brandslang",
+              "BSL-C",
+              "Actief",
+              "Haspel 3e-3",
+              "Brandslanghaspel",
+              "Brandslanghaspel 3e verdieping",
+              "Toren C (772-784)",
+              "Overloop 3"
+            ],
+            [
+              "Brandslang",
+              "BSL-C",
+              "Actief",
+              "Haspel 5e-3",
+              "Brandslanghaspel",
+              "Brandslanghaspel 5e verdieping",
+              "Toren C (772-784)",
+              "Overloop 5"
+            ],
+            [
+              "Droge blusleiding",
+              "DBL-D",
+              "Actief",
+              "Stijgleiding 4",
+              "Stijgleiding",
+              "Stijgleiding trapportaal rechts",
+              "Toren D (786-798)",
+              "Trappenhuis"
+            ],
+            [
+              "Droge blusleiding",
+              "DBL-D",
+              "Actief",
+              "Voedingsaansluiting 4",
+              "Voedingsaansluiting",
+              "Siamese aansluiting gevel rechts",
+              "Toren D (786-798)",
+              "Gevel BG"
+            ],
+            [
+              "Droge blusleiding",
+              "DBL-D",
+              "Actief",
+              "BSA BG-4",
+              "Aansluitpunt",
+              "Brandslangaansluiting begane grond",
+              "Toren D (786-798)",
+              "Hal BG"
+            ],
+            [
+              "Droge blusleiding",
+              "DBL-D",
+              "Actief",
+              "BSA 5e-4",
+              "Aansluitpunt",
+              "Brandslangaansluiting 5e verdieping",
+              "Toren D (786-798)",
+              "Overloop 5"
+            ],
+            [
+              "BMI",
+              "BMI-04",
+              "Actief",
+              "Centrale BMI-4",
+              "Brandmeldcentrale",
+              "Esser IQ8Control M",
+              "Toren D (786-798)",
+              "Hal BG"
+            ],
+            [
+              "BMI",
+              "BMI-04",
+              "Actief",
+              "Doormelding-4",
+              "Doormelding",
+              "KPN doormelding RAC",
+              "Toren D (786-798)",
+              "Hal BG"
+            ],
+            [
+              "BMI",
+              "BMI-04",
+              "Actief",
+              "Lus 4-1",
+              "Detectielus",
+              "Rookmelders trappenhuis + galerij",
+              "Toren D (786-798)",
+              "Diverse"
+            ],
+            [
+              "BMI",
+              "BMI-04",
+              "Actief",
+              "Lus 4-2",
+              "Detectielus",
+              "Rookmelders bergingen + parkeergarage",
+              "Toren D (786-798)",
+              "Kelder"
+            ],
+            [
+              "Sprinkler",
+              "SPR-D",
+              "Actief",
+              "Sprinklerkop 4-1",
+              "Sprinklerkop",
+              "Sprinklerkoppen parkeergarage",
+              "Toren D (786-798)",
+              "Parkeergarage"
+            ],
+            [
+              "Sprinkler",
+              "SPR-D",
+              "Actief",
+              "Sprinklerkop 4-2",
+              "Sprinklerkop",
+              "Sprinklerkoppen berging",
+              "Toren D (786-798)",
+              "Berging"
+            ],
+            [
+              "Noodverlichting",
+              "NVL-04",
+              "Actief",
+              "NVL armatuur 4-T",
+              "Armatuur",
+              "Noodverlichting trappenhuis",
+              "Toren D (786-798)",
+              "Trappenhuis"
+            ],
+            [
+              "Noodverlichting",
+              "NVL-04",
+              "Actief",
+              "NVL armatuur 4-G",
+              "Armatuur",
+              "Noodverlichting galerij",
+              "Toren D (786-798)",
+              "Galerij"
+            ],
+            [
+              "Brandslang",
+              "BSL-D",
+              "Actief",
+              "Haspel BG-4",
+              "Brandslanghaspel",
+              "Brandslanghaspel begane grond",
+              "Toren D (786-798)",
+              "Hal BG"
+            ],
+            [
+              "Brandslang",
+              "BSL-D",
+              "Actief",
+              "Haspel 3e-4",
+              "Brandslanghaspel",
+              "Brandslanghaspel 3e verdieping",
+              "Toren D (786-798)",
+              "Overloop 3"
+            ],
+            [
+              "Brandslang",
+              "BSL-D",
+              "Actief",
+              "Haspel 5e-4",
+              "Brandslanghaspel",
+              "Brandslanghaspel 5e verdieping",
+              "Toren D (786-798)",
+              "Overloop 5"
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "voorziening": {
+    "code": "DBL-A",
+    "beschrijving": "Droge blusleiding / BMI",
+    "vereiste_status": "Vloeistofdicht",
+    "huidige_status": "Vloeistofdicht",
+    "notitie": "",
+    "foto": ""
+  },
+  "object": {
+    "code": "OBJ-HW-0336-A",
+    "beschrijving": "Stijgleiding 1 Droge blusleiding",
+    "ruimte": "Trappenhuis",
+    "type": "Stijgleiding trapportaal links"
+  },
+  "vvv": {
+    "geldigheid": "31-12-2027",
+    "nummer": "VVV-2024-HW-0336",
+    "instantie": "Kiwa N.V.",
+    "opmerkingen": "",
+    "onderhoudsdossier_ref": "Zie hoofdstuk 7",
+    "bijlage_ref": "Zie bijlage 8.2"
+  },
+  "backcover": {
+    "enabled": true
+  },
+  "metadata": {
+    "software": "Symitech Report Generator v1.0",
+    "bic_system": "Symitech BIC Manager v4.2",
+    "location_code": "HW-DH-0336"
+  }
+}

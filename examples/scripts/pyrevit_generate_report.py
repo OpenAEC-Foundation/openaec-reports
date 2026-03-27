@@ -275,7 +275,7 @@ def main() -> None:
         sys.exit(1)
 
     # 5. Genereer PDF
-    output = Path(__file__).parent.parent / "output" / "pyrevit_voorbeeld.pdf"
+    output = Path(__file__).parent.parent.parent / "output" / "pyrevit_voorbeeld.pdf"
     print(f"\nPDF genereren...")
     pdf_path = client.generate_pdf(report_data, output)
     print(f"Rapport opgeslagen: {pdf_path}")

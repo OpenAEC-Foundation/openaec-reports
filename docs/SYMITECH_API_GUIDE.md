@@ -264,8 +264,8 @@ De stationery achtergrond wisselt automatisch mee.
 
 | Template | Voorbeeld JSON |
 |----------|---------------|
-| `symitech_bic_factuur` | `docs/symitech_bic_factuur_example.json` |
-| `symitech_bic_rapport` | `docs/symitech_bic_example.json` |
+| `symitech_bic_factuur` | `examples/symitech/bic_factuur.json` |
+| `symitech_bic_rapport` | `examples/symitech/bic_rapport.json` |
 
 ---
 

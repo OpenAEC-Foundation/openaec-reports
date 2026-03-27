@@ -1,0 +1,230 @@
+{
+  "template": "symitech_bic_factuur",
+  "format": "A4",
+  "brand": "symitech",
+  "project": "Jaarlijkse BIC controle 2026",
+  "project_number": "336.01",
+  "client": "Stichting Woonbron",
+  "author": "Symitech B.V.",
+  "date": "2026-02-28",
+  "version": "1.0",
+  "status": "DEFINITIEF",
+  "report_type": "BIC Factuur",
+
+  "cover": {
+    "subtitle": "BIC Factuur",
+    "extra_fields": {
+      "Factuurnummer": "F2026-0283",
+      "Datum": "28 februari 2026",
+      "Type offerte": "BIC Controle",
+      "Offertecode": "336.01",
+      "Offertenaam": "Jaarlijkse BIC controle wooncomplexen Delfshaven"
+    }
+  },
+
+  "colofon": {
+    "enabled": false
+  },
+
+  "toc": {
+    "enabled": false
+  },
+
+  "sections": [
+    {
+      "title": "Locatie",
+      "level": 1,
+      "content": [
+        {
+          "type": "location_detail",
+          "client": {
+            "section_title": "Opdrachtgever",
+            "name": "Stichting Woonbron",
+            "address": "Schiedamseweg 46",
+            "city": "3025 AE Rotterdam"
+          },
+          "location": {
+            "section_title": "Locatie van uitvoer",
+            "name": "Woonerf De Mathenesserdijk",
+            "address": "Mathenesserdijk 274-312",
+            "city": "3026 GV Rotterdam",
+            "code": "WB-RTD-0047",
+            "provision": "Droge blusleiding / BMI",
+            "object": "Woonerf 274 t/m 312 (even)"
+          },
+          "photo_path": null
+        }
+      ]
+    },
+    {
+      "title": "BIC Controles",
+      "level": 1,
+      "content": [
+        {
+          "type": "bic_table",
+          "location_name": "Woonerf De Mathenesserdijk",
+          "sections": [
+            {
+              "title": "BIC controles",
+              "rows": [
+                {
+                  "label": "Aantal BIC controles",
+                  "ref_value": "4",
+                  "actual_value": "4"
+                },
+                {
+                  "label": "Kosten",
+                  "ref_value": "€ 1.240,00",
+                  "actual_value": "€ 1.240,00"
+                },
+                {
+                  "label": "Aantal interne inspecties",
+                  "ref_value": "2",
+                  "actual_value": "2"
+                },
+                {
+                  "label": "Kosten",
+                  "ref_value": "€ 480,00",
+                  "actual_value": "€ 480,00"
+                },
+                {
+                  "label": "Reiskosten",
+                  "ref_value": "€ 180,00",
+                  "actual_value": "€ 216,00"
+                },
+                {
+                  "label": "Subtotaal",
+                  "ref_value": "€ 1.900,00",
+                  "actual_value": "€ 1.936,00"
+                }
+              ]
+            },
+            {
+              "title": "Reinigen tijdens BIC",
+              "rows": [
+                {
+                  "label": "Aantal reinigingen",
+                  "ref_value": "2",
+                  "actual_value": "3"
+                },
+                {
+                  "label": "Kosten",
+                  "ref_value": "€ 350,00",
+                  "actual_value": "€ 525,00"
+                }
+              ]
+            },
+            {
+              "title": "Additioneel tijdens BIC",
+              "rows": [
+                {
+                  "label": "Aantal additionele activiteiten",
+                  "ref_value": "",
+                  "actual_value": "1"
+                },
+                {
+                  "label": "Kosten",
+                  "ref_value": "",
+                  "actual_value": "€ 185,00"
+                }
+              ]
+            }
+          ],
+          "summary": {
+            "title": "Overzicht samenvatting",
+            "rows": [
+              {
+                "label": "BIC controles",
+                "ref_value": "€ 1.900,00",
+                "actual_value": "€ 1.936,00"
+              },
+              {
+                "label": "Reinigen tijdens BIC",
+                "ref_value": "€ 350,00",
+                "actual_value": "€ 525,00"
+              },
+              {
+                "label": "Additioneel tijdens BIC",
+                "ref_value": "",
+                "actual_value": "€ 185,00"
+              }
+            ],
+            "total": {
+              "label": "Totaal",
+              "ref_value": "€ 2.250,00",
+              "actual_value": "€ 2.646,00"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Detail weergave",
+      "level": 1,
+      "orientation": "landscape",
+      "content": [
+        {
+          "type": "table",
+          "title": "Detail weergave",
+          "headers": [
+            "BIC Controle nummer",
+            "Type",
+            "Datum",
+            "BIC controle",
+            "Int. inspectie",
+            "Reiniging",
+            "Additioneel"
+          ],
+          "rows": [
+            ["BIC-2026-0047-001", "Droge blusleiding", "15-01-2026", "€ 310,00", "", "", ""],
+            ["BIC-2026-0047-002", "BMI", "15-01-2026", "€ 310,00", "€ 240,00", "€ 175,00", ""],
+            ["BIC-2026-0047-003", "Droge blusleiding", "12-04-2026", "€ 310,00", "", "€ 175,00", "€ 185,00"],
+            ["BIC-2026-0047-004", "BMI", "12-04-2026", "€ 310,00", "€ 240,00", "€ 175,00", ""]
+          ],
+          "footer_note": "* Detail weergave exclusief reiskosten. Reiskosten zijn gebaseerd op het aantal unieke dagen met activiteiten op de locatie. Zie ook pagina 2 voor reiskosten overzicht."
+        }
+      ]
+    },
+    {
+      "title": "Voorziening en objecten beschrijving",
+      "level": 1,
+      "orientation": "landscape",
+      "content": [
+        {
+          "type": "table",
+          "title": "Voorziening en objecten beschrijving",
+          "headers": [
+            "Voorziening",
+            "Type",
+            "Status",
+            "Object",
+            "Type",
+            "Beschrijving",
+            "Gebouw",
+            "Ruimte"
+          ],
+          "rows": [
+            ["Droge blusleiding", "DBL-A", "Actief", "Stijgleiding 1", "Stijgleiding", "Stijgleiding trapportaal links", "Blok A (274-288)", "Trappenhuis"],
+            ["Droge blusleiding", "DBL-A", "Actief", "Stijgleiding 2", "Stijgleiding", "Stijgleiding trapportaal rechts", "Blok A (274-288)", "Trappenhuis"],
+            ["Droge blusleiding", "DBL-B", "Actief", "Stijgleiding 3", "Stijgleiding", "Stijgleiding trapportaal", "Blok B (290-312)", "Trappenhuis"],
+            ["BMI", "BMI-01", "Actief", "Centrale BMI", "Brandmeldcentrale", "Esser IQ8Control M", "Blok A (274-288)", "Hal BG"],
+            ["BMI", "BMI-01", "Actief", "Doormelding", "Doormelding", "KPN Telfort doormelding RAC", "Blok A (274-288)", "Hal BG"],
+            ["BMI", "BMI-01", "Actief", "Lus 1", "Detectielus", "Rookmelders trappenhuizen + galerij Blok A", "Blok A (274-288)", "Diverse"],
+            ["BMI", "BMI-01", "Actief", "Lus 2", "Detectielus", "Rookmelders trappenhuizen + galerij Blok B", "Blok B (290-312)", "Diverse"],
+            ["BMI", "BMI-01", "Defect", "Handbrandmelder BG", "Handbrandmelder", "Handbrandmelder bij hoofdingang — defect gemeld 12-04", "Blok A (274-288)", "Hal BG"]
+          ]
+        }
+      ]
+    }
+  ],
+
+  "backcover": {
+    "enabled": true
+  },
+
+  "metadata": {
+    "software": "Symitech Report Generator v1.0",
+    "bic_system": "Symitech BIC Manager v4.2",
+    "location_code": "WB-RTD-0047"
+  }
+}

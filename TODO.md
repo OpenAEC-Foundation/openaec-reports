@@ -1,7 +1,7 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-26
+> Laatst bijgewerkt: 2026-03-28
 
 ---
 
@@ -264,19 +264,19 @@ Zie `PLAN-rust-implementation.md` voor details.
 - [x] R1.10 — DocTemplate (multi-page PDF assembly)
 - [x] R1.11 — PDF backend (printpdf crate)
 
-**Phase 2 — Python libs porten:** ✅ MVP Compleet
+**Phase 2 — Python libs porten:** ✅ Compleet (169 tests)
 - [x] R2.1 — Schema sync: Spreadsheet block toegevoegd
+- [x] R2.2 — document.rs (page sizes, marges, content dimensions) — 260 LOC, 7 tests
+- [x] R2.3 — styles.rs (font rollen, kleuren, paragraph styles) — 463 LOC, 9 tests
+- [x] R2.4 — template_config.rs (PageType, TextZone, ImageZone, flow layout) — 460 LOC, 11 tests
+- [x] R2.5 — template_loader.rs (YAML discovery, scaffold, multi-dir) — 507 LOC, 7 tests
 - [x] R2.6 — block_renderer.rs (ContentBlock → Flowable, alle block types)
-- [ ] R2.2 — document.rs (page sizes, marges) — deels via engine.rs
-- [ ] R2.3 — styles.rs (font rollen, kleuren, paragraph styles)
-- [ ] R2.4 — template_config.rs (PageType, TextZone, ImageZone)
-- [ ] R2.5 — template_loader.rs (YAML discovery, scaffold)
-- [ ] R2.7 — data_transform.rs (JSON → flat dict)
-- [ ] R2.8 — stationery.rs (PDF merge met lopdf)
-- [ ] R2.9 — toc.rs (TOC data)
-- [ ] R2.10 — kadaster.rs (RD↔WGS84, PDOK WMS)
-- [ ] R2.11 — json_adapter.rs (schema validatie)
-- [ ] R2.12 — report_types.rs (structural, daylight, building_code)
+- [x] R2.7 — data_transform.rs (JSON → flat dict, BIC inject helpers) — 560 LOC, 13 tests
+- [x] R2.8 — stationery.rs (path resolver, format detection, caching) — 223 LOC, 7 tests
+- [x] R2.9 — toc.rs (TOC builder, styles, page numbers) — 224 LOC, 6 tests
+- [x] R2.10 — kadaster.rs (RD↔WGS84 polynoom, PDOK WMS URL builder) — 354 LOC, 7 tests
+- [x] R2.11 — json_adapter.rs (JSON laden, validatie, project/section extractie) — 271 LOC, 9 tests
+- [x] R2.12 — report_types.rs (structural, daylight, building_code builders) — 1020 LOC, 12 tests
 
 **Phase 3 — Rendering pipeline:** ✅ Compleet
 - [x] R3.1 — Block renderers (ContentBlock → Flowable) — alle types

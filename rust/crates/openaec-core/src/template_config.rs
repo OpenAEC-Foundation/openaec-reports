@@ -23,6 +23,12 @@ pub struct TextZone {
     pub color: String,
     #[serde(default = "default_align_left")]
     pub align: TextAlign,
+    /// Maximale breedte — tekst wraps bij overschrijding.
+    #[serde(default)]
+    pub max_width_mm: Option<f64>,
+    /// Regelafstand voor multi-line tekst (default 4.2 mm).
+    #[serde(default = "default_line_height")]
+    pub line_height_mm: f64,
 }
 
 /// Image at a fixed position on the page.
@@ -156,6 +162,15 @@ pub struct PageType {
     pub table: Option<TableConfig>,
     #[serde(default)]
     pub content_frame: Option<ContentFrameDef>,
+    /// Text zones verschuiven automatisch bij wrapping overflow.
+    #[serde(default)]
+    pub flow_layout: bool,
+    /// Zones >= deze y zijn footer (vast, niet verschoven). Default 260.0 mm.
+    #[serde(default = "default_flow_footer_y")]
+    pub flow_footer_y_mm: f64,
+    /// Y-start voor overflow vervolg-pagina's. Default 32.0 mm.
+    #[serde(default = "default_flow_content_start_y")]
+    pub flow_content_start_y_mm: f64,
 }
 
 /// Page definition type.
@@ -295,6 +310,18 @@ fn default_line_width() -> f64 {
     1.0
 }
 
+fn default_line_height() -> f64 {
+    4.2
+}
+
+fn default_flow_footer_y() -> f64 {
+    260.0
+}
+
+fn default_flow_content_start_y() -> f64 {
+    32.0
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -415,6 +442,48 @@ repeat: auto
         assert_eq!(pd.page_type_kind, PageDefType::Flow);
         assert_eq!(pd.page_type, "content");
         assert_eq!(pd.repeat, RepeatMode::Auto);
+    }
+
+    #[test]
+    fn test_text_zone_flow_fields() {
+        let yaml = r#"
+bind: "notes"
+x_mm: 25.0
+y_mm: 100.0
+max_width_mm: 80.0
+line_height_mm: 5.0
+"#;
+        let zone: TextZone = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(zone.max_width_mm, Some(80.0));
+        assert_eq!(zone.line_height_mm, 5.0);
+
+        // Defaults
+        let yaml2 = r#"bind: "test""#;
+        let zone2: TextZone = serde_yaml::from_str(yaml2).unwrap();
+        assert!(zone2.max_width_mm.is_none());
+        assert_eq!(zone2.line_height_mm, 4.2);
+    }
+
+    #[test]
+    fn test_page_type_flow_layout_fields() {
+        let yaml = r#"
+name: locatie
+flow_layout: true
+flow_footer_y_mm: 255.0
+flow_content_start_y_mm: 35.0
+text_zones: []
+"#;
+        let pt: PageType = serde_yaml::from_str(yaml).unwrap();
+        assert!(pt.flow_layout);
+        assert_eq!(pt.flow_footer_y_mm, 255.0);
+        assert_eq!(pt.flow_content_start_y_mm, 35.0);
+
+        // Defaults
+        let yaml2 = r#"name: cover"#;
+        let pt2: PageType = serde_yaml::from_str(yaml2).unwrap();
+        assert!(!pt2.flow_layout);
+        assert_eq!(pt2.flow_footer_y_mm, 260.0);
+        assert_eq!(pt2.flow_content_start_y_mm, 32.0);
     }
 
     #[test]

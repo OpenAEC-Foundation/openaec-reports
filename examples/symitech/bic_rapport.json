@@ -1,0 +1,179 @@
+{
+  "template": "bic_rapport",
+  "tenant": "symitech",
+  "format": "A4",
+  "project": "Uniper Benelux N.V. Maasvlakte - BIC inspectie UNIP0105",
+  "project_number": "B2401",
+  "author": "Symitech B.V.",
+  "date": "2026-03-28",
+  "version": "1.0",
+  "status": "DEFINITIEF",
+  "report_type": "bic_rapport",
+  "meta": {
+    "factuur_kop": "Eindrapportage Bedrijfsinterne Controle",
+    "datum": "MAART 2026",
+    "factuurnummer": "B2401",
+    "type_offerte": "Voorziening:Object",
+    "offerte_regel": "UNIP0105:OBR01 Riolering tbv laad/losplaats ammonia",
+    "rapportkop_locatie": "Eindrapportage Bedrijfsinterne Controle: B2401"
+  },
+  "client": {
+    "name": "Uniper Benelux N.V.",
+    "address": "Capelseweg 400",
+    "postcode_plaats": "3068 AX Rotterdam"
+  },
+  "location": {
+    "name": "Uniper Maasvlakte",
+    "address": "Missouriweg 93",
+    "postcode_plaats": "3199 LB Maasvlakte Rotterdam",
+    "code": "UNIP0105",
+    "provision_label": "Voorziening",
+    "provision": "Riolering tbv laad/losplaats ammonia",
+    "object_label": "Object",
+    "object": "OBR01"
+  },
+  "voorziening": {
+    "code": "UNIP0105",
+    "beschrijving": "Vloeistofdichte bedrijfsriolering tbv laad/losplaats ammonia. De riolering betreft een HDPE leiding DN200 met inspectieputten en een olieafscheider klasse I, aangesloten op de bedrijfswaterzuivering.",
+    "vereiste_status": "Vloeistofdicht",
+    "huidige_status": "Vloeistofdicht",
+    "notitie": "Geen bijzonderheden geconstateerd tijdens visuele inspectie. Alle verbindingen zijn intact en vrij van lekkage."
+  },
+  "object": {
+    "code": "OBR01",
+    "beschrijving": "Bedrijfsriolering laad/losplaats ammonia",
+    "ruimte": "Buitenterrein - laad/losplaats",
+    "type": "Bedrijfsriolering HDPE DN200"
+  },
+  "vvv": {
+    "geldigheid": "16-10-2030",
+    "nummer": "VVV-2026-0142",
+    "instantie": "Kiwa N.V.",
+    "opmerkingen": "Verklaring afgegeven na succesvolle BIC controle. Geen beperkingen.",
+    "onderhoudsdossier_ref": "Zie hoofdstuk 7",
+    "bijlage_ref": "Zie bijlage 8.2"
+  },
+  "controleur": {
+    "bedrijf": "Symitech B.V.",
+    "adres": "Kanaalweg 15b",
+    "postcode_plaats": "3526 KL Utrecht",
+    "telefoon": "030-820 0400",
+    "email": "info@symitech.nl",
+    "naam": "ing. R.A. van den Berg"
+  },
+  "bic": {
+    "nummer": "BIC-2026-0142-01",
+    "datum_controle": "12-03-2026",
+    "datum_geldigheid": "12-03-2031",
+    "bijzonderheden": "Geen bijzonderheden geconstateerd. Alle leidingdelen visueel gecontroleerd, geen scheuren, verkleuringen of lekkage waargenomen. Putdeksels intact.",
+    "ref_controlelijst": "Zie hoofdstuk 7.1",
+    "ref_historie": "Zie hoofdstuk 7.2",
+    "ref_fotos": "Zie bijlage 8.2",
+    "rapportagedatum": "28-03-2026"
+  },
+  "reiniging": {
+    "nummer": "REI-2026-0142-01",
+    "omschrijving": "Hogedruk reiniging riolering en inspectieputten, inclusief rioolinspectie met camera (CCTV inspectie conform EN 13508-2).",
+    "type": "Hogedruk reiniging + CCTV",
+    "datum": "11-03-2026"
+  },
+  "additioneel": {
+    "nummer": "ADD-2026-0142-01",
+    "omschrijving": "Dichtheidsbeproeving uitgevoerd conform CUR/PBV-Aanbeveling 44, methode A (waterkolom). Resultaat: vloeistofdicht bevonden.",
+    "datum": "12-03-2026"
+  },
+  "herstel": {
+    "nummer": "HER-2026-0142-01",
+    "ref_controlelijst": "Zie controlelijst hoofdstuk 7.1",
+    "ref_historie": "Zie historie hoofdstuk 7.2.3",
+    "ref_fotos": "Zie fotobijlage 8.3"
+  },
+  "herstel_reiniging": {
+    "nummer": "REI-H-2026-0142-01",
+    "omschrijving": "Lokale reiniging rond put 3 na herstel voegwerk.",
+    "type": "Lokale hogedruk reiniging",
+    "datum": "15-03-2026"
+  },
+  "herstel_additioneel": {
+    "nummer": "ADD-H-2026-0142-01",
+    "omschrijving": "Controle dichtheid na herstel voegwerk put 3. Vloeistofdicht bevonden.",
+    "datum": "15-03-2026"
+  },
+  "tekening_overzicht": {
+    "titel": "Regionale overzichtstekening (1: 12.500)"
+  },
+  "tekening_detail": {
+    "titel": "Detailtekening riolering laad/losplaats (1: 500)"
+  },
+  "controlelijst": {
+    "context": "UNIP0105: Bedrijfsriolering  Riolering tbv laad/losplaats ammonia  BIC-2026-0142-01  12-03-2026"
+  },
+  "controlelijst_items": [
+    {"Onderdeel": "Leiding DN200", "Aspect": "Visuele conditie", "Antwoord": "G", "Bodemrisico": "Nee", "Schadenummer": "-"},
+    {"Onderdeel": "Leiding DN200", "Aspect": "Lekvrij", "Antwoord": "G", "Bodemrisico": "Nee", "Schadenummer": "-"},
+    {"Onderdeel": "Inspectieput 1", "Aspect": "Deksel + frame", "Antwoord": "G", "Bodemrisico": "Nee", "Schadenummer": "-"},
+    {"Onderdeel": "Inspectieput 1", "Aspect": "Wanden + bodem", "Antwoord": "G", "Bodemrisico": "Nee", "Schadenummer": "-"},
+    {"Onderdeel": "Inspectieput 2", "Aspect": "Deksel + frame", "Antwoord": "G", "Bodemrisico": "Nee", "Schadenummer": "-"},
+    {"Onderdeel": "Inspectieput 2", "Aspect": "Wanden + bodem", "Antwoord": "G", "Bodemrisico": "Nee", "Schadenummer": "-"},
+    {"Onderdeel": "Inspectieput 3", "Aspect": "Deksel + frame", "Antwoord": "G", "Bodemrisico": "Nee", "Schadenummer": "-"},
+    {"Onderdeel": "Inspectieput 3", "Aspect": "Wanden + bodem", "Antwoord": "M", "Bodemrisico": "Ja", "Schadenummer": "S-2026-001"},
+    {"Onderdeel": "Inspectieput 3", "Aspect": "Voegwerk", "Antwoord": "S", "Bodemrisico": "Ja", "Schadenummer": "S-2026-002"},
+    {"Onderdeel": "Olieafscheider", "Aspect": "Constructie", "Antwoord": "G", "Bodemrisico": "Nee", "Schadenummer": "-"},
+    {"Onderdeel": "Olieafscheider", "Aspect": "Werking", "Antwoord": "G", "Bodemrisico": "Nee", "Schadenummer": "-"},
+    {"Onderdeel": "Goten/verharding", "Aspect": "Afvoercapaciteit", "Antwoord": "G", "Bodemrisico": "Nee", "Schadenummer": "-"}
+  ],
+  "inspecties": {
+    "voetnoot": "Overzicht inspecties verricht aan de voorziening en objecten."
+  },
+  "inspecties_items": [
+    {"Inspectiebedrijf": "Symitech B.V.", "Inspecteur": "R.A. van den Berg", "Aard": "CCTV", "Onderdeel": "Riolering", "Datum": "11-03-2026", "SIKB": "BRL 7700", "Uiterste datum": "11-03-2031"},
+    {"Inspectiebedrijf": "Symitech B.V.", "Inspecteur": "R.A. van den Berg", "Aard": "Visueel", "Onderdeel": "Putten + afscheider", "Datum": "12-03-2026", "SIKB": "BRL 7700", "Uiterste datum": "12-03-2031"}
+  ],
+  "historie_bic_items": [
+    {"Controlerend bedrijf": "Symitech B.V.", "Controleur": "R.A. van den Berg", "Onderdeel": "Riolering + putten", "Datum": "12-03-2026", "Controle nummer": "BIC-2026-0142-01", "Uiterste datum": "12-03-2031"},
+    {"Controlerend bedrijf": "TerraControl B.V.", "Controleur": "J. Pietersen", "Onderdeel": "Riolering + putten", "Datum": "15-03-2021", "Controle nummer": "BIC-2021-0088-01", "Uiterste datum": "15-03-2026"}
+  ],
+  "historie_herstel_items": [
+    {"Uitvoerend bedrijf": "Symitech B.V.", "Uitvoerder": "M. Jansen", "Onderdeel": "Inspectieput 3 voegwerk", "Hersteldatum": "15-03-2026", "Schadenummer": "S-2026-002", "Aard werkzaamheden": "Voegwerk vernieuwd met HDPE laminaat. Dichtheidstest positief."}
+  ],
+  "foto_bijlage": {
+    "nummer": "8.2",
+    "titel": "BIC foto-overzicht",
+    "context_1": "UNIP0105: Bedrijfsriolering Riolering tbv laad/losplaats ammonia",
+    "context_2": "BIC-2026-0142-01  12-03-2026",
+    "context_3": "Controleur: ing. R.A. van den Berg",
+    "label_links": "Foto 1",
+    "caption_links": "Overzicht laad/losplaats ammonia - westzijde",
+    "label_rechts": "Foto 2",
+    "caption_rechts": "Inspectieput 3 - detail voegwerk na herstel"
+  },
+  "schade_fotos": {
+    "context_1": "UNIP0105: Bedrijfsriolering Riolering tbv laad/losplaats ammonia",
+    "context_2": "S-2026-002: Inspectieput 3 voegwerk  15-03-2026",
+    "schade_label": "Schade S-2026-002",
+    "schade_caption": "Voegwerk inspectieput 3 - loslatend/gescheurd",
+    "herstel_label": "Herstel S-2026-002",
+    "herstel_caption": "Voegwerk vernieuwd met HDPE laminaat"
+  },
+  "toc": {
+    "item_1": "1  Locatie",
+    "item_2": "2  Voorziening",
+    "item_3": "3  Object",
+    "item_4": "4  Bedrijfsinterne controle (BIC)",
+    "item_5": "5  Herstelwerkzaamheden",
+    "item_6": "6  Tekeningen",
+    "item_6_1": "6.1  Regionale overzichtstekening",
+    "item_6_2": "6.2  Detailtekening",
+    "item_6_3": "6.3  Kadastrale kaart",
+    "item_7": "7  Onderhoudsdossier",
+    "item_7_1": "7.1  Controlelijst BIC",
+    "item_7_2": "7.2  Historie",
+    "item_7_2_1": "7.2.1  BIC controles",
+    "item_7_2_2": "7.2.2  Herstelwerkzaamheden",
+    "item_7_2_3": "7.2.3  Onderhouds- en inspectieoverzicht",
+    "item_8": "8  Bijlagen",
+    "item_8_1": "8.1  Fotobijlage",
+    "item_8_2": "8.2  Certificaten",
+    "item_8_3": "8.3  Overige documenten"
+  }
+}

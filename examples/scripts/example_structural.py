@@ -5,7 +5,7 @@ from openaec_reports import Report, A4
 
 # Pad naar voorbeeld data
 DATA_FILE = Path(__file__).parent / "example_data.json"
-OUTPUT_DIR = Path(__file__).parent.parent / "output"
+OUTPUT_DIR = Path(__file__).parent.parent.parent / "output"
 
 
 def main():

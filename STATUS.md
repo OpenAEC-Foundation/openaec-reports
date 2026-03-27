@@ -1,6 +1,6 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-27
+> Laatst bijgewerkt: 2026-03-28
 > Sessie-historie ouder dan 2 sessies: zie `git log` of `git show <commit>:STATUS.md`
 
 ---
@@ -88,11 +88,11 @@
 | Phase | Status | Tests |
 |-------|--------|-------|
 | Phase 0 — Schema Types | ✅ Compleet | 40 |
-| Phase 1 — openaec-layout | ✅ Compleet | 9 |
-| Phase 2 — Python ports | MVP (block_renderer) | — |
-| Phase 3 — Rendering pipeline | ✅ Compleet | — |
-| Phase 4 — Server + CLI | ✅ Compleet (deploy wacht) | — |
-| **Totaal** | **62 tests** | **~5.500 LOC** |
+| Phase 1 — openaec-layout | ✅ Compleet | 11 |
+| Phase 2 — Python ports | ✅ Compleet | 102 |
+| Phase 3 — Rendering pipeline | ✅ Compleet | incl. in P2 |
+| Phase 4 — Server + CLI | ✅ Compleet (deploy wacht) | 2 |
+| **Totaal** | **169 tests** | **~6.500 LOC** |
 
 ---
 

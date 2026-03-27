@@ -9,6 +9,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 
+from openaec_reports.storage.sql_utils import quote_identifier
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_DB_PATH = "data/auth.db"
@@ -360,13 +362,13 @@ class UserDB:
         set_clauses = []
         values: list = []
         for key, value in fields.items():
-            set_clauses.append(f"{key} = ?")
+            set_clauses.append(f"{quote_identifier(key)} = ?")
             if key == "is_active":
                 values.append(int(value))
             else:
                 values.append(value)
 
-        set_clauses.append("updated_at = datetime('now')")
+        set_clauses.append('"updated_at" = datetime(\'now\')')
         values.append(user_id)
 
         sql = f"UPDATE users SET {', '.join(set_clauses)} WHERE id = ?"
@@ -571,9 +573,9 @@ class OrganisationDB:
         set_clauses = []
         values = []
         for key, value in fields.items():
-            set_clauses.append(f"{key} = ?")
+            set_clauses.append(f"{quote_identifier(key)} = ?")
             values.append(int(value) if key == "is_active" else value)
-        set_clauses.append("updated_at = datetime('now')")
+        set_clauses.append('"updated_at" = datetime(\'now\')')
         values.append(org_id)
         sql = f"UPDATE organisations SET {', '.join(set_clauses)} WHERE id = ?"
         with self._get_connection() as conn:

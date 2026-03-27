@@ -1,7 +1,7 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-27
+> Laatst bijgewerkt: 2026-03-28
 
 ---
 
@@ -17,30 +17,31 @@ Uitgebreide code review over 3 domeinen (Python backend, Frontend, Config/Infra)
   - **Fix:** `RUN adduser --disabled-password appuser && chown -R appuser:appuser /app` + `USER appuser`
   - **Bestand:** `Dockerfile`
 
-- [ ] **CR-K2** — JWT default secret niet afgedwongen in productie (=SEC-M3)
-  - `"CHANGE-ME-in-production"` → server start gewoon op, iedereen kan geldige tokens genereren
-  - **Fix:** Hard falen bij startup wanneer `OPENAEC_ENV=production` en secret is default
-  - **Bestand:** `auth/security.py:16-17`, `api.py:125-129`
+- [x] **CR-K2** — JWT default secret niet afgedwongen in productie (=SEC-M3) — GEFIXT (27 maart)
+  - `enforce_jwt_secret()` in `auth/security.py`: productie → RuntimeError, dev → warning
+  - Verplaatst van module-level check naar FastAPI `lifespan` startup
+  - 3 tests in `test_auth.py::TestJwtSecretEnforcement`
 
-- [ ] **CR-K3** — Brand session temp directory zonder cleanup (DoS vector)
-  - `bm_brand_sessions` in tempdir, geen TTL, geen max sessies → disk vullen mogelijk
-  - **Fix:** Achtergrondtaak: sessies > 24u auto-verwijderen, max sessies per user
-  - **Bestand:** `brand_api.py:45`
+- [x] **CR-K3** — Brand session temp directory zonder cleanup (DoS vector) — GEFIXT (27 maart)
+  - `cleanup_stale_sessions(max_age_hours=24)` in `brand_api.py`
+  - `created_at` timestamp in session metadata bij aanmaak
+  - Aangeroepen vanuit FastAPI `lifespan` startup
+  - 8 tests in `test_brand_session_cleanup.py`
 
-- [ ] **CR-K4** — `dangerouslySetInnerHTML` voor SVG icons (XSS-vector)
-  - 6+ locaties met `__html: icon` — nu hardcoded, maar gevaarlijk bij toekomstige refactoring
-  - **Fix:** Vervang door React SVG componenten of icon library (lucide-react)
-  - **Bestanden:** `Backstage.tsx:36`, `SaveAsDialog.tsx:24`, `RibbonButton.tsx:29`
+- [x] **CR-K4** — `dangerouslySetInnerHTML` voor SVG icons — FALSE POSITIVE (27 maart)
+  - Alle 6 locaties gebruiken hardcoded SVG constanten uit `icons.ts`, geen user input
+  - Gedowngraded naar CR-L (nice-to-have: migratie naar lucide-react)
 
-- [ ] **CR-K5** — SQL queries via f-string in storage models
-  - `f"UPDATE projects SET {', '.join(set_clauses)}"` — safe by convention, niet by construction
-  - **Fix:** Gebruik consequent parameterized queries, geen dynamische SQL constructie
-  - **Bestand:** `storage/models.py:261-268, 475-482`
+- [x] **CR-K5** — SQL queries via f-string in storage models — GEFIXT (27 maart)
+  - `storage/sql_utils.py`: `quote_identifier()` met regex validatie + double-quote escaping
+  - 4 locaties geupdate: `storage/models.py` (2x) + `auth/models.py` (2x)
+  - Whitelist-validatie behouden als defense-in-depth
+  - 11 tests in `test_sql_utils.py`
 
-- [ ] **CR-K6** — Nextcloud credentials als module-level constanten
-  - `NEXTCLOUD_PASS = os.getenv(...)` — zichtbaar bij exception dumps, persistent in geheugen
-  - **Fix:** Lazy credentials via functie, niet module-level
-  - **Bestand:** `cloud.py:32-34`
+- [x] **CR-K6** — Nextcloud credentials als module-level constanten — GEFIXT (27 maart)
+  - Module-level `NEXTCLOUD_URL/USER/PASS` vervangen door lazy `_get_nextcloud_*()` functies
+  - Credentials worden pas bij aanroep uit environment gelezen
+  - 8 tests in `test_cloud_credentials.py`
 
 ### CR-H: Hoog — Snel oppakken
 
@@ -318,11 +319,8 @@ Volledige code review uitgevoerd. Bevindingen per prioriteit:
   - **Fix:** Rate limiting middleware (bijv. `slowapi` of custom)
   - **Bestand:** `auth/routes.py`
 
-- [ ] **SEC-M3** — Default JWT secret niet afgedwongen
-  - `JWT_SECRET_KEY` valt terug op `"CHANGE-ME-in-production"`
-  - Warning wordt gelogd maar server start gewoon op
-  - **Fix:** In productie (env var check) hard falen als secret default is
-  - **Bestand:** `auth/security.py` regels 14-17
+- [x] **SEC-M3** — Default JWT secret niet afgedwongen — GEFIXT (27 maart, zie CR-K2)
+  - `enforce_jwt_secret()` in lifespan: productie → RuntimeError, dev → warning
 
 - [ ] **SEC-M4** — Exception type in API response
   - `type(exc).__name__` wordt meegestuurd in 500 responses → info lekkage

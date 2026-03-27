@@ -21,6 +21,7 @@ import logging
 import re
 import shutil
 import tempfile
+import time
 import uuid
 import zipfile
 from dataclasses import asdict
@@ -69,6 +70,62 @@ brand_router = APIRouter(
 
 # Validatie patterns
 _SESSION_ID_PATTERN = re.compile(r"^[a-f0-9]{12}$")
+
+
+def cleanup_stale_sessions(max_age_hours: float = 24.0) -> int:
+    """Verwijder brand onboarding sessies ouder dan max_age_hours.
+
+    Leest ``created_at`` uit session metadata. Als dat ontbreekt,
+    valt terug op de directory mtime.
+
+    Args:
+        max_age_hours: Maximale leeftijd in uren (default 24).
+
+    Returns:
+        Aantal verwijderde sessies.
+    """
+    if not SESSIONS_DIR.exists():
+        return 0
+
+    cutoff = time.time() - (max_age_hours * 3600)
+    removed = 0
+
+    for entry in SESSIONS_DIR.iterdir():
+        if not entry.is_dir():
+            continue
+        if not _SESSION_ID_PATTERN.match(entry.name):
+            continue
+
+        # Bepaal sessie-leeftijd
+        meta_path = entry / _SESSION_METADATA_FILE
+        created_at: float | None = None
+        if meta_path.exists():
+            try:
+                meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                created_at = meta.get("created_at")
+            except (json.JSONDecodeError, OSError):
+                pass
+
+        if created_at is None:
+            # Fallback: directory modification time
+            try:
+                created_at = entry.stat().st_mtime
+            except OSError:
+                continue
+
+        if created_at < cutoff:
+            try:
+                shutil.rmtree(entry)
+                removed += 1
+                logger.info("Stale brand sessie verwijderd: %s", entry.name)
+            except OSError:
+                logger.warning(
+                    "Kon stale sessie niet verwijderen: %s", entry.name
+                )
+
+    if removed:
+        logger.info("Brand session cleanup: %d sessie(s) verwijderd", removed)
+    return removed
 
 
 def _validate_session_id(session_id: str) -> str:
@@ -366,11 +423,12 @@ async def upload_pairs(
     # Bepaal slug
     slug = brand_slug or _to_slug(brand_name)
 
-    # Sla metadata op met eigenaar
+    # Sla metadata op met eigenaar en timestamp
     session.save_metadata({
         "brand_name": brand_name,
         "brand_slug": slug,
         "owner_id": user.id,
+        "created_at": time.time(),
     })
 
     # Detecteer paren

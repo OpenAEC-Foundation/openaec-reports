@@ -28,23 +28,37 @@ logger = logging.getLogger(__name__)
 # Tool-specific subdirectory inside 99_overige_documenten/
 TOOL_SUBDIR = "reports"
 
-# Nextcloud configuration from environment
-NEXTCLOUD_URL = os.getenv("NEXTCLOUD_URL", "")
-NEXTCLOUD_USER = os.getenv("NEXTCLOUD_SERVICE_USER", "")
-NEXTCLOUD_PASS = os.getenv("NEXTCLOUD_SERVICE_PASS", "")
+# --- Lazy-loaded Nextcloud credentials ---
+# Credentials worden pas bij eerste gebruik opgehaald, niet bij module import.
+# Dit voorkomt dat secrets als module-level constanten in geheugen staan.
+
+
+def _get_nextcloud_url() -> str:
+    """Lees Nextcloud URL lazy uit environment."""
+    return os.getenv("NEXTCLOUD_URL", "")
+
+
+def _get_nextcloud_user() -> str:
+    """Lees Nextcloud service user lazy uit environment."""
+    return os.getenv("NEXTCLOUD_SERVICE_USER", "")
+
+
+def _get_nextcloud_pass() -> str:
+    """Lees Nextcloud service password lazy uit environment."""
+    return os.getenv("NEXTCLOUD_SERVICE_PASS", "")
 
 DAV_NAMESPACE = {"d": "DAV:"}
 
 
 def is_cloud_configured() -> bool:
     """Check if Nextcloud environment variables are set."""
-    return bool(NEXTCLOUD_URL and NEXTCLOUD_USER and NEXTCLOUD_PASS)
+    return bool(_get_nextcloud_url() and _get_nextcloud_user() and _get_nextcloud_pass())
 
 
 def _dav_base() -> str:
     """WebDAV base URL for the service account's Projects folder."""
-    base = NEXTCLOUD_URL.rstrip("/")
-    return f"{base}/remote.php/dav/files/{NEXTCLOUD_USER}/Projects"
+    base = _get_nextcloud_url().rstrip("/")
+    return f"{base}/remote.php/dav/files/{_get_nextcloud_user()}/Projects"
 
 
 def _tool_path(project: str) -> str:
@@ -60,7 +74,7 @@ def _file_url(project: str, filename: str) -> str:
 def _get_client() -> httpx.Client:
     """Create an httpx client with Nextcloud Basic auth."""
     return httpx.Client(
-        auth=(NEXTCLOUD_USER, NEXTCLOUD_PASS),
+        auth=(_get_nextcloud_user(), _get_nextcloud_pass()),
         timeout=30.0,
     )
 

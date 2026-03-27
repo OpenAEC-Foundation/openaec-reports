@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import os
 
 import pytest
@@ -220,3 +221,43 @@ class TestSsoOnly:
         monkeypatch.setenv("OPENAEC_LOCAL_AUTH_ENABLED", "false")
         r = client.get("/api/auth/registration-enabled")
         assert r.json()["enabled"] is False
+
+
+class TestJwtSecretEnforcement:
+    """Tests voor CR-K2 — JWT default secret enforcement."""
+
+    def test_production_raises_with_default_secret(self, monkeypatch):
+        """In productie moet een RuntimeError worden gegooid bij default secret."""
+        monkeypatch.setenv("OPENAEC_ENV", "production")
+        monkeypatch.delenv("OPENAEC_JWT_SECRET", raising=False)
+
+        from openaec_reports.auth import security
+        importlib.reload(security)
+
+        with pytest.raises(RuntimeError, match="default waarde in productie"):
+            security.enforce_jwt_secret()
+
+    def test_development_warns_with_default_secret(self, monkeypatch, caplog):
+        """In development wordt alleen een warning gelogd."""
+        monkeypatch.setenv("OPENAEC_ENV", "development")
+        monkeypatch.delenv("OPENAEC_JWT_SECRET", raising=False)
+
+        from openaec_reports.auth import security
+        importlib.reload(security)
+
+        import logging
+        with caplog.at_level(logging.WARNING, logger="openaec_reports.auth.security"):
+            security.enforce_jwt_secret()
+
+        assert "default waarde" in caplog.text
+
+    def test_custom_secret_no_error(self, monkeypatch):
+        """Met een custom secret wordt geen error/warning gegeven."""
+        monkeypatch.setenv("OPENAEC_ENV", "production")
+        monkeypatch.setenv("OPENAEC_JWT_SECRET", "mijn-super-veilige-secret-123")
+
+        from openaec_reports.auth import security
+        importlib.reload(security)
+
+        # Moet zonder exception doorlopen
+        security.enforce_jwt_secret()

@@ -54,6 +54,32 @@ def is_default_secret() -> bool:
     return JWT_SECRET_KEY == _DEFAULT_SECRET
 
 
+def enforce_jwt_secret() -> None:
+    """Forceer een veilige JWT secret in productie.
+
+    In productie (OPENAEC_ENV=production) gooit dit een RuntimeError
+    als de default secret actief is — de server mag niet starten.
+    In andere omgevingen wordt alleen een warning gelogd.
+
+    Raises:
+        RuntimeError: Als default secret actief is in productie.
+    """
+    if not is_default_secret():
+        return
+
+    env = os.environ.get("OPENAEC_ENV", "development").lower()
+    if env == "production":
+        raise RuntimeError(
+            "OPENAEC_JWT_SECRET staat op de default waarde in productie! "
+            "Stel een veilige secret in via de OPENAEC_JWT_SECRET environment variable."
+        )
+
+    logger.warning(
+        "OPENAEC_JWT_SECRET staat op de default waarde! "
+        "Stel een veilige secret in via de OPENAEC_JWT_SECRET environment variable."
+    )
+
+
 def hash_password(password: str) -> str:
     """Hash een wachtwoord met bcrypt.
 

@@ -358,6 +358,94 @@ fn parse_bic_summary(summary: &Map<String, Value>) -> Map<String, Value> {
     out
 }
 
+// ── BIC inject helpers ────────────────────────────────────────────────
+
+/// Static TOC data for BIC Rapport templates.
+fn bic_rapport_toc() -> Value {
+    json!({
+        "item_1": "1  Locatie",
+        "item_2": "2  Voorziening",
+        "item_3": "3  Object",
+        "item_4": "4  Bedrijfsinterne controle (BIC)",
+        "item_5": "5  Herstelwerkzaamheden",
+        "item_6": "6  Tekeningen",
+        "item_6_1": "6.1  Regionale overzichtstekening",
+        "item_6_2": "6.2  Detailtekening",
+        "item_6_3": "6.3  Kadastrale kaart",
+        "item_7": "7  Onderhoudsdossier",
+        "item_7_1": "7.1  Controlelijst BIC",
+        "item_7_2": "7.2  Historie",
+        "item_7_2_1": "7.2.1  BIC controles",
+        "item_7_2_2": "7.2.2  Herstelwerkzaamheden",
+        "item_7_2_3": "7.2.3  Onderhouds- en inspectieoverzicht",
+        "item_8": "8  Bijlagen",
+        "item_8_1": "8.1  Fotobijlage",
+        "item_8_2": "8.2  Certificaten",
+        "item_8_3": "8.3  Overige documenten",
+    })
+}
+
+/// Inject static TOC data for BIC Rapport templates.
+///
+/// BIC Rapporten have a fixed table of contents. The template defines
+/// text_zones (toc.item_1 through toc.item_8_3) but the data must also
+/// contain the corresponding values.
+///
+/// Skips if a `toc` dict with `item_*` keys is already present.
+pub fn inject_toc_if_needed(result: &mut Value, raw: &Value) {
+    let template = raw
+        .get("template")
+        .and_then(|v| v.as_str())
+        .unwrap_or("");
+    if !template.contains("bic_rapport") {
+        return;
+    }
+
+    // Skip if toc already has item_* keys
+    if let Some(toc) = result.get("toc").and_then(|v| v.as_object()) {
+        if toc.keys().any(|k| k.starts_with("item_")) {
+            return;
+        }
+    }
+
+    result
+        .as_object_mut()
+        .expect("result must be an object")
+        .insert("toc".into(), bic_rapport_toc());
+}
+
+/// Add dynamic labels to location dict if corresponding values exist.
+///
+/// The location page_type binds on `location.provision_label` and
+/// `location.object_label`. These are only shown when the corresponding
+/// value is non-empty.
+pub fn inject_location_labels(result: &mut Value) {
+    let loc = match result.get_mut("location").and_then(|v| v.as_object_mut()) {
+        Some(loc) => loc,
+        None => return,
+    };
+
+    let has_provision = loc
+        .get("provision")
+        .and_then(|v| v.as_str())
+        .is_some_and(|s| !s.is_empty());
+    let has_provision_label = loc.contains_key("provision_label");
+
+    if !has_provision_label && has_provision {
+        loc.insert("provision_label".into(), json!("Voorziening"));
+    }
+
+    let has_object = loc
+        .get("object")
+        .and_then(|v| v.as_str())
+        .is_some_and(|s| !s.is_empty());
+    let has_object_label = loc.contains_key("object_label");
+
+    if !has_object_label && has_object {
+        loc.insert("object_label".into(), json!("Object"));
+    }
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────
 
 fn get_str(map: &Map<String, Value>, key: &str) -> String {
@@ -473,6 +561,70 @@ mod tests {
         assert_eq!(result["bic"]["aantal_conform"], "10");
         assert_eq!(result["bic"]["kosten_werkelijk"], "400");
         assert_eq!(result["samenvatting"]["totaal_conform"], "1000");
+    }
+
+    #[test]
+    fn test_inject_toc_if_needed_bic_rapport() {
+        let raw = json!({"template": "bic_rapport"});
+        let mut result = json!({"meta": {"datum": "2026-01-01"}});
+        inject_toc_if_needed(&mut result, &raw);
+        assert_eq!(result["toc"]["item_1"], "1  Locatie");
+        assert_eq!(result["toc"]["item_8_3"], "8.3  Overige documenten");
+    }
+
+    #[test]
+    fn test_inject_toc_skips_non_bic() {
+        let raw = json!({"template": "structural"});
+        let mut result = json!({});
+        inject_toc_if_needed(&mut result, &raw);
+        assert!(result.get("toc").is_none());
+    }
+
+    #[test]
+    fn test_inject_toc_skips_existing() {
+        let raw = json!({"template": "bic_rapport"});
+        let mut result = json!({"toc": {"item_1": "Custom"}});
+        inject_toc_if_needed(&mut result, &raw);
+        // Should NOT overwrite existing toc
+        assert_eq!(result["toc"]["item_1"], "Custom");
+    }
+
+    #[test]
+    fn test_inject_location_labels() {
+        let mut result = json!({
+            "location": {
+                "provision": "Gasleiding",
+                "object": "Hoofdleiding",
+            }
+        });
+        inject_location_labels(&mut result);
+        assert_eq!(result["location"]["provision_label"], "Voorziening");
+        assert_eq!(result["location"]["object_label"], "Object");
+    }
+
+    #[test]
+    fn test_inject_location_labels_skips_empty() {
+        let mut result = json!({
+            "location": {
+                "provision": "",
+                "object": "",
+            }
+        });
+        inject_location_labels(&mut result);
+        assert!(result["location"].get("provision_label").is_none());
+        assert!(result["location"].get("object_label").is_none());
+    }
+
+    #[test]
+    fn test_inject_location_labels_preserves_existing() {
+        let mut result = json!({
+            "location": {
+                "provision": "Gasleiding",
+                "provision_label": "Custom Label",
+            }
+        });
+        inject_location_labels(&mut result);
+        assert_eq!(result["location"]["provision_label"], "Custom Label");
     }
 
     #[test]

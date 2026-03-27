@@ -17,7 +17,7 @@ python -m pytest tests/ -v
 openaec-report serve --port 8000 --reload
 
 # Rapport genereren
-openaec-report generate --template structural --data schemas/example_structural.json --output output/test.pdf
+openaec-report generate --template structural --data examples/default/structural_report.json --output output/test.pdf
 ```
 
 ---

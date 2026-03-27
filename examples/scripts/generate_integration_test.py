@@ -17,8 +17,8 @@ from pathlib import Path
 from openaec_reports import Report, A4
 from openaec_reports.components import CalculationBlock, CheckBlock, ImageBlock, TableBlock
 
-OUTPUT_DIR = Path(__file__).parent.parent / "output"
-LOGO_PATH = Path(__file__).parent.parent / "src" / "openaec_reports" / "assets" / "logos" / "default.png"
+OUTPUT_DIR = Path(__file__).parent.parent.parent / "output"
+LOGO_PATH = Path(__file__).parent.parent.parent / "src" / "openaec_reports" / "assets" / "logos" / "default.png"
 
 
 def main():

@@ -5,7 +5,7 @@ from pathlib import Path
 from openaec_reports import Report, A4
 from openaec_reports.components import CalculationBlock, CheckBlock, TableBlock
 
-OUTPUT_DIR = Path(__file__).parent.parent / "output"
+OUTPUT_DIR = Path(__file__).parent.parent.parent / "output"
 
 
 def main():

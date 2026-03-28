@@ -1,7 +1,34 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-28
+> Laatst bijgewerkt: 2026-03-28 (sessie 2)
+
+---
+
+## 🟡 Rust Server — Volgende Fasen
+
+### Phase 2: Auth systeem
+- [ ] Auth models + security (User struct, JWT create/decode, bcrypt)
+- [ ] Auth database (users table, api_keys table — apart `auth.db`)
+- [ ] Auth middleware (AuthUser extractor: API key → JWT cookie → Bearer)
+- [ ] Auth routes (/api/auth/login, register, logout, me, profile)
+- [ ] OIDC support (JWKS fetch, RS256 validatie, auto-provisioning)
+- [ ] Route protection (alle /api/* behalve health/auth)
+
+### Phase 3: Ontbrekende core endpoints
+- [ ] File upload (`/api/upload` — multipart, 10MB max)
+- [ ] PDOK map proxy (`/api/pdok/map`, `/api/pdok/services`)
+- [ ] User profile injection in rapport colofon
+
+### Phase 4: Admin endpoints
+- [ ] User management CRUD
+- [ ] API key management
+- [ ] Organisation management
+- [ ] Tenant/template/brand YAML CRUD
+
+### Phase 5: Nice-to-haves
+- [ ] Cloud storage (Nextcloud WebDAV)
+- [ ] Brand onboarding wizard (of als Python microservice houden)
 
 ---
 

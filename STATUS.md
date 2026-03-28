@@ -1,6 +1,6 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-28
+> Laatst bijgewerkt: 2026-03-28 (sessie 2)
 > Sessie-historie ouder dan 2 sessies: zie `git log` of `git show <commit>:STATUS.md`
 
 ---
@@ -15,7 +15,26 @@
 
 ---
 
-## Laatste Sessie — 28 maart
+## Laatste Sessie — 28 maart (sessie 2)
+
+### Rust Server Uitbouw + openaec-engine crate
+- **openaec-engine crate:** V3 TemplateEngine in pure Rust (~2400 LOC), coordinate-based PDF rendering, 28 tests
+  - Modules: engine, pdf_backend, font_engine, text, data_bind, zone_renderer, flow_layout, special_pages
+  - Pure Rust stack: `pdf-writer` + `lopdf` + `ttf-parser` (geen Python/AGPL)
+- **Server module split:** `main.rs` (769 regels) → 14 bestanden in modulaire structuur
+  - `routes/`: health, templates, brands, stationery, generate, validate, admin, auth
+  - `db/`: projects CRUD, reports CRUD
+  - `state.rs`, `error.rs` (AppError enum), `helpers.rs`
+- **CORS middleware:** `tower-http::CorsLayer` met expliciete origins, `allow_credentials(true)`, configureerbaar via `CORS_ORIGINS` env var
+- **V3 Engine endpoint:** `POST /api/generate/template` → `openaec_engine::Engine` (apart van legacy V1/V2)
+- **Async-safety:** Alle PDF generatie in `tokio::task::spawn_blocking()`
+- **Template loader:** Scant alle tenants in `OPENAEC_TENANTS_ROOT` (15 templates gevonden)
+- **BIC Schema docs:** `docs/CUSTOMER_BIC_SCHEMA.md` (598 regels), `test_bic_rapport.py`
+- **Deployed:** `01cf2f4` naar `report.open-aec.com`
+
+---
+
+## Sessie — 28 maart (sessie 1)
 
 ### CR-K Security Fixes (4 van 6 resterende kritieke items)
 - **CR-K6:** Nextcloud credentials lazy loading — `_get_nextcloud_*()` functies i.p.v. module-level constanten (8 tests)
@@ -104,7 +123,9 @@
 | Phase 2 — Python ports | ✅ Compleet | 102 |
 | Phase 3 — Rendering pipeline | ✅ Compleet | incl. in P2 |
 | Phase 4 — Server + CLI | ✅ Compleet (deploy wacht) | 2 |
-| **Totaal** | **169 tests** | **~6.500 LOC** |
+| Phase 5 — openaec-engine (V3) | ✅ Compleet | 28 |
+| Phase 6 — Server module split + CORS | ✅ Compleet | 0 (integration) |
+| **Totaal** | **197 tests** | **~9.000 LOC** |
 
 ---
 

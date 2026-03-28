@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "crates/openaec-layout",
     "crates/openaec-core",
+    "crates/openaec-engine",
     "crates/openaec-server",
     "crates/openaec-ffi",
     "crates/openaec-cli",

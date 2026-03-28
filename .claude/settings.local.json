@@ -17,7 +17,25 @@
       "Bash(wc:*)",
       "Bash(xargs:*)",
       "Bash(start \"\" \"X:\\\\10_3BM_bouwkunde\\\\50_Claude-Code-Projects\\\\Report_generator\\\\output\\\\test_from_json.pdf\")",
-      "Bash(start \"\" \"X:\\\\10_3BM_bouwkunde\\\\50_Claude-Code-Projects\\\\Report_generator\\\\output\\\\component_showcase.pdf\")"
+      "Bash(start \"\" \"X:\\\\10_3BM_bouwkunde\\\\50_Claude-Code-Projects\\\\Report_generator\\\\output\\\\component_showcase.pdf\")",
+      "WebFetch(domain:registry.npmjs.org)",
+      "WebFetch(domain:www.ag-grid.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:react-datasheet-grid.netlify.app)",
+      "WebFetch(domain:univer.ai)",
+      "WebFetch(domain:bundlephobia.com)",
+      "WebFetch(domain:iddan.github.io)",
+      "WebFetch(domain:docs.univer.ai)",
+      "WebFetch(domain:handsontable.com)",
+      "mcp__bm_reports__list_templates",
+      "mcp__file_operations__open_file",
+      "mcp__file_operations__pdf_to_images",
+      "mcp__file_operations__pdf_extract_text",
+      "mcp__desktop_vision__capture_screen"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "file_operations",
+    "bm_reports"
+  ]
 }

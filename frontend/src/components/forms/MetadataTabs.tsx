@@ -19,16 +19,16 @@ export function MetadataTabs() {
   return (
     <div className="flex-1 overflow-y-auto">
       {/* Tab bar */}
-      <div className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 backdrop-blur px-6 py-3">
-        <div className="inline-flex rounded-lg bg-gray-100 p-0.5">
+      <div className="sticky top-0 z-10 border-b border-oaec-border bg-oaec-bg-lighter/95 backdrop-blur px-6 py-3">
+        <div className="inline-flex rounded-lg bg-oaec-hover p-0.5">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-oaec-bg-lighter text-oaec-text shadow-sm'
+                  : 'text-oaec-text-muted hover:text-oaec-text-secondary'
               }`}
             >
               {tab.label}

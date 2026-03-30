@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 const inputClass =
-  'w-full rounded border border-gray-200 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none';
+  'w-full rounded border border-oaec-border px-2 py-1.5 text-sm focus:border-oaec-accent focus:ring-2 focus:ring-oaec-accent/20 outline-none';
 
 interface ExtraFieldRowProps {
   fieldKey: string;
@@ -39,7 +39,7 @@ export function ExtraFieldRow({ fieldKey, fieldValue, onKeyChange, onValueChange
       />
       <button
         onClick={onRemove}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-gray-300 hover:bg-red-50 hover:text-red-500"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-oaec-text-faint hover:bg-oaec-danger-soft hover:text-oaec-danger"
         title="Verwijder veld"
       >
         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

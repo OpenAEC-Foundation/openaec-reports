@@ -10,10 +10,10 @@ import type { ReportDefinition } from '@/types/report';
 
 function LoadingSpinner() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="flex min-h-screen items-center justify-center" style={{ background: 'var(--oaec-bg)' }}>
       <div className="text-center">
         <svg
-          className="mx-auto h-8 w-8 animate-spin text-gray-400"
+          className="mx-auto h-8 w-8 animate-spin" style={{ color: 'var(--oaec-accent)' }}
           fill="none"
           viewBox="0 0 24 24"
         >
@@ -31,7 +31,7 @@ function LoadingSpinner() {
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
           />
         </svg>
-        <p className="mt-3 text-sm text-gray-500">Laden...</p>
+        <p className="mt-3 text-sm" style={{ color: 'var(--oaec-text-secondary)' }}>Laden...</p>
       </div>
     </div>
   );

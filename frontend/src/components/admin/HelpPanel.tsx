@@ -18,7 +18,7 @@ const SECTIONS: HelpSection[] = [
           Het beheerpaneel biedt toegang tot alle configuratie van het OpenAEC
           Reports platform. Hieronder vind je uitleg per onderdeel.
         </p>
-        <h4 className="mt-4 font-semibold text-gray-900">Architectuur</h4>
+        <h4 className="mt-4 font-semibold text-oaec-text">Architectuur</h4>
         <p className="mt-1">
           Het platform bestaat uit drie lagen:
         </p>
@@ -36,7 +36,7 @@ const SECTIONS: HelpSection[] = [
             produceert conform het rapport-schema.
           </li>
         </ul>
-        <h4 className="mt-4 font-semibold text-gray-900">Multi-tenant</h4>
+        <h4 className="mt-4 font-semibold text-oaec-text">Multi-tenant</h4>
         <p className="mt-1">
           Het systeem ondersteunt meerdere organisaties (tenants). Elke tenant
           heeft eigen templates, brand-configuratie, stationery, logo&apos;s en
@@ -54,12 +54,12 @@ const SECTIONS: HelpSection[] = [
         <p>
           Een <strong>tenant</strong> is een organisatie met eigen huisstijl en
           templates. Elke tenant heeft een unieke slug (bijv.{" "}
-          <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm">
+          <code className="rounded bg-oaec-hover px-1.5 py-0.5 text-sm">
             mijn_organisatie
           </code>
           ).
         </p>
-        <h4 className="mt-4 font-semibold text-gray-900">Tenant aanmaken</h4>
+        <h4 className="mt-4 font-semibold text-oaec-text">Tenant aanmaken</h4>
         <ol className="mt-2 list-decimal pl-5 space-y-1">
           <li>Ga naar het tabblad <strong>Tenants</strong>.</li>
           <li>
@@ -70,35 +70,35 @@ const SECTIONS: HelpSection[] = [
             underscores toegestaan).
           </li>
         </ol>
-        <h4 className="mt-4 font-semibold text-gray-900">Tenant structuur</h4>
+        <h4 className="mt-4 font-semibold text-oaec-text">Tenant structuur</h4>
         <p className="mt-1">Na aanmaken bevat een tenant-map:</p>
         <ul className="mt-2 list-disc pl-5 space-y-1">
           <li>
-            <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm">
+            <code className="rounded bg-oaec-hover px-1.5 py-0.5 text-sm">
               brand.yaml
             </code>{" "}
             — Huisstijl configuratie (kleuren, fonts, logo-paden)
           </li>
           <li>
-            <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm">
+            <code className="rounded bg-oaec-hover px-1.5 py-0.5 text-sm">
               templates/
             </code>{" "}
             — YAML rapport-templates
           </li>
           <li>
-            <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm">
+            <code className="rounded bg-oaec-hover px-1.5 py-0.5 text-sm">
               stationery/
             </code>{" "}
             — PDF/PNG achtergrondpagina&apos;s
           </li>
           <li>
-            <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm">
+            <code className="rounded bg-oaec-hover px-1.5 py-0.5 text-sm">
               logos/
             </code>{" "}
             — Logo&apos;s (SVG, PNG)
           </li>
           <li>
-            <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm">
+            <code className="rounded bg-oaec-hover px-1.5 py-0.5 text-sm">
               fonts/
             </code>{" "}
             — Lettertypen (TTF, OTF)
@@ -116,7 +116,7 @@ const SECTIONS: HelpSection[] = [
           Gebruikersbeheer regelt wie toegang heeft tot het platform en met welke
           rechten.
         </p>
-        <h4 className="mt-4 font-semibold text-gray-900">Rollen</h4>
+        <h4 className="mt-4 font-semibold text-oaec-text">Rollen</h4>
         <ul className="mt-2 list-disc pl-5 space-y-1">
           <li>
             <strong>admin</strong> — Volledige toegang tot alle beheerfuncties,
@@ -127,7 +127,7 @@ const SECTIONS: HelpSection[] = [
             geen beheertaken uitvoeren.
           </li>
         </ul>
-        <h4 className="mt-4 font-semibold text-gray-900">Acties</h4>
+        <h4 className="mt-4 font-semibold text-oaec-text">Acties</h4>
         <ul className="mt-2 list-disc pl-5 space-y-1">
           <li>
             <strong>Aanmaken</strong> — Vul gebruikersnaam, wachtwoord, rol en
@@ -153,7 +153,7 @@ const SECTIONS: HelpSection[] = [
           Templates zijn YAML-bestanden die de structuur en opmaak van een
           rapporttype defini&euml;ren. Elke tenant kan eigen templates hebben.
         </p>
-        <h4 className="mt-4 font-semibold text-gray-900">Template structuur</h4>
+        <h4 className="mt-4 font-semibold text-oaec-text">Template structuur</h4>
         <p className="mt-1">Een template YAML bevat:</p>
         <ul className="mt-2 list-disc pl-5 space-y-1">
           <li>
@@ -172,7 +172,7 @@ const SECTIONS: HelpSection[] = [
             placeholder-content.
           </li>
         </ul>
-        <h4 className="mt-4 font-semibold text-gray-900">Template uploaden</h4>
+        <h4 className="mt-4 font-semibold text-oaec-text">Template uploaden</h4>
         <ol className="mt-2 list-decimal pl-5 space-y-1">
           <li>Selecteer een tenant in het Tenants-tabblad.</li>
           <li>
@@ -181,79 +181,79 @@ const SECTIONS: HelpSection[] = [
           </li>
           <li>
             Selecteer een{" "}
-            <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm">
+            <code className="rounded bg-oaec-hover px-1.5 py-0.5 text-sm">
               .yaml
             </code>{" "}
             bestand.
           </li>
         </ol>
-        <h4 className="mt-4 font-semibold text-gray-900">Content block types</h4>
+        <h4 className="mt-4 font-semibold text-oaec-text">Content block types</h4>
         <div className="mt-2 overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 text-left">
-                <th className="py-1.5 pr-4 font-medium text-gray-900">Type</th>
-                <th className="py-1.5 font-medium text-gray-900">Beschrijving</th>
+              <tr className="border-b border-oaec-border text-left">
+                <th className="py-1.5 pr-4 font-medium text-oaec-text">Type</th>
+                <th className="py-1.5 font-medium text-oaec-text">Beschrijving</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-oaec-border-subtle">
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="text-purple-700">paragraph</code>
+                  <code className="text-oaec-accent">paragraph</code>
                 </td>
                 <td>Tekst met opmaak (bold, italic, sub, sup)</td>
               </tr>
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="text-purple-700">calculation</code>
+                  <code className="text-oaec-accent">calculation</code>
                 </td>
                 <td>Berekening met formule, eenheid en resultaat</td>
               </tr>
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="text-purple-700">check</code>
+                  <code className="text-oaec-accent">check</code>
                 </td>
                 <td>Unity check met required/calculated waarden</td>
               </tr>
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="text-purple-700">table</code>
+                  <code className="text-oaec-accent">table</code>
                 </td>
                 <td>Tabel met headers en rijen</td>
               </tr>
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="text-purple-700">image</code>
+                  <code className="text-oaec-accent">image</code>
                 </td>
                 <td>Afbeelding (pad, URL of base64)</td>
               </tr>
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="text-purple-700">map</code>
+                  <code className="text-oaec-accent">map</code>
                 </td>
                 <td>Kadasterkaart via PDOK WMS</td>
               </tr>
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="text-purple-700">bullet_list</code>
+                  <code className="text-oaec-accent">bullet_list</code>
                 </td>
                 <td>Opsomming met bullet points</td>
               </tr>
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="text-purple-700">heading_2</code>
+                  <code className="text-oaec-accent">heading_2</code>
                 </td>
                 <td>Subkop binnen een sectie</td>
               </tr>
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="text-purple-700">spacer</code>
+                  <code className="text-oaec-accent">spacer</code>
                 </td>
                 <td>Verticale witruimte (in mm)</td>
               </tr>
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="text-purple-700">page_break</code>
+                  <code className="text-oaec-accent">page_break</code>
                 </td>
                 <td>Pagina-einde forceren</td>
               </tr>
@@ -273,7 +273,7 @@ const SECTIONS: HelpSection[] = [
           kleuren, lettertypen, logo&apos;s en achtergrondpagina&apos;s
           (stationery).
         </p>
-        <h4 className="mt-4 font-semibold text-gray-900">brand.yaml</h4>
+        <h4 className="mt-4 font-semibold text-oaec-text">brand.yaml</h4>
         <p className="mt-1">Het centrale configuratiebestand bevat:</p>
         <ul className="mt-2 list-disc pl-5 space-y-1">
           <li>
@@ -293,7 +293,7 @@ const SECTIONS: HelpSection[] = [
             achtergrondpagina&apos;s per paginatype.
           </li>
         </ul>
-        <h4 className="mt-4 font-semibold text-gray-900">Brand Extraction Wizard</h4>
+        <h4 className="mt-4 font-semibold text-oaec-text">Brand Extraction Wizard</h4>
         <p className="mt-1">
           Automatisch een brand-configuratie opbouwen vanuit een bestaande PDF:
         </p>
@@ -311,7 +311,7 @@ const SECTIONS: HelpSection[] = [
           </li>
           <li>Merge de resultaten naar de tenant brand.yaml.</li>
         </ol>
-        <h4 className="mt-4 font-semibold text-gray-900">Assets uploaden</h4>
+        <h4 className="mt-4 font-semibold text-oaec-text">Assets uploaden</h4>
         <ul className="mt-2 list-disc pl-5 space-y-1">
           <li>
             <strong>Stationery</strong> — PDF of PNG bestanden voor
@@ -338,24 +338,24 @@ const SECTIONS: HelpSection[] = [
           Het platform biedt een REST API voor integratie met externe systemen
           (bijv. pyRevit, scripts, CI/CD).
         </p>
-        <h4 className="mt-4 font-semibold text-gray-900">Endpoints</h4>
+        <h4 className="mt-4 font-semibold text-oaec-text">Endpoints</h4>
         <div className="mt-2 overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 text-left">
-                <th className="py-1.5 pr-4 font-medium text-gray-900">
+              <tr className="border-b border-oaec-border text-left">
+                <th className="py-1.5 pr-4 font-medium text-oaec-text">
                   Methode
                 </th>
-                <th className="py-1.5 pr-4 font-medium text-gray-900">Pad</th>
-                <th className="py-1.5 font-medium text-gray-900">
+                <th className="py-1.5 pr-4 font-medium text-oaec-text">Pad</th>
+                <th className="py-1.5 font-medium text-oaec-text">
                   Beschrijving
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-oaec-border-subtle">
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="rounded bg-green-50 px-1.5 py-0.5 text-green-700">
+                  <code className="rounded bg-oaec-success-soft px-1.5 py-0.5 text-oaec-success">
                     GET
                   </code>
                 </td>
@@ -364,7 +364,7 @@ const SECTIONS: HelpSection[] = [
               </tr>
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="rounded bg-green-50 px-1.5 py-0.5 text-green-700">
+                  <code className="rounded bg-oaec-success-soft px-1.5 py-0.5 text-oaec-success">
                     GET
                   </code>
                 </td>
@@ -375,7 +375,7 @@ const SECTIONS: HelpSection[] = [
               </tr>
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="rounded bg-green-50 px-1.5 py-0.5 text-green-700">
+                  <code className="rounded bg-oaec-success-soft px-1.5 py-0.5 text-oaec-success">
                     GET
                   </code>
                 </td>
@@ -384,7 +384,7 @@ const SECTIONS: HelpSection[] = [
               </tr>
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="rounded bg-green-50 px-1.5 py-0.5 text-green-700">
+                  <code className="rounded bg-oaec-success-soft px-1.5 py-0.5 text-oaec-success">
                     GET
                   </code>
                 </td>
@@ -395,7 +395,7 @@ const SECTIONS: HelpSection[] = [
               </tr>
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="rounded bg-blue-50 px-1.5 py-0.5 text-blue-700">
+                  <code className="rounded bg-oaec-accent-soft px-1.5 py-0.5 text-oaec-accent">
                     POST
                   </code>
                 </td>
@@ -406,7 +406,7 @@ const SECTIONS: HelpSection[] = [
               </tr>
               <tr>
                 <td className="py-1.5 pr-4">
-                  <code className="rounded bg-blue-50 px-1.5 py-0.5 text-blue-700">
+                  <code className="rounded bg-oaec-accent-soft px-1.5 py-0.5 text-oaec-accent">
                     POST
                   </code>
                 </td>
@@ -418,28 +418,28 @@ const SECTIONS: HelpSection[] = [
             </tbody>
           </table>
         </div>
-        <h4 className="mt-4 font-semibold text-gray-900">Authenticatie</h4>
+        <h4 className="mt-4 font-semibold text-oaec-text">Authenticatie</h4>
         <p className="mt-1">
           De API gebruikt JWT-tokens. Log in via{" "}
-          <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm">
+          <code className="rounded bg-oaec-hover px-1.5 py-0.5 text-sm">
             POST /api/auth/login
           </code>{" "}
           om een token te ontvangen. Stuur het token mee als{" "}
-          <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm">
+          <code className="rounded bg-oaec-hover px-1.5 py-0.5 text-sm">
             Authorization: Bearer &lt;token&gt;
           </code>{" "}
           header bij alle beveiligde endpoints.
         </p>
-        <h4 className="mt-4 font-semibold text-gray-900">
+        <h4 className="mt-4 font-semibold text-oaec-text">
           JSON Schema
         </h4>
         <p className="mt-1">
           Het volledige datamodel staat in{" "}
-          <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm">
+          <code className="rounded bg-oaec-hover px-1.5 py-0.5 text-sm">
             schemas/report.schema.json
           </code>
           . Dit is het contract tussen frontend, API en library. Gebruik{" "}
-          <code className="rounded bg-gray-100 px-1.5 py-0.5 text-sm">
+          <code className="rounded bg-oaec-hover px-1.5 py-0.5 text-sm">
             GET /api/templates/&#123;name&#125;/scaffold
           </code>{" "}
           om een geldig startpunt te krijgen.
@@ -466,8 +466,8 @@ export function HelpPanel() {
                 onClick={() => setActiveSection(section.key)}
                 className={`w-full rounded-md px-3 py-2 text-left text-sm transition-colors ${
                   activeSection === section.key
-                    ? "bg-purple-50 font-medium text-purple-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    ? "bg-oaec-accent-soft font-medium text-oaec-accent"
+                    : "text-oaec-text-secondary hover:bg-oaec-bg hover:text-oaec-text"
                 }`}
               >
                 {section.title}
@@ -479,11 +479,11 @@ export function HelpPanel() {
 
       {/* Content */}
       <div className="min-w-0 flex-1">
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <h3 className="text-lg font-semibold text-gray-900">
+        <div className="rounded-lg border border-oaec-border bg-oaec-bg-lighter p-6">
+          <h3 className="text-lg font-semibold text-oaec-text">
             {current.title}
           </h3>
-          <div className="mt-3 text-sm leading-relaxed text-gray-600">
+          <div className="mt-3 text-sm leading-relaxed text-oaec-text-secondary">
             {current.content}
           </div>
         </div>

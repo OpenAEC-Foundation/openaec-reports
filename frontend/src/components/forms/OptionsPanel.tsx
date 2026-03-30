@@ -4,9 +4,9 @@ import { ToggleSwitch } from './ToggleSwitch';
 import type { TocConfig } from '@/types/report';
 
 const inputClass =
-  'w-full rounded border border-gray-200 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none';
+  'w-full rounded border border-oaec-border px-2 py-1.5 text-sm focus:border-oaec-accent focus:ring-2 focus:ring-oaec-accent/20 outline-none';
 
-const labelClass = 'block text-xs font-medium text-gray-500 mb-1';
+const labelClass = 'block text-xs font-medium text-oaec-text-muted mb-1';
 
 export function OptionsPanel() {
   const toc = useReportStore((s) => s.report.toc);
@@ -35,8 +35,8 @@ export function OptionsPanel() {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* TOC settings */}
       <div>
-        <div className="flex items-center justify-between border-b border-gray-100 pb-2 mb-4">
-          <h3 className="text-sm font-semibold text-gray-700">Inhoudsopgave</h3>
+        <div className="flex items-center justify-between border-b border-oaec-border-subtle pb-2 mb-4">
+          <h3 className="text-sm font-semibold text-oaec-text-secondary">Inhoudsopgave</h3>
           <ToggleSwitch
             checked={toc.enabled !== false}
             onChange={() => updateToc({ enabled: !(toc.enabled !== false) })}
@@ -75,8 +75,8 @@ export function OptionsPanel() {
 
       {/* Backcover */}
       <div>
-        <div className="flex items-center justify-between border-b border-gray-100 pb-2">
-          <h3 className="text-sm font-semibold text-gray-700">Achterblad</h3>
+        <div className="flex items-center justify-between border-b border-oaec-border-subtle pb-2">
+          <h3 className="text-sm font-semibold text-oaec-text-secondary">Achterblad</h3>
           <ToggleSwitch
             checked={backcover.enabled !== false}
             onChange={() =>

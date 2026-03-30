@@ -7,9 +7,9 @@ interface CalculationEditorProps {
 }
 
 const inputClass =
-  'w-full rounded border border-gray-200 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none';
+  'w-full rounded border border-oaec-border px-2 py-1.5 text-sm focus:border-oaec-accent focus:ring-2 focus:ring-oaec-accent/20 outline-none';
 const monoInputClass = `${inputClass} font-mono`;
-const labelClass = 'text-xs font-medium text-gray-500 mb-1';
+const labelClass = 'text-xs font-medium text-oaec-text-muted mb-1';
 
 export function CalculationEditor({ block, onChange }: CalculationEditorProps) {
   const [values, setValues] = useState({

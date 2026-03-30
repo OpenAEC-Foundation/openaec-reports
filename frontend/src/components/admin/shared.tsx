@@ -2,7 +2,7 @@ import type React from "react";
 
 export function Th({ children }: { children: React.ReactNode }) {
   return (
-    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-oaec-text-muted">
       {children}
     </th>
   );
@@ -16,7 +16,7 @@ export function Td({
   className?: string;
 }) {
   return (
-    <td className={`px-4 py-3 text-sm text-gray-700 ${className}`}>
+    <td className={`px-4 py-3 text-sm text-oaec-text-secondary ${className}`}>
       {children}
     </td>
   );
@@ -37,13 +37,13 @@ export function Input({
 }) {
   return (
     <label className="block">
-      <span className="text-xs font-medium text-gray-600">{label}</span>
+      <span className="text-xs font-medium text-oaec-text-secondary">{label}</span>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+        className="mt-1 block w-full rounded-md border border-oaec-border px-3 py-1.5 text-sm shadow-sm focus:border-oaec-accent focus:ring-1 focus:ring-oaec-accent"
       />
     </label>
   );
@@ -62,11 +62,11 @@ export function Select({
 }) {
   return (
     <label className="block">
-      <span className="text-xs font-medium text-gray-600">{label}</span>
+      <span className="text-xs font-medium text-oaec-text-secondary">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+        className="mt-1 block w-full rounded-md border border-oaec-border px-3 py-1.5 text-sm shadow-sm focus:border-oaec-accent focus:ring-1 focus:ring-oaec-accent"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -93,10 +93,10 @@ export function Dialog({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+        className="w-full max-w-md rounded-xl bg-oaec-bg-lighter p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+        <h3 className="text-lg font-semibold text-oaec-text mb-4">{title}</h3>
         {children}
       </div>
     </div>
@@ -105,7 +105,7 @@ export function Dialog({
 
 export function LoadingSpinner({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-2 text-sm text-gray-500 py-8">
+    <div className="flex items-center gap-2 text-sm text-oaec-text-muted py-8">
       <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
         <circle
           className="opacity-25"

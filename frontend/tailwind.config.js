@@ -24,6 +24,54 @@ export default {
           'text-secondary': 'var(--theme-text-secondary)',
           border: 'var(--theme-border)',
         },
+        // OpenAEC Design System palette
+        oaec: {
+          bg: {
+            DEFAULT: 'var(--oaec-bg)',
+            lighter: 'var(--oaec-bg-lighter)',
+            surface: 'var(--oaec-bg-surface)',
+            input: 'var(--oaec-bg-input)',
+          },
+          accent: {
+            DEFAULT: 'var(--oaec-accent)',
+            hover: 'var(--oaec-accent-hover)',
+            soft: 'var(--oaec-accent-soft)',
+            text: 'var(--oaec-accent-text)',
+          },
+          text: {
+            DEFAULT: 'var(--oaec-text)',
+            secondary: 'var(--oaec-text-secondary)',
+            muted: 'var(--oaec-text-muted)',
+            faint: 'var(--oaec-text-faint)',
+          },
+          border: {
+            DEFAULT: 'var(--oaec-border)',
+            subtle: 'var(--oaec-border-subtle)',
+          },
+          hover: {
+            DEFAULT: 'var(--oaec-hover)',
+            strong: 'var(--oaec-hover-strong)',
+          },
+          danger: {
+            DEFAULT: 'var(--oaec-danger)',
+            hover: 'var(--oaec-danger-hover)',
+            soft: 'var(--oaec-danger-soft)',
+          },
+          success: {
+            DEFAULT: 'var(--oaec-success)',
+            soft: 'var(--oaec-success-soft)',
+          },
+          warning: {
+            DEFAULT: 'var(--oaec-warning)',
+            soft: 'var(--oaec-warning-soft)',
+          },
+        },
+      },
+      borderColor: {
+        oaec: {
+          DEFAULT: 'var(--oaec-border)',
+          subtle: 'var(--oaec-border-subtle)',
+        },
       },
     },
   },

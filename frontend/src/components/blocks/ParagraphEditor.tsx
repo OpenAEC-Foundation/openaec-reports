@@ -11,11 +11,11 @@ export function ParagraphEditor({ block, onChange }: ParagraphEditorProps) {
     <div className="space-y-3">
       {/* Style selector (H1, H2, H3, Normal) */}
       <div className="flex gap-2">
-        <label className="text-sm text-gray-500">Stijl:</label>
+        <label className="text-sm text-oaec-text-muted">Stijl:</label>
         <select
           value={block.style || 'Normal'}
           onChange={(e) => onChange({ style: e.target.value })}
-          className="text-sm border border-gray-200 rounded px-2 py-1"
+          className="text-sm border border-oaec-border rounded px-2 py-1"
         >
           <option value="Normal">Normaal</option>
           <option value="Heading1">Heading 1</option>

@@ -36,16 +36,16 @@ export function TableConfigSection({ table, onChange, brandColors }: TableConfig
     return (
       <div className="mb-4">
         <div className="flex items-center justify-between mb-1.5">
-          <h4 className="text-xs font-semibold text-gray-700">Tabel</h4>
+          <h4 className="text-xs font-semibold text-oaec-text-secondary">Tabel</h4>
           <button
             type="button"
             onClick={() => onChange(newTable())}
-            className="rounded bg-purple-50 px-2 py-0.5 text-[10px] font-medium text-purple-600 hover:bg-purple-100 transition-colors"
+            className="rounded bg-oaec-accent-soft px-2 py-0.5 text-[10px] font-medium text-oaec-accent hover:bg-oaec-accent-soft transition-colors"
           >
             + Tabel toevoegen
           </button>
         </div>
-        <p className="text-xs text-gray-400 italic">Geen tabel geconfigureerd</p>
+        <p className="text-xs text-oaec-text-faint italic">Geen tabel geconfigureerd</p>
       </div>
     );
   }
@@ -80,18 +80,18 @@ export function TableConfigSection({ table, onChange, brandColors }: TableConfig
   return (
     <div className="mb-4">
       <div className="flex items-center justify-between mb-1.5">
-        <h4 className="text-xs font-semibold text-gray-700">Tabel</h4>
+        <h4 className="text-xs font-semibold text-oaec-text-secondary">Tabel</h4>
         <button
           type="button"
           onClick={removeTable}
-          className="rounded bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-600 hover:bg-red-100 transition-colors"
+          className="rounded bg-oaec-danger-soft px-2 py-0.5 text-[10px] font-medium text-oaec-danger hover:bg-oaec-danger-soft transition-colors"
         >
           Verwijderen
         </button>
       </div>
 
       {/* Tabel metadata */}
-      <div className="rounded border border-gray-200 bg-white px-3 py-2 mb-2">
+      <div className="rounded border border-oaec-border bg-oaec-bg-lighter px-3 py-2 mb-2">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <Field label="data_bind" className="flex-1 min-w-[120px]">
             <TextInput
@@ -147,13 +147,13 @@ export function TableConfigSection({ table, onChange, brandColors }: TableConfig
       {/* Kolommen */}
       <div className="ml-2">
         <div className="flex items-center justify-between mb-1">
-          <h5 className="text-[10px] font-semibold text-gray-600 uppercase tracking-wider">
+          <h5 className="text-[10px] font-semibold text-oaec-text-secondary uppercase tracking-wider">
             Kolommen ({(table.columns ?? []).length})
           </h5>
           <button
             type="button"
             onClick={addColumn}
-            className="rounded bg-purple-50 px-2 py-0.5 text-[10px] font-medium text-purple-600 hover:bg-purple-100 transition-colors"
+            className="rounded bg-oaec-accent-soft px-2 py-0.5 text-[10px] font-medium text-oaec-accent hover:bg-oaec-accent-soft transition-colors"
           >
             + Kolom
           </button>

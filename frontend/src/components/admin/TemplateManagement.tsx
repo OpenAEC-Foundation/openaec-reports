@@ -47,10 +47,10 @@ function YamlFileSection({
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
+        <h3 className="text-sm font-semibold text-oaec-text">{title}</h3>
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="rounded-md bg-purple-600 px-3 py-1 text-xs font-medium text-white hover:bg-purple-700 transition-colors"
+          className="rounded-md bg-oaec-accent px-3 py-1 text-xs font-medium text-oaec-accent-text hover:bg-oaec-accent-hover transition-colors"
         >
           Upload
         </button>
@@ -64,7 +64,7 @@ function YamlFileSection({
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 text-sm text-gray-500 py-4">
+        <div className="flex items-center gap-2 text-sm text-oaec-text-muted py-4">
           <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -72,52 +72,52 @@ function YamlFileSection({
           Laden...
         </div>
       ) : files.length === 0 ? (
-        <div className="rounded-lg border-2 border-dashed border-gray-300 py-6 text-center">
-          <p className="text-sm text-gray-500">Geen bestanden</p>
-          <p className="text-xs text-gray-400 mt-1">Upload een .yaml bestand</p>
+        <div className="rounded-lg border-2 border-dashed border-oaec-border py-6 text-center">
+          <p className="text-sm text-oaec-text-muted">Geen bestanden</p>
+          <p className="text-xs text-oaec-text-faint mt-1">Upload een .yaml bestand</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-hidden rounded-lg border border-oaec-border">
+          <table className="min-w-full divide-y divide-oaec-border">
+            <thead className="bg-oaec-bg">
               <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-oaec-text-muted">
                   Bestandsnaam
                 </th>
-                <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-oaec-text-muted">
                   Grootte
                 </th>
-                <th className="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th className="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-oaec-text-muted">
                   Acties
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-oaec-border bg-oaec-bg-lighter">
               {files.map((f) => (
                 <tr key={f.filename}>
-                  <td className="px-4 py-2 text-sm font-medium text-gray-700">
+                  <td className="px-4 py-2 text-sm font-medium text-oaec-text-secondary">
                     {f.filename}
                   </td>
-                  <td className="px-4 py-2 text-sm text-gray-500">
+                  <td className="px-4 py-2 text-sm text-oaec-text-muted">
                     {formatSize(f.size)}
                   </td>
                   <td className="px-4 py-2 text-right space-x-2">
                     <button
                       onClick={() => onEdit(f.filename)}
-                      className="rounded px-2 py-1 text-xs text-purple-600 hover:bg-purple-50"
+                      className="rounded px-2 py-1 text-xs text-oaec-accent hover:bg-oaec-accent-soft"
                     >
                       Bewerken
                     </button>
                     <a
                       href={adminApi.getYamlDownloadUrl(tenant, category, f.filename)}
-                      className="rounded px-2 py-1 text-xs text-blue-600 hover:bg-blue-50"
+                      className="rounded px-2 py-1 text-xs text-oaec-accent hover:bg-oaec-accent-soft"
                       download
                     >
                       Download
                     </a>
                     <button
                       onClick={() => handleDelete(f.filename)}
-                      className="rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50"
+                      className="rounded px-2 py-1 text-xs text-oaec-danger hover:bg-oaec-danger-soft"
                     >
                       Verwijderen
                     </button>
@@ -150,10 +150,10 @@ function PreviewPanel() {
 
   return (
     <div className="flex flex-col h-full">
-      <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
+      <h4 className="text-xs font-semibold text-oaec-text-secondary uppercase tracking-wider mb-2">
         Preview
       </h4>
-      <div className="flex-1 relative rounded-md border border-gray-200 bg-gray-100 overflow-hidden min-h-[400px]">
+      <div className="flex-1 relative rounded-md border border-oaec-border bg-oaec-hover overflow-hidden min-h-[400px]">
         {previewImage && (
           <img
             src={previewImage}
@@ -165,22 +165,22 @@ function PreviewPanel() {
         )}
         {previewLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex items-center gap-2 rounded-md bg-white/80 px-3 py-2 shadow-sm">
+            <div className="flex items-center gap-2 rounded-md bg-oaec-bg-lighter/80 px-3 py-2 shadow-sm">
               <Spinner />
-              <span className="text-xs text-gray-600">Rendering...</span>
+              <span className="text-xs text-oaec-text-secondary">Rendering...</span>
             </div>
           </div>
         )}
         {previewError && !previewLoading && (
           <div className="absolute inset-0 flex items-center justify-center p-4">
-            <div className="rounded-md bg-red-50 border border-red-200 px-3 py-2 max-w-full">
-              <p className="text-xs text-red-600 font-mono break-all">{previewError}</p>
+            <div className="rounded-md bg-oaec-danger-soft border border-oaec-border px-3 py-2 max-w-full">
+              <p className="text-xs text-oaec-danger font-mono break-all">{previewError}</p>
             </div>
           </div>
         )}
         {!previewImage && !previewLoading && !previewError && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-oaec-text-faint">
               Klik "Preview" of wijzig de YAML om een preview te zien
             </p>
           </div>
@@ -203,13 +203,13 @@ function ModeTabs({
   if (!isPageType) return null;
 
   return (
-    <div className="flex border-b border-gray-200 mb-3">
+    <div className="flex border-b border-oaec-border mb-3">
       <button
         onClick={() => onModeChange("raw")}
         className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
           mode === "raw"
-            ? "border-purple-600 text-purple-700"
-            : "border-transparent text-gray-500 hover:text-gray-700"
+            ? "border-oaec-accent text-oaec-accent"
+            : "border-transparent text-oaec-text-muted hover:text-oaec-text-secondary"
         }`}
       >
         Raw YAML
@@ -218,8 +218,8 @@ function ModeTabs({
         onClick={() => onModeChange("form")}
         className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
           mode === "form"
-            ? "border-purple-600 text-purple-700"
-            : "border-transparent text-gray-500 hover:text-gray-700"
+            ? "border-oaec-accent text-oaec-accent"
+            : "border-transparent text-oaec-text-muted hover:text-oaec-text-secondary"
         }`}
       >
         Formulier
@@ -358,17 +358,17 @@ function YamlEditorPanel() {
   if (!editorFile) return null;
 
   return (
-    <div className="mb-8 rounded-lg border border-purple-200 bg-purple-50 p-4">
+    <div className="mb-8 rounded-lg border border-oaec-border bg-oaec-accent-soft p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-purple-800">
+          <h3 className="text-sm font-semibold text-oaec-accent">
             {editorFile.filename}
           </h3>
           {isDirty && (
-            <span className="inline-block h-2 w-2 rounded-full bg-orange-400" title="Onopgeslagen wijzigingen" />
+            <span className="inline-block h-2 w-2 rounded-full bg-oaec-accent" title="Onopgeslagen wijzigingen" />
           )}
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-oaec-text-muted">
             ({editorFile.category})
           </span>
         </div>
@@ -377,7 +377,7 @@ function YamlEditorPanel() {
             <button
               onClick={handlePreview}
               disabled={!!yamlError || previewLoading}
-              className="rounded-md bg-teal-600 px-3 py-1 text-xs font-medium text-white hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-md bg-oaec-accent px-3 py-1 text-xs font-medium text-oaec-accent-text hover:bg-oaec-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {previewLoading ? "Rendering..." : "Preview"}
             </button>
@@ -385,13 +385,13 @@ function YamlEditorPanel() {
           <button
             onClick={handleSave}
             disabled={!isDirty || !!yamlError || editorSaving}
-            className="rounded-md bg-purple-600 px-3 py-1 text-xs font-medium text-white hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md bg-oaec-accent px-3 py-1 text-xs font-medium text-oaec-accent-text hover:bg-oaec-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {editorSaving ? "Opslaan..." : "Opslaan"}
           </button>
           <button
             onClick={handleClose}
-            className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            className="rounded-md border border-oaec-border bg-oaec-bg-lighter px-3 py-1 text-xs font-medium text-oaec-text-secondary hover:bg-oaec-bg transition-colors"
           >
             Sluiten
           </button>
@@ -406,7 +406,7 @@ function YamlEditorPanel() {
       />
 
       {editorLoading ? (
-        <div className="flex items-center gap-2 text-sm text-gray-500 py-8 justify-center">
+        <div className="flex items-center gap-2 text-sm text-oaec-text-muted py-8 justify-center">
           <Spinner />
           Laden...
         </div>
@@ -430,15 +430,15 @@ function YamlEditorPanel() {
                   spellCheck={false}
                   className={`w-full rounded-md border p-3 font-mono text-sm leading-relaxed focus:outline-none focus:ring-2 ${
                     yamlError
-                      ? "border-red-300 focus:ring-red-400"
-                      : "border-gray-300 focus:ring-purple-400"
+                      ? "border-oaec-danger focus:ring-oaec-danger"
+                      : "border-oaec-border focus:ring-oaec-accent"
                   }`}
                   rows={24}
                 />
                 {yamlError && (
-                  <p className="mt-1 text-xs text-red-600 font-mono">{yamlError}</p>
+                  <p className="mt-1 text-xs text-oaec-danger font-mono">{yamlError}</p>
                 )}
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-oaec-text-faint">
                   Ctrl+S om op te slaan &middot; Tab voegt 2 spaties in
                   {isPageType && " \u00b7 Preview update automatisch"}
                 </p>
@@ -528,11 +528,11 @@ export function TemplateManagement() {
     <div>
       {/* Tenant selector */}
       <div className="flex items-center gap-4 mb-6">
-        <label className="text-sm font-medium text-gray-700">Tenant:</label>
+        <label className="text-sm font-medium text-oaec-text-secondary">Tenant:</label>
         <select
           value={selectedTenant ?? ""}
           onChange={(e) => selectTenant(e.target.value || null)}
-          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+          className="rounded-md border border-oaec-border px-3 py-1.5 text-sm shadow-sm focus:border-oaec-accent focus:ring-1 focus:ring-oaec-accent"
         >
           <option value="">Selecteer tenant...</option>
           {tenants.map((t) => (
@@ -542,7 +542,7 @@ export function TemplateManagement() {
       </div>
 
       {!selectedTenant ? (
-        <p className="text-sm text-gray-500 py-8 text-center">
+        <p className="text-sm text-oaec-text-muted py-8 text-center">
           Selecteer een tenant om YAML bestanden te beheren
         </p>
       ) : (

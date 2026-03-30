@@ -193,7 +193,7 @@ function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
   return (
     <div
       ref={ref}
-      className="fixed z-50 min-w-[160px] rounded-md border border-gray-200 bg-white py-1 shadow-lg"
+      className="fixed z-50 min-w-[160px] rounded-md border border-oaec-border bg-oaec-bg-lighter py-1 shadow-lg"
       style={{ left: x, top: y }}
     >
       {items.map((item, i) => (
@@ -201,8 +201,8 @@ function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
           key={i}
           type="button"
           onClick={() => { item.onClick(); onClose(); }}
-          className={`w-full px-3 py-1.5 text-left text-xs hover:bg-gray-100 transition-colors ${
-            item.danger ? "text-red-600 hover:bg-red-50" : "text-gray-700"
+          className={`w-full px-3 py-1.5 text-left text-xs hover:bg-oaec-hover transition-colors ${
+            item.danger ? "text-oaec-danger hover:bg-oaec-danger-soft" : "text-oaec-text-secondary"
           }`}
         >
           {item.label}
@@ -235,15 +235,15 @@ function ColorPicker({ colors, value, onSelect, onClose }: ColorPickerProps) {
   return (
     <div
       ref={ref}
-      className="absolute bottom-full left-0 mb-1 z-50 bg-white border border-gray-200 rounded-md shadow-lg p-2.5 grid grid-cols-5 gap-1.5"
+      className="absolute bottom-full left-0 mb-1 z-50 bg-oaec-bg-lighter border border-oaec-border rounded-md shadow-lg p-2.5 grid grid-cols-5 gap-1.5"
     >
       {colors.map((c) => (
         <button
           key={c}
           type="button"
           onClick={() => onSelect(c)}
-          className={`w-8 h-8 rounded border hover:ring-2 hover:ring-blue-300 ${
-            c === value ? "ring-2 ring-blue-500" : "border-gray-200"
+          className={`w-8 h-8 rounded border hover:ring-2 hover:ring-oaec-accent/30 ${
+            c === value ? "ring-2 ring-oaec-accent" : "border-oaec-border"
           }`}
           style={{ backgroundColor: c }}
         />
@@ -255,8 +255,8 @@ function ColorPicker({ colors, value, onSelect, onClose }: ColorPickerProps) {
 // --- Main Component ---
 
 const btnBase = "rounded border px-1.5 py-1 text-xs transition-colors flex items-center justify-center";
-const btnNormal = `${btnBase} border-gray-200 text-gray-600 hover:bg-gray-100`;
-const btnActive = `${btnBase} border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100`;
+const btnNormal = `${btnBase} border-oaec-border text-oaec-text-secondary hover:bg-oaec-hover`;
+const btnActive = `${btnBase} border-oaec-accent text-oaec-accent bg-oaec-accent-soft hover:bg-oaec-accent-soft`;
 
 export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
   // --- State ---
@@ -749,7 +749,7 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
       {/* Title */}
       <input
         type="text"
-        className="w-full rounded-t border border-gray-300 bg-gray-50 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-1 focus:ring-blue-100 outline-none"
+        className="w-full rounded-t border border-oaec-border bg-oaec-bg px-2 py-1.5 text-sm focus:border-oaec-accent focus:ring-1 focus:ring-oaec-accent/20 outline-none"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         onBlur={() => {
@@ -759,9 +759,9 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
       />
 
       {/* Toolbar */}
-      <div className="flex items-center gap-0.5 flex-wrap border-x border-b border-gray-300 px-1.5 py-1 bg-gray-50">
+      <div className="flex items-center gap-0.5 flex-wrap border-x border-b border-oaec-border px-1.5 py-1 bg-oaec-bg">
         {/* Cell reference */}
-        <span className="inline-flex items-center rounded border border-gray-300 bg-white px-1.5 py-0.5 text-[11px] font-mono text-gray-700 min-w-[36px] text-center mr-1">
+        <span className="inline-flex items-center rounded border border-oaec-border bg-oaec-bg-lighter px-1.5 py-0.5 text-[11px] font-mono text-oaec-text-secondary min-w-[36px] text-center mr-1">
           {activeCell ? cellRef(activeCell.row, activeCell.col) : "—"}
         </span>
 
@@ -773,11 +773,11 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
           <span className="italic text-[11px] w-4">I</span>
         </button>
 
-        <span className="mx-0.5 h-4 w-px bg-gray-300" />
+        <span className="mx-0.5 h-4 w-px bg-oaec-hover-strong" />
 
         {/* Font size */}
         <select
-          className="rounded border border-gray-200 bg-white px-1 py-0.5 text-[11px] text-gray-700 outline-none hover:bg-gray-100"
+          className="rounded border border-oaec-border bg-oaec-bg-lighter px-1 py-0.5 text-[11px] text-oaec-text-secondary outline-none hover:bg-oaec-hover"
           value={selStyle.font_size ?? ""}
           onChange={(e) => setFontSize(e.target.value ? Number(e.target.value) : undefined)}
           title="Lettergrootte"
@@ -788,7 +788,7 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
           ))}
         </select>
 
-        <span className="mx-0.5 h-4 w-px bg-gray-300" />
+        <span className="mx-0.5 h-4 w-px bg-oaec-hover-strong" />
 
         {/* Alignment */}
         <button
@@ -816,7 +816,7 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
           <IconAlignRight className="h-3.5 w-3.5" />
         </button>
 
-        <span className="mx-0.5 h-4 w-px bg-gray-300" />
+        <span className="mx-0.5 h-4 w-px bg-oaec-hover-strong" />
 
         {/* Background color */}
         <div className="relative">
@@ -872,7 +872,7 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
           )}
         </div>
 
-        <span className="mx-0.5 h-4 w-px bg-gray-300" />
+        <span className="mx-0.5 h-4 w-px bg-oaec-hover-strong" />
 
         {/* Merge / split */}
         {hasMultiSelection && !activeMerge && (
@@ -897,12 +897,12 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
         <div className="flex-1" />
 
         {/* Grid toggle */}
-        <label className="flex items-center gap-1 text-[11px] text-gray-500 cursor-pointer">
+        <label className="flex items-center gap-1 text-[11px] text-oaec-text-muted cursor-pointer">
           <input
             type="checkbox"
             checked={showGrid}
             onChange={(e) => { setShowGrid(e.target.checked); onChange({ show_grid: e.target.checked }); }}
-            className="rounded border-gray-300 h-3 w-3"
+            className="rounded border-oaec-border h-3 w-3"
           />
           Raster
         </label>
@@ -911,7 +911,7 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
         <button
           type="button"
           onClick={handleCopy}
-          className={`${btnNormal} ml-1 ${copied ? "!bg-green-50 !border-green-300 !text-green-700" : ""}`}
+          className={`${btnNormal} ml-1 ${copied ? "!bg-oaec-success-soft !border-oaec-success !text-oaec-success" : ""}`}
           title="Kopieer selectie als TSV (plakbaar in Excel)"
         >
           <span className="text-[11px]">{copied ? "Gekopieerd!" : "Kopieer"}</span>
@@ -919,8 +919,8 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
       </div>
 
       {/* Formula bar */}
-      <div className="flex items-center border-x border-b border-gray-300 bg-white">
-        <span className="shrink-0 border-r border-gray-200 px-2 py-1 text-[11px] text-gray-400">
+      <div className="flex items-center border-x border-b border-oaec-border bg-oaec-bg-lighter">
+        <span className="shrink-0 border-r border-oaec-border px-2 py-1 text-[11px] text-oaec-text-faint">
           <em>fx</em>
         </span>
         <input
@@ -958,7 +958,7 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
       </div>
 
       {/* Grid */}
-      <div className="overflow-x-auto overflow-y-scroll border-x border-b border-gray-300 rounded-b" style={{ maxHeight: "500px" }}>
+      <div className="overflow-x-auto overflow-y-scroll border-x border-b border-oaec-border rounded-b" style={{ maxHeight: "500px" }}>
         <table className="border-collapse" style={{ tableLayout: "fixed" }}>
           <colgroup>
             <col style={{ width: "32px" }} />
@@ -968,31 +968,31 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
           </colgroup>
           {/* Column letter header row */}
           <thead className="sticky top-0 z-20">
-            <tr className="bg-gray-100">
-              <th className="border-r border-b border-gray-300 bg-gray-100" />
+            <tr className="bg-oaec-hover">
+              <th className="border-r border-b border-oaec-border bg-oaec-hover" />
               {headers.map((_, ci) => (
                 <th
                   key={ci}
-                  className="relative border-r border-b border-gray-300 bg-gray-100 py-0.5 text-[10px] font-medium text-gray-500 text-center select-none group"
+                  className="relative border-r border-b border-oaec-border bg-oaec-hover py-0.5 text-[10px] font-medium text-oaec-text-muted text-center select-none group"
                 >
                   {colLabel(ci)}
                   <div
-                    className="absolute right-0 top-0 w-1.5 h-full cursor-col-resize hover:bg-blue-400/50"
+                    className="absolute right-0 top-0 w-1.5 h-full cursor-col-resize hover:bg-oaec-accent/50"
                     onMouseDown={(e) => startColResize(ci, e)}
                   />
                 </th>
               ))}
             </tr>
             {/* Header row (PDF table headers) */}
-            <tr className="bg-gray-50">
-              <td className="border-r border-b border-gray-300 bg-gray-100 text-[10px] text-gray-400 text-center select-none font-medium">
+            <tr className="bg-oaec-bg">
+              <td className="border-r border-b border-oaec-border bg-oaec-hover text-[10px] text-oaec-text-faint text-center select-none font-medium">
                 H
               </td>
               {headers.map((header, ci) => (
-                <td key={ci} className="border-r border-b border-gray-300 bg-gray-50 p-0">
+                <td key={ci} className="border-r border-b border-oaec-border bg-oaec-bg p-0">
                   <input
                     type="text"
-                    className="w-full bg-transparent px-1.5 py-1 text-xs font-semibold text-gray-700 outline-none"
+                    className="w-full bg-transparent px-1.5 py-1 text-xs font-semibold text-oaec-text-secondary outline-none"
                     value={header}
                     onChange={(e) => {
                       const nh = [...headers];
@@ -1011,12 +1011,12 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
               <tr key={ri} className="group/row">
                 {/* Row number */}
                 <td
-                  className="sticky left-0 z-10 border-r border-b border-gray-300 bg-gray-100 text-[10px] text-gray-500 text-center select-none relative font-medium"
+                  className="sticky left-0 z-10 border-r border-b border-oaec-border bg-oaec-hover text-[10px] text-oaec-text-muted text-center select-none relative font-medium"
                   style={{ height: `${(rowHeights[ri] ?? DEFAULT_ROW_HEIGHT) * PX_PER_MM}px` }}
                 >
                   {ri + 1}
                   <div
-                    className="absolute left-0 bottom-0 w-full h-1 cursor-row-resize hover:bg-blue-400/50"
+                    className="absolute left-0 bottom-0 w-full h-1 cursor-row-resize hover:bg-oaec-accent/50"
                     onMouseDown={(e) => startRowResize(ri, e)}
                   />
                 </td>
@@ -1034,9 +1034,9 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
                       colSpan={merge?.colspan}
                       className={[
                         "p-0 relative",
-                        showGrid ? "border border-gray-200" : "border border-transparent",
+                        showGrid ? "border border-oaec-border" : "border border-transparent",
                         isActive ? "outline outline-2 outline-blue-500 outline-offset-[-2px] z-10" : "",
-                        isSelected && !isActive ? "bg-blue-50/60" : "",
+                        isSelected && !isActive ? "bg-oaec-accent-soft/60" : "",
                       ].join(" ")}
                       style={{
                         backgroundColor: isSelected && !isActive
@@ -1052,7 +1052,7 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
                         <input
                           type="text"
                           autoFocus
-                          className="w-full h-full bg-white px-1.5 py-0.5 text-sm outline-none border-0"
+                          className="w-full h-full bg-oaec-bg-lighter px-1.5 py-0.5 text-sm outline-none border-0"
                           style={{
                             fontWeight: cs?.bold ? "bold" : undefined,
                             fontStyle: cs?.italic ? "italic" : undefined,
@@ -1102,7 +1102,7 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
       </div>
 
       {/* Footer actions */}
-      <div className="flex items-center gap-1.5 flex-wrap border-x border-b border-gray-300 rounded-b px-2 py-1.5 bg-gray-50">
+      <div className="flex items-center gap-1.5 flex-wrap border-x border-b border-oaec-border rounded-b px-2 py-1.5 bg-oaec-bg">
         <button type="button" onClick={() => insertRowAt(rowCount)} className={btnNormal}>
           + Rij
         </button>
@@ -1110,7 +1110,7 @@ export function SpreadsheetEditor({ block, onChange }: SpreadsheetEditorProps) {
           + Kolom
         </button>
         <div className="flex-1" />
-        <span className="text-[10px] text-gray-400">
+        <span className="text-[10px] text-oaec-text-faint">
           {colCount} kolommen &times; {rowCount} rijen &middot; Plak vanuit Excel met Ctrl+V
         </span>
       </div>

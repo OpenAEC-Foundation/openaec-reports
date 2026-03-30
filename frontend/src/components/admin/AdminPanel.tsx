@@ -34,19 +34,19 @@ export function AdminPanel() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Beheer</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="text-2xl font-bold text-oaec-text">Beheer</h1>
+        <p className="text-sm text-oaec-text-muted mt-1">
           Tenants, gebruikers, templates en brand configuratie beheren
         </p>
       </div>
 
       {/* Error banner */}
       {error && (
-        <div className="mb-4 flex items-center justify-between rounded-lg bg-red-50 border border-red-200 px-4 py-3">
-          <span className="text-sm text-red-700">{error}</span>
+        <div className="mb-4 flex items-center justify-between rounded-lg bg-oaec-danger-soft border border-oaec-border px-4 py-3">
+          <span className="text-sm text-oaec-danger">{error}</span>
           <button
             onClick={clearError}
-            className="text-red-500 hover:text-red-700 text-sm font-medium"
+            className="text-oaec-danger hover:text-oaec-danger text-sm font-medium"
           >
             Sluiten
           </button>
@@ -54,7 +54,7 @@ export function AdminPanel() {
       )}
 
       {/* Sub-tabs */}
-      <div className="border-b border-gray-200 mb-6">
+      <div className="border-b border-oaec-border mb-6">
         <nav className="flex gap-6">
           {TABS.map((tab) => (
             <button
@@ -62,8 +62,8 @@ export function AdminPanel() {
               onClick={() => setActiveTab(tab.key)}
               className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab.key
-                  ? "border-purple-600 text-purple-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  ? "border-oaec-accent text-oaec-accent"
+                  : "border-transparent text-oaec-text-muted hover:text-oaec-text-secondary hover:border-oaec-border"
               }`}
             >
               {tab.label}

@@ -91,19 +91,19 @@ export function OidcCallback() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="flex min-h-screen items-center justify-center bg-oaec-bg">
         <div className="w-full max-w-md">
-          <div className="rounded-xl border border-red-200 bg-white p-8 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-red-700">
+          <div className="rounded-xl border border-oaec-border bg-oaec-bg-lighter p-8 shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold text-oaec-danger">
               Inloggen mislukt
             </h2>
-            <p className="mb-6 text-sm text-gray-600">{error}</p>
+            <p className="mb-6 text-sm text-oaec-text-secondary">{error}</p>
             <button
               onClick={() => {
                 window.history.replaceState({}, "", "/");
                 window.location.reload();
               }}
-              className="w-full rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+              className="w-full rounded-lg bg-oaec-hover px-4 py-2 text-sm font-medium text-oaec-text-secondary hover:bg-oaec-hover-strong transition-colors"
             >
               Terug naar inlogpagina
             </button>
@@ -114,10 +114,10 @@ export function OidcCallback() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="flex min-h-screen items-center justify-center bg-oaec-bg">
       <div className="text-center">
         <svg
-          className="mx-auto h-8 w-8 animate-spin text-gray-400"
+          className="mx-auto h-8 w-8 animate-spin text-oaec-text-faint"
           fill="none"
           viewBox="0 0 24 24"
         >
@@ -135,7 +135,7 @@ export function OidcCallback() {
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
           />
         </svg>
-        <p className="mt-3 text-sm text-gray-500">Inloggen via SSO...</p>
+        <p className="mt-3 text-sm text-oaec-text-muted">Inloggen via SSO...</p>
       </div>
     </div>
   );

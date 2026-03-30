@@ -7,8 +7,8 @@ interface CheckEditorProps {
 }
 
 const inputClass =
-  'w-full rounded border border-gray-200 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none';
-const labelClass = 'text-xs font-medium text-gray-500 mb-1';
+  'w-full rounded border border-oaec-border px-2 py-1.5 text-sm focus:border-oaec-accent focus:ring-2 focus:ring-oaec-accent/20 outline-none';
+const labelClass = 'text-xs font-medium text-oaec-text-muted mb-1';
 
 export function CheckEditor({ block, onChange }: CheckEditorProps) {
   const [values, setValues] = useState({
@@ -135,16 +135,16 @@ export function CheckEditor({ block, onChange }: CheckEditorProps) {
       {/* UC bar */}
       <div className="space-y-1">
         <div className="flex items-center justify-between text-xs">
-          <span className={`font-semibold ${pass ? 'text-green-600' : 'text-red-600'}`}>
+          <span className={`font-semibold ${pass ? 'text-oaec-success' : 'text-oaec-danger'}`}>
             UC = {uc.toFixed(2)} / {limit.toFixed(2)}
           </span>
-          <span className={`font-semibold ${pass ? 'text-green-600' : 'text-red-600'}`}>
+          <span className={`font-semibold ${pass ? 'text-oaec-success' : 'text-oaec-danger'}`}>
             {pass ? 'VOLDOET' : 'VOLDOET NIET'}
           </span>
         </div>
-        <div className="h-3 w-full rounded-full bg-gray-100 overflow-hidden">
+        <div className="h-3 w-full rounded-full bg-oaec-hover overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all ${pass ? 'bg-green-500' : 'bg-red-500'}`}
+            className={`h-full rounded-full transition-all ${pass ? 'bg-oaec-success-soft0' : 'bg-oaec-danger-soft0'}`}
             style={{ width: `${Math.min((uc / limit) * 100, 100)}%` }}
           />
         </div>

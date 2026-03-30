@@ -7,8 +7,8 @@ interface MapEditorProps {
 }
 
 const inputClass =
-  'w-full rounded border border-gray-200 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none';
-const labelClass = 'text-xs font-medium text-gray-500 mb-1';
+  'w-full rounded border border-oaec-border px-2 py-1.5 text-sm focus:border-oaec-accent focus:ring-2 focus:ring-oaec-accent/20 outline-none';
+const labelClass = 'text-xs font-medium text-oaec-text-muted mb-1';
 
 const ALL_LAYERS: { value: MapLayer; label: string; desc: string }[] = [
   { value: 'percelen', label: 'Percelen', desc: 'Kadastrale grenzen + straatnamen' },
@@ -300,7 +300,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
       <div className="relative" ref={suggestionsRef}>
         <label className={labelClass}>
           Adres / locatie
-          {isGeocoding && <span className="ml-2 text-blue-400 animate-pulse">zoeken…</span>}
+          {isGeocoding && <span className="ml-2 text-oaec-accent animate-pulse">zoeken…</span>}
         </label>
         <div className="relative">
           <input
@@ -312,14 +312,14 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             placeholder="Bijv. Kijkduinsestraat 100, Den Haag"
           />
-          <svg className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <svg className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-oaec-text-faint" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
         </div>
 
         {/* Suggestions dropdown */}
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg max-h-48 overflow-y-auto">
+          <div className="absolute z-50 mt-1 w-full rounded-md border border-oaec-border bg-oaec-bg-lighter shadow-lg max-h-48 overflow-y-auto">
             {suggestions.map((s) => (
               <button
                 key={s.id}
@@ -333,8 +333,8 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                 </svg>
                 <div>
-                  <div className="text-gray-800">{s.weergavenaam}</div>
-                  <div className="text-[10px] text-gray-400">{s.type}</div>
+                  <div className="text-oaec-text">{s.weergavenaam}</div>
+                  <div className="text-[10px] text-oaec-text-faint">{s.type}</div>
                 </div>
               </button>
             ))}
@@ -348,7 +348,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
             {resolvedName}
-            <span className="text-gray-400 ml-1">
+            <span className="text-oaec-text-faint ml-1">
               ({resolvedCoords.lat.toFixed(4)}, {resolvedCoords.lon.toFixed(4)})
             </span>
           </div>
@@ -357,7 +357,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
 
       {/* Map preview */}
       {previewUrl && (
-        <div className="rounded-md overflow-hidden border border-gray-200 bg-gray-100 relative">
+        <div className="rounded-md overflow-hidden border border-oaec-border bg-oaec-hover relative">
           <img
             src={previewUrl}
             alt="Kaart preview"
@@ -390,7 +390,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
               className={`flex cursor-pointer items-center gap-1.5 rounded border px-2.5 py-1.5 text-xs transition-colors ${
                 layers.includes(value)
                   ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
-                  : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                  : 'border-oaec-border text-oaec-text-muted hover:bg-oaec-bg'
               }`}
             >
               <input
@@ -403,11 +403,11 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
                 className={`h-3 w-3 rounded-sm border flex items-center justify-center ${
                   layers.includes(value)
                     ? 'border-emerald-500 bg-emerald-500'
-                    : 'border-gray-300'
+                    : 'border-oaec-border'
                 }`}
               >
                 {layers.includes(value) && (
-                  <svg className="h-2 w-2 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                  <svg className="h-2 w-2 text-oaec-accent-text" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
                 )}
@@ -432,7 +432,7 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
           onChange={(e) => handleZoomChange(Number(e.target.value))}
           className="w-full accent-emerald-400"
         />
-        <div className="flex justify-between text-[10px] text-gray-400">
+        <div className="flex justify-between text-[10px] text-oaec-text-faint">
           <span>Regio</span>
           <span>Perceel</span>
         </div>
@@ -465,14 +465,14 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
           onKeyUp={handleWidthCommit}
           className="w-full accent-emerald-400"
         />
-        <div className="flex justify-between text-[10px] text-gray-400">
+        <div className="flex justify-between text-[10px] text-oaec-text-faint">
           <span>80 mm</span>
           <span>170 mm</span>
         </div>
       </div>
 
       {/* Cadastral lookup */}
-      <div className="border-t border-gray-100 pt-3">
+      <div className="border-t border-oaec-border-subtle pt-3">
         <label className={labelClass}>Kadastrale gegevens</label>
 
         {!cadastral ? (
@@ -483,8 +483,8 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
               onClick={lookupCadastral}
               className={`flex items-center gap-2 rounded border px-3 py-2 text-xs font-medium transition-colors ${
                 resolvedCoords && !isCadastralLoading
-                  ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100'
-                  : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                  ? 'border-oaec-border bg-oaec-accent-soft text-oaec-accent hover:bg-oaec-accent-soft'
+                  : 'border-oaec-border bg-oaec-bg text-oaec-text-faint cursor-not-allowed'
               }`}
             >
               {isCadastralLoading ? (
@@ -505,40 +505,40 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
               )}
             </button>
             {!resolvedCoords && (
-              <p className="text-[10px] text-gray-400">Selecteer eerst een adres om kadastrale gegevens op te halen.</p>
+              <p className="text-[10px] text-oaec-text-faint">Selecteer eerst een adres om kadastrale gegevens op te halen.</p>
             )}
             {cadastralError && (
-              <p className="text-[11px] text-red-500">{cadastralError}</p>
+              <p className="text-[11px] text-oaec-danger">{cadastralError}</p>
             )}
           </div>
         ) : (
-          <div className="rounded-md border border-amber-200 bg-amber-50 p-3 space-y-1.5">
+          <div className="rounded-md border border-oaec-border bg-oaec-accent-soft p-3 space-y-1.5">
             <div className="flex items-start justify-between">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <svg className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-4 w-4 text-oaec-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
                   </svg>
-                  <span className="text-sm font-bold text-amber-800 font-mono tracking-wide">
+                  <span className="text-sm font-bold text-oaec-accent font-mono tracking-wide">
                     {cadastral.identificatie}
                   </span>
                 </div>
-                <div className="text-[11px] text-amber-700 pl-6 space-y-0.5">
+                <div className="text-[11px] text-oaec-accent pl-6 space-y-0.5">
                   <div>
-                    <span className="text-amber-500">Gemeente:</span>{' '}
+                    <span className="text-oaec-accent">Gemeente:</span>{' '}
                     {cadastral.gemeentenaam}
                     {cadastral.gemeentecode && (
-                      <span className="text-amber-400 ml-1">({cadastral.gemeentecode})</span>
+                      <span className="text-oaec-text-muted ml-1">({cadastral.gemeentecode})</span>
                     )}
                   </div>
                   <div>
-                    <span className="text-amber-500">Sectie:</span> {cadastral.sectie}
+                    <span className="text-oaec-accent">Sectie:</span> {cadastral.sectie}
                     {' · '}
-                    <span className="text-amber-500">Perceelnr:</span> {cadastral.perceelnummer}
+                    <span className="text-oaec-accent">Perceelnr:</span> {cadastral.perceelnummer}
                   </div>
                   {cadastral.grootte > 0 && (
                     <div>
-                      <span className="text-amber-500">Oppervlakte:</span>{' '}
+                      <span className="text-oaec-accent">Oppervlakte:</span>{' '}
                       {cadastral.grootte.toLocaleString('nl-NL')} m²
                     </div>
                   )}
@@ -548,14 +548,14 @@ export function MapEditor({ block, onChange }: MapEditorProps) {
                 type="button"
                 onClick={removeCadastral}
                 title="Kadastrale gegevens verwijderen"
-                className="text-amber-400 hover:text-red-500 transition-colors p-1"
+                className="text-oaec-text-muted hover:text-oaec-danger transition-colors p-1"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <p className="text-[10px] text-amber-500 pl-6">
+            <p className="text-[10px] text-oaec-accent pl-6">
               Wordt onder de kaartafbeelding(en) in het rapport getoond.
             </p>
           </div>
@@ -599,11 +599,11 @@ function ManualCoords({
   }, [lat, lon]);
 
   return (
-    <div className="border-t border-gray-100 pt-2">
+    <div className="border-t border-oaec-border-subtle pt-2">
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 text-[11px] text-gray-400 hover:text-gray-600 transition-colors"
+        className="flex items-center gap-1.5 text-[11px] text-oaec-text-faint hover:text-oaec-text-secondary transition-colors"
       >
         <svg
           className={`h-3 w-3 transition-transform ${open ? 'rotate-90' : ''}`}
@@ -619,22 +619,22 @@ function ManualCoords({
       {open && (
         <div className="mt-2 grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-medium text-gray-500 mb-1">Latitude</label>
+            <label className="text-xs font-medium text-oaec-text-muted mb-1">Latitude</label>
             <input
               type="number"
               step={0.0001}
-              className="w-full rounded border border-gray-200 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none"
+              className="w-full rounded border border-oaec-border px-2 py-1.5 text-sm focus:border-oaec-accent focus:ring-2 focus:ring-oaec-accent/20 outline-none"
               value={latVal}
               onChange={(e) => setLatVal(parseFloat(e.target.value) || 0)}
               onBlur={() => onUpdate(latVal, lonVal)}
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-500 mb-1">Longitude</label>
+            <label className="text-xs font-medium text-oaec-text-muted mb-1">Longitude</label>
             <input
               type="number"
               step={0.0001}
-              className="w-full rounded border border-gray-200 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none"
+              className="w-full rounded border border-oaec-border px-2 py-1.5 text-sm focus:border-oaec-accent focus:ring-2 focus:ring-oaec-accent/20 outline-none"
               value={lonVal}
               onChange={(e) => setLonVal(parseFloat(e.target.value) || 0)}
               onBlur={() => onUpdate(latVal, lonVal)}

@@ -99,12 +99,12 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
   return (
     <div className="flex h-full">
       {/* Links: Projectlijst */}
-      <div className="w-72 shrink-0 border-r border-gray-200 bg-gray-50 flex flex-col">
-        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-          <h2 className="text-sm font-semibold text-gray-900">Projecten</h2>
+      <div className="w-72 shrink-0 border-r border-oaec-border bg-oaec-bg flex flex-col">
+        <div className="flex items-center justify-between border-b border-oaec-border px-4 py-3">
+          <h2 className="text-sm font-semibold text-oaec-text">Projecten</h2>
           <button
             onClick={() => setShowNewProject(true)}
-            className="rounded-md px-2 py-1 text-xs font-medium text-white transition-colors"
+            className="rounded-md px-2 py-1 text-xs font-medium text-oaec-accent-text transition-colors"
             style={{ backgroundColor: brand.colors.primary }}
           >
             + Nieuw
@@ -113,14 +113,14 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
 
         {/* Nieuw project formulier */}
         {showNewProject && (
-          <div className="border-b border-gray-200 bg-white p-3">
+          <div className="border-b border-oaec-border bg-oaec-bg-lighter p-3">
             <input
               type="text"
               value={newProjectName}
               onChange={(e) => setNewProjectName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleCreateProject()}
               placeholder="Projectnaam..."
-              className="mb-2 w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-1"
+              className="mb-2 w-full rounded border border-oaec-border px-2 py-1.5 text-sm focus:outline-none focus:ring-1"
               style={
                 { "--tw-ring-color": brand.colors.primary } as React.CSSProperties
               }
@@ -130,7 +130,7 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
               <button
                 onClick={handleCreateProject}
                 disabled={!newProjectName.trim()}
-                className="rounded px-2 py-1 text-xs font-medium text-white disabled:opacity-50"
+                className="rounded px-2 py-1 text-xs font-medium text-oaec-accent-text disabled:opacity-50"
                 style={{ backgroundColor: brand.colors.primary }}
               >
                 Aanmaken
@@ -140,7 +140,7 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
                   setShowNewProject(false);
                   setNewProjectName("");
                 }}
-                className="rounded px-2 py-1 text-xs text-gray-500 hover:text-gray-700"
+                className="rounded px-2 py-1 text-xs text-oaec-text-muted hover:text-oaec-text-secondary"
               >
                 Annuleren
               </button>
@@ -158,8 +158,8 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
             }}
             className={`w-full px-4 py-3 text-left text-sm transition-colors ${
               selectedProjectId === null
-                ? "bg-white font-medium border-l-2"
-                : "hover:bg-white/50"
+                ? "bg-oaec-bg-lighter font-medium border-l-2"
+                : "hover:bg-oaec-bg-lighter/50"
             }`}
             style={
               selectedProjectId === null
@@ -168,7 +168,7 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
             }
           >
             <div className="flex items-center gap-2">
-              <svg className="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <svg className="h-4 w-4 shrink-0 text-oaec-text-faint" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
               </svg>
               Alle rapporten
@@ -189,7 +189,7 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
           ))}
 
           {projects.length === 0 && !loading && (
-            <p className="px-4 py-6 text-center text-xs text-gray-400">
+            <p className="px-4 py-6 text-center text-xs text-oaec-text-faint">
               Nog geen projecten
             </p>
           )}
@@ -197,9 +197,9 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
       </div>
 
       {/* Rechts: Rapportenlijst */}
-      <div className="flex-1 flex flex-col bg-white">
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-3">
-          <h2 className="text-sm font-semibold text-gray-900">
+      <div className="flex-1 flex flex-col bg-oaec-bg-lighter">
+        <div className="flex items-center justify-between border-b border-oaec-border px-6 py-3">
+          <h2 className="text-sm font-semibold text-oaec-text">
             {selectedProjectId
               ? projects.find((p) => p.id === selectedProjectId)?.name ||
                 "Rapporten"
@@ -208,11 +208,11 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
         </div>
 
         {error && (
-          <div className="mx-6 mt-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mx-6 mt-3 rounded-lg bg-oaec-danger-soft px-4 py-3 text-sm text-oaec-danger">
             {error}
             <button
               onClick={clearError}
-              className="ml-2 text-red-500 hover:text-red-700"
+              className="ml-2 text-oaec-danger hover:text-oaec-danger"
             >
               Sluiten
             </button>
@@ -222,7 +222,7 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
         {loading ? (
           <div className="flex flex-1 items-center justify-center">
             <svg
-              className="h-6 w-6 animate-spin text-gray-400"
+              className="h-6 w-6 animate-spin text-oaec-text-faint"
               fill="none"
               viewBox="0 0 24 24"
             >
@@ -243,11 +243,11 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
           </div>
         ) : reports.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-            <svg className="h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+            <svg className="h-12 w-12 text-oaec-text-faint" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
             </svg>
-            <p className="text-sm text-gray-500">Nog geen rapporten</p>
-            <p className="text-xs text-gray-400">
+            <p className="text-sm text-oaec-text-muted">Nog geen rapporten</p>
+            <p className="text-xs text-oaec-text-faint">
               Maak een rapport in de editor en sla het hier op
             </p>
           </div>
@@ -255,7 +255,7 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
           <div className="flex-1 overflow-y-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-100 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <tr className="border-b border-oaec-border-subtle text-left text-xs font-medium uppercase tracking-wider text-oaec-text-muted">
                   <th className="px-6 py-2">Titel</th>
                   <th className="px-6 py-2">Template</th>
                   <th className="px-6 py-2">Laatst gewijzigd</th>
@@ -266,16 +266,16 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
                 {reports.map((report) => (
                   <tr
                     key={report.id}
-                    className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors"
+                    className="border-b border-oaec-border-subtle hover:bg-oaec-bg cursor-pointer transition-colors"
                     onClick={() => handleOpenReport(report.id)}
                   >
-                    <td className="px-6 py-3 text-sm font-medium text-gray-900">
+                    <td className="px-6 py-3 text-sm font-medium text-oaec-text">
                       {report.title}
                     </td>
-                    <td className="px-6 py-3 text-sm text-gray-500">
+                    <td className="px-6 py-3 text-sm text-oaec-text-muted">
                       {report.template || "-"}
                     </td>
-                    <td className="px-6 py-3 text-sm text-gray-500">
+                    <td className="px-6 py-3 text-sm text-oaec-text-muted">
                       {formatDate(report.updatedAt)}
                     </td>
                     <td className="px-6 py-3">
@@ -289,7 +289,7 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
                             );
                             setConfirmDelete(null);
                           }}
-                          className="rounded p-1 text-gray-400 hover:text-blue-500 transition-colors"
+                          className="rounded p-1 text-oaec-text-faint hover:text-oaec-accent transition-colors"
                           title="Verplaatsen naar project"
                         >
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -300,10 +300,10 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
                         {/* Move dropdown */}
                         {moveReportId === report.id && (
                           <div
-                            className="absolute right-0 top-8 z-10 w-52 rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+                            className="absolute right-0 top-8 z-10 w-52 rounded-lg border border-oaec-border bg-oaec-bg-lighter py-1 shadow-lg"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <p className="px-3 py-1.5 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            <p className="px-3 py-1.5 text-xs font-medium text-oaec-text-faint uppercase tracking-wider">
                               Verplaats naar
                             </p>
                             <button
@@ -311,9 +311,9 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
                                 handleMoveReport(report.id, null)
                               }
                               disabled={report.projectId === null}
-                              className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 disabled:text-gray-300 disabled:hover:bg-white flex items-center gap-2"
+                              className="w-full px-3 py-2 text-left text-sm hover:bg-oaec-bg disabled:text-oaec-text-faint disabled:hover:bg-oaec-bg-lighter flex items-center gap-2"
                             >
-                              <svg className="h-3.5 w-3.5 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                              <svg className="h-3.5 w-3.5 shrink-0 text-oaec-text-faint" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                               </svg>
                               Geen project
@@ -325,9 +325,9 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
                                   handleMoveReport(report.id, p.id)
                                 }
                                 disabled={report.projectId === p.id}
-                                className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 disabled:text-gray-300 disabled:hover:bg-white flex items-center gap-2"
+                                className="w-full px-3 py-2 text-left text-sm hover:bg-oaec-bg disabled:text-oaec-text-faint disabled:hover:bg-oaec-bg-lighter flex items-center gap-2"
                               >
-                                <svg className="h-3.5 w-3.5 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                                <svg className="h-3.5 w-3.5 shrink-0 text-oaec-text-faint" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
                                 </svg>
                                 <span className="truncate">{p.name}</span>
@@ -344,7 +344,7 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
                                 e.stopPropagation();
                                 handleDeleteReport(report.id);
                               }}
-                              className="rounded px-2 py-1 text-xs font-medium text-white bg-red-500 hover:bg-red-600"
+                              className="rounded px-2 py-1 text-xs font-medium text-oaec-accent-text bg-oaec-danger-soft0 hover:bg-oaec-danger"
                             >
                               Bevestig
                             </button>
@@ -353,7 +353,7 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
                                 e.stopPropagation();
                                 setConfirmDelete(null);
                               }}
-                              className="rounded px-2 py-1 text-xs text-gray-500 hover:text-gray-700"
+                              className="rounded px-2 py-1 text-xs text-oaec-text-muted hover:text-oaec-text-secondary"
                             >
                               Annuleer
                             </button>
@@ -365,7 +365,7 @@ export function ProjectBrowser({ onOpenReport }: ProjectBrowserProps) {
                               setConfirmDelete(`report:${report.id}`);
                               setMoveReportId(null);
                             }}
-                            className="rounded p-1 text-gray-400 hover:text-red-500 transition-colors"
+                            className="rounded p-1 text-oaec-text-faint hover:text-oaec-danger transition-colors"
                             title="Verwijderen"
                           >
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -412,8 +412,8 @@ function ProjectItem({
       onClick={onSelect}
       className={`group flex cursor-pointer items-center justify-between px-4 py-3 text-sm transition-colors ${
         isSelected
-          ? "bg-white font-medium border-l-2"
-          : "hover:bg-white/50"
+          ? "bg-oaec-bg-lighter font-medium border-l-2"
+          : "hover:bg-oaec-bg-lighter/50"
       }`}
       style={
         isSelected
@@ -423,13 +423,13 @@ function ProjectItem({
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <svg className="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <svg className="h-4 w-4 shrink-0 text-oaec-text-faint" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
           </svg>
           <span className="truncate">{project.name}</span>
         </div>
         {project.reportCount !== undefined && (
-          <span className="ml-6 text-xs text-gray-400">
+          <span className="ml-6 text-xs text-oaec-text-faint">
             {project.reportCount} rapport{project.reportCount !== 1 ? "en" : ""}
           </span>
         )}
@@ -439,13 +439,13 @@ function ProjectItem({
         <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={onConfirmDelete}
-            className="rounded px-1.5 py-0.5 text-xs font-medium text-white bg-red-500 hover:bg-red-600"
+            className="rounded px-1.5 py-0.5 text-xs font-medium text-oaec-accent-text bg-oaec-danger-soft0 hover:bg-oaec-danger"
           >
             Ja
           </button>
           <button
             onClick={onCancelDelete}
-            className="rounded px-1.5 py-0.5 text-xs text-gray-500"
+            className="rounded px-1.5 py-0.5 text-xs text-oaec-text-muted"
           >
             Nee
           </button>
@@ -456,7 +456,7 @@ function ProjectItem({
             e.stopPropagation();
             onDelete();
           }}
-          className="rounded p-1 text-gray-400 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
+          className="rounded p-1 text-oaec-text-faint opacity-0 group-hover:opacity-100 hover:text-oaec-danger transition-all"
           title="Verwijderen"
         >
           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">

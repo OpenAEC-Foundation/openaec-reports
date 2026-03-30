@@ -44,9 +44,9 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
   if (!editor) return null;
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="border border-oaec-border rounded-lg overflow-hidden">
       {/* Toolbar */}
-      <div className="flex gap-1 p-2 border-b border-gray-200 bg-gray-50 flex-wrap">
+      <div className="flex gap-1 p-2 border-b border-oaec-border bg-oaec-bg flex-wrap">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           isActive={editor.isActive('bold')}
@@ -68,7 +68,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
         >
           <u>U</u>
         </ToolbarButton>
-        <div className="w-px bg-gray-300 mx-1" />
+        <div className="w-px bg-oaec-hover-strong mx-1" />
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleSubscript().run()}
           isActive={editor.isActive('subscript')}
@@ -83,7 +83,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
         >
           X<sup>2</sup>
         </ToolbarButton>
-        <div className="w-px bg-gray-300 mx-1" />
+        <div className="w-px bg-oaec-hover-strong mx-1" />
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           isActive={editor.isActive('bulletList')}
@@ -121,8 +121,8 @@ function ToolbarButton({
       title={title}
       className={`px-2 py-1 rounded text-sm transition-colors ${
         isActive
-          ? 'bg-purple-100 text-purple-800 font-medium'
-          : 'text-gray-600 hover:bg-gray-100'
+          ? 'bg-oaec-accent-soft text-oaec-accent font-medium'
+          : 'text-oaec-text-secondary hover:bg-oaec-hover'
       }`}
     >
       {children}

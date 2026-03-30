@@ -78,7 +78,7 @@ export function ApiKeyManagement() {
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">
+        <h2 className="text-lg font-semibold text-oaec-text">
           API Keys ({apiKeys.length})
         </h2>
         <button
@@ -86,7 +86,7 @@ export function ApiKeyManagement() {
             setShowForm(!showForm);
             setPlaintextKey(null);
           }}
-          className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
+          className="rounded-md bg-oaec-accent px-4 py-2 text-sm font-medium text-oaec-accent-text hover:bg-oaec-accent-hover transition-colors"
         >
           {showForm ? "Annuleren" : "Nieuwe API key"}
         </button>
@@ -94,24 +94,24 @@ export function ApiKeyManagement() {
 
       {/* Plaintext key banner — eenmalig zichtbaar na aanmaken */}
       {plaintextKey && (
-        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-4">
-          <p className="text-sm font-semibold text-green-800 mb-2">
+        <div className="mb-4 rounded-lg border border-oaec-border bg-oaec-success-soft p-4">
+          <p className="text-sm font-semibold text-oaec-success mb-2">
             API key aangemaakt — kopieer deze nu! Deze wordt niet meer getoond.
           </p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 rounded bg-white px-3 py-2 text-sm font-mono border border-green-200 select-all break-all">
+            <code className="flex-1 rounded bg-oaec-bg-lighter px-3 py-2 text-sm font-mono border border-oaec-border select-all break-all">
               {plaintextKey}
             </code>
             <button
               onClick={handleCopy}
-              className="rounded-md bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors whitespace-nowrap"
+              className="rounded-md bg-oaec-success px-3 py-2 text-sm font-medium text-oaec-accent-text hover:bg-oaec-success transition-colors whitespace-nowrap"
             >
               {copied ? "Gekopieerd!" : "Kopieer"}
             </button>
           </div>
           <button
             onClick={() => setPlaintextKey(null)}
-            className="mt-2 text-xs text-green-600 hover:text-green-800"
+            className="mt-2 text-xs text-oaec-success hover:text-oaec-success"
           >
             Sluiten
           </button>
@@ -120,8 +120,8 @@ export function ApiKeyManagement() {
 
       {/* Create form */}
       {showForm && (
-        <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">
+        <div className="mb-6 rounded-lg border border-oaec-border bg-oaec-bg p-4">
+          <h3 className="text-sm font-semibold text-oaec-text-secondary mb-3">
             Nieuwe API key
           </h3>
           <div className="grid grid-cols-2 gap-3">
@@ -148,7 +148,7 @@ export function ApiKeyManagement() {
             <button
               onClick={handleCreate}
               disabled={!form.name || !form.user_id}
-              className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="rounded-md bg-oaec-accent px-4 py-2 text-sm font-medium text-oaec-accent-text hover:bg-oaec-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               Aanmaken
             </button>
@@ -158,13 +158,13 @@ export function ApiKeyManagement() {
 
       {/* API keys table */}
       {apiKeys.length === 0 ? (
-        <div className="text-center py-12 text-sm text-gray-500">
+        <div className="text-center py-12 text-sm text-oaec-text-muted">
           Nog geen API keys aangemaakt.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-hidden rounded-lg border border-oaec-border">
+          <table className="min-w-full divide-y divide-oaec-border">
+            <thead className="bg-oaec-bg">
               <tr>
                 <Th>Naam</Th>
                 <Th>Gebruiker</Th>
@@ -174,16 +174,16 @@ export function ApiKeyManagement() {
                 <Th>Acties</Th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-oaec-border bg-oaec-bg-lighter">
               {apiKeys.map((key) => (
                 <tr
                   key={key.id}
-                  className={!key.is_active ? "bg-gray-50 opacity-60" : ""}
+                  className={!key.is_active ? "bg-oaec-bg opacity-60" : ""}
                 >
                   <Td className="font-medium">{key.name}</Td>
                   <Td>{getUserName(key.user_id)}</Td>
                   <Td>
-                    <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded">
+                    <code className="text-xs bg-oaec-hover px-1.5 py-0.5 rounded">
                       {key.key_prefix}...
                     </code>
                   </Td>
@@ -192,8 +192,8 @@ export function ApiKeyManagement() {
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                         key.is_active
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                          ? "bg-oaec-success-soft text-oaec-success"
+                          : "bg-oaec-danger-soft text-oaec-danger"
                       }`}
                     >
                       {key.is_active ? "Actief" : "Ingetrokken"}
@@ -204,7 +204,7 @@ export function ApiKeyManagement() {
                       {key.is_active && (
                         <button
                           onClick={() => setConfirmRevoke(key.id)}
-                          className="rounded px-2 py-1 text-xs text-orange-600 hover:bg-orange-50"
+                          className="rounded px-2 py-1 text-xs text-oaec-accent hover:bg-oaec-hover"
                           title="Intrekken (deactiveren)"
                         >
                           Intrekken
@@ -212,7 +212,7 @@ export function ApiKeyManagement() {
                       )}
                       <button
                         onClick={() => setConfirmDelete(key.id)}
-                        className="rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50"
+                        className="rounded px-2 py-1 text-xs text-oaec-danger hover:bg-oaec-danger-soft"
                         title="Permanent verwijderen"
                       >
                         Verwijder
@@ -232,20 +232,20 @@ export function ApiKeyManagement() {
           title="API key intrekken"
           onClose={() => setConfirmRevoke(null)}
         >
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-oaec-text-secondary">
             Weet je zeker dat je deze API key wilt intrekken? De key wordt
             gedeactiveerd en kan niet meer gebruikt worden voor authenticatie.
           </p>
           <div className="mt-4 flex justify-end gap-2">
             <button
               onClick={() => setConfirmRevoke(null)}
-              className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              className="rounded-md border border-oaec-border px-4 py-2 text-sm text-oaec-text-secondary hover:bg-oaec-bg"
             >
               Annuleren
             </button>
             <button
               onClick={() => handleRevoke(confirmRevoke)}
-              className="rounded-md bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700"
+              className="rounded-md bg-oaec-accent px-4 py-2 text-sm font-medium text-oaec-accent-text hover:bg-oaec-accent-hover"
             >
               Intrekken
             </button>
@@ -259,20 +259,20 @@ export function ApiKeyManagement() {
           title="API key verwijderen"
           onClose={() => setConfirmDelete(null)}
         >
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-oaec-text-secondary">
             Weet je zeker dat je deze API key permanent wilt verwijderen? Dit kan
             niet ongedaan worden.
           </p>
           <div className="mt-4 flex justify-end gap-2">
             <button
               onClick={() => setConfirmDelete(null)}
-              className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              className="rounded-md border border-oaec-border px-4 py-2 text-sm text-oaec-text-secondary hover:bg-oaec-bg"
             >
               Annuleren
             </button>
             <button
               onClick={() => handleDelete(confirmDelete)}
-              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+              className="rounded-md bg-oaec-danger px-4 py-2 text-sm font-medium text-oaec-text hover:bg-oaec-danger-hover"
             >
               Verwijderen
             </button>

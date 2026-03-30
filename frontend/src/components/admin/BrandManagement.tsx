@@ -73,15 +73,15 @@ function AssetSection({ tenant, category, assets }: AssetSectionProps) {
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4">
+    <div className="rounded-lg border border-oaec-border bg-oaec-bg-lighter p-4">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h4 className="text-sm font-semibold text-gray-700">{info.title}</h4>
-          <p className="text-xs text-gray-400">{info.description}</p>
+          <h4 className="text-sm font-semibold text-oaec-text-secondary">{info.title}</h4>
+          <p className="text-xs text-oaec-text-faint">{info.description}</p>
         </div>
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="rounded-md bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700 transition-colors"
+          className="rounded-md bg-oaec-accent px-3 py-1.5 text-xs font-medium text-oaec-accent-text hover:bg-oaec-accent-hover transition-colors"
         >
           Uploaden
         </button>
@@ -103,31 +103,31 @@ function AssetSection({ tenant, category, assets }: AssetSectionProps) {
       </div>
 
       {assets.length === 0 ? (
-        <p className="text-xs text-gray-400 italic py-2">Geen bestanden</p>
+        <p className="text-xs text-oaec-text-faint italic py-2">Geen bestanden</p>
       ) : (
-        <ul className="divide-y divide-gray-100">
+        <ul className="divide-y divide-oaec-border-subtle">
           {assets.map((asset) => (
             <li
               key={asset.filename}
               className="flex items-center justify-between py-1.5 text-sm"
             >
               <div className="flex items-center gap-2 min-w-0">
-                <span className="text-gray-700 truncate">{asset.filename}</span>
-                <span className="text-xs text-gray-400 shrink-0">
+                <span className="text-oaec-text-secondary truncate">{asset.filename}</span>
+                <span className="text-xs text-oaec-text-faint shrink-0">
                   {formatFileSize(asset.size)}
                 </span>
               </div>
               <div className="flex items-center gap-2 shrink-0 ml-2">
                 <button
                   onClick={() => startReplace(asset.filename)}
-                  className="text-xs text-purple-600 hover:text-purple-800"
+                  className="text-xs text-oaec-accent hover:text-oaec-accent"
                   title="Vervangen"
                 >
                   Vervangen
                 </button>
                 <button
                   onClick={() => handleDelete(asset.filename)}
-                  className="text-xs text-red-500 hover:text-red-700"
+                  className="text-xs text-oaec-danger hover:text-oaec-danger"
                   title="Verwijderen"
                 >
                   Verwijder
@@ -187,11 +187,11 @@ export function BrandManagement() {
     <div>
       {/* Tenant selector */}
       <div className="flex items-center gap-4 mb-6">
-        <label className="text-sm font-medium text-gray-700">Tenant:</label>
+        <label className="text-sm font-medium text-oaec-text-secondary">Tenant:</label>
         <select
           value={selectedTenant ?? ""}
           onChange={(e) => selectTenant(e.target.value || null)}
-          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+          className="rounded-md border border-oaec-border px-3 py-1.5 text-sm shadow-sm focus:border-oaec-accent focus:ring-1 focus:ring-oaec-accent"
         >
           <option value="">Selecteer tenant...</option>
           {tenants.map((t) => (
@@ -201,11 +201,11 @@ export function BrandManagement() {
       </div>
 
       {!selectedTenant ? (
-        <p className="text-sm text-gray-500 py-8 text-center">
+        <p className="text-sm text-oaec-text-muted py-8 text-center">
           Selecteer een tenant om de brand configuratie te bekijken
         </p>
       ) : isLoading ? (
-        <div className="flex items-center gap-2 text-sm text-gray-500 py-8">
+        <div className="flex items-center gap-2 text-sm text-oaec-text-muted py-8">
           <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -221,7 +221,7 @@ export function BrandManagement() {
             <div className="flex justify-end">
               <button
                 onClick={() => setExtractionStep(1)}
-                className="rounded-md border border-purple-300 bg-purple-50 px-3 py-1.5 text-xs font-medium text-purple-700 hover:bg-purple-100 transition-colors"
+                className="rounded-md border border-oaec-border bg-oaec-accent-soft px-3 py-1.5 text-xs font-medium text-oaec-accent hover:bg-oaec-accent-soft transition-colors"
               >
                 Brand extractie starten
               </button>
@@ -229,15 +229,15 @@ export function BrandManagement() {
           )}
 
           {/* Brand YAML sectie */}
-          <div className="rounded-lg border border-gray-200 bg-white p-4">
+          <div className="rounded-lg border border-oaec-border bg-oaec-bg-lighter p-4">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h4 className="text-sm font-semibold text-gray-700">Brand configuratie</h4>
-                <p className="text-xs text-gray-400">Hoofd brand.yaml bestand met kleuren, fonts, header/footer</p>
+                <h4 className="text-sm font-semibold text-oaec-text-secondary">Brand configuratie</h4>
+                <p className="text-xs text-oaec-text-faint">Hoofd brand.yaml bestand met kleuren, fonts, header/footer</p>
               </div>
               <button
                 onClick={() => brandInputRef.current?.click()}
-                className="rounded-md bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700 transition-colors"
+                className="rounded-md bg-oaec-accent px-3 py-1.5 text-xs font-medium text-oaec-accent-text hover:bg-oaec-accent-hover transition-colors"
               >
                 {brandData?.exists ? "Vervangen" : "Uploaden"}
               </button>
@@ -251,21 +251,21 @@ export function BrandManagement() {
             </div>
 
             {!brandData?.exists ? (
-              <p className="text-xs text-gray-400 italic py-2">
+              <p className="text-xs text-oaec-text-faint italic py-2">
                 Geen brand.yaml gevonden — upload een bestand om te beginnen
               </p>
             ) : (
               <div>
                 {/* Parsed summary */}
                 {brandData.parsed && (
-                  <div className="mb-3 rounded-md border border-gray-100 bg-gray-50 p-3">
+                  <div className="mb-3 rounded-md border border-oaec-border-subtle bg-oaec-bg p-3">
                     <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                       {Object.entries(brandData.parsed).map(([key, value]) => {
                         if (typeof value === "object" && value !== null) return null;
                         return (
                           <div key={key} className="contents">
-                            <dt className="text-gray-500">{key}</dt>
-                            <dd className="text-gray-700 font-medium">{String(value)}</dd>
+                            <dt className="text-oaec-text-muted">{key}</dt>
+                            <dd className="text-oaec-text-secondary font-medium">{String(value)}</dd>
                           </div>
                         );
                       })}
@@ -275,10 +275,10 @@ export function BrandManagement() {
 
                 {/* Raw YAML */}
                 <details className="group">
-                  <summary className="text-xs font-medium text-gray-500 cursor-pointer hover:text-gray-700">
+                  <summary className="text-xs font-medium text-oaec-text-muted cursor-pointer hover:text-oaec-text-secondary">
                     brand.yaml bekijken
                   </summary>
-                  <pre className="mt-2 max-h-64 overflow-auto rounded-md border border-gray-200 bg-gray-900 p-3 text-xs text-gray-100 font-mono">
+                  <pre className="mt-2 max-h-64 overflow-auto rounded-md border border-oaec-border bg-oaec-bg-input p-3 text-xs text-oaec-text font-mono">
                     {brandData.raw}
                   </pre>
                 </details>

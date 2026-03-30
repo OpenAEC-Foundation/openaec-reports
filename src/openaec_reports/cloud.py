@@ -2,14 +2,19 @@
 
 Provides REST endpoints to list Nextcloud project directories and save
 generated PDF reports directly to the project's cloud folder.
+
+Supports both the new project container model (reports/) and the legacy
+layout (99_overige_documenten/reports/) with automatic fallback.
 """
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
-from datetime import date
+import uuid
+from datetime import date, datetime, timezone
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any
@@ -25,8 +30,16 @@ from openaec_reports.auth.models import User
 
 logger = logging.getLogger(__name__)
 
-# Tool-specific subdirectory inside 99_overige_documenten/
+# --- Project container model constants ---
+DIR_REPORTS = "reports"
+MANIFEST_FILENAME = "project.wefc"
+
+# Legacy path components (backward compatibility)
+LEGACY_SUBDIR = "99_overige_documenten"
 TOOL_SUBDIR = "reports"
+
+# Application identifier for manifest header
+APPLICATION_NAME = "openaec-reports"
 
 # --- Lazy-loaded Nextcloud credentials ---
 # Credentials worden pas bij eerste gebruik opgehaald, niet bij module import.
@@ -61,14 +74,32 @@ def _dav_base() -> str:
     return f"{base}/remote.php/dav/files/{_get_nextcloud_user()}/Projects"
 
 
+def _new_path(project: str) -> str:
+    """WebDAV URL for the new project container reports directory."""
+    return f"{_dav_base()}/{quote(project)}/{DIR_REPORTS}"
+
+
+def _legacy_path(project: str) -> str:
+    """WebDAV URL for the legacy reports directory (backward compat)."""
+    return f"{_dav_base()}/{quote(project)}/{LEGACY_SUBDIR}/{TOOL_SUBDIR}"
+
+
 def _tool_path(project: str) -> str:
-    """Full WebDAV URL for a project's tool subdirectory."""
-    return f"{_dav_base()}/{quote(project)}/99_overige_documenten/{TOOL_SUBDIR}"
+    """Full WebDAV URL for a project's tool subdirectory.
+
+    Uses the new path (reports/) as default.
+    """
+    return _new_path(project)
 
 
 def _file_url(project: str, filename: str) -> str:
-    """Full WebDAV URL for a specific file."""
-    return f"{_tool_path(project)}/{quote(filename)}"
+    """Full WebDAV URL for a specific file in the new reports directory."""
+    return f"{_new_path(project)}/{quote(filename)}"
+
+
+def _manifest_url(project: str) -> str:
+    """WebDAV URL for the project manifest (project.wefc)."""
+    return f"{_dav_base()}/{quote(project)}/{MANIFEST_FILENAME}"
 
 
 def _get_client() -> httpx.Client:
@@ -160,6 +191,131 @@ def _slugify(text: str) -> str:
     return re.sub(r"[\s]+", "_", text)
 
 
+def _read_manifest(client: httpx.Client, project: str) -> dict[str, Any] | None:
+    """Read the project manifest (project.wefc) via WebDAV.
+
+    Returns the parsed JSON dict, or None if no manifest exists.
+    """
+    url = _manifest_url(project)
+    res = client.get(url)
+    if res.status_code == 404:
+        return None
+    if res.status_code >= 400:
+        logger.warning("Failed to read manifest for %s: %s", project, res.status_code)
+        return None
+    try:
+        return res.json()
+    except (json.JSONDecodeError, ValueError):
+        logger.warning("Invalid JSON in manifest for project %s", project)
+        return None
+
+
+def _write_manifest(
+    client: httpx.Client,
+    project: str,
+    manifest: dict[str, Any],
+) -> bool:
+    """Write the project manifest (project.wefc) via WebDAV.
+
+    Returns True on success, False on failure.
+    """
+    url = _manifest_url(project)
+    data = json.dumps(manifest, indent=2, ensure_ascii=False).encode("utf-8")
+    res = client.put(url, content=data, headers={"Content-Type": "application/json"})
+    if res.status_code >= 400:
+        logger.warning("Failed to write manifest for %s: %s", project, res.status_code)
+        return False
+    return True
+
+
+def _create_empty_manifest() -> dict[str, Any]:
+    """Create a new empty project manifest."""
+    return {
+        "header": {
+            "schema": "WeFC",
+            "schemaVersion": "1.0.0",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "application": APPLICATION_NAME,
+        },
+        "data": [],
+    }
+
+
+def _build_wefc_report(
+    name: str,
+    filename: str,
+) -> dict[str, Any]:
+    """Build a WefcReport manifest object for a generated report.
+
+    Args:
+        name: Human-readable report title.
+        filename: PDF filename (e.g. "rapport_2026-03-30.pdf").
+
+    Returns:
+        WefcReport dict ready for insertion into manifest.data.
+    """
+    now = datetime.now(timezone.utc).isoformat()
+    return {
+        "type": "WefcReport",
+        "guid": str(uuid.uuid4()),
+        "name": name,
+        "path": f"{DIR_REPORTS}/{filename}",
+        "status": "active",
+        "created": now,
+        "modified": now,
+    }
+
+
+def _upsert_manifest_report(
+    client: httpx.Client,
+    project: str,
+    report_name: str,
+    filename: str,
+) -> None:
+    """Read-merge-write a WefcReport entry into the project manifest.
+
+    Creates the manifest if it doesn't exist yet.
+    """
+    manifest = _read_manifest(client, project)
+    if manifest is None:
+        manifest = _create_empty_manifest()
+
+    # Update header timestamp and application
+    manifest.setdefault("header", {})
+    manifest["header"]["timestamp"] = datetime.now(timezone.utc).isoformat()
+    manifest["header"]["application"] = APPLICATION_NAME
+
+    # Build report object
+    report_obj = _build_wefc_report(report_name, filename)
+
+    # Check if a report with the same path already exists — update it
+    data = manifest.get("data", [])
+    report_path = report_obj["path"]
+    updated = False
+    for i, item in enumerate(data):
+        if (
+            isinstance(item, dict)
+            and item.get("type") == "WefcReport"
+            and item.get("path") == report_path
+        ):
+            # Preserve original guid and created timestamp
+            report_obj["guid"] = item.get("guid", report_obj["guid"])
+            report_obj["created"] = item.get("created", report_obj["created"])
+            data[i] = report_obj
+            updated = True
+            break
+
+    if not updated:
+        data.append(report_obj)
+
+    manifest["data"] = data
+
+    if _write_manifest(client, project, manifest):
+        logger.info("Updated manifest for project %s with report %s", project, filename)
+    else:
+        logger.warning("Failed to update manifest for project %s", project)
+
+
 # --- FastAPI Router ---
 
 cloud_router = APIRouter(
@@ -191,32 +347,68 @@ async def list_projects() -> list[dict[str, str]]:
 
 @cloud_router.get("/projects/{project}/files")
 async def list_files(project: str) -> list[dict[str, Any]]:
-    """List PDF files in a project's reports directory."""
+    """List PDF files in a project's reports directory.
+
+    Tries the new path (reports/) first, falls back to legacy
+    (99_overige_documenten/reports/) if the new path is empty or missing.
+    """
     with _get_client() as client:
+        # Try new path first
         res = client.request(
             "PROPFIND",
-            f"{_tool_path(project)}/",
+            f"{_new_path(project)}/",
             headers={"Depth": "1"},
         )
 
-    # 404 = directory doesn't exist yet
-    if res.status_code == 404:
-        return []
+        if res.status_code < 400:
+            files = _parse_files(res.text)
+            if files:
+                return files
 
-    if res.status_code >= 400:
-        raise HTTPException(
-            status_code=502,
-            detail=f"Nextcloud returned {res.status_code}",
+        # Fallback to legacy path
+        legacy_res = client.request(
+            "PROPFIND",
+            f"{_legacy_path(project)}/",
+            headers={"Depth": "1"},
         )
 
-    return _parse_files(res.text)
+    if legacy_res.status_code == 404 and res.status_code == 404:
+        return []
+
+    if legacy_res.status_code < 400:
+        legacy_files = _parse_files(legacy_res.text)
+        if legacy_files:
+            logger.info(
+                "Project %s: using legacy path 99_overige_documenten/reports/",
+                project,
+            )
+            return legacy_files
+
+    # Both paths empty
+    if res.status_code < 400 or legacy_res.status_code < 400:
+        return []
+
+    raise HTTPException(
+        status_code=502,
+        detail=f"Nextcloud returned {res.status_code}",
+    )
 
 
 @cloud_router.get("/projects/{project}/files/{filename}")
 async def get_file(project: str, filename: str) -> Response:
-    """Download a specific file from Nextcloud."""
+    """Download a specific file from Nextcloud.
+
+    Tries new path first, falls back to legacy path.
+    """
     with _get_client() as client:
-        res = client.get(_file_url(project, filename))
+        # Try new path first
+        new_url = f"{_new_path(project)}/{quote(filename)}"
+        res = client.get(new_url)
+
+        if res.status_code == 404:
+            # Fallback to legacy path
+            legacy_url = f"{_legacy_path(project)}/{quote(filename)}"
+            res = client.get(legacy_url)
 
     if res.status_code == 404:
         raise HTTPException(status_code=404, detail=f"Bestand '{filename}' niet gevonden")
@@ -243,6 +435,7 @@ async def save_report_to_cloud(
     """Generate a PDF report and save it directly to Nextcloud.
 
     Accepts the same JSON body as /api/generate.
+    Always writes to the new path (reports/), then updates project.wefc.
     """
     # Import here to avoid circular imports
     from openaec_reports.api import _generate_and_respond, _resolve_brand_with_tenant_check
@@ -275,13 +468,13 @@ async def save_report_to_cloud(
     date_str = date.today().isoformat()
     filename = f"{title_slug}_{date_str}.pdf"
 
-    # Upload to Nextcloud
-    with _get_client() as client:
-        overige_url = f"{_dav_base()}/{quote(project)}/99_overige_documenten/"
-        _ensure_directory(client, overige_url)
+    # Derive report title for manifest
+    report_title = data.get("title", data.get("project", "Rapport"))
 
-        tool_url = f"{_tool_path(project)}/"
-        _ensure_directory(client, tool_url)
+    # Upload to Nextcloud — always write to new path (reports/)
+    with _get_client() as client:
+        reports_url = f"{_new_path(project)}/"
+        _ensure_directory(client, reports_url)
 
         res = client.put(
             _file_url(project, filename),
@@ -289,14 +482,18 @@ async def save_report_to_cloud(
             headers={"Content-Type": "application/pdf"},
         )
 
-    if res.status_code >= 400:
-        raise HTTPException(
-            status_code=502,
-            detail=f"Upload naar Nextcloud mislukt: {res.status_code}",
-        )
+        if res.status_code >= 400:
+            raise HTTPException(
+                status_code=502,
+                detail=f"Upload naar Nextcloud mislukt: {res.status_code}",
+            )
+
+        # Update project manifest (project.wefc) with WefcReport entry
+        _upsert_manifest_report(client, project, report_title, filename)
 
     return {
         "status": "saved",
         "filename": filename,
         "project": project,
+        "path": f"{DIR_REPORTS}/{filename}",
     }

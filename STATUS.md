@@ -1,6 +1,6 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-28 (sessie 2)
+> Laatst bijgewerkt: 2026-03-30
 > Sessie-historie ouder dan 2 sessies: zie `git log` of `git show <commit>:STATUS.md`
 
 ---
@@ -11,11 +11,30 @@
 - **BIC Rapport:** 17 pagina's compleet, field groups, PDOK kaarten, flow layout met auto page-break
 - **Security:** Alle 6 kritieke items gefixt (K1-K6), 1 hoge + 8 medium open (zie TODO.md)
 - **Productie:** `report.open-aec.com` / `report.open-aec.com` — SSO-only, multi-tenant
+- **Cloud:** Project container model geintegreerd (Python + Rust)
 - **Open:** S2 Sanering template
 
 ---
 
-## Laatste Sessie — 28 maart (sessie 2)
+## Laatste Sessie — 30 maart
+
+### Cloud Migratie — Project Container Model
+- **Python `cloud.py`:** Gemigreerd van `99_overige_documenten/reports/` naar `reports/` met backward compatibility
+  - Constanten: `DIR_REPORTS = "reports"`, `MANIFEST_FILENAME = "project.wefc"`
+  - Alle lees-endpoints (list_files, get_file) proberen nieuw pad eerst, fallback naar legacy
+  - Alle schrijf-endpoints (save) schrijven altijd naar het nieuwe pad
+  - Na PDF upload: `project.wefc` manifest wordt bijgewerkt met `WefcReport` object
+  - Manifest read-merge-write patroon: bestaande entries worden ge-update (guid + created behouden)
+- **Rust server:** `openaec-cloud` crate als dependency toegevoegd
+  - 3 nieuwe cloud routes: `GET /api/cloud/projects`, `GET /api/cloud/projects/{project}/reports`, `POST /api/cloud/projects/{project}/upload`
+  - Upload endpoint accepteert multipart PDF, schrijft naar `reports/`, updatet `project.wefc`
+  - Tenant-aware via `OPENAEC_TENANT` env var + `tenants.json`
+  - Volume mount reads (snel) met WebDAV fallback
+- **Tests:** Rust 208 tests passing, Python 8 cloud tests passing, geen nieuwe failures
+
+---
+
+## Sessie — 28 maart (sessie 2)
 
 ### Rust Server Uitbouw + openaec-engine crate
 - **openaec-engine crate:** V3 TemplateEngine in pure Rust (~2400 LOC), coordinate-based PDF rendering, 28 tests

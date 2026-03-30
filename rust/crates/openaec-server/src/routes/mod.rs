@@ -6,3 +6,4 @@ pub mod generate;
 pub mod validate;
 pub mod admin;
 pub mod auth;
+pub mod cloud;

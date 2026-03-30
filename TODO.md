@@ -1,7 +1,7 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-28 (sessie 2)
+> Laatst bijgewerkt: 2026-03-30
 
 ---
 
@@ -27,7 +27,7 @@
 - [ ] Tenant/template/brand YAML CRUD
 
 ### Phase 5: Nice-to-haves
-- [ ] Cloud storage (Nextcloud WebDAV)
+- [x] Cloud storage (Nextcloud WebDAV) — openaec-cloud crate + 3 cloud routes (30 maart)
 - [ ] Brand onboarding wizard (of als Python microservice houden)
 
 ---

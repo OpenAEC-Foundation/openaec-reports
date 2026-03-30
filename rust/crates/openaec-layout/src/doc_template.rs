@@ -184,14 +184,42 @@ impl DocTemplate {
                 let remaining = Pt(inner_h.0 - cursor_y.0);
                 let size = flowable.wrap(inner_w, remaining, ctx);
 
-                if size.height.0 <= remaining.0 || cursor_y.0 == 0.0 {
-                    // Fits, or first item on page (force draw even if too tall)
+                if size.height.0 <= remaining.0 {
+                    // Fits entirely
                     flowable.draw(start_x, Pt(start_y.0 + cursor_y.0), &mut draw_list);
                     cursor_y = Pt(cursor_y.0 + size.height.0);
                     idx += 1;
                 } else {
-                    // Doesn't fit — new page
-                    break;
+                    // Doesn't fit — try to split
+                    let split_result = flowable.split(inner_w, remaining, ctx);
+                    match split_result {
+                        crate::flowable::SplitResult::Split(mut first, second) => {
+                            // Draw the first part on this page
+                            let first_size = first.wrap(inner_w, remaining, ctx);
+                            first.draw(start_x, Pt(start_y.0 + cursor_y.0), &mut draw_list);
+                            cursor_y = Pt(cursor_y.0 + first_size.height.0);
+                            // Replace current flowable with the remainder
+                            flowables[idx] = second;
+                            // Break to start a new page for the remainder
+                            break;
+                        }
+                        crate::flowable::SplitResult::CannotSplit => {
+                            if cursor_y.0 == 0.0 {
+                                // First item on page, force draw even if too tall
+                                flowable.draw(start_x, Pt(start_y.0 + cursor_y.0), &mut draw_list);
+                                cursor_y = Pt(cursor_y.0 + size.height.0);
+                                idx += 1;
+                            }
+                            // Move to next page
+                            break;
+                        }
+                        crate::flowable::SplitResult::Fits => {
+                            // Shouldn't happen but handle gracefully
+                            flowable.draw(start_x, Pt(start_y.0 + cursor_y.0), &mut draw_list);
+                            cursor_y = Pt(cursor_y.0 + size.height.0);
+                            idx += 1;
+                        }
+                    }
                 }
             }
 

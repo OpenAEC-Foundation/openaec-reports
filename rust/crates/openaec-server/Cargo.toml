@@ -20,3 +20,6 @@ tracing-subscriber = { workspace = true }
 rusqlite = { workspace = true }
 jsonwebtoken = { workspace = true }
 bcrypt = { workspace = true }
+openaec-cloud = { workspace = true }
+uuid = { workspace = true }
+reqwest = { workspace = true }

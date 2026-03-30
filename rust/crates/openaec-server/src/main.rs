@@ -148,6 +148,19 @@ async fn main() {
             "/api/admin/tenants/{tenant}/brand",
             get(routes::admin::get_tenant_brand),
         )
+        // Cloud storage
+        .route(
+            "/api/cloud/projects",
+            get(routes::cloud::list_projects),
+        )
+        .route(
+            "/api/cloud/projects/{project}/reports",
+            get(routes::cloud::list_reports),
+        )
+        .route(
+            "/api/cloud/projects/{project}/upload",
+            post(routes::cloud::upload_report),
+        )
         // Auth
         .route("/api/auth/me", get(routes::auth::auth_me))
         // Shared state

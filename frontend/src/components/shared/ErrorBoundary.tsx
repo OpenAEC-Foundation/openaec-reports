@@ -33,16 +33,16 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
       return (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <p className="text-sm font-medium text-red-700">
+        <div className="rounded-lg border border-oaec-border bg-oaec-danger-soft p-4">
+          <p className="text-sm font-medium text-oaec-danger">
             Er ging iets mis{this.props.context ? ` in ${this.props.context}` : ''}
           </p>
-          <p className="mt-1 text-xs text-red-500 font-mono">
+          <p className="mt-1 text-xs text-oaec-danger font-mono">
             {this.state.error?.message}
           </p>
           <button
             onClick={() => this.setState({ hasError: false, error: null })}
-            className="mt-2 rounded bg-red-600 px-3 py-1 text-xs text-white hover:bg-red-700"
+            className="mt-2 rounded bg-oaec-danger px-3 py-1 text-xs text-oaec-text hover:bg-oaec-danger-hover"
           >
             Opnieuw proberen
           </button>

@@ -13,8 +13,8 @@ interface ZoneRowProps {
  */
 export function ZoneRow({ index, onDelete, children }: ZoneRowProps) {
   return (
-    <div className="flex items-start gap-2 rounded border border-gray-200 bg-white px-2 py-1.5 mb-1.5">
-      <span className="flex-shrink-0 mt-0.5 text-[10px] font-mono text-gray-400 w-4 text-right">
+    <div className="flex items-start gap-2 rounded border border-oaec-border bg-oaec-bg-lighter px-2 py-1.5 mb-1.5">
+      <span className="flex-shrink-0 mt-0.5 text-[10px] font-mono text-oaec-text-faint w-4 text-right">
         {index + 1}
       </span>
       <div className="flex-1 flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
@@ -23,7 +23,7 @@ export function ZoneRow({ index, onDelete, children }: ZoneRowProps) {
       <button
         type="button"
         onClick={() => onDelete(index)}
-        className="flex-shrink-0 mt-0.5 rounded p-0.5 text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+        className="flex-shrink-0 mt-0.5 rounded p-0.5 text-oaec-danger hover:text-oaec-danger hover:bg-oaec-danger-soft transition-colors"
         title="Verwijderen"
       >
         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -46,7 +46,7 @@ export function Field({
 }) {
   return (
     <div className={`flex items-center gap-1 ${className}`}>
-      <label className="text-[10px] font-medium text-gray-500 whitespace-nowrap">
+      <label className="text-[10px] font-medium text-oaec-text-muted whitespace-nowrap">
         {label}
       </label>
       {children}
@@ -78,7 +78,7 @@ export function NumberInput({
       step={step}
       min={min}
       max={max}
-      className={`rounded border border-gray-300 px-1 py-0.5 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-purple-400 ${className}`}
+      className={`rounded border border-oaec-border px-1 py-0.5 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-oaec-accent ${className}`}
     />
   );
 }
@@ -101,7 +101,7 @@ export function TextInput({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className={`rounded border border-gray-300 px-1 py-0.5 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-purple-400 ${className}`}
+      className={`rounded border border-oaec-border px-1 py-0.5 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-oaec-accent ${className}`}
     />
   );
 }
@@ -122,7 +122,7 @@ export function SelectInput({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`rounded border border-gray-300 px-1 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-purple-400 ${className}`}
+      className={`rounded border border-oaec-border px-1 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-oaec-accent ${className}`}
     >
       {options.map((o) => (
         <option key={o.value} value={o.value}>{o.label}</option>

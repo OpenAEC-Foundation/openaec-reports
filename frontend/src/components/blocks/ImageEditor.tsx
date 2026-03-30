@@ -7,8 +7,8 @@ interface ImageEditorProps {
 }
 
 const inputClass =
-  'w-full rounded border border-gray-200 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none';
-const labelClass = 'text-xs font-medium text-gray-500 mb-1';
+  'w-full rounded border border-oaec-border px-2 py-1.5 text-sm focus:border-oaec-accent focus:ring-2 focus:ring-oaec-accent/20 outline-none';
+const labelClass = 'text-xs font-medium text-oaec-text-muted mb-1';
 
 const ALIGNMENTS: { value: ImageAlignment; label: string }[] = [
   { value: 'left', label: 'Links' },
@@ -125,8 +125,8 @@ export function ImageEditor({ block, onChange }: ImageEditorProps) {
         onClick={() => fileInputRef.current?.click()}
         className={`flex min-h-[80px] cursor-pointer items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
           isDragOver
-            ? 'border-purple-400 bg-purple-50'
-            : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+            ? 'border-oaec-accent bg-oaec-accent-soft'
+            : 'border-oaec-border bg-oaec-bg hover:border-oaec-border'
         }`}
       >
         {previewUrl ? (
@@ -137,10 +137,10 @@ export function ImageEditor({ block, onChange }: ImageEditorProps) {
           />
         ) : (
           <div className="py-4 text-center">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-oaec-text-muted">
               Sleep een afbeelding hierheen of klik om te uploaden
             </p>
-            <p className="mt-1 text-[10px] text-gray-400">PNG, JPEG, SVG</p>
+            <p className="mt-1 text-[10px] text-oaec-text-faint">PNG, JPEG, SVG</p>
           </div>
         )}
         <input
@@ -153,7 +153,7 @@ export function ImageEditor({ block, onChange }: ImageEditorProps) {
       </div>
 
       {error && (
-        <p className="text-xs text-red-500 mt-1">{error}</p>
+        <p className="text-xs text-oaec-danger mt-1">{error}</p>
       )}
 
       {/* URL input */}
@@ -197,7 +197,7 @@ export function ImageEditor({ block, onChange }: ImageEditorProps) {
             onKeyUp={handleWidthCommit}
             className="w-full accent-purple-400"
           />
-          <div className="flex justify-between text-[10px] text-gray-400">
+          <div className="flex justify-between text-[10px] text-oaec-text-faint">
             <span>50 mm</span>
             <span>210 mm</span>
           </div>
@@ -213,8 +213,8 @@ export function ImageEditor({ block, onChange }: ImageEditorProps) {
                 onClick={() => handleAlignmentChange(value)}
                 className={`flex-1 rounded border px-2 py-1.5 text-xs font-medium transition-colors ${
                   alignment === value
-                    ? 'border-purple-300 bg-purple-50 text-purple-700'
-                    : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                    ? 'border-oaec-border bg-oaec-accent-soft text-oaec-accent'
+                    : 'border-oaec-border text-oaec-text-muted hover:bg-oaec-bg'
                 }`}
               >
                 {label}

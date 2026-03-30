@@ -70,7 +70,7 @@ function BlockEditorInner({
       return <SpreadsheetEditor block={block} onChange={onChange} />;
     case 'raw_flowable':
       return (
-        <p className="text-xs italic text-gray-400">
+        <p className="text-xs italic text-oaec-text-faint">
           Raw flowable — niet bewerkbaar in de editor
         </p>
       );

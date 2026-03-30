@@ -7,10 +7,10 @@ interface TableEditorProps {
 }
 
 const cellClass =
-  'w-full border-0 bg-transparent px-2 py-1 text-sm outline-none focus:bg-blue-50';
-const labelClass = 'text-xs font-medium text-gray-500 mb-1';
+  'w-full border-0 bg-transparent px-2 py-1 text-sm outline-none focus:bg-oaec-accent-soft';
+const labelClass = 'text-xs font-medium text-oaec-text-muted mb-1';
 const btnClass =
-  'rounded border border-gray-200 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 transition-colors';
+  'rounded border border-oaec-border px-2 py-1 text-xs text-oaec-text-secondary hover:bg-oaec-hover transition-colors';
 
 const STYLES: { value: TableStyle; label: string }[] = [
   { value: 'default', label: 'Standaard' },
@@ -108,7 +108,7 @@ export function TableEditor({ block, onChange }: TableEditorProps) {
           <label className={labelClass}>Titel</label>
           <input
             type="text"
-            className="w-full rounded border border-gray-200 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none"
+            className="w-full rounded border border-oaec-border px-2 py-1.5 text-sm focus:border-oaec-accent focus:ring-2 focus:ring-oaec-accent/20 outline-none"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onBlur={handleTitleBlur}
@@ -120,7 +120,7 @@ export function TableEditor({ block, onChange }: TableEditorProps) {
           <select
             value={style}
             onChange={(e) => handleStyleChange(e.target.value as TableStyle)}
-            className="w-full rounded border border-gray-200 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none"
+            className="w-full rounded border border-oaec-border px-2 py-1.5 text-sm focus:border-oaec-accent focus:ring-2 focus:ring-oaec-accent/20 outline-none"
           >
             {STYLES.map(({ value, label }) => (
               <option key={value} value={value}>
@@ -132,12 +132,12 @@ export function TableEditor({ block, onChange }: TableEditorProps) {
       </div>
 
       {/* Table grid */}
-      <div className="overflow-x-auto rounded border border-gray-200">
+      <div className="overflow-x-auto rounded border border-oaec-border">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-gray-50">
+            <tr className="bg-oaec-bg">
               {headers.map((header, colIdx) => (
-                <th key={colIdx} className="border-b border-r border-gray-200 last:border-r-0">
+                <th key={colIdx} className="border-b border-r border-oaec-border last:border-r-0">
                   <input
                     type="text"
                     className={`${cellClass} font-semibold`}
@@ -151,9 +151,9 @@ export function TableEditor({ block, onChange }: TableEditorProps) {
           </thead>
           <tbody>
             {rows.map((row, rowIdx) => (
-              <tr key={rowIdx} className="border-b border-gray-100 last:border-b-0">
+              <tr key={rowIdx} className="border-b border-oaec-border-subtle last:border-b-0">
                 {row.map((cell, colIdx) => (
-                  <td key={colIdx} className="border-r border-gray-100 last:border-r-0">
+                  <td key={colIdx} className="border-r border-oaec-border-subtle last:border-r-0">
                     <input
                       type="text"
                       className={cellClass}
@@ -182,7 +182,7 @@ export function TableEditor({ block, onChange }: TableEditorProps) {
         >
           − Rij
         </button>
-        <span className="mx-1 h-4 w-px bg-gray-200" />
+        <span className="mx-1 h-4 w-px bg-oaec-hover-strong" />
         <button type="button" onClick={addColumn} className={btnClass}>
           + Kolom
         </button>
@@ -195,7 +195,7 @@ export function TableEditor({ block, onChange }: TableEditorProps) {
           − Kolom
         </button>
         <div className="flex-1" />
-        <span className="text-[10px] text-gray-400">
+        <span className="text-[10px] text-oaec-text-faint">
           {colCount} kolommen &middot; {rows.length} rij{rows.length !== 1 ? 'en' : ''}
         </span>
       </div>

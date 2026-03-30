@@ -107,23 +107,23 @@ export function YamlFormEditor({ yamlContent, onChange, brandColors }: YamlFormE
 
   if (parseError) {
     return (
-      <div className="rounded-md border border-red-200 bg-red-50 p-3">
-        <p className="text-xs font-semibold text-red-700 mb-1">
+      <div className="rounded-md border border-oaec-border bg-oaec-danger-soft p-3">
+        <p className="text-xs font-semibold text-oaec-danger mb-1">
           YAML parse fout — schakel terug naar Raw YAML om te herstellen
         </p>
-        <p className="text-xs text-red-600 font-mono">{parseError}</p>
+        <p className="text-xs text-oaec-danger font-mono">{parseError}</p>
       </div>
     );
   }
 
   if (!formData) {
-    return <div className="text-xs text-gray-400">Laden...</div>;
+    return <div className="text-xs text-oaec-text-faint">Laden...</div>;
   }
 
   return (
     <div className="space-y-1">
       {/* Metadata */}
-      <div className="rounded border border-gray-200 bg-white px-3 py-2 mb-3">
+      <div className="rounded border border-oaec-border bg-oaec-bg-lighter px-3 py-2 mb-3">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <Field label="name" className="flex-1 min-w-[120px]">
             <TextInput
@@ -178,7 +178,7 @@ export function YamlFormEditor({ yamlContent, onChange, brandColors }: YamlFormE
       />
 
       {/* Hint */}
-      <p className="text-[10px] text-gray-400 mt-2">
+      <p className="text-[10px] text-oaec-text-faint mt-2">
         Wijzigingen worden automatisch gesynchroniseerd naar de YAML. Preview update live.
       </p>
     </div>

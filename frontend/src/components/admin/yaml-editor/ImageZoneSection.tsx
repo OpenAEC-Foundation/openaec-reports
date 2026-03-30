@@ -30,18 +30,18 @@ export function ImageZoneSection({ zones, onChange }: ImageZoneSectionProps) {
   return (
     <div className="mb-4">
       <div className="flex items-center justify-between mb-1.5">
-        <h4 className="text-xs font-semibold text-gray-700">Image Zones ({zones.length})</h4>
+        <h4 className="text-xs font-semibold text-oaec-text-secondary">Image Zones ({zones.length})</h4>
         <button
           type="button"
           onClick={addZone}
-          className="rounded bg-purple-50 px-2 py-0.5 text-[10px] font-medium text-purple-600 hover:bg-purple-100 transition-colors"
+          className="rounded bg-oaec-accent-soft px-2 py-0.5 text-[10px] font-medium text-oaec-accent hover:bg-oaec-accent-soft transition-colors"
         >
           + Toevoegen
         </button>
       </div>
 
       {zones.length === 0 ? (
-        <p className="text-xs text-gray-400 italic">Geen image zones</p>
+        <p className="text-xs text-oaec-text-faint italic">Geen image zones</p>
       ) : (
         zones.map((zone, i) => (
           <ZoneRow key={i} index={i} onDelete={deleteZone}>

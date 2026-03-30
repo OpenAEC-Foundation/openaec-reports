@@ -62,15 +62,15 @@ function BlockSummary({ block }: { block: EditorBlock }) {
   switch (block.type) {
     case 'paragraph':
       return (
-        <p className="text-sm text-gray-600 line-clamp-2">
-          {block.text || <span className="italic text-gray-400">Lege tekst</span>}
+        <p className="text-sm text-oaec-text-secondary line-clamp-2">
+          {block.text || <span className="italic text-oaec-text-faint">Lege tekst</span>}
         </p>
       );
     case 'calculation':
       return (
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-oaec-text-secondary">
           <p className="font-medium">{block.title || 'Naamloze berekening'}</p>
-          {block.formula && <p className="font-mono text-xs text-gray-500">{block.formula}</p>}
+          {block.formula && <p className="font-mono text-xs text-oaec-text-muted">{block.formula}</p>}
           {block.result && block.unit && (
             <p className="text-xs">
               = {block.result} {block.unit}
@@ -83,12 +83,12 @@ function BlockSummary({ block }: { block: EditorBlock }) {
       const limit = block.limit ?? 1.0;
       const pass = uc !== undefined && uc <= limit;
       return (
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-oaec-text-secondary">
           <p>{block.description || 'Naamloze toets'}</p>
           {uc !== undefined && (
             <span
               className={`inline-block mt-1 rounded px-1.5 py-0.5 text-xs font-semibold ${
-                pass ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                pass ? 'bg-oaec-success-soft text-oaec-success' : 'bg-oaec-danger-soft text-oaec-danger'
               }`}
             >
               UC = {uc.toFixed(2)} {pass ? 'VOLDOET' : 'VOLDOET NIET'}
@@ -99,9 +99,9 @@ function BlockSummary({ block }: { block: EditorBlock }) {
     }
     case 'table':
       return (
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-oaec-text-secondary">
           {block.title && <p className="font-medium">{block.title}</p>}
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-oaec-text-faint">
             {block.headers.length} kolommen &middot; {block.rows.length} rij
             {block.rows.length !== 1 ? 'en' : ''}
           </p>
@@ -109,8 +109,8 @@ function BlockSummary({ block }: { block: EditorBlock }) {
       );
     case 'image':
       return (
-        <div className="text-sm text-gray-600">
-          <p className="text-xs text-gray-400">
+        <div className="text-sm text-oaec-text-secondary">
+          <p className="text-xs text-oaec-text-faint">
             {typeof block.src === 'string'
               ? block.src || 'Geen bron'
               : `Base64 ${block.src.media_type}`}
@@ -120,44 +120,44 @@ function BlockSummary({ block }: { block: EditorBlock }) {
       );
     case 'map':
       return (
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-oaec-text-secondary">
           {block.center && (
-            <p className="text-xs font-mono text-gray-400">
+            <p className="text-xs font-mono text-oaec-text-faint">
               {block.center.lat.toFixed(4)}, {block.center.lon.toFixed(4)}
             </p>
           )}
           {block.caption && <p className="text-xs">{block.caption}</p>}
           {block.layers && (
-            <p className="text-xs text-gray-400">{block.layers.join(', ')}</p>
+            <p className="text-xs text-oaec-text-faint">{block.layers.join(', ')}</p>
           )}
         </div>
       );
     case 'spacer':
       return (
-        <p className="text-xs text-gray-400">{block.height_mm ?? 5} mm</p>
+        <p className="text-xs text-oaec-text-faint">{block.height_mm ?? 5} mm</p>
       );
     case 'bullet_list':
       return (
-        <div className="text-sm text-gray-600">
-          <p className="text-xs text-gray-400">{block.items.length} item{block.items.length !== 1 ? 's' : ''}</p>
+        <div className="text-sm text-oaec-text-secondary">
+          <p className="text-xs text-oaec-text-faint">{block.items.length} item{block.items.length !== 1 ? 's' : ''}</p>
           {block.items.slice(0, 3).map((item, i) => (
-            <p key={i} className="text-xs text-gray-500 truncate">&bull; {item || <span className="italic text-gray-400">Leeg</span>}</p>
+            <p key={i} className="text-xs text-oaec-text-muted truncate">&bull; {item || <span className="italic text-oaec-text-faint">Leeg</span>}</p>
           ))}
-          {block.items.length > 3 && <p className="text-xs text-gray-400">+{block.items.length - 3} meer</p>}
+          {block.items.length > 3 && <p className="text-xs text-oaec-text-faint">+{block.items.length - 3} meer</p>}
         </div>
       );
     case 'heading_2':
       return (
-        <p className="text-sm font-semibold text-gray-700">
-          {block.number && <span className="text-gray-400 mr-1">{block.number}</span>}
-          {block.title || <span className="italic text-gray-400">Naamloze subkop</span>}
+        <p className="text-sm font-semibold text-oaec-text-secondary">
+          {block.number && <span className="text-oaec-text-faint mr-1">{block.number}</span>}
+          {block.title || <span className="italic text-oaec-text-faint">Naamloze subkop</span>}
         </p>
       );
     case 'page_break':
-      return <p className="text-xs text-gray-400">Nieuwe pagina</p>;
+      return <p className="text-xs text-oaec-text-faint">Nieuwe pagina</p>;
     case 'raw_flowable':
       return (
-        <p className="text-xs text-gray-400 italic">
+        <p className="text-xs text-oaec-text-faint italic">
           {block.class_name} (library-only)
         </p>
       );
@@ -199,19 +199,19 @@ function SortableBlockItem({ block, sectionId, isActive, onSelect }: SortableBlo
       ref={setNodeRef}
       style={style}
       onClick={onSelect}
-      className={`group relative w-full text-left rounded-lg border-l-4 border bg-white p-4 shadow-sm transition-all cursor-pointer ${
+      className={`group relative w-full text-left rounded-lg border-l-4 border bg-oaec-bg-lighter p-4 shadow-sm transition-all cursor-pointer ${
         BLOCK_TYPE_COLORS[block.type] ?? 'border-l-gray-300'
       } ${
         isActive
           ? 'border-brand-primary ring-2 ring-brand-primary/20'
-          : 'border-gray-100 hover:border-gray-200 hover:shadow-md'
+          : 'border-oaec-border-subtle hover:border-oaec-border hover:shadow-md'
       }`}
     >
       {/* Top bar: type label + actions */}
       <div className="mb-1 flex items-center gap-2">
         {/* Drag handle */}
         <button
-          className="flex h-5 w-5 shrink-0 cursor-grab items-center justify-center rounded text-gray-300 hover:text-gray-500 active:cursor-grabbing"
+          className="flex h-5 w-5 shrink-0 cursor-grab items-center justify-center rounded text-oaec-text-faint hover:text-oaec-text-muted active:cursor-grabbing"
           {...attributes}
           {...listeners}
           onClick={(e) => e.stopPropagation()}
@@ -222,7 +222,7 @@ function SortableBlockItem({ block, sectionId, isActive, onSelect }: SortableBlo
           </svg>
         </button>
 
-        <span className="flex items-center gap-1.5 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+        <span className="flex items-center gap-1.5 rounded bg-oaec-hover px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-oaec-text-muted">
           <BlockIcon type={block.type} className="h-3 w-3" />
           {BLOCK_TYPE_LABELS[block.type] ?? block.type}
         </span>
@@ -238,7 +238,7 @@ function SortableBlockItem({ block, sectionId, isActive, onSelect }: SortableBlo
               e.stopPropagation();
               duplicateBlock(sectionId, block.id);
             }}
-            className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-blue-50 hover:text-blue-500"
+            className="flex h-6 w-6 items-center justify-center rounded text-oaec-text-faint hover:bg-oaec-accent-soft hover:text-oaec-accent"
             title="Dupliceer block"
             aria-label="Dupliceer block"
           >
@@ -253,7 +253,7 @@ function SortableBlockItem({ block, sectionId, isActive, onSelect }: SortableBlo
               e.stopPropagation();
               removeBlock(sectionId, block.id);
             }}
-            className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-red-50 hover:text-red-500"
+            className="flex h-6 w-6 items-center justify-center rounded text-oaec-text-faint hover:bg-oaec-danger-soft hover:text-oaec-danger"
             title="Verwijder block"
             aria-label="Verwijder block"
           >
@@ -308,13 +308,13 @@ function SectionHeader({ section, chapterNumber }: { section: EditorSection; cha
               setEditing(false);
             }
           }}
-          className="flex-1 rounded border border-brand-primary px-2 py-1 text-lg font-semibold text-gray-900 outline-none ring-2 ring-brand-primary/20"
+          className="flex-1 rounded border border-brand-primary px-2 py-1 text-lg font-semibold text-oaec-text outline-none ring-2 ring-brand-primary/20"
         />
         {/* Level selector */}
         <select
           value={section.level}
           onChange={(e) => updateSection(section.id, { level: Number(e.target.value) })}
-          className="rounded border border-gray-200 px-2 py-1 text-sm text-gray-600"
+          className="rounded border border-oaec-border px-2 py-1 text-sm text-oaec-text-secondary"
         >
           {[1, 2, 3, 4].map((l) => (
             <option key={l} value={l}>H{l}</option>
@@ -330,14 +330,14 @@ function SectionHeader({ section, chapterNumber }: { section: EditorSection; cha
         {chapterNumber}
       </span>
       <h2
-        className="flex-1 text-lg font-semibold text-gray-900 cursor-pointer hover:text-brand-primary-dark transition-colors"
+        className="flex-1 text-lg font-semibold text-oaec-text cursor-pointer hover:text-brand-primary-dark transition-colors"
         onClick={() => setEditing(true)}
         title="Klik om te bewerken"
       >
         {section.title}
       </h2>
       {section.page_break_before && (
-        <span className="rounded bg-orange-100 px-1.5 py-0.5 text-xs text-orange-600">
+        <span className="rounded bg-oaec-accent-soft px-1.5 py-0.5 text-xs text-oaec-accent">
           page break
         </span>
       )}
@@ -389,7 +389,7 @@ export function MainPanel() {
   if (viewMode === 'split') {
     return (
       <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 overflow-y-auto border-r border-gray-200">
+        <div className="flex-1 overflow-y-auto border-r border-oaec-border">
           <EditorContent
             section={section}
             activeAppendix={activeAppendix}
@@ -463,8 +463,8 @@ function EditorContent({
   if (!section) {
     return (
       <div className="flex-1 overflow-y-auto">
-        <div className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 backdrop-blur px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">
+        <div className="sticky top-0 z-10 border-b border-oaec-border bg-oaec-bg-lighter/95 backdrop-blur px-6 py-4">
+          <h2 className="text-lg font-semibold text-oaec-text">
             {PANEL_TITLES[activePanel] ?? activePanel}
           </h2>
         </div>
@@ -483,7 +483,7 @@ function EditorContent({
   return (
     <div className="flex-1 overflow-y-auto">
       {/* Section header */}
-      <div className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 backdrop-blur px-6 py-4">
+      <div className="sticky top-0 z-10 border-b border-oaec-border bg-oaec-bg-lighter/95 backdrop-blur px-6 py-4">
         <SectionHeader section={section} chapterNumber={chapterNumber} />
       </div>
 
@@ -491,13 +491,13 @@ function EditorContent({
       <div className="px-6 py-4 space-y-3">
         {section.content.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="rounded-full bg-gray-100 p-4 mb-4">
-              <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <div className="rounded-full bg-oaec-hover p-4 mb-4">
+              <svg className="h-8 w-8 text-oaec-text-faint" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
               </svg>
             </div>
-            <p className="text-sm font-medium text-gray-500">Geen content blocks</p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-sm font-medium text-oaec-text-muted">Geen content blocks</p>
+            <p className="text-xs text-oaec-text-faint mt-1">
               Gebruik de toolbar hieronder om tekst, berekeningen of tabellen toe te voegen
             </p>
           </div>
@@ -569,30 +569,30 @@ function JsonEditor() {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-gray-900">
+    <div className="flex-1 flex flex-col overflow-hidden bg-oaec-bg-input">
       {/* Toolbar */}
-      <div className="flex items-center gap-2 border-b border-gray-700 px-4 py-2">
+      <div className="flex items-center gap-2 border-b border-oaec-border px-4 py-2">
         <button
           onClick={handleApply}
-          className="rounded-md bg-brand-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-primary-dark transition-colors"
+          className="rounded-md bg-brand-primary px-3 py-1.5 text-xs font-medium text-oaec-accent-text hover:bg-brand-primary-dark transition-colors"
         >
           Toepassen
         </button>
         <button
           onClick={handleFormat}
-          className="rounded-md border border-gray-600 px-3 py-1.5 text-xs font-medium text-gray-300 hover:bg-gray-800 transition-colors"
+          className="rounded-md border border-oaec-border px-3 py-1.5 text-xs font-medium text-oaec-text-faint hover:bg-oaec-bg transition-colors"
         >
           Formatteren
         </button>
         {jsonError && (
-          <span className="text-xs text-red-400 ml-2">{jsonError}</span>
+          <span className="text-xs text-oaec-danger ml-2">{jsonError}</span>
         )}
       </div>
 
       <textarea
         value={jsonText}
         onChange={(e) => setJsonText(e.target.value)}
-        className="flex-1 bg-gray-900 p-6 text-sm text-green-300 font-mono resize-none outline-none"
+        className="flex-1 bg-oaec-bg-input p-6 text-sm text-oaec-success font-mono resize-none outline-none"
         spellCheck={false}
       />
     </div>
@@ -620,7 +620,7 @@ function PreviewOutline() {
     return (
       <button
         onClick={() => setExpanded(true)}
-        className="absolute top-2 left-2 z-20 rounded-md bg-white/90 border border-gray-200 px-2 py-1 text-xs text-gray-500 hover:bg-white shadow-sm"
+        className="absolute top-2 left-2 z-20 rounded-md bg-oaec-bg-lighter/90 border border-oaec-border px-2 py-1 text-xs text-oaec-text-muted hover:bg-oaec-bg-lighter shadow-sm"
         title="Toon navigatie"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -631,12 +631,12 @@ function PreviewOutline() {
   }
 
   return (
-    <div className="absolute top-2 left-2 z-20 w-56 max-h-[60%] overflow-y-auto rounded-lg bg-white/95 border border-gray-200 shadow-lg backdrop-blur">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Navigatie</span>
+    <div className="absolute top-2 left-2 z-20 w-56 max-h-[60%] overflow-y-auto rounded-lg bg-oaec-bg-lighter/95 border border-oaec-border shadow-lg backdrop-blur">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-oaec-border-subtle">
+        <span className="text-xs font-semibold text-oaec-text-muted uppercase tracking-wider">Navigatie</span>
         <button
           onClick={() => setExpanded(false)}
-          className="text-gray-400 hover:text-gray-600"
+          className="text-oaec-text-faint hover:text-oaec-text-secondary"
         >
           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -652,7 +652,7 @@ function PreviewOutline() {
             className={`w-full text-left rounded px-2 py-1 text-xs transition-colors ${
               isNavActive && activePanel === panel
                 ? 'bg-brand-primary-light text-brand-primary-dark font-medium'
-                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                : 'text-oaec-text-muted hover:bg-oaec-bg hover:text-oaec-text-secondary'
             }`}
           >
             {panel === 'rapport' ? 'Rapport' : panel === 'voorblad' ? 'Voorblad' : panel === 'colofon' ? 'Colofon' : 'Opties'}
@@ -660,7 +660,7 @@ function PreviewOutline() {
         ))}
 
         {sections.length > 0 && (
-          <div className="border-t border-gray-100 pt-1 mt-1">
+          <div className="border-t border-oaec-border-subtle pt-1 mt-1">
             {sections.map((s, i) => (
               <button
                 key={s.id}
@@ -668,7 +668,7 @@ function PreviewOutline() {
                 className={`w-full text-left rounded px-2 py-1 text-xs transition-colors ${
                   activeSection === s.id
                     ? 'bg-brand-primary-light text-brand-primary-dark font-medium'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    : 'text-oaec-text-secondary hover:bg-oaec-bg'
                 }`}
               >
                 <span className="font-bold mr-1">{i + 1}.</span>
@@ -679,15 +679,15 @@ function PreviewOutline() {
         )}
 
         {appendices.length > 0 && (
-          <div className="border-t border-gray-100 pt-1 mt-1">
+          <div className="border-t border-oaec-border-subtle pt-1 mt-1">
             {appendices.map((a) => (
               <button
                 key={a.id}
                 onClick={() => setActiveAppendix(a.id)}
                 className={`w-full text-left rounded px-2 py-1 text-xs transition-colors ${
                   activeAppendix === a.id
-                    ? 'bg-teal-50 text-teal-700 font-medium'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'bg-oaec-accent-soft text-oaec-accent font-medium'
+                    : 'text-oaec-text-secondary hover:bg-oaec-bg'
                 }`}
               >
                 <span className="font-bold mr-1">B{a.number}.</span>
@@ -718,10 +718,10 @@ function PdfPreview() {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Preview toolbar */}
-      <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-2 shrink-0">
+      <div className="flex items-center gap-3 border-b border-oaec-border px-4 py-2 shrink-0">
         <ToggleSwitch checked={autoPreview} onChange={() => setAutoPreview(!autoPreview)} label="Auto-preview" />
         {isGenerating && (
-          <span className="flex items-center gap-1.5 text-xs text-gray-400">
+          <span className="flex items-center gap-1.5 text-xs text-oaec-text-faint">
             <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -730,7 +730,7 @@ function PdfPreview() {
           </span>
         )}
         {lastPdfUrl && (
-          <div className="flex items-center gap-1 text-xs text-gray-500">
+          <div className="flex items-center gap-1 text-xs text-oaec-text-muted">
             <label htmlFor="preview-page" className="whitespace-nowrap">Pagina</label>
             <input
               id="preview-page"
@@ -738,14 +738,14 @@ function PdfPreview() {
               min={1}
               value={previewPage}
               onChange={(e) => setPreviewPage(Number(e.target.value))}
-              className="w-12 rounded border border-gray-300 px-1.5 py-0.5 text-xs text-center font-mono focus:outline-none focus:ring-1 focus:ring-purple-400"
+              className="w-12 rounded border border-oaec-border px-1.5 py-0.5 text-xs text-center font-mono focus:outline-none focus:ring-1 focus:ring-oaec-accent"
             />
           </div>
         )}
         <button
           onClick={generatePdf}
           disabled={!connected || isGenerating}
-          className="rounded-md border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-40 flex items-center gap-1.5"
+          className="rounded-md border border-oaec-border px-3 py-1 text-xs font-medium text-oaec-text-secondary hover:bg-oaec-bg transition-colors disabled:opacity-40 flex items-center gap-1.5"
           title="Regenereer PDF"
         >
           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -757,9 +757,9 @@ function PdfPreview() {
 
       {/* API error banner — persistent in preview panel */}
       {apiError && !lastPdfUrl && (
-        <div className="mx-4 mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-3">
-          <p className="text-sm font-medium text-red-800">PDF generatie mislukt</p>
-          <p className="mt-1 text-xs text-red-600">{apiError}</p>
+        <div className="mx-4 mt-3 rounded-md border border-oaec-border bg-oaec-danger-soft px-4 py-3">
+          <p className="text-sm font-medium text-oaec-danger">PDF generatie mislukt</p>
+          <p className="mt-1 text-xs text-oaec-danger">{apiError}</p>
         </div>
       )}
 
@@ -774,29 +774,29 @@ function PdfPreview() {
           />
         </div>
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center text-gray-400 gap-4">
+        <div className="flex flex-1 flex-col items-center justify-center text-oaec-text-faint gap-4">
           {!connected ? (
             <>
-              <div className="rounded-full bg-orange-100 p-4">
-                <svg className="h-10 w-10 text-orange-400" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+              <div className="rounded-full bg-oaec-accent-soft p-4">
+                <svg className="h-10 w-10 text-oaec-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-orange-600">Geen verbinding met API server</p>
-              <p className="text-xs text-gray-400">Start de backend: openaec-report serve --port 8000</p>
+              <p className="text-sm font-medium text-oaec-accent">Geen verbinding met API server</p>
+              <p className="text-xs text-oaec-text-faint">Start de backend: openaec-report serve --port 8000</p>
             </>
           ) : (
             <>
-              <div className="rounded-full bg-gray-100 p-4">
-                <svg className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+              <div className="rounded-full bg-oaec-hover p-4">
+                <svg className="h-10 w-10 text-oaec-text-faint" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-gray-500">Nog geen PDF gegenereerd</p>
+              <p className="text-sm font-medium text-oaec-text-muted">Nog geen PDF gegenereerd</p>
               <button
                 onClick={generatePdf}
                 disabled={isGenerating}
-                className="rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-brand-primary-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-oaec-accent-text hover:bg-brand-primary-dark transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Genereer PDF
               </button>

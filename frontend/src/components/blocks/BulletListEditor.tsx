@@ -43,22 +43,22 @@ export function BulletListEditor({ block, onChange }: BulletListEditorProps) {
 
   return (
     <div className="bullet-list-editor space-y-1.5">
-      <label className="block text-xs font-medium text-gray-500 mb-1">Opsomming</label>
+      <label className="block text-xs font-medium text-oaec-text-muted mb-1">Opsomming</label>
       {items.map((item, index) => (
         <div key={index} className="group flex items-center gap-2">
-          <span className="text-gray-400 text-sm select-none">&bull;</span>
+          <span className="text-oaec-text-faint text-sm select-none">&bull;</span>
           <input
             type="text"
             value={item}
             onChange={(e) => updateItem(index, e.target.value)}
             onKeyDown={(e) => handleKeyDown(index, e)}
             placeholder={`Item ${index + 1}`}
-            className="flex-1 rounded border border-gray-200 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none"
+            className="flex-1 rounded border border-oaec-border px-2 py-1.5 text-sm focus:border-oaec-accent focus:ring-2 focus:ring-oaec-accent/20 outline-none"
           />
           {items.length > 1 && (
             <button
               onClick={() => removeItem(index)}
-              className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-gray-300 opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 transition-opacity"
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-oaec-text-faint opacity-0 group-hover:opacity-100 hover:bg-oaec-danger-soft hover:text-oaec-danger transition-opacity"
               title="Verwijder item"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -70,7 +70,7 @@ export function BulletListEditor({ block, onChange }: BulletListEditorProps) {
       ))}
       <button
         onClick={addItem}
-        className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+        className="flex items-center gap-1 rounded px-2 py-1 text-xs text-oaec-text-faint hover:bg-oaec-accent-soft hover:text-oaec-accent transition-colors"
       >
         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

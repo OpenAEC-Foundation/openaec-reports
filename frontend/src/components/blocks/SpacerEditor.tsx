@@ -19,7 +19,7 @@ export function SpacerEditor({ block, onChange }: SpacerEditorProps) {
 
   return (
     <div className="space-y-2">
-      <label className="text-xs font-medium text-gray-500">
+      <label className="text-xs font-medium text-oaec-text-muted">
         Hoogte: {height} mm
       </label>
       <input
@@ -33,7 +33,7 @@ export function SpacerEditor({ block, onChange }: SpacerEditorProps) {
         onKeyUp={handleCommit}
         className="w-full accent-gray-400"
       />
-      <div className="flex justify-between text-[10px] text-gray-400">
+      <div className="flex justify-between text-[10px] text-oaec-text-faint">
         <span>1 mm</span>
         <span>50 mm</span>
       </div>

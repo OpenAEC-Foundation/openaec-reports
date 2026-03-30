@@ -49,35 +49,35 @@ function BlockSummary({ block }: { block: EditorBlock }) {
   switch (block.type) {
     case 'paragraph':
       return (
-        <p className="text-sm text-gray-600 line-clamp-2">
-          {block.text || <span className="italic text-gray-400">Lege tekst</span>}
+        <p className="text-sm text-oaec-text-secondary line-clamp-2">
+          {block.text || <span className="italic text-oaec-text-faint">Lege tekst</span>}
         </p>
       );
     case 'calculation':
       return (
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-oaec-text-secondary">
           <p className="font-medium">{block.title || 'Naamloze berekening'}</p>
-          {block.formula && <p className="font-mono text-xs text-gray-500">{block.formula}</p>}
+          {block.formula && <p className="font-mono text-xs text-oaec-text-muted">{block.formula}</p>}
         </div>
       );
     case 'check':
       return (
-        <p className="text-sm text-gray-600">{block.description || 'Naamloze toets'}</p>
+        <p className="text-sm text-oaec-text-secondary">{block.description || 'Naamloze toets'}</p>
       );
     case 'table':
       return (
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-oaec-text-faint">
           {block.headers.length} kolommen &middot; {block.rows.length} rij{block.rows.length !== 1 ? 'en' : ''}
         </p>
       );
     case 'image':
       return (
-        <p className="text-xs text-gray-400">{block.caption || 'Afbeelding'}</p>
+        <p className="text-xs text-oaec-text-faint">{block.caption || 'Afbeelding'}</p>
       );
     case 'spacer':
-      return <p className="text-xs text-gray-400">{block.height_mm ?? 5} mm</p>;
+      return <p className="text-xs text-oaec-text-faint">{block.height_mm ?? 5} mm</p>;
     case 'page_break':
-      return <p className="text-xs text-gray-400">Nieuwe pagina</p>;
+      return <p className="text-xs text-oaec-text-faint">Nieuwe pagina</p>;
     default:
       return null;
   }
@@ -116,17 +116,17 @@ function SortableBlockItem({ block, appendixId, isActive, onSelect }: SortableBl
       ref={setNodeRef}
       style={style}
       onClick={onSelect}
-      className={`group relative w-full text-left rounded-lg border-l-4 border bg-white p-4 shadow-sm transition-all cursor-pointer ${
+      className={`group relative w-full text-left rounded-lg border-l-4 border bg-oaec-bg-lighter p-4 shadow-sm transition-all cursor-pointer ${
         BLOCK_TYPE_COLORS[block.type] ?? 'border-l-gray-300'
       } ${
         isActive
-          ? 'border-blue-300 ring-2 ring-blue-100'
-          : 'border-gray-100 hover:border-gray-200'
+          ? 'border-oaec-accent ring-2 ring-oaec-accent/30'
+          : 'border-oaec-border-subtle hover:border-oaec-border'
       }`}
     >
       <div className="mb-1 flex items-center gap-2">
         <button
-          className="flex h-5 w-5 shrink-0 cursor-grab items-center justify-center rounded text-gray-300 hover:text-gray-500 active:cursor-grabbing"
+          className="flex h-5 w-5 shrink-0 cursor-grab items-center justify-center rounded text-oaec-text-faint hover:text-oaec-text-muted active:cursor-grabbing"
           {...attributes}
           {...listeners}
           onClick={(e) => e.stopPropagation()}
@@ -137,7 +137,7 @@ function SortableBlockItem({ block, appendixId, isActive, onSelect }: SortableBl
           </svg>
         </button>
 
-        <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+        <span className="rounded bg-oaec-hover px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-oaec-text-muted">
           {BLOCK_TYPE_LABELS[block.type] ?? block.type}
         </span>
 
@@ -149,7 +149,7 @@ function SortableBlockItem({ block, appendixId, isActive, onSelect }: SortableBl
               e.stopPropagation();
               duplicateAppendixBlock(appendixId, block.id);
             }}
-            className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-blue-50 hover:text-blue-500"
+            className="flex h-6 w-6 items-center justify-center rounded text-oaec-text-faint hover:bg-oaec-accent-soft hover:text-oaec-accent"
             title="Dupliceer block"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -161,7 +161,7 @@ function SortableBlockItem({ block, appendixId, isActive, onSelect }: SortableBl
               e.stopPropagation();
               removeAppendixBlock(appendixId, block.id);
             }}
-            className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-red-50 hover:text-red-500"
+            className="flex h-6 w-6 items-center justify-center rounded text-oaec-text-faint hover:bg-oaec-danger-soft hover:text-oaec-danger"
             title="Verwijder block"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -200,7 +200,7 @@ function AppendixHeader({ appendix }: { appendix: EditorAppendix }) {
   if (editing) {
     return (
       <div className="flex items-center gap-3">
-        <span className="flex h-7 w-7 items-center justify-center rounded bg-teal-100 text-xs font-semibold text-teal-600">
+        <span className="flex h-7 w-7 items-center justify-center rounded bg-oaec-accent-soft text-xs font-semibold text-oaec-accent">
           B{appendix.number}
         </span>
         <input
@@ -215,7 +215,7 @@ function AppendixHeader({ appendix }: { appendix: EditorAppendix }) {
               setEditing(false);
             }
           }}
-          className="flex-1 rounded border border-teal-300 px-2 py-1 text-lg font-semibold text-gray-900 outline-none ring-2 ring-teal-100"
+          className="flex-1 rounded border border-oaec-accent px-2 py-1 text-lg font-semibold text-oaec-text outline-none ring-2 ring-oaec-accent/30"
         />
       </div>
     );
@@ -223,11 +223,11 @@ function AppendixHeader({ appendix }: { appendix: EditorAppendix }) {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="flex h-7 w-7 items-center justify-center rounded bg-teal-100 text-xs font-semibold text-teal-600">
+      <span className="flex h-7 w-7 items-center justify-center rounded bg-oaec-accent-soft text-xs font-semibold text-oaec-accent">
         B{appendix.number}
       </span>
       <h2
-        className="flex-1 text-lg font-semibold text-gray-900 cursor-pointer hover:text-teal-700 transition-colors"
+        className="flex-1 text-lg font-semibold text-oaec-text cursor-pointer hover:text-oaec-accent transition-colors"
         onClick={() => setEditing(true)}
         title="Klik om te bewerken"
       >
@@ -273,16 +273,16 @@ export function AppendixEditor({ appendixId }: AppendixEditorProps) {
   return (
     <div className="flex-1 overflow-y-auto">
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 backdrop-blur px-6 py-4">
+      <div className="sticky top-0 z-10 border-b border-oaec-border bg-oaec-bg-lighter/95 backdrop-blur px-6 py-4">
         <AppendixHeader appendix={appendix} />
       </div>
 
       {/* Divider preview hint */}
-      <div className="mx-6 mt-4 rounded-lg border border-dashed border-teal-300 bg-teal-50 p-4 text-center">
-        <p className="text-sm text-teal-700 font-medium">
+      <div className="mx-6 mt-4 rounded-lg border border-dashed border-oaec-accent bg-oaec-accent-soft p-4 text-center">
+        <p className="text-sm text-oaec-accent font-medium">
           Bijlage {appendix.number} — Scheidingspagina
         </p>
-        <p className="text-xs text-teal-500 mt-1">
+        <p className="text-xs text-oaec-accent mt-1">
           Turquoise divider wordt automatisch gegenereerd in de PDF
         </p>
       </div>
@@ -290,7 +290,7 @@ export function AppendixEditor({ appendixId }: AppendixEditorProps) {
       {/* Content blocks */}
       <div className="px-6 py-4 space-y-3">
         {appendix.content.length === 0 && (
-          <p className="py-4 text-center text-sm text-gray-400 italic">
+          <p className="py-4 text-center text-sm text-oaec-text-faint italic">
             Optioneel: voeg content toe die na de divider komt
           </p>
         )}

@@ -45,29 +45,29 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="flex min-h-screen items-center justify-center bg-oaec-bg">
       <div className="w-full max-w-sm">
         {/* Brand header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight">
-            <span style={{ color: brand.colors.headerBg }}>
+            <span className="text-oaec-text">
               {brand.namePrefix}
             </span>
             <span style={{ color: brand.colors.primary }}>
               {brand.nameAccent}
             </span>
           </h1>
-          <p className="mt-1 text-sm text-gray-500">{brand.productName}</p>
+          <p className="mt-1 text-sm text-oaec-text-muted">{brand.productName}</p>
         </div>
 
         {/* Register card */}
-        <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-          <h2 className="mb-6 text-lg font-semibold text-gray-900">
+        <div className="rounded-xl border border-oaec-border bg-oaec-bg-lighter p-8 shadow-sm">
+          <h2 className="mb-6 text-lg font-semibold text-oaec-text">
             Account aanmaken
           </h2>
 
           {error && (
-            <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="mb-4 rounded-lg bg-oaec-danger-soft px-4 py-3 text-sm text-oaec-danger">
               {error}
             </div>
           )}
@@ -76,7 +76,7 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
             <div>
               <label
                 htmlFor="reg-username"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-oaec-text-secondary"
               >
                 Gebruikersnaam *
               </label>
@@ -91,7 +91,7 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
                   setUsername(e.target.value);
                   handleFieldChange();
                 }}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2"
+                className="w-full rounded-lg border border-oaec-border bg-oaec-bg-input px-3 py-2 text-sm text-oaec-text focus:border-transparent focus:outline-none focus:ring-2"
                 onFocus={(e) =>
                   (e.target.style.boxShadow = `0 0 0 2px ${brand.colors.primary}40`)
                 }
@@ -103,7 +103,7 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
             <div>
               <label
                 htmlFor="reg-email"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-oaec-text-secondary"
               >
                 E-mailadres *
               </label>
@@ -117,7 +117,7 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
                   setEmail(e.target.value);
                   handleFieldChange();
                 }}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2"
+                className="w-full rounded-lg border border-oaec-border bg-oaec-bg-input px-3 py-2 text-sm text-oaec-text focus:border-transparent focus:outline-none focus:ring-2"
                 onFocus={(e) =>
                   (e.target.style.boxShadow = `0 0 0 2px ${brand.colors.primary}40`)
                 }
@@ -128,7 +128,7 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
             <div>
               <label
                 htmlFor="reg-displayname"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-oaec-text-secondary"
               >
                 Weergavenaam
               </label>
@@ -138,7 +138,7 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
                 autoComplete="name"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2"
+                className="w-full rounded-lg border border-oaec-border bg-oaec-bg-input px-3 py-2 text-sm text-oaec-text focus:border-transparent focus:outline-none focus:ring-2"
                 onFocus={(e) =>
                   (e.target.style.boxShadow = `0 0 0 2px ${brand.colors.primary}40`)
                 }
@@ -150,7 +150,7 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
             <div>
               <label
                 htmlFor="reg-password"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-oaec-text-secondary"
               >
                 Wachtwoord *
               </label>
@@ -165,7 +165,7 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
                   setPassword(e.target.value);
                   handleFieldChange();
                 }}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2"
+                className="w-full rounded-lg border border-oaec-border bg-oaec-bg-input px-3 py-2 text-sm text-oaec-text focus:border-transparent focus:outline-none focus:ring-2"
                 onFocus={(e) =>
                   (e.target.style.boxShadow = `0 0 0 2px ${brand.colors.primary}40`)
                 }
@@ -173,7 +173,7 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
                 placeholder={`min. ${MIN_PASSWORD_LENGTH} tekens`}
               />
               {passwordTooShort && (
-                <p className="mt-1 text-xs text-amber-600">
+                <p className="mt-1 text-xs text-oaec-accent">
                   Minimaal {MIN_PASSWORD_LENGTH} tekens
                 </p>
               )}
@@ -182,7 +182,7 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
             <div>
               <label
                 htmlFor="reg-confirm"
-                className="mb-1 block text-sm font-medium text-gray-700"
+                className="mb-1 block text-sm font-medium text-oaec-text-secondary"
               >
                 Wachtwoord bevestigen *
               </label>
@@ -196,14 +196,14 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
                   setConfirmPassword(e.target.value);
                   handleFieldChange();
                 }}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2"
+                className="w-full rounded-lg border border-oaec-border bg-oaec-bg-input px-3 py-2 text-sm text-oaec-text focus:border-transparent focus:outline-none focus:ring-2"
                 onFocus={(e) =>
                   (e.target.style.boxShadow = `0 0 0 2px ${brand.colors.primary}40`)
                 }
                 onBlur={(e) => (e.target.style.boxShadow = "none")}
               />
               {passwordMismatch && (
-                <p className="mt-1 text-xs text-red-600">
+                <p className="mt-1 text-xs text-oaec-danger">
                   Wachtwoorden komen niet overeen
                 </p>
               )}
@@ -212,7 +212,7 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
             <button
               type="submit"
               disabled={!canSubmit}
-              className="w-full rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-lg px-4 py-2.5 text-sm font-medium text-oaec-accent-text transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               style={{ backgroundColor: brand.colors.primary }}
               onMouseEnter={(e) =>
                 (e.currentTarget.style.backgroundColor =
@@ -227,7 +227,7 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
             </button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-gray-500">
+          <p className="mt-4 text-center text-sm text-oaec-text-muted">
             Al een account?{" "}
             <button
               onClick={onSwitchToLogin}

@@ -3,9 +3,9 @@ import { useApiStore } from '@/stores/apiStore';
 import { useReportStore, reportHasContent } from '@/stores/reportStore';
 
 const inputClass =
-  'w-full rounded border border-gray-200 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none';
+  'w-full rounded border border-oaec-border px-2 py-1.5 text-sm focus:border-oaec-accent focus:ring-2 focus:ring-oaec-accent/20 outline-none';
 
-const labelClass = 'block text-xs font-medium text-gray-500 mb-1';
+const labelClass = 'block text-xs font-medium text-oaec-text-muted mb-1';
 
 export function TemplateSelector() {
   const connected = useApiStore((s) => s.connected);
@@ -78,7 +78,7 @@ export function TemplateSelector() {
             placeholder="Template"
           />
           {!connected && (
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-oaec-text-faint">
               Backend niet beschikbaar — templates laden niet mogelijk
             </p>
           )}
@@ -87,26 +87,26 @@ export function TemplateSelector() {
 
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm mx-4">
+          <div className="bg-oaec-bg-lighter rounded-lg shadow-xl p-6 max-w-sm mx-4">
             <div className="flex items-center gap-3 mb-3">
-              <svg className="h-6 w-6 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <svg className="h-6 w-6 text-oaec-accent flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
-              <h3 className="text-sm font-semibold text-gray-900">Template wijzigen</h3>
+              <h3 className="text-sm font-semibold text-oaec-text">Template wijzigen</h3>
             </div>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-oaec-text-secondary mb-4">
               Template wijzigen wist je huidige rapport inclusief alle secties en instellingen. Wil je doorgaan?
             </p>
             <div className="flex justify-end gap-2">
               <button
                 onClick={handleCancel}
-                className="px-3 py-1.5 text-sm text-gray-700 border border-gray-300 rounded hover:bg-gray-50"
+                className="px-3 py-1.5 text-sm text-oaec-text-secondary border border-oaec-border rounded hover:bg-oaec-bg"
               >
                 Annuleren
               </button>
               <button
                 onClick={handleConfirm}
-                className="px-3 py-1.5 text-sm text-white bg-red-500 rounded hover:bg-red-600"
+                className="px-3 py-1.5 text-sm text-oaec-accent-text bg-oaec-danger-soft0 rounded hover:bg-oaec-danger"
               >
                 Doorgaan
               </button>
@@ -120,7 +120,7 @@ export function TemplateSelector() {
 
 function Spinner() {
   return (
-    <svg className="h-4 w-4 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+    <svg className="h-4 w-4 animate-spin text-oaec-accent" fill="none" viewBox="0 0 24 24">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
     </svg>

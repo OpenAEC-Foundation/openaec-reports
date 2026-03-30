@@ -73,12 +73,12 @@ export function UserManagement() {
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">
+        <h2 className="text-lg font-semibold text-oaec-text">
           Gebruikers ({users.length})
         </h2>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
+          className="rounded-md bg-oaec-accent px-4 py-2 text-sm font-medium text-oaec-accent-text hover:bg-oaec-accent-hover transition-colors"
         >
           {showForm ? "Annuleren" : "Nieuwe gebruiker"}
         </button>
@@ -86,8 +86,8 @@ export function UserManagement() {
 
       {/* Create form */}
       {showForm && (
-        <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Nieuwe gebruiker</h3>
+        <div className="mb-6 rounded-lg border border-oaec-border bg-oaec-bg p-4">
+          <h3 className="text-sm font-semibold text-oaec-text-secondary mb-3">Nieuwe gebruiker</h3>
           <div className="grid grid-cols-2 gap-3">
             <Input
               label="Gebruikersnaam *"
@@ -133,7 +133,7 @@ export function UserManagement() {
             <button
               onClick={handleCreate}
               disabled={!form.username || !form.password}
-              className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="rounded-md bg-oaec-accent px-4 py-2 text-sm font-medium text-oaec-accent-text hover:bg-oaec-accent-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               Aanmaken
             </button>
@@ -142,9 +142,9 @@ export function UserManagement() {
       )}
 
       {/* Users table */}
-      <div className="overflow-hidden rounded-lg border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="overflow-hidden rounded-lg border border-oaec-border">
+        <table className="min-w-full divide-y divide-oaec-border">
+          <thead className="bg-oaec-bg">
             <tr>
               <Th>Gebruikersnaam</Th>
               <Th>Weergavenaam</Th>
@@ -155,9 +155,9 @@ export function UserManagement() {
               <Th>Acties</Th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody className="divide-y divide-oaec-border bg-oaec-bg-lighter">
             {users.map((user) => (
-              <tr key={user.id} className={!user.is_active ? "bg-gray-50 opacity-60" : ""}>
+              <tr key={user.id} className={!user.is_active ? "bg-oaec-bg opacity-60" : ""}>
                 <Td className="font-medium">{user.username}</Td>
                 <Td>
                   {editingId === user.id ? (
@@ -172,7 +172,7 @@ export function UserManagement() {
                   ) : (
                     <span
                       onClick={() => setEditingId(user.id)}
-                      className="cursor-pointer hover:text-purple-600"
+                      className="cursor-pointer hover:text-oaec-accent"
                       title="Klik om te bewerken"
                     >
                       {user.display_name || "-"}
@@ -185,7 +185,7 @@ export function UserManagement() {
                     value={user.role}
                     onChange={(e) => handleRoleChange(user, e.target.value)}
                     disabled={user.id === currentUser?.id}
-                    className="text-xs rounded border-gray-300 bg-transparent disabled:opacity-50"
+                    className="text-xs rounded border-oaec-border bg-transparent disabled:opacity-50"
                   >
                     <option value="user">Gebruiker</option>
                     <option value="admin">Admin</option>
@@ -195,7 +195,7 @@ export function UserManagement() {
                   <select
                     value={user.tenant}
                     onChange={(e) => handleTenantChange(user, e.target.value)}
-                    className="text-xs rounded border-gray-300 bg-transparent"
+                    className="text-xs rounded border-oaec-border bg-transparent"
                   >
                     <option value="">(geen)</option>
                     {tenants.map((t) => (
@@ -211,8 +211,8 @@ export function UserManagement() {
                     disabled={user.id === currentUser?.id}
                     className={`rounded-full px-2 py-0.5 text-xs font-medium disabled:cursor-not-allowed ${
                       user.is_active
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
+                        ? "bg-oaec-success-soft text-oaec-success"
+                        : "bg-oaec-danger-soft text-oaec-danger"
                     }`}
                   >
                     {user.is_active ? "Actief" : "Inactief"}
@@ -222,7 +222,7 @@ export function UserManagement() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => { setResetId(user.id); setNewPassword(""); }}
-                      className="rounded px-2 py-1 text-xs text-gray-600 hover:bg-gray-100"
+                      className="rounded px-2 py-1 text-xs text-oaec-text-secondary hover:bg-oaec-hover"
                       title="Wachtwoord resetten"
                     >
                       Reset ww
@@ -230,7 +230,7 @@ export function UserManagement() {
                     {user.id !== currentUser?.id && (
                       <button
                         onClick={() => setConfirmDelete(user.id)}
-                        className="rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50"
+                        className="rounded px-2 py-1 text-xs text-oaec-danger hover:bg-oaec-danger-soft"
                         title="Verwijderen"
                       >
                         Verwijder
@@ -259,14 +259,14 @@ export function UserManagement() {
           <div className="mt-4 flex justify-end gap-2">
             <button
               onClick={() => setResetId(null)}
-              className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              className="rounded-md border border-oaec-border px-4 py-2 text-sm text-oaec-text-secondary hover:bg-oaec-bg"
             >
               Annuleren
             </button>
             <button
               onClick={handleResetPassword}
               disabled={newPassword.length < 6}
-              className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="rounded-md bg-oaec-accent px-4 py-2 text-sm font-medium text-oaec-accent-text hover:bg-oaec-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Resetten
             </button>
@@ -280,19 +280,19 @@ export function UserManagement() {
           title="Gebruiker verwijderen"
           onClose={() => setConfirmDelete(null)}
         >
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-oaec-text-secondary">
             Weet je zeker dat je deze gebruiker wilt verwijderen? Dit kan niet ongedaan worden.
           </p>
           <div className="mt-4 flex justify-end gap-2">
             <button
               onClick={() => setConfirmDelete(null)}
-              className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              className="rounded-md border border-oaec-border px-4 py-2 text-sm text-oaec-text-secondary hover:bg-oaec-bg"
             >
               Annuleren
             </button>
             <button
               onClick={() => handleDelete(confirmDelete)}
-              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+              className="rounded-md bg-oaec-danger px-4 py-2 text-sm font-medium text-oaec-text hover:bg-oaec-danger-hover"
             >
               Verwijderen
             </button>
@@ -325,7 +325,7 @@ function InlineEdit({
         if (e.key === "Enter") onSave(text);
         if (e.key === "Escape") onCancel();
       }}
-      className="w-full rounded border border-purple-300 px-2 py-0.5 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+      className="w-full rounded border border-oaec-border px-2 py-0.5 text-sm focus:outline-none focus:ring-1 focus:ring-oaec-accent"
     />
   );
 }

@@ -205,9 +205,9 @@ export function AppShell() {
       {/* Drag overlay */}
       {dragOver && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-brand-primary/10 border-2 border-dashed border-brand-primary pointer-events-none">
-          <div className="rounded-xl bg-white px-8 py-6 shadow-lg text-center">
-            <p className="text-lg font-medium text-brand-primary-dark">JSON rapport importeren</p>
-            <p className="text-sm text-gray-500">Laat los om te laden</p>
+          <div className="rounded-xl bg-oaec-bg-lighter px-8 py-6 shadow-lg text-center border border-oaec-border">
+            <p className="text-lg font-medium text-oaec-accent">JSON rapport importeren</p>
+            <p className="text-sm text-oaec-text-secondary">Laat los om te laden</p>
           </div>
         </div>
       )}
@@ -246,8 +246,8 @@ export function AppShell() {
         <div className="fixed top-36 right-4 z-50 animate-slide-in-right">
           <div className={`rounded-lg shadow-lg px-4 py-3 flex items-center gap-2 ${
             toast.type === "success"
-              ? "bg-green-600 text-white"
-              : "bg-red-600 text-white"
+              ? "bg-oaec-success text-oaec-accent-text"
+              : "bg-oaec-danger text-oaec-accent-text"
           }`}>
             {toast.type === "success" ? (
               <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
@@ -333,23 +333,24 @@ export function AppShell() {
 function AppCrashFallback() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-      <div className="rounded-full bg-red-100 p-4">
-        <svg className="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <div className="rounded-full p-4" style={{ background: 'var(--oaec-danger-soft)' }}>
+        <svg className="h-8 w-8" style={{ color: 'var(--oaec-danger)' }} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
         </svg>
       </div>
-      <p className="text-sm font-medium text-gray-700">Er is een fout opgetreden in de editor</p>
-      <p className="text-xs text-gray-500">Probeer het rapport te resetten of herlaad de pagina</p>
+      <p className="text-sm font-medium text-oaec-text">Er is een fout opgetreden in de editor</p>
+      <p className="text-xs text-oaec-text-secondary">Probeer het rapport te resetten of herlaad de pagina</p>
       <div className="flex gap-3">
         <button
           onClick={() => useReportStore.getState().reset()}
-          className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors"
+          className="rounded-md px-4 py-2 text-sm font-medium transition-colors"
+          style={{ background: 'var(--oaec-danger)', color: 'var(--oaec-accent-text)' }}
         >
           Reset rapport
         </button>
         <button
           onClick={() => window.location.reload()}
-          className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          className="rounded-md border border-oaec-border px-4 py-2 text-sm font-medium text-oaec-text-secondary hover:bg-oaec-hover transition-colors"
         >
           Herlaad pagina
         </button>

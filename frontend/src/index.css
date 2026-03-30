@@ -1,3 +1,6 @@
+@import "@openaec/ui/css/tokens.css";
+@import "@openaec/ui/css/components.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,6 +10,8 @@
   min-height: 100px;
   padding: 0.75rem;
   outline: none;
+  background: var(--oaec-bg-input);
+  color: var(--oaec-text);
 }
 
 .ProseMirror p {
@@ -22,7 +27,7 @@
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
-  color: #adb5bd;
+  color: var(--oaec-text-faint);
   pointer-events: none;
   height: 0;
 }
@@ -50,4 +55,35 @@
 *:focus-visible {
   outline: 2px solid rgb(var(--brand-primary));
   outline-offset: 2px;
+}
+
+/* ── Dark theme base input styles ────────────────────────────── */
+@layer base {
+  input,
+  textarea,
+  select {
+    color: var(--oaec-text);
+    background-color: var(--oaec-bg-input);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--oaec-text-faint);
+  }
+
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--oaec-scrollbar-thumb);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--oaec-scrollbar-thumb-hover);
+  }
 }

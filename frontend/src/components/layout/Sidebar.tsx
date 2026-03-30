@@ -137,8 +137,8 @@ function SortableSectionItem({ section, chapterNumber, isActive, isCollapsed, on
       style={style}
       className={`group flex w-full items-start gap-1 rounded-md text-sm transition-colors ${
         isActive
-          ? 'bg-brand-primary-light text-brand-primary-dark'
-          : 'text-gray-700 hover:bg-gray-50'
+          ? 'bg-oaec-hover-strong text-oaec-accent'
+          : 'text-oaec-text-secondary hover:bg-oaec-hover'
       }`}
     >
       {/* Collapse chevron */}
@@ -147,7 +147,7 @@ function SortableSectionItem({ section, chapterNumber, isActive, isCollapsed, on
           e.stopPropagation();
           onToggleCollapse();
         }}
-        className="mt-2 flex h-5 w-5 shrink-0 items-center justify-center rounded text-gray-400 hover:text-gray-600 transition-transform"
+        className="mt-2 flex h-5 w-5 shrink-0 items-center justify-center rounded text-oaec-text-muted hover:text-oaec-text transition-transform"
         aria-label={isCollapsed ? 'Uitklappen' : 'Inklappen'}
       >
         <svg
@@ -161,7 +161,7 @@ function SortableSectionItem({ section, chapterNumber, isActive, isCollapsed, on
 
       {/* Drag handle */}
       <button
-        className="mt-2 flex h-5 w-5 shrink-0 cursor-grab items-center justify-center rounded text-gray-300 hover:text-gray-500 active:cursor-grabbing"
+        className="mt-2 flex h-5 w-5 shrink-0 cursor-grab items-center justify-center rounded text-oaec-text-faint hover:text-oaec-text-muted active:cursor-grabbing"
         {...attributes}
         {...listeners}
         aria-label="Versleep hoofdstuk"
@@ -179,8 +179,8 @@ function SortableSectionItem({ section, chapterNumber, isActive, isCollapsed, on
         <span
           className={`mt-0.5 flex h-5 min-w-[1.25rem] shrink-0 items-center justify-center rounded text-xs font-bold ${
             isActive
-              ? 'bg-brand-primary/20 text-brand-primary-dark'
-              : 'bg-gray-100 text-gray-500'
+              ? 'bg-oaec-accent-soft text-oaec-accent'
+              : 'bg-oaec-hover text-oaec-text-muted'
           }`}
         >
           {chapterNumber}
@@ -189,27 +189,27 @@ function SortableSectionItem({ section, chapterNumber, isActive, isCollapsed, on
           <div className="flex items-center gap-2">
             <p className="truncate font-medium">{section.title}</p>
             {isCollapsed && section.content.length > 0 && (
-              <span className="shrink-0 rounded-full bg-gray-200 px-1.5 py-0.5 text-[10px] font-medium text-gray-500">
+              <span className="shrink-0 rounded-full bg-oaec-hover px-1.5 py-0.5 text-[10px] font-medium text-oaec-text-muted">
                 {section.content.length}
               </span>
             )}
           </div>
           {!isCollapsed && (
             <div className="mt-0.5 flex flex-wrap gap-1">
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-oaec-text-faint">
                 {blockCountLabel(section.content.length)}
               </span>
               {section.content.slice(0, 4).map((block) => (
                 <span
                   key={block.id}
-                  className="inline-flex items-center rounded bg-gray-100 px-1 py-0.5 text-gray-500"
+                  className="inline-flex items-center rounded bg-oaec-hover px-1 py-0.5 text-oaec-text-muted"
                   title={BLOCK_TYPE_LABELS[block.type] ?? block.type}
                 >
                   <BlockIcon type={block.type} className="h-3 w-3" />
                 </span>
               ))}
               {section.content.length > 4 && (
-                <span className="text-[10px] text-gray-400">
+                <span className="text-[10px] text-oaec-text-faint">
                   +{section.content.length - 4}
                 </span>
               )}
@@ -224,7 +224,7 @@ function SortableSectionItem({ section, chapterNumber, isActive, isCollapsed, on
           e.stopPropagation();
           onRemove();
         }}
-        className="mr-1 mt-2 flex h-5 w-5 shrink-0 items-center justify-center rounded text-gray-300 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+        className="mr-1 mt-2 flex h-5 w-5 shrink-0 items-center justify-center rounded text-oaec-text-faint opacity-0 transition-opacity hover:bg-oaec-danger-soft hover:text-oaec-danger group-hover:opacity-100"
         aria-label="Verwijder hoofdstuk"
         title="Verwijder hoofdstuk"
       >
@@ -267,13 +267,13 @@ function SortableAppendixItem({ appendix, isActive, onSelect, onRemove }: Sortab
       style={style}
       className={`group flex w-full items-start gap-1 rounded-md text-sm transition-colors ${
         isActive
-          ? 'bg-teal-50 text-teal-700'
-          : 'text-gray-700 hover:bg-gray-50'
+          ? 'bg-oaec-hover-strong text-oaec-accent'
+          : 'text-oaec-text-secondary hover:bg-oaec-hover'
       }`}
     >
       {/* Drag handle */}
       <button
-        className="mt-2 flex h-5 w-5 shrink-0 cursor-grab items-center justify-center rounded text-gray-300 hover:text-gray-500 active:cursor-grabbing"
+        className="mt-2 flex h-5 w-5 shrink-0 cursor-grab items-center justify-center rounded text-oaec-text-faint hover:text-oaec-text-muted active:cursor-grabbing"
         {...attributes}
         {...listeners}
         aria-label="Versleep bijlage"
@@ -291,8 +291,8 @@ function SortableAppendixItem({ appendix, isActive, onSelect, onRemove }: Sortab
         <span
           className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs font-medium ${
             isActive
-              ? 'bg-teal-100 text-teal-600'
-              : 'bg-teal-50 text-teal-500'
+              ? 'bg-oaec-accent-soft text-oaec-accent'
+              : 'bg-oaec-hover text-oaec-text-muted'
           }`}
         >
           {appendix.number}
@@ -301,20 +301,20 @@ function SortableAppendixItem({ appendix, isActive, onSelect, onRemove }: Sortab
           <p className="truncate font-medium">{appendix.title}</p>
           {appendix.content.length > 0 && (
             <div className="mt-0.5 flex flex-wrap gap-1">
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-oaec-text-faint">
                 {blockCountLabel(appendix.content.length)}
               </span>
               {appendix.content.slice(0, 4).map((block) => (
                 <span
                   key={block.id}
-                  className="inline-flex items-center rounded bg-gray-100 px-1 py-0.5 text-gray-500"
+                  className="inline-flex items-center rounded bg-oaec-hover px-1 py-0.5 text-oaec-text-muted"
                   title={BLOCK_TYPE_LABELS[block.type] ?? block.type}
                 >
                   <BlockIcon type={block.type} className="h-3 w-3" />
                 </span>
               ))}
               {appendix.content.length > 4 && (
-                <span className="text-[10px] text-gray-400">
+                <span className="text-[10px] text-oaec-text-faint">
                   +{appendix.content.length - 4}
                 </span>
               )}
@@ -329,7 +329,7 @@ function SortableAppendixItem({ appendix, isActive, onSelect, onRemove }: Sortab
           e.stopPropagation();
           onRemove();
         }}
-        className="mr-1 mt-2 flex h-5 w-5 shrink-0 items-center justify-center rounded text-gray-300 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+        className="mr-1 mt-2 flex h-5 w-5 shrink-0 items-center justify-center rounded text-oaec-text-faint opacity-0 transition-opacity hover:bg-oaec-danger-soft hover:text-oaec-danger group-hover:opacity-100"
         aria-label="Verwijder bijlage"
         title="Verwijder bijlage"
       >
@@ -482,25 +482,32 @@ export function Sidebar() {
 
   return (
     <aside
-      className="relative flex h-full flex-col border-r border-gray-200 bg-white"
+      className="relative flex h-full flex-col border-r border-oaec-border-subtle bg-oaec-bg"
       style={{ width, minWidth: SIDEBAR_MIN_WIDTH, maxWidth: SIDEBAR_MAX_WIDTH }}
     >
       {/* Header */}
-      <div className="border-b border-gray-200 px-4 py-3">
+      <div className="border-b border-oaec-border-subtle px-4 py-3">
         {project ? (
-          <p className="text-sm font-medium text-gray-900 truncate">{project}</p>
+          <p className="text-sm font-medium text-oaec-text truncate">{project}</p>
         ) : (
-          <p className="text-sm text-gray-400 italic">Geen project</p>
+          <p className="text-sm text-oaec-text-faint italic">Geen project</p>
         )}
         {status && (
           <span
             className={`mt-1 inline-block rounded px-1.5 py-0.5 text-xs font-medium ${
               status === 'DEFINITIEF'
-                ? 'bg-green-100 text-green-700'
+                ? 'text-oaec-success'
                 : status === 'REVISIE'
-                  ? 'bg-amber-100 text-amber-700'
-                  : 'bg-gray-100 text-gray-600'
+                  ? 'text-oaec-accent'
+                  : 'text-oaec-text-muted'
             }`}
+            style={{
+              background: status === 'DEFINITIEF'
+                ? 'var(--oaec-success-soft)'
+                : status === 'REVISIE'
+                  ? 'var(--oaec-accent-soft)'
+                  : 'var(--oaec-hover)',
+            }}
           >
             {status}
           </span>
@@ -517,8 +524,8 @@ export function Sidebar() {
               onClick={() => setActivePanel(item.id)}
               className={`w-full flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors ${
                 isNavActive && activePanel === item.id
-                  ? 'bg-brand-primary-light text-brand-primary-dark font-medium'
-                  : 'text-gray-600 hover:bg-gray-50'
+                  ? 'bg-oaec-hover-strong text-oaec-accent font-medium'
+                  : 'text-oaec-text-secondary hover:bg-oaec-hover'
               }`}
             >
               {item.icon}
@@ -530,12 +537,12 @@ export function Sidebar() {
         {/* Field groups (BIC / template-driven forms) */}
         {fieldGroups.length > 0 && (
           <>
-            <div className="mx-4 my-1 border-t border-gray-100" />
+            <div className="mx-4 my-1 border-t border-oaec-border-subtle" />
             <div className="flex items-center justify-between px-4 pt-2 pb-1">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              <p className="text-xs font-semibold text-oaec-text-faint uppercase tracking-wider">
                 Formulier
               </p>
-              <span className="text-[10px] text-gray-300">
+              <span className="text-[10px] text-oaec-text-faint">
                 {fieldGroups.length} groepen
               </span>
             </div>
@@ -546,16 +553,16 @@ export function Sidebar() {
                   onClick={() => setActiveFieldGroup(group.key)}
                   className={`w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors text-left ${
                     activeFieldGroup === group.key
-                      ? 'bg-amber-50 text-amber-700 font-medium'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      ? 'bg-oaec-hover-strong text-oaec-accent font-medium'
+                      : 'text-oaec-text-secondary hover:bg-oaec-hover'
                   }`}
                 >
                   {group.type === 'table' ? (
-                    <svg className="h-3.5 w-3.5 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <svg className="h-3.5 w-3.5 shrink-0 text-oaec-text-faint" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0112 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M13.125 12h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125M20.625 12c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5M12 14.625v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 14.625c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m0 0v1.5c0 .621-.504 1.125-1.125 1.125" />
                     </svg>
                   ) : (
-                    <svg className="h-3.5 w-3.5 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <svg className="h-3.5 w-3.5 shrink-0 text-oaec-text-faint" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
                     </svg>
                   )}
@@ -567,16 +574,16 @@ export function Sidebar() {
         )}
 
         {/* Divider */}
-        <div className="mx-4 my-1 border-t border-gray-100" />
+        <div className="mx-4 my-1 border-t border-oaec-border-subtle" />
 
         {/* Chapter list header + add button */}
         <div className="flex items-center justify-between px-4 pt-2 pb-1">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          <p className="text-xs font-semibold text-oaec-text-faint uppercase tracking-wider">
             Hoofdstukken
           </p>
           <button
             onClick={() => addNewSection()}
-            className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-gray-400 hover:bg-brand-primary-light hover:text-brand-primary-dark transition-colors"
+            className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-oaec-text-faint hover:bg-oaec-hover hover:text-oaec-accent transition-colors"
             title="Hoofdstuk toevoegen"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -590,15 +597,15 @@ export function Sidebar() {
         <nav className="px-2 py-1">
           {sections.length === 0 && (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="rounded-full bg-gray-100 p-3 mb-3">
-                <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <div className="rounded-full bg-oaec-hover p-3 mb-3">
+                <svg className="h-6 w-6 text-oaec-text-faint" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
               </div>
-              <p className="text-sm text-gray-500">Geen hoofdstukken</p>
+              <p className="text-sm text-oaec-text-muted">Geen hoofdstukken</p>
               <button
                 onClick={() => addNewSection()}
-                className="mt-2 text-sm text-brand-primary hover:text-brand-primary-dark font-medium"
+                className="mt-2 text-sm text-oaec-accent hover:text-oaec-accent-hover font-medium"
               >
                 Eerste hoofdstuk toevoegen
               </button>
@@ -631,7 +638,8 @@ export function Sidebar() {
                         removeSection(section.id);
                         setConfirmDeleteId(null);
                       }}
-                      className="absolute right-7 top-1 z-10 rounded bg-red-600 px-2 py-1 text-xs text-white shadow-md hover:bg-red-700 transition-colors cursor-pointer"
+                      className="absolute right-7 top-1 z-10 rounded px-2 py-1 text-xs shadow-md transition-colors cursor-pointer"
+                      style={{ background: 'var(--oaec-danger)', color: 'var(--oaec-accent-text)' }}
                     >
                       Klik om te verwijderen
                     </button>
@@ -643,16 +651,16 @@ export function Sidebar() {
         </nav>
 
         {/* Divider between chapters and appendices */}
-        <div className="mx-4 my-1 border-t border-gray-100" />
+        <div className="mx-4 my-1 border-t border-oaec-border-subtle" />
 
         {/* Appendix list header + add button */}
         <div className="flex items-center justify-between px-4 pt-2 pb-1">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          <p className="text-xs font-semibold text-oaec-text-faint uppercase tracking-wider">
             Bijlagen
           </p>
           <button
             onClick={() => addNewAppendix()}
-            className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-gray-400 hover:bg-teal-50 hover:text-teal-600 transition-colors"
+            className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-oaec-text-faint hover:bg-oaec-hover hover:text-oaec-accent transition-colors"
             title="Bijlage toevoegen"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -666,7 +674,7 @@ export function Sidebar() {
         <nav className="px-2 py-1">
           {appendices.length === 0 && (
             <div className="px-2 py-4 text-center">
-              <p className="text-sm text-gray-400 italic">Geen bijlagen</p>
+              <p className="text-sm text-oaec-text-faint italic">Geen bijlagen</p>
             </div>
           )}
           <DndContext
@@ -693,7 +701,8 @@ export function Sidebar() {
                         removeAppendix(appendix.id);
                         setConfirmDeleteId(null);
                       }}
-                      className="absolute right-7 top-1 z-10 rounded bg-red-600 px-2 py-1 text-xs text-white shadow-md hover:bg-red-700 transition-colors cursor-pointer"
+                      className="absolute right-7 top-1 z-10 rounded px-2 py-1 text-xs shadow-md transition-colors cursor-pointer"
+                      style={{ background: 'var(--oaec-danger)', color: 'var(--oaec-accent-text)' }}
                     >
                       Klik om te verwijderen
                     </button>

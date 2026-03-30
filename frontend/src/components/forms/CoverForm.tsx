@@ -4,9 +4,9 @@ import { ExtraFieldRow } from './ExtraFieldRow';
 import type { Cover, ImageSourceBase64, ImageMediaType } from '@/types/report';
 
 const inputClass =
-  'w-full rounded border border-gray-200 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none';
+  'w-full rounded border border-oaec-border px-2 py-1.5 text-sm focus:border-oaec-accent focus:ring-2 focus:ring-oaec-accent/20 outline-none';
 
-const labelClass = 'block text-xs font-medium text-gray-500 mb-1';
+const labelClass = 'block text-xs font-medium text-oaec-text-muted mb-1';
 
 const ACCEPTED_TYPES: Record<string, ImageMediaType> = {
   'image/png': 'image/png',
@@ -120,7 +120,7 @@ export function CoverForm() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
-      <h3 className="text-sm font-semibold text-gray-700 border-b border-gray-100 pb-2">
+      <h3 className="text-sm font-semibold text-oaec-text-secondary border-b border-oaec-border-subtle pb-2">
         Voorblad configuratie
       </h3>
 
@@ -141,7 +141,7 @@ export function CoverForm() {
       <div>
         <label className={labelClass}>Cover afbeelding</label>
         {imagePreviewSrc ? (
-          <div className="relative rounded-lg border border-gray-200 bg-gray-50 p-2">
+          <div className="relative rounded-lg border border-oaec-border bg-oaec-bg p-2">
             <img
               src={imagePreviewSrc}
               alt="Cover preview"
@@ -149,7 +149,7 @@ export function CoverForm() {
             />
             <button
               onClick={removeImage}
-              className="absolute top-3 right-3 flex h-6 w-6 items-center justify-center rounded-full bg-white/80 text-gray-500 shadow hover:bg-red-50 hover:text-red-500"
+              className="absolute top-3 right-3 flex h-6 w-6 items-center justify-center rounded-full bg-oaec-bg-lighter/80 text-oaec-text-muted shadow hover:bg-oaec-danger-soft hover:text-oaec-danger"
               title="Verwijder afbeelding"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -162,17 +162,17 @@ export function CoverForm() {
             onDrop={handleDrop}
             onDragOver={(e) => e.preventDefault()}
             onClick={() => fileInputRef.current?.click()}
-            className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 px-4 py-8 cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-colors"
+            className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-oaec-border bg-oaec-bg px-4 py-8 cursor-pointer hover:border-oaec-accent hover:bg-oaec-accent-soft/30 transition-colors"
           >
-            <svg className="h-8 w-8 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <svg className="h-8 w-8 text-oaec-text-faint mb-2" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
             </svg>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-oaec-text-faint">
               Klik of sleep een afbeelding hierheen
             </p>
-            <p className="text-xs text-gray-300 mt-1">PNG, JPG of SVG</p>
+            <p className="text-xs text-oaec-text-faint mt-1">PNG, JPG of SVG</p>
             {typeof cover.image === 'string' && !imagePreviewSrc && (
-              <p className="text-xs text-amber-500 mt-2">
+              <p className="text-xs text-oaec-accent mt-2">
                 Huidig pad: {cover.image} (niet beschikbaar in browser)
               </p>
             )}
@@ -208,7 +208,7 @@ export function CoverForm() {
           ))}
           <button
             onClick={addExtraField}
-            className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+            className="flex items-center gap-1 rounded px-2 py-1 text-xs text-oaec-text-faint hover:bg-oaec-accent-soft hover:text-oaec-accent transition-colors"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

@@ -32,21 +32,21 @@ export function ColorPicker({ value, onChange, brandColors }: ColorPickerProps) 
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 rounded border border-gray-300 px-2 py-0.5 text-xs hover:border-purple-400 transition-colors"
+        className="flex items-center gap-1.5 rounded border border-oaec-border px-2 py-0.5 text-xs hover:border-oaec-accent transition-colors"
       >
         <span
-          className="inline-block h-3 w-3 rounded-sm border border-gray-300"
+          className="inline-block h-3 w-3 rounded-sm border border-oaec-border"
           style={{ backgroundColor: displayColor }}
         />
-        <span className="font-mono text-gray-700">{displayLabel}</span>
+        <span className="font-mono text-oaec-text-secondary">{displayLabel}</span>
       </button>
 
       {open && (
-        <div className="absolute z-20 mt-1 rounded-md border border-gray-200 bg-white p-2 shadow-lg min-w-[180px]">
+        <div className="absolute z-20 mt-1 rounded-md border border-oaec-border bg-oaec-bg-lighter p-2 shadow-lg min-w-[180px]">
           {/* Brand swatches */}
           {hasSwatches && (
             <div className="mb-2">
-              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
+              <p className="text-[10px] font-semibold text-oaec-text-muted uppercase tracking-wider mb-1">
                 Brand kleuren
               </p>
               <div className="flex flex-col gap-1">
@@ -55,16 +55,16 @@ export function ColorPicker({ value, onChange, brandColors }: ColorPickerProps) 
                     key={name}
                     type="button"
                     onClick={() => { onChange(name); setOpen(false); }}
-                    className={`flex items-center gap-2 rounded px-1.5 py-0.5 text-xs hover:bg-gray-50 ${
-                      value === name ? "bg-purple-50 ring-1 ring-purple-300" : ""
+                    className={`flex items-center gap-2 rounded px-1.5 py-0.5 text-xs hover:bg-oaec-bg ${
+                      value === name ? "bg-oaec-accent-soft ring-1 ring-oaec-accent/30" : ""
                     }`}
                   >
                     <span
-                      className="inline-block h-3 w-3 rounded-sm border border-gray-300"
+                      className="inline-block h-3 w-3 rounded-sm border border-oaec-border"
                       style={{ backgroundColor: hex }}
                     />
-                    <span className="text-gray-700">{name}</span>
-                    <span className="text-gray-400 font-mono ml-auto">{hex}</span>
+                    <span className="text-oaec-text-secondary">{name}</span>
+                    <span className="text-oaec-text-faint font-mono ml-auto">{hex}</span>
                   </button>
                 ))}
               </div>
@@ -73,7 +73,7 @@ export function ColorPicker({ value, onChange, brandColors }: ColorPickerProps) 
 
           {/* Custom hex input */}
           <div>
-            <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">
+            <p className="text-[10px] font-semibold text-oaec-text-muted uppercase tracking-wider mb-1">
               Custom
             </p>
             <div className="flex items-center gap-1">
@@ -90,7 +90,7 @@ export function ColorPicker({ value, onChange, brandColors }: ColorPickerProps) 
                 onKeyDown={(e) => {
                   if (e.key === "Enter") setOpen(false);
                 }}
-                className="w-full rounded border border-gray-300 px-1.5 py-0.5 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-purple-400"
+                className="w-full rounded border border-oaec-border px-1.5 py-0.5 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-oaec-accent"
               />
               <input
                 type="color"

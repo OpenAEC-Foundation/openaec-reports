@@ -6,9 +6,9 @@ import brand from '@/config/brand';
 import type { Colofon, RevisionEntry } from '@/types/report';
 
 const inputClass =
-  'w-full rounded border border-gray-200 px-2 py-1.5 text-sm focus:border-blue-300 focus:ring-2 focus:ring-blue-100 outline-none';
+  'w-full rounded border border-oaec-border px-2 py-1.5 text-sm focus:border-oaec-accent focus:ring-2 focus:ring-oaec-accent/20 outline-none';
 
-const labelClass = 'block text-xs font-medium text-gray-500 mb-1';
+const labelClass = 'block text-xs font-medium text-oaec-text-muted mb-1';
 
 const FASE_OPTIONS = [
   'Haalbaarheid',
@@ -167,8 +167,8 @@ export function ColofonForm() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header + Toggle */}
-      <div className="flex items-center justify-between border-b border-gray-100 pb-2">
-        <h3 className="text-sm font-semibold text-gray-700">Colofon</h3>
+      <div className="flex items-center justify-between border-b border-oaec-border-subtle pb-2">
+        <h3 className="text-sm font-semibold text-oaec-text-secondary">Colofon</h3>
         <ToggleSwitch checked={colofon.enabled !== false} onChange={handleToggle} label="Tonen" />
       </div>
 
@@ -176,7 +176,7 @@ export function ColofonForm() {
         <>
           {/* Sectie: Opdrachtgever */}
           <fieldset className="space-y-3">
-            <legend className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Opdrachtgever</legend>
+            <legend className="text-xs font-semibold text-oaec-text-faint uppercase tracking-wider">Opdrachtgever</legend>
             <div>
               <label className={labelClass}>Contactpersoon</label>
               <input
@@ -214,7 +214,7 @@ export function ColofonForm() {
 
           {/* Sectie: Adviseur */}
           <fieldset className="space-y-3">
-            <legend className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Adviseur</legend>
+            <legend className="text-xs font-semibold text-oaec-text-faint uppercase tracking-wider">Adviseur</legend>
             <div>
               <label className={labelClass}>Bedrijf</label>
               <input
@@ -289,7 +289,7 @@ export function ColofonForm() {
 
           {/* Sectie: Document */}
           <fieldset className="space-y-3">
-            <legend className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Document</legend>
+            <legend className="text-xs font-semibold text-oaec-text-faint uppercase tracking-wider">Document</legend>
             <div>
               <label className={labelClass}>Toegepaste normen</label>
               <textarea
@@ -376,17 +376,17 @@ export function ColofonForm() {
           {/* Revisiegeschiedenis */}
           <div>
             <label className={labelClass}>Revisiegeschiedenis</label>
-            <div className="rounded-lg border border-gray-200 overflow-hidden">
-              <div className="grid grid-cols-[60px_100px_1fr_1fr_32px] gap-px bg-gray-100 text-xs font-medium text-gray-500">
-                <div className="bg-gray-50 px-2 py-1.5">Versie</div>
-                <div className="bg-gray-50 px-2 py-1.5">Datum</div>
-                <div className="bg-gray-50 px-2 py-1.5">Auteur</div>
-                <div className="bg-gray-50 px-2 py-1.5">Omschrijving</div>
-                <div className="bg-gray-50" />
+            <div className="rounded-lg border border-oaec-border overflow-hidden">
+              <div className="grid grid-cols-[60px_100px_1fr_1fr_32px] gap-px bg-oaec-hover text-xs font-medium text-oaec-text-muted">
+                <div className="bg-oaec-bg px-2 py-1.5">Versie</div>
+                <div className="bg-oaec-bg px-2 py-1.5">Datum</div>
+                <div className="bg-oaec-bg px-2 py-1.5">Auteur</div>
+                <div className="bg-oaec-bg px-2 py-1.5">Omschrijving</div>
+                <div className="bg-oaec-bg" />
               </div>
 
               {sortedRevisions.length === 0 && (
-                <div className="px-3 py-4 text-center text-sm text-gray-400 italic">
+                <div className="px-3 py-4 text-center text-sm text-oaec-text-faint italic">
                   Geen revisies
                 </div>
               )}
@@ -406,7 +406,7 @@ export function ColofonForm() {
 
             <button
               onClick={addRevision}
-              className="mt-2 flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              className="mt-2 flex items-center gap-1 rounded px-2 py-1 text-xs text-oaec-text-faint hover:bg-oaec-accent-soft hover:text-oaec-accent transition-colors"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -446,7 +446,7 @@ function RevisionRow({
 }) {
   const [local, setLocal] = useState(revision);
 
-  const cellClass = 'bg-white px-2 py-1';
+  const cellClass = 'bg-oaec-bg-lighter px-2 py-1';
   const cellInputClass =
     'w-full border-0 bg-transparent px-0 py-0 text-sm focus:ring-0 outline-none';
 
@@ -457,7 +457,7 @@ function RevisionRow({
   }
 
   return (
-    <div className="group grid grid-cols-[60px_100px_1fr_1fr_32px] gap-px bg-gray-100">
+    <div className="group grid grid-cols-[60px_100px_1fr_1fr_32px] gap-px bg-oaec-hover">
       <div className={cellClass}>
         <input
           type="text"
@@ -502,7 +502,7 @@ function RevisionRow({
       <div className={`${cellClass} flex items-center justify-center`}>
         <button
           onClick={onRemove}
-          className="flex h-5 w-5 items-center justify-center rounded text-gray-300 opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 transition-opacity"
+          className="flex h-5 w-5 items-center justify-center rounded text-oaec-text-faint opacity-0 group-hover:opacity-100 hover:bg-oaec-danger-soft hover:text-oaec-danger transition-opacity"
           title="Verwijder revisie"
         >
           <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

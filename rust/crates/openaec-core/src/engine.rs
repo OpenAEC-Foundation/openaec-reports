@@ -56,10 +56,22 @@ pub fn generate_pdf_bytes(data: &ReportData) -> Result<Vec<u8>, EngineError> {
     setup_fonts(&fonts, &tenant);
 
     // 4. Create DocTemplate with content frame from brand
+    let base_size = match data.format {
+        crate::schema::PaperFormat::A3 => openaec_layout::A3,
+        _ => A4,
+    };
+    let page_size = match data.orientation {
+        crate::schema::Orientation::Landscape => Size {
+            width: Pt(base_size.height.0.max(base_size.width.0)),
+            height: Pt(base_size.height.0.min(base_size.width.0)),
+        },
+        _ => base_size,
+    };
+
     let mut doc = DocTemplate::new(&data.project, fonts);
     let frame = build_content_frame(&brand);
     let callback = build_footer_callback(&brand);
-    let mut template = PageTemplate::new("content", A4, frame);
+    let mut template = PageTemplate::new("content", page_size, frame);
     if let Some(cb) = callback {
         template = template.with_callback(cb);
     }
@@ -85,10 +97,23 @@ pub fn generate_pdf_with_config(
     let fonts = shared_font_registry();
     setup_fonts(&fonts, tenant);
 
+    // Determine page size from data
+    let base_size = match data.format {
+        crate::schema::PaperFormat::A3 => openaec_layout::A3,
+        _ => A4,
+    };
+    let page_size = match data.orientation {
+        crate::schema::Orientation::Landscape => Size {
+            width: Pt(base_size.height.0.max(base_size.width.0)),
+            height: Pt(base_size.height.0.min(base_size.width.0)),
+        },
+        _ => base_size,
+    };
+
     let mut doc = DocTemplate::new(&data.project, fonts);
     let frame = build_content_frame(brand);
     let callback = build_footer_callback(brand);
-    let mut template = PageTemplate::new("content", A4, frame);
+    let mut template = PageTemplate::new("content", page_size, frame);
     if let Some(cb) = callback {
         template = template.with_callback(cb);
     }
@@ -425,7 +450,7 @@ fn setup_fonts(fonts: &SharedFontRegistry, tenant: &TenantConfig) {
 // ── Defaults ────────────────────────────────────────────────────────────
 
 /// Create a minimal default BrandConfig when no brand file is available.
-fn default_brand() -> BrandConfig {
+pub fn default_brand() -> BrandConfig {
     let mut colors = std::collections::HashMap::new();
     colors.insert("primary".to_string(), "#40124A".to_string());
     colors.insert("secondary".to_string(), "#38BDA0".to_string());

@@ -48,8 +48,12 @@ A4_PORTRAIT_HEIGHT = 841.89
 A4_LANDSCAPE_WIDTH = 841.89
 A4_LANDSCAPE_HEIGHT = 595.28
 
-# Maximum y coordinate for content (bottom boundary)
-Y_MAX_PORTRAIT = 780.0
+# Maximum y coordinate for content (bottom boundary, top-down).
+# Conservatieve fallback waarden — tenants overrulen dit via
+# `templates/<brand>/standaard.yaml` content_area.y_td_end. Voor de
+# openaec-stationery start de footer/logo zone op y=768; daarom 760 als
+# generieke veilige bovengrens (8pt clearance).
+Y_MAX_PORTRAIT = 760.0
 Y_MAX_LANDSCAPE = 533.0
 
 
@@ -60,6 +64,33 @@ def _hex_to_rgb(h: str) -> tuple[float, float, float]:
 
 
 _RE_HTML_TAG = re.compile(r"<[^>]+>")
+# Matcht alleen als de VOLLEDIGE celinhoud omhuld is met ``<b>...</b>``
+# of ``<strong>...</strong>``. Partial markup zoals ``"<b>foo</b> bar"``
+# wordt NIET als bold gemarkeerd; de tags worden dan wel gestript door
+# ``_strip_html`` zodat ze niet letterlijk in de PDF verschijnen.
+_RE_BOLD_WRAPPER = re.compile(
+    r"^\s*<(?:b|strong)>(.*?)</(?:b|strong)>\s*$",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _derive_bold_fontname(
+    base_fontname: str, fallback_bold: str = "Inter-Bold"
+) -> str:
+    """Leid de bold variant af van een font naam.
+
+    - Als ``base_fontname`` al ``"Bold"`` bevat: retourneer ongewijzigd.
+    - Als het een Inter-variant is: retourneer ``"Inter-Bold"``.
+    - Anders: retourneer ``fallback_bold``.
+
+    Gebruikt om inline ``<b>``-cells in tabellen correct te renderen
+    zonder per cel de font-naamdetectie te dupliceren.
+    """
+    if "Bold" in base_fontname:
+        return base_fontname
+    if base_fontname.startswith("Inter"):
+        return "Inter-Bold"
+    return fallback_bold
 
 
 def _strip_html(text: str) -> str:
@@ -70,6 +101,30 @@ def _strip_html(text: str) -> str:
     # Collapse whitespace from removed tags
     clean = re.sub(r"[ \t]+", " ", clean).strip()
     return clean
+
+
+def _parse_cell(value: object) -> tuple[str, bool]:
+    """Parse a table cell value to (plain_text, is_bold).
+
+    Detecteert of de cell volledig omhuld is met ``<b>...</b>`` of
+    ``<strong>...</strong>`` en retourneert dan ``is_bold=True``. Alle
+    overige HTML tags worden gestript zodat ze niet letterlijk in de
+    PDF verschijnen.
+
+    Args:
+        value: Ruwe celwaarde (str, int, float, etc.).
+
+    Returns:
+        Tuple van (geschoonde tekst, is_bold flag).
+    """
+    if value is None:
+        return "", False
+    text = str(value)
+    if "<" not in text:
+        return text, False
+    match = _RE_BOLD_WRAPPER.match(text)
+    is_bold = match is not None
+    return _strip_html(text), is_bold
 
 
 # ---------------------------------------------------------------------------
@@ -516,40 +571,38 @@ class ColofonGenerator:
         page.clean_contents()  # Normaliseer content stream voor TextWriter
         self.fonts.insert_into_page(page)
 
-        # Title
-        title_cfg = self.tpl.get("dynamic_fields", {}).get("titel", {})
-        report_type = data.get("report_type", "")
-        if report_type:
-            font_obj = self.fonts.get_fitz_font(
-                title_cfg.get("font", "LiberationSans-Bold")
-            )
-            tw = fitz.TextWriter(page.rect)
-            tw.append(
-                (
-                    title_cfg.get("x", 70.9),
-                    title_cfg.get("y_td", 57.3) + title_cfg.get("size", 22) * 0.8,
-                ),
-                report_type, font=font_obj, fontsize=title_cfg.get("size", 22),
-            )
-            tw.write_text(
-                page, color=_hex_to_rgb(title_cfg.get("color", "#40124A"))
-            )
+        # Pagina-breedte en rechter-margin bepalen max tekstbreedtes
+        # (voorkomt dat lange velden over de rechter rand lopen — zie bug
+        # "ISSO 51:2023 — Warmteverliesberekening voor woningen en
+        # utiliteitsgebo" die visueel afgekapt werd).
+        page_w = page.rect.width
+        right_margin = 64.0
 
-        # Subtitle
-        sub_cfg = self.tpl.get("dynamic_fields", {}).get("subtitel", {})
-        project_name = data.get("project", "")
-        if project_name:
-            font_obj = self.fonts.get_fitz_font(
-                sub_cfg.get("font", "LiberationSans")
-            )
-            tw = fitz.TextWriter(page.rect)
-            tw.append(
-                (sub_cfg.get("x", 70.9), sub_cfg.get("y_td", 86.8) + sub_cfg.get("size", 14) * 0.8),
-                project_name, font=font_obj, fontsize=sub_cfg.get("size", 14),
-            )
-            tw.write_text(
-                page, color=_hex_to_rgb(sub_cfg.get("color", "#38BDA0"))
-            )
+        # Title + Subtitle via gedeelde helper (voorheen copy-paste blok).
+        self._render_dynamic_field(
+            page,
+            field_key="titel",
+            value=data.get("report_type", ""),
+            default_x=70.9,
+            default_y_td=57.3,
+            default_size=22,
+            default_font="LiberationSans-Bold",
+            default_color="#40124A",
+            page_w=page_w,
+            right_margin=right_margin,
+        )
+        self._render_dynamic_field(
+            page,
+            field_key="subtitel",
+            value=data.get("project", ""),
+            default_x=70.9,
+            default_y_td=86.8,
+            default_size=14,
+            default_font="LiberationSans",
+            default_color="#38BDA0",
+            page_w=page_w,
+            right_margin=right_margin,
+        )
 
         # Table values — map JSON fields to colofon positions
         colofon_data = data.get("colofon", {})
@@ -559,18 +612,30 @@ class ColofonGenerator:
         value_size = table_cfg.get("value_size", 10)
         value_font = table_cfg.get("value_font", "LiberationSans")
         value_color = _hex_to_rgb(table_cfg.get("value_color", "#40124A"))
+        value_max_w = table_cfg.get(
+            "value_max_width", max(50.0, page_w - value_x - right_margin)
+        )
+        value_bold = "Bold" in value_font
 
         for field_key, y_td in self._get_field_positions():
             text = field_map.get(field_key, "")
-            if text:
-                font_obj = self.fonts.get_fitz_font(value_font)
-                for i, line in enumerate(text.split("\n")):
-                    tw = fitz.TextWriter(page.rect)
-                    tw.append(
-                        (value_x, y_td + i * 12.8 + value_size * 0.8),
-                        line, font=font_obj, fontsize=value_size,
-                    )
-                    tw.write_text(page, color=value_color)
+            if not text:
+                continue
+            font_obj = self.fonts.get_fitz_font(value_font)
+            # Ondersteun expliciete newlines én auto-wrap bij te lange tekst
+            logical_lines: list[str] = []
+            for raw_line in text.split("\n"):
+                wrapped = self.fonts.wrap_text(
+                    raw_line, value_size, value_max_w, bold=value_bold
+                )
+                logical_lines.extend(wrapped if wrapped else [""])
+            for i, line in enumerate(logical_lines):
+                tw = fitz.TextWriter(page.rect)
+                tw.append(
+                    (value_x, y_td + i * 12.8 + value_size * 0.8),
+                    line, font=font_obj, fontsize=value_size,
+                )
+                tw.write_text(page, color=value_color)
 
         # Revision history (optional)
         rev_cfg = self.tpl.get("revision_history", {})
@@ -684,6 +749,63 @@ class ColofonGenerator:
         doc.close()
         return output
 
+    def _render_dynamic_field(
+        self,
+        page: "fitz.Page",
+        *,
+        field_key: str,
+        value: str,
+        default_x: float,
+        default_y_td: float,
+        default_size: float,
+        default_font: str,
+        default_color: str,
+        page_w: float,
+        right_margin: float,
+    ) -> None:
+        """Render één dynamic field (titel/subtitel) met word-wrap.
+
+        Gedeelde helper voor de vrijwel identieke title- en subtitle
+        render-blokken. Leest layout uit ``dynamic_fields[field_key]``
+        in het colofon template, wrapt de waarde op basis van de
+        beschikbare breedte (``page_w - x - right_margin``) en schrijft
+        iedere regel via een aparte ``TextWriter``.
+
+        Args:
+            page: De PyMuPDF pagina waar op geschreven wordt.
+            field_key: Template-key binnen ``dynamic_fields`` (bijv.
+                ``"titel"`` of ``"subtitel"``).
+            value: De weer te geven string. Lege strings worden
+                overgeslagen.
+            default_x: Fallback x-coördinaat als het template geen
+                positie definieert.
+            default_y_td: Fallback y (top-down) als fallback.
+            default_size: Fallback font-size.
+            default_font: Fallback font-naam.
+            default_color: Fallback hex-kleur.
+            page_w: Breedte van de pagina (voor max-width berekening).
+            right_margin: Rechtermarge (voor max-width berekening).
+        """
+        if not value:
+            return
+        cfg = self.tpl.get("dynamic_fields", {}).get(field_key, {})
+        x = cfg.get("x", default_x)
+        size = cfg.get("size", default_size)
+        font_name = cfg.get("font", default_font)
+        color = _hex_to_rgb(cfg.get("color", default_color))
+        y_base = cfg.get("y_td", default_y_td)
+        max_w = max(50.0, page_w - x - right_margin)
+        bold = "Bold" in font_name
+        font_obj = self.fonts.get_fitz_font(font_name)
+        lines = self.fonts.wrap_text(value, size, max_w, bold=bold)
+        for i, line in enumerate(lines):
+            tw = fitz.TextWriter(page.rect)
+            tw.append(
+                (x, y_base + i * size * 1.15 + size * 0.8),
+                line, font=font_obj, fontsize=size,
+            )
+            tw.write_text(page, color=color)
+
     def _build_field_map(self, data: dict, colofon: dict) -> dict[str, str]:
         """Build mapping from field keys to display values."""
         pn = data.get("project_number", "")
@@ -754,15 +876,32 @@ class ContentRenderer:
         self.blocks = templates.blocks
         self._brand_config = brand_config
 
-        # Content frame uit brand config of defaults
-        if brand_config and brand_config.stationery:
+        # Y_max bepalen — bottom-grens voor content in top-down coords.
+        # Voorkeursvolgorde:
+        #   1. standaard.yaml `content_area.y_td_end` (top-down, semantisch
+        #      correct voor renderer_v2 — voorkomt overlap met footer-zone).
+        #   2. brand.yaml `stationery.content.content_frame` (legacy
+        #      ReportLab-veld, bottom-up; werkt hier alleen via toeval).
+        #   3. Hardcoded fallback (Y_MAX_PORTRAIT / Y_MAX_LANDSCAPE).
+        content_area = templates.standaard.get("content_area") or {}
+        y_td_end = content_area.get("y_td_end")
+        if isinstance(y_td_end, (int, float)):
+            self._default_y_max_portrait = float(y_td_end)
+        elif brand_config and brand_config.stationery:
             content_spec = brand_config.stationery.get("content")
             if content_spec and content_spec.content_frame:
                 cf = content_spec.content_frame
                 self._default_y_max_portrait = cf.get("y_pt", 38.9) + cf.get("height_pt", 746.0)
             else:
                 self._default_y_max_portrait = Y_MAX_PORTRAIT
+        else:
+            self._default_y_max_portrait = Y_MAX_PORTRAIT
 
+        landscape_area = templates.standaard.get("content_area_landscape") or {}
+        y_td_end_landscape = landscape_area.get("y_td_end")
+        if isinstance(y_td_end_landscape, (int, float)):
+            self._default_y_max_landscape = float(y_td_end_landscape)
+        elif brand_config and brand_config.stationery:
             landscape_spec = brand_config.stationery.get("content_landscape")
             if landscape_spec and landscape_spec.content_frame:
                 cf = landscape_spec.content_frame
@@ -770,7 +909,6 @@ class ContentRenderer:
             else:
                 self._default_y_max_landscape = Y_MAX_LANDSCAPE
         else:
-            self._default_y_max_portrait = Y_MAX_PORTRAIT
             self._default_y_max_landscape = Y_MAX_LANDSCAPE
 
         self.doc = fitz.open()
@@ -780,8 +918,37 @@ class ContentRenderer:
         self.y_max = self._default_y_max_portrait
         self.current_page_nr = 3  # starts after cover (1) + colofon (2)
         self._orientation: str = "portrait"
+        # Idempotency-flag: voorkomt dat dezelfde pagina meermaals een
+        # paginanummer krijgt (anders ontstaat overlay zoals "16" + "17"
+        # → "167" op de laatste pagina door cleanup-calls).
+        self._page_number_written: bool = False
+        # Log van werkelijk gerenderde headings → (level, number, title,
+        # display_page_nr). Publieke attribuut (leesbaar door
+        # ``ReportGeneratorV2._render_content``) zodat de TOC achteraf
+        # gebouwd kan worden met correcte paginanummers in plaats van de
+        # grove schatting uit ``_build_toc_entries``.
+        self.heading_log: list[tuple[int, str, str, int]] = []
+        # Cache van geopende stationery PDF documents, key = absoluut
+        # pad. Voorkomt dat ``_new_page`` elk keer opnieuw de stationery
+        # van disk leest (typisch 15+ reads per rapport).
+        self._stationery_doc_cache: dict[str, fitz.Document] = {}
 
     # --- Low level ---
+
+    def _get_stationery_doc(self, pdf_path: Path) -> "fitz.Document":
+        """Geeft een (gecachte) ``fitz.Document`` voor de stationery terug.
+
+        PyMuPDF's ``insert_pdf`` kopieert pagina's uit de source-doc, dus
+        we kunnen dezelfde ``fitz.Document`` meerdere keren hergebruiken
+        voor verschillende doelpagina's.
+        """
+        key = str(pdf_path)
+        cached = self._stationery_doc_cache.get(key)
+        if cached is not None:
+            return cached
+        doc = fitz.open(key)
+        self._stationery_doc_cache[key] = doc
+        return doc
 
     def _new_page(self, template_key: str = "standaard") -> None:
         """Insert a new page from stationery template.
@@ -800,9 +967,8 @@ class ContentRenderer:
             pdf_path = self.stationery.get(template_key)
 
         if pdf_path and pdf_path.exists():
-            src = fitz.open(str(pdf_path))
+            src = self._get_stationery_doc(pdf_path)
             self.doc.insert_pdf(src)
-            src.close()
         elif self._orientation == "landscape":
             self.doc.new_page(
                 width=A4_LANDSCAPE_WIDTH, height=A4_LANDSCAPE_HEIGHT
@@ -816,6 +982,8 @@ class ContentRenderer:
         self.page = self.doc[-1]
         self.page.clean_contents()  # Normaliseer content stream voor TextWriter
         self.fonts.insert_into_page(self.page)
+        # Reset idempotency-flag: nieuwe pagina krijgt een nieuw nummer.
+        self._page_number_written = False
 
         margins = self.tpl.standaard.get("margins", {})
         self.y = margins.get("top", 74.9)
@@ -835,7 +1003,15 @@ class ContentRenderer:
         return False
 
     def _add_page_number(self) -> None:
-        """Add page number to current page."""
+        """Add page number to current page (idempotent per page).
+
+        Meerdere aanroepen op dezelfde pagina zijn no-ops. Dit voorkomt
+        dat cleanup-code in ``_render_content`` het nummer nogmaals
+        schrijft nadat ``render_section`` dit al had gedaan — anders
+        ontstaat een overlay (bijv. "16" + "17" → "167").
+        """
+        if self._page_number_written:
+            return
         pn = self.tpl.page_number
         if not pn or not self.page:
             return
@@ -847,6 +1023,7 @@ class ContentRenderer:
             pn["color"],
         )
         self.current_page_nr += 1
+        self._page_number_written = True
 
     def _text(
         self,
@@ -952,6 +1129,61 @@ class ContentRenderer:
 
         self._add_page_number()
 
+    def render_toc_to_fresh_doc(
+        self,
+        entries: list[tuple],
+        toc_page_nr: int,
+    ) -> "fitz.Document":
+        """Render de TOC in een gloednieuwe ``fitz.Document``.
+
+        Voor deferred TOC-rendering: na het rendern van alle sections
+        bevat ``self._heading_log`` de werkelijke paginanummers; de TOC
+        moet dan ergens NA die render-fase gebouwd worden zonder dat de
+        pagina tussen de bestaande content-pagina's belandt. Deze
+        methode swapt de renderer-state tijdelijk naar een schone doc,
+        roept ``render_toc`` aan en herstelt daarna alle mutaties.
+
+        Args:
+            entries: TOC entries ``(level, number, title, page_nr)`` met
+                werkelijke paginanummers.
+            toc_page_nr: Het paginanummer dat op de TOC-pagina zelf
+                gedrukt wordt (bijv. 3 bij cover+colofon voorin).
+
+        Returns:
+            Nieuwe ``fitz.Document`` met uitsluitend de TOC-pagina(s).
+            De caller is verantwoordelijk voor het mergen en sluiten.
+        """
+        # Alle muteerbare state die ``render_toc`` (via ``_new_page`` en
+        # ``_add_page_number``) aanraakt, wordt hier vastgelegd.
+        snapshot = {
+            "doc": self.doc,
+            "page": self.page,
+            "y": self.y,
+            "page_count": self.page_count,
+            "current_page_nr": self.current_page_nr,
+            "_page_number_written": self._page_number_written,
+            "y_max": self.y_max,
+            "_orientation": self._orientation,
+        }
+
+        toc_doc = fitz.open()
+        self.doc = toc_doc
+        self.page = None
+        self.y = 0.0
+        self.page_count = 0
+        self.current_page_nr = toc_page_nr
+        self._page_number_written = False
+        self._orientation = "portrait"
+        self.y_max = self._default_y_max_portrait
+
+        try:
+            self.render_toc(entries)
+        finally:
+            for attr, value in snapshot.items():
+                setattr(self, attr, value)
+
+        return toc_doc
+
     # --- Content blocks ---
 
     def heading_1(self, number: str, title: str) -> None:
@@ -959,6 +1191,9 @@ class ContentRenderer:
         n = s.get("number", {})
         t = s.get("title", {})
         self._check_overflow(n.get("size", 18) + s.get("spacing_after", 33.9))
+        # Log AFTER overflow check: current_page_nr reflects the actual
+        # page waarop de heading getekend wordt.
+        self.heading_log.append((1, number, title, self.current_page_nr))
         self._text(n["x"], self.y, number, n["font"], n["size"], n["color"])
         self._text(t["x"], self.y, title, t["font"], t["size"], t["color"])
         self.y += n["size"] + s.get("spacing_after", 33.9)
@@ -969,6 +1204,9 @@ class ContentRenderer:
         t = s.get("title", {})
         spacing_before = s.get("spacing_before", 30.0)
         self._check_overflow(spacing_before + t.get("size", 13) + s.get("spacing_after", 20.5))
+        # Log AFTER overflow check zodat het juiste paginanummer wordt
+        # vastgelegd (ook als overflow een _new_page heeft getriggerd).
+        self.heading_log.append((2, number, title, self.current_page_nr))
         self.y += spacing_before
         self._text(n["x"], self.y, number, n["font"], n["size"], n["color"])
         y_title = self.y - (t["size"] - n["size"]) * 0.3
@@ -1029,14 +1267,26 @@ class ContentRenderer:
         x = s.get("x", 125.4)
         max_w = s.get("max_width", 415.9)
 
-        headers = block.get("headers", [])
-        rows = block.get("rows", [])
+        headers_raw = block.get("headers", [])
+        rows_raw = block.get("rows", [])
         raw_widths = block.get("column_widths")
         title = block.get("title", "")
         style = block.get("style", "")
-        num_cols = len(headers) if headers else (len(rows[0]) if rows else 0)
+        num_cols = (
+            len(headers_raw) if headers_raw else (len(rows_raw[0]) if rows_raw else 0)
+        )
         if num_cols == 0:
             return
+
+        # --- Normalize cells: strip HTML, detect inline bold ---
+        # Headers zijn altijd bold; we slaan alleen de schoongemaakte tekst op.
+        headers: list[str] = [_parse_cell(h)[0] for h in headers_raw]
+        # Body cellen krijgen per cel een (text, is_bold) tuple zodat
+        # ``<b>...</b>`` markup uit de payload bold gerenderd kan worden
+        # zonder dat de tags letterlijk in de PDF terechtkomen.
+        rows: list[list[tuple[str, bool]]] = [
+            [_parse_cell(cell) for cell in row] for row in rows_raw
+        ]
 
         # --- Resolve column widths ---
         cell_pad = 5  # horizontal padding per side
@@ -1051,12 +1301,15 @@ class ContentRenderer:
             header_font_size = header_s.get("size", 9)
             measured = []
             for i in range(num_cols):
-                h_text = str(headers[i]) if i < len(headers) else ""
+                h_text = headers[i] if i < len(headers) else ""
                 max_cell_w = self.fonts.measure(h_text, header_font_size, bold=True)
                 body_font_size = body_s.get("size", 8)
                 for row in rows[:10]:
                     if i < len(row):
-                        cell_w = self.fonts.measure(str(row[i]), body_font_size)
+                        cell_text, cell_bold = row[i]
+                        cell_w = self.fonts.measure(
+                            cell_text, body_font_size, bold=cell_bold
+                        )
                         max_cell_w = max(max_cell_w, cell_w)
                 measured.append(max_cell_w + cell_pad * 2)
             total_measured = sum(measured)
@@ -1073,16 +1326,19 @@ class ContentRenderer:
         min_widths = []
         for i in range(num_cols):
             # Widest single token in header
-            h_text = str(headers[i]) if i < len(headers) else ""
+            h_text = headers[i] if i < len(headers) else ""
             h_tokens = h_text.split() or [""]
             min_w = max(
                 self.fonts.measure(t, header_font_size, bold=True) for t in h_tokens
             )
             # Widest single token in body rows
             for row in rows:
-                cell_val = str(row[i]) if i < len(row) else ""
-                tokens = cell_val.split() or [""]
-                token_max = max(self.fonts.measure(t, body_font_size) for t in tokens)
+                cell_text, cell_bold = row[i] if i < len(row) else ("", False)
+                tokens = cell_text.split() or [""]
+                token_max = max(
+                    self.fonts.measure(t, body_font_size, bold=cell_bold)
+                    for t in tokens
+                )
                 min_w = max(min_w, token_max)
             min_widths.append(min_w + cell_pad * 2)
 
@@ -1177,15 +1433,23 @@ class ContentRenderer:
         render_header()
         self.y += header_h
 
+        # Bold body font name (via centrale helper). Valt terug op de
+        # header font wanneer die niet direct afgeleid kan worden.
+        b_bold_fontname = _derive_bold_fontname(b_fontname, fallback_bold=h_fontname)
+
         # --- Body rows ---
         for row_idx, row in enumerate(rows):
-            # Pre-wrap all cells to determine row height
-            row_wrapped: list[list[str]] = []
+            # Pre-wrap all cells to determine row height. Elke cell is een
+            # (text, is_bold) tuple zodat we de juiste font kunnen kiezen.
+            row_wrapped: list[list[tuple[str, bool]]] = []
             for i in range(num_cols):
-                cell_val = str(row[i]) if i < len(row) else ""
+                cell_text, cell_bold = row[i] if i < len(row) else ("", False)
                 w = col_widths_pt[i] if i < len(col_widths_pt) else col_widths_pt[-1]
-                lines = self.fonts.wrap_text(cell_val, b_fontsize, w - cell_pad * 2)
-                row_wrapped.append(lines if lines else [""])
+                lines = self.fonts.wrap_text(
+                    cell_text, b_fontsize, w - cell_pad * 2, bold=cell_bold
+                )
+                wrapped_lines = lines if lines else [""]
+                row_wrapped.append([(line, cell_bold) for line in wrapped_lines])
             max_lines = max(len(lines) for lines in row_wrapped)
             row_h = max(max_lines * cell_line_h + 6, cell_line_h + 6)
 
@@ -1204,8 +1468,9 @@ class ContentRenderer:
             for i, lines in enumerate(row_wrapped):
                 w = col_widths_pt[i] if i < len(col_widths_pt) else col_widths_pt[-1]
                 y_text = self.y + 3  # top padding
-                for li, line in enumerate(lines):
-                    font_obj = self.fonts.get_fitz_font(b_fontname)
+                for li, (line, line_bold) in enumerate(lines):
+                    font_name = b_bold_fontname if line_bold else b_fontname
+                    font_obj = self.fonts.get_fitz_font(font_name)
                     tw = fitz.TextWriter(self.page.rect)
                     tw.append(
                         (cx + cell_pad, y_text + b_fontsize * 0.8 + li * cell_line_h),
@@ -2105,13 +2370,24 @@ class ReportGeneratorV2:
                 tmp.unlink(missing_ok=True)
 
     def _render_content(self, renderer: ContentRenderer, data: dict) -> None:
-        """Orchestrate rendering of TOC, sections, appendices, backcover."""
+        """Orchestrate rendering of TOC, sections, appendices, backcover.
 
-        # TOC
+        Twee-pass TOC-rendering: de TOC wordt ALS LAATSTE gerenderd in
+        een aparte PyMuPDF-doc en vervolgens vooraan in de content-doc
+        ingevoegd. Zo krijgen TOC-entries de werkelijke paginanummers
+        op basis van het ``_heading_log`` in plaats van de grove
+        schatting uit ``_build_toc_entries`` (die alle entries naar
+        dezelfde pagina liet wijzen).
+        """
         toc_cfg = data.get("toc", {})
-        if toc_cfg.get("enabled", True):
-            toc_entries = self._build_toc_entries(data)
-            renderer.render_toc(toc_entries)
+        toc_enabled = toc_cfg.get("enabled", True)
+
+        # Paginanummer voor de TOC zelf (één positie gereserveerd vóór de
+        # sections). Sections starten daardoor één hoger dan de huidige
+        # renderer.current_page_nr.
+        toc_page_nr = renderer.current_page_nr
+        if toc_enabled:
+            renderer.current_page_nr += 1  # reserveer 1 pagina voor TOC
 
         # Sections
         for section in data.get("sections", []):
@@ -2136,6 +2412,20 @@ class ReportGeneratorV2:
         # Backcover
         if data.get("backcover", {}).get("enabled", True):
             renderer.render_achterblad()
+
+        # TOC — deferred rendering met werkelijke paginanummers
+        if toc_enabled:
+            toc_entries = self._build_toc_entries_from_log(
+                renderer.heading_log, data
+            )
+            toc_doc = renderer.render_toc_to_fresh_doc(
+                toc_entries, toc_page_nr
+            )
+            try:
+                # Voeg TOC pagina(s) in op positie 0 van de content-doc
+                renderer.doc.insert_pdf(toc_doc, start_at=0)
+            finally:
+                toc_doc.close()
 
     def _build_toc_entries(self, data: dict) -> list[tuple]:
         """Build TOC entries from sections data.
@@ -2169,6 +2459,36 @@ class ReportGeneratorV2:
                     )
 
         return entries
+
+    def _build_toc_entries_from_log(
+        self,
+        heading_log: list[tuple[int, str, str, int]],
+        data: dict,
+    ) -> list[tuple]:
+        """Build TOC entries from the actual heading render log.
+
+        Het ``heading_log`` bevat tuples van ``(level, number, title,
+        display_page_nr)`` die door ``heading_1`` / ``heading_2`` worden
+        vastgelegd op het moment dat ze daadwerkelijk getekend worden
+        (na eventuele page-overflow). Dit levert de juiste TOC-nummers,
+        in tegenstelling tot ``_build_toc_entries`` die een grove
+        schatting maakt en in de praktijk alle entries naar dezelfde
+        pagina laat wijzen.
+
+        Args:
+            heading_log: Door de renderer opgebouwde log tijdens de
+                sections-pass.
+            data: Rapport-data (gebruikt als fallback wanneer het log
+                leeg blijkt — bijv. tests die direct op de TOC richten).
+
+        Returns:
+            Lijst van ``(level, number, title, page_nr)`` tuples.
+        """
+        if heading_log:
+            return list(heading_log)
+        # Fallback: gebruik de oude heuristische builder als het log
+        # leeg is (bijv. bij lege rapporten in tests).
+        return self._build_toc_entries(data)
 
     @staticmethod
     def _merge_pdfs(input_paths: list[Path], output_path: Path) -> None:

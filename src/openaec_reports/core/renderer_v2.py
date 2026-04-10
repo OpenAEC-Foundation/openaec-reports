@@ -932,6 +932,13 @@ class ContentRenderer:
         # pad. Voorkomt dat ``_new_page`` elk keer opnieuw de stationery
         # van disk leest (typisch 15+ reads per rapport).
         self._stationery_doc_cache: dict[str, fitz.Document] = {}
+        # Auto-nummering van headings (1, 1.1, 1.2, 2, 2.1, ...). Kan via
+        # ``data["toc"]["auto_number"]`` worden uitgezet voor rapporten
+        # waarvan de titels zelf al een nummering bevatten (bijv. BBL-
+        # toetsingen met "Afd. 4.3 — ..." als titel).
+        self._auto_number_enabled: bool = True
+        self._section_counter: int = 0
+        self._subsection_counter: int = 0
 
     # --- Low level ---
 
@@ -2033,6 +2040,35 @@ class ContentRenderer:
 
     # --- Section rendering ---
 
+    def _next_auto_number(self, level: int) -> str:
+        """Lever het volgende automatische heading-nummer voor ``level``.
+
+        Houdt counters bij voor level-1 (``1``, ``2``, ...) en level-2
+        (``1.1``, ``1.2``, ``2.1``, ...). Een nieuwe level-1 reset de
+        level-2 counter. Levels >= 3 krijgen (voorlopig) geen nummer.
+        """
+        if level == 1:
+            self._section_counter += 1
+            self._subsection_counter = 0
+            return str(self._section_counter)
+        if level == 2:
+            self._subsection_counter += 1
+            return f"{self._section_counter}.{self._subsection_counter}"
+        return ""
+
+    def _resolve_heading_number(self, level: int, explicit: str) -> str:
+        """Kies tussen expliciet nummer en auto-gegenereerd.
+
+        Expliciete nummers blijven altijd leidend. Als er geen nummer
+        is en ``_auto_number_enabled`` aan staat, wordt een automatisch
+        nummer toegewezen — anders blijft het leeg.
+        """
+        if explicit:
+            return explicit
+        if self._auto_number_enabled:
+            return self._next_auto_number(level)
+        return ""
+
     def render_section(self, section: dict) -> None:
         """Render a single section (chapter) with its content blocks.
 
@@ -2043,7 +2079,7 @@ class ContentRenderer:
         """
         level = section.get("level", 1)
         title = section.get("title", "")
-        number = section.get("number", "")
+        explicit_number = section.get("number") or ""
 
         # Per-sectie orientation switch
         section_orientation = section.get("orientation", self._orientation)
@@ -2062,10 +2098,15 @@ class ContentRenderer:
             # Forceer nieuwe pagina bij oriëntatiewissel
             self._new_page()
 
-        if level == 1 and number:
-            self.heading_1(number, title)
-        elif level == 2 and number:
-            self.heading_2(number, title)
+        number = self._resolve_heading_number(level, explicit_number)
+
+        # Titel moet altijd getekend worden wanneer aanwezig, ook als
+        # er geen (auto)nummer beschikbaar is.
+        if title or number:
+            if level == 1:
+                self.heading_1(number, title)
+            elif level == 2:
+                self.heading_2(number, title)
 
         for block in section.get("content", []):
             self._render_block(block)
@@ -2089,17 +2130,21 @@ class ContentRenderer:
         if block_type == "paragraph":
             style = block.get("style", "")
             if style in ("Heading1", "heading_1"):
-                self.heading_1(block.get("number", ""), block.get("text", ""))
+                number = self._resolve_heading_number(1, block.get("number") or "")
+                self.heading_1(number, block.get("text", ""))
             elif style in ("Heading2", "heading_2"):
-                self.heading_2(block.get("number", ""), block.get("text", ""))
+                number = self._resolve_heading_number(2, block.get("number") or "")
+                self.heading_2(number, block.get("text", ""))
             else:
                 self.paragraph(block.get("text", ""))
         elif block_type == "bullet_list":
             self.bullet_list(block.get("items", []))
         elif block_type == "heading_2":
-            self.heading_2(block.get("number", ""), block.get("title", ""))
+            number = self._resolve_heading_number(2, block.get("number") or "")
+            self.heading_2(number, block.get("title", ""))
         elif block_type == "heading_1":
-            self.heading_1(block.get("number", ""), block.get("title", ""))
+            number = self._resolve_heading_number(1, block.get("number") or "")
+            self.heading_1(number, block.get("title", ""))
         elif block_type == "table":
             self.table(block)
         elif block_type == "image":
@@ -2381,6 +2426,13 @@ class ReportGeneratorV2:
         """
         toc_cfg = data.get("toc", {})
         toc_enabled = toc_cfg.get("enabled", True)
+        # Auto-nummering default aan — rapporten met eigen nummering in
+        # de titels kunnen dit via ``toc.auto_number = false`` uitzetten.
+        renderer._auto_number_enabled = bool(
+            toc_cfg.get("auto_number", True)
+        )
+        renderer._section_counter = 0
+        renderer._subsection_counter = 0
 
         # Paginanummer voor de TOC zelf (één positie gereserveerd vóór de
         # sections). Sections starten daardoor één hoger dan de huidige

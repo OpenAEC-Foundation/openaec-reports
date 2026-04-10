@@ -19,6 +19,9 @@ from openaec_reports.core.document import A3, A4, Document, DocumentConfig, Page
 from openaec_reports.core.page_templates import create_page_templates
 from openaec_reports.core.styles import activate_brand, create_stylesheet
 from openaec_reports.core.toc import TOC_HEADING_STYLES, TOCBuilder
+from openaec_reports.core.warmteverlies_footnote import (
+    inject_water_footnote_if_needed,
+)
 
 
 class BMDocTemplate(BaseDocTemplate):
@@ -567,6 +570,12 @@ class Report:
         Returns:
             Volledig geconfigureerd Report object.
         """
+        # Pre-processors — muteren data in-place vóór de sections
+        # worden geconverteerd naar flowables. Warmteverlies-specifieke
+        # voetnoot voor water-grensvlakken wordt hier toegevoegd aan
+        # de Uitgangspunten sectie; voor andere rapporten no-op.
+        inject_water_footnote_if_needed(data)
+
         # Format bepalen
         fmt_name = data.get("format", "A4")
         fmt = A3 if fmt_name == "A3" else A4

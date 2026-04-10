@@ -1,7 +1,50 @@
 # TODO — openaec-reports
 
 > Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-03-30
+> Laatst bijgewerkt: 2026-04-10
+
+---
+
+## 🟡 Rust renderer — feature parity met Python `renderer_v2.py`
+
+> Achtergrond: op 2026-04-10 is in de Python renderer een aantal
+> rendering-bugs gefixt (tabel-overflow, HTML-cellen, idempotente
+> paginanummers, colofon text-wrap, deferred TOC rendering, auto-
+> nummering). De live deploy draait Python dus dit is niet blokkerend,
+> maar de Rust port (`rust/crates/openaec-core/`) heeft vergelijkbare
+> gaps die later dichtgelopen moeten worden. Zie commits `e971395` en
+> `58a2046` voor de Python reference implementation.
+
+### Heading nummering + TOC
+- [ ] `Section.number: Option<String>` toevoegen aan `schema.rs`
+  (Rust kent het veld nu niet, Python leest het wel)
+- [ ] Counter-state (`section_counter`, `subsection_counter`) in
+  `engine.rs` — nu wordt `section_num = i + 1` doorgegeven maar reset
+  per level-1 ontbreekt voor nested level-2 blocks
+- [ ] Level-2 auto-nummering in `render_heading2` via die counter
+  (huidig: `h.number` alleen als expliciet gezet, anders alleen titel)
+- [ ] Resolver-logica: expliciet > auto > leeg (zie Python
+  `_resolve_heading_number`)
+- [ ] `toc.auto_number` opt-out flag in `ReportData` voor rapporten
+  met nummering-in-titel (bijv. BBL "Afd. 4.3 — ...")
+
+### TOC vulling tijdens rendering
+- [ ] `TocBuilder::add_entry(title, level, number)` daadwerkelijk
+  aanroepen vanuit `render_section` / `render_heading2` — nu wordt
+  de builder alleen in tests gebruikt, niet in de engine
+- [ ] `TocEntry` uitbreiden met `number: Option<String>`
+- [ ] Two-pass TOC rendering zodat paginanummers na de sections-pass
+  worden teruggeschreven (zie Python `render_toc_to_fresh_doc()` +
+  `doc.insert_pdf(toc_doc, start_at=0)`)
+
+### Overige renderer-bugs die in Python gefixt zijn
+- [ ] Tabel footer overflow: Y_max / bottom margin constanten matchen
+  met tenant yaml (openaec-footer begint op y=768)
+- [ ] HTML cell-parsing: `<b>...</b>` of `<strong>...</strong>` als
+  volledige cell-wrap → bold font i.p.v. literal tags
+- [ ] Idempotente paginanummers (voorkomt "167"-overlay bug als
+  cleanup-calls nogmaals `_add_page_number` aanroepen)
+- [ ] Stationery PDF caching: voorkom re-open per pagina
 
 ---
 

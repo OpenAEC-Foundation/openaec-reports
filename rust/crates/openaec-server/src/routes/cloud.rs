@@ -185,7 +185,7 @@ pub async fn upload_report(
     });
 
     if let Err(e) = client
-        .upsert_manifest_object(&project, report_object)
+        .upsert_default_manifest_object(&project, report_object)
         .await
     {
         warn!(

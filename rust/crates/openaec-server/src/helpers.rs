@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use openaec_core::template_loader::TemplateLoader;
-use openaec_core::tenant::TenantConfig;
+use openaec_core::tenant::{TenantConfig, DEFAULT_TENANT};
 
 pub fn tenant_config() -> TenantConfig {
     TenantConfig::new(None, None)
@@ -27,7 +27,10 @@ pub fn template_loader() -> TemplateLoader {
 
     if dirs.is_empty() {
         tracing::warn!("No template directories found");
-        TemplateLoader::new(PathBuf::from("tenants/default/templates"))
+        TemplateLoader::new(PathBuf::from(format!(
+            "tenants/{}/templates",
+            DEFAULT_TENANT
+        )))
     } else {
         TemplateLoader::with_dirs(dirs)
     }

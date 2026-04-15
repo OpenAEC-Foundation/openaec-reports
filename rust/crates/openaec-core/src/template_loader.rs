@@ -285,7 +285,7 @@ impl TemplateLoader {
         });
 
         let brand = if config.tenant.is_empty() {
-            "default"
+            crate::tenant::DEFAULT_TENANT
         } else {
             &config.tenant
         };

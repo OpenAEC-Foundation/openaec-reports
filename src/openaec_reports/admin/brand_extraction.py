@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from pathlib import Path
 
 import yaml
@@ -406,7 +407,10 @@ def merge_brand_yaml(
 
 
 def get_reference_pages_yaml(tenants_base: Path) -> str | None:
-    """Lees de pages-sectie uit de default brand.yaml als referentie.
+    """Lees de pages-sectie uit de default tenant brand.yaml als referentie.
+
+    De referentie-tenant kan overschreven worden via de
+    ``OPENAEC_REFERENCE_TENANT`` environment variable.
 
     Args:
         tenants_base: Basis pad naar tenants directory.
@@ -414,7 +418,8 @@ def get_reference_pages_yaml(tenants_base: Path) -> str | None:
     Returns:
         YAML string van de pages-sectie, of None.
     """
-    ref_path = tenants_base / "default" / "brand.yaml"
+    reference_tenant = os.getenv("OPENAEC_REFERENCE_TENANT", "default")
+    ref_path = tenants_base / reference_tenant / "brand.yaml"
     if not ref_path.exists():
         return None
 

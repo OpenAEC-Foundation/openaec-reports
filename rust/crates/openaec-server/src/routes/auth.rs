@@ -1,5 +1,6 @@
 use axum::http::HeaderMap;
 use axum::Json;
+use openaec_core::tenant::DEFAULT_TENANT;
 use serde_json::{json, Value};
 
 use crate::helpers::tenant_config;
@@ -25,7 +26,7 @@ pub async fn auth_me(headers: HeaderMap) -> Json<Value> {
         .tenant_dir()
         .and_then(|p| p.file_name().map(|n| n.to_os_string()))
         .and_then(|n| n.into_string().ok())
-        .unwrap_or_else(|| "default".to_string());
+        .unwrap_or_else(|| DEFAULT_TENANT.to_string());
 
     let is_authenticated = !username.is_empty();
 

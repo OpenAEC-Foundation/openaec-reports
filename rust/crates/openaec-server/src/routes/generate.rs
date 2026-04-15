@@ -1,4 +1,5 @@
 use axum::{http::header, response::IntoResponse, Json};
+use openaec_core::tenant::DEFAULT_TENANT;
 use serde_json::Value;
 
 use crate::error::AppError;
@@ -50,7 +51,7 @@ pub async fn generate_template(
             payload
                 .get("brand")
                 .and_then(|v| v.as_str())
-                .unwrap_or("default")
+                .unwrap_or(DEFAULT_TENANT)
         })
         .to_string();
 

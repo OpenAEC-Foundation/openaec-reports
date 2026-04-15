@@ -12,6 +12,9 @@ const ENV_TENANT_DIR: &str = "OPENAEC_TENANT_DIR";
 /// Environment variable for the tenants root (parent of all tenant dirs).
 const ENV_TENANTS_ROOT: &str = "OPENAEC_TENANTS_ROOT";
 
+/// Default tenant slug used as runtime fallback when no tenant is configured.
+pub const DEFAULT_TENANT: &str = "default";
+
 /// Multi-tenant configuration with fallback to package defaults.
 ///
 /// Asset lookup order:

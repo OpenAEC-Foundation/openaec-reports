@@ -1,0 +1,454 @@
+# ==============================================================================
+# Default — Pixel-perfect template (open-source MVP)
+# ==============================================================================
+# Generieke, tenant-neutrale template als startpunt voor nieuwe tenants.
+# Alle coordinaten in PDF y-up systeem (origin = linksonder, A4 = 595.28 x 841.89 pt).
+# ==============================================================================
+
+template:
+  name: "Default"
+  version: "1.0"
+  source_pdf: null
+  brand: "default"
+
+colors:
+  primary: "#2563EB"           # Primary blue
+  secondary: "#1E293B"         # Slate 800
+  text_dark: "#1E293B"
+  text_light: "#64748B"
+  warm_gold: "#F59E0B"
+  signal_orange: "#F97316"
+  blueprint_white: "#FFFFFF"
+  concrete: "#F1F5F9"
+  night_build: "#0F172A"
+  separator: "#E2E8F0"
+
+fonts:
+  heading: "SpaceGrotesk-Bold"
+  subheading: "SpaceGrotesk-Medium"
+  body: "Inter-Regular"
+  medium: "Inter-Medium"
+  semibold: "Inter-SemiBold"
+  bold: "Inter-Bold"
+  heading_fb: "Helvetica-Bold"
+  body_fb: "Helvetica"
+
+# ==============================================================================
+# PAGE TYPES
+# ==============================================================================
+
+pages:
+
+  # ============================================================
+  # COVER — Dark header band + dynamic title
+  # ============================================================
+  cover:
+    source_page: null
+    layers:
+      - type: rect
+        role: background
+        static: true
+        x: 0
+        y: 280.0
+        w: 595.28
+        h: 561.89
+        fill: "$colors.secondary"
+
+      - type: rect
+        role: gradient_strip
+        static: true
+        x: 0
+        y: 277.0
+        w: 595.28
+        h: 3.0
+        fill: "$colors.primary"
+
+      - type: text
+        role: website_label
+        static: true
+        content: ""
+        font: "$fonts.medium"
+        size: 11.0
+        color: "$colors.primary"
+        x: 490
+        y: 785
+        align: right
+
+      - type: text
+        role: title
+        static: false
+        bind: "project"
+        font: "$fonts.heading"
+        size: 28.0
+        color: "$colors.secondary"
+        x: 54.0
+        y: 95.0
+
+      - type: text
+        role: subtitle
+        static: false
+        bind: "cover.subtitle"
+        font: "$fonts.body"
+        size: 16.0
+        color: "$colors.text_light"
+        x: 54.0
+        y: 65.0
+
+  # ============================================================
+  # COLOFON — Project information page
+  # ============================================================
+  colofon:
+    source_page: null
+    layers:
+      - type: rect
+        role: header_bg
+        static: true
+        x: 0
+        y: 734.2
+        w: 595.28
+        h: 107.7
+        fill: "$colors.secondary"
+
+      - type: rect
+        role: gradient_strip
+        static: true
+        x: 0
+        y: 731.0
+        w: 595.28
+        h: 3.2
+        fill: "$colors.primary"
+
+      - type: text
+        role: title
+        static: false
+        bind: "project"
+        font: "$fonts.heading"
+        size: 22.0
+        color: "$colors.secondary"
+        x: 70.9
+        y: 695.0
+
+      - type: text
+        role: subtitle
+        static: false
+        bind: "cover.subtitle"
+        font: "$fonts.body"
+        size: 14.0
+        color: "$colors.text_light"
+        x: 70.9
+        y: 672.0
+
+      - type: table
+        role: project_info
+        static: false
+        y_start: 521.1
+        col1_x: 103.0
+        col2_x: 229.1
+        row_height: 24.0
+        label_font: "$fonts.heading"
+        label_size: 10.0
+        label_color: "$colors.secondary"
+        value_font: "$fonts.body"
+        value_size: 10.0
+        value_color: "$colors.secondary"
+        separator_color: "$colors.separator"
+        separator_width: 0.3
+        separator_x_end: 419.8
+        rows:
+          - label: "Project"
+            bind: "colofon.project_description"
+          - label: "Client"
+            bind: "colofon.client_block"
+
+      - type: table
+        role: advisor_info
+        static: false
+        y_start: 353.1
+        col1_x: 103.0
+        col2_x: 229.1
+        row_height: 24.0
+        label_font: "$fonts.heading"
+        label_size: 10.0
+        label_color: "$colors.primary"
+        value_font: "$fonts.body"
+        value_size: 10.0
+        value_color: "$colors.secondary"
+        separator_color: "$colors.separator"
+        separator_width: 0.3
+        separator_x_end: 419.8
+        rows:
+          - label: "Author"
+            bind: "colofon.advisor"
+          - label: "Applicable norms"
+            bind: "colofon.norms"
+          - label: "Document description"
+            bind: "colofon.document_info"
+          - label: "Report date"
+            bind: "colofon.date"
+          - label: "Phase"
+            bind: "colofon.phase"
+          - label: "Status"
+            bind: "colofon.status"
+          - label: "Document code"
+            bind: "colofon.document_code"
+
+      - type: rect
+        role: footer_bar
+        static: true
+        x: 0
+        y: 0
+        w: 282
+        h: 42.5
+        fill: "$colors.primary"
+
+      - type: rect
+        role: footer_dark
+        static: true
+        x: 282
+        y: 0
+        w: 313.28
+        h: 42.5
+        fill: "$colors.secondary"
+
+      - type: page_number
+        role: page_number
+        static: false
+        x: 538.6
+        y: 18.0
+        font: "$fonts.body"
+        size: 9.5
+        color: "$colors.primary"
+        align: right
+
+  # ============================================================
+  # CONTENT — Standard content pages with header/footer
+  # ============================================================
+  content:
+    source_page: null
+    content_frame:
+      x: 34.0
+      y: 57.0
+      w: 527.3
+      h: 677.0
+    layers:
+      - type: rect
+        role: header_bg
+        static: true
+        x: 0
+        y: 734.2
+        w: 595.28
+        h: 107.7
+        fill: "$colors.secondary"
+
+      - type: text
+        role: project_number
+        static: false
+        bind: "project_number"
+        font: "$fonts.semibold"
+        size: 7.5
+        color: "$colors.blueprint_white"
+        x: 561
+        y: 800
+        align: right
+
+      - type: text
+        role: project_name
+        static: false
+        bind: "project"
+        font: "$fonts.body"
+        size: 7.0
+        color: "$colors.text_light"
+        x: 561
+        y: 790
+        align: right
+
+      - type: rect
+        role: gradient_strip
+        static: true
+        x: 0
+        y: 731.0
+        w: 595.28
+        h: 3.2
+        fill: "$colors.primary"
+
+      - type: rect
+        role: footer_bg
+        static: true
+        x: 0
+        y: 0
+        w: 595.28
+        h: 42.5
+        fill: "$colors.secondary"
+
+      - type: rect
+        role: footer_gradient
+        static: true
+        x: 0
+        y: 42.5
+        w: 595.28
+        h: 2.1
+        fill: "$colors.primary"
+
+      - type: page_number
+        role: page_number
+        static: false
+        x: 561
+        y: 18
+        font: "$fonts.body"
+        size: 8.0
+        color: "$colors.primary"
+        align: right
+
+  # ============================================================
+  # TOC — Table of Contents
+  # ============================================================
+  toc:
+    source_page: null
+    content_frame:
+      x: 34.0
+      y: 57.0
+      w: 527.3
+      h: 640.0
+    layers:
+      - type: rect
+        role: header_bg
+        static: true
+        x: 0
+        y: 734.2
+        w: 595.28
+        h: 107.7
+        fill: "$colors.secondary"
+
+      - type: rect
+        role: gradient_strip
+        static: true
+        x: 0
+        y: 731.0
+        w: 595.28
+        h: 3.2
+        fill: "$colors.primary"
+
+      - type: text
+        role: toc_title
+        static: true
+        content: "Table of contents"
+        font: "$fonts.heading"
+        size: 18.0
+        color: "$colors.secondary"
+        x: 56.0
+        y: 705.0
+
+      - type: rect
+        role: footer_bg
+        static: true
+        x: 0
+        y: 0
+        w: 595.28
+        h: 42.5
+        fill: "$colors.secondary"
+
+      - type: rect
+        role: footer_gradient
+        static: true
+        x: 0
+        y: 42.5
+        w: 595.28
+        h: 2.1
+        fill: "$colors.primary"
+
+      - type: page_number
+        role: page_number
+        static: false
+        x: 561
+        y: 18
+        font: "$fonts.body"
+        size: 8.0
+        color: "$colors.primary"
+        align: right
+
+  # ============================================================
+  # APPENDIX DIVIDER — Appendix separator page
+  # ============================================================
+  appendix_divider:
+    source_page: null
+    layers:
+      - type: rect
+        role: background
+        static: true
+        x: 0
+        y: 0
+        w: 595.28
+        h: 841.89
+        fill: "$colors.secondary"
+
+      - type: text
+        role: appendix_label
+        static: false
+        bind: "appendix.label"
+        font: "$fonts.heading"
+        size: 41.4
+        color: "$colors.primary"
+        x: 103.0
+        y: 602.3
+
+      - type: text
+        role: appendix_title
+        static: false
+        bind: "appendix.title_line1"
+        font: "$fonts.body"
+        size: 41.4
+        color: "$colors.blueprint_white"
+        x: 136.1
+        y: 535.2
+
+      - type: text
+        role: appendix_title_2
+        static: false
+        bind: "appendix.title_line2"
+        font: "$fonts.body"
+        size: 41.4
+        color: "$colors.blueprint_white"
+        x: 136.1
+        y: 469.0
+
+      - type: rect
+        role: accent_bar
+        static: true
+        x: 0
+        y: 0
+        w: 282
+        h: 70.3
+        fill: "$colors.primary"
+
+  # ============================================================
+  # BACKCOVER — Back page
+  # ============================================================
+  backcover:
+    source_page: null
+    layers:
+      - type: rect
+        role: background
+        static: true
+        x: 0
+        y: 0
+        w: 595.28
+        h: 841.89
+        fill: "$colors.secondary"
+
+      - type: rect
+        role: accent_zone
+        static: true
+        x: 0
+        y: 0
+        w: 595.28
+        h: 140
+        fill: "$colors.night_build"
+
+      - type: rect
+        role: gradient_strip
+        static: true
+        x: 0
+        y: 140
+        w: 595.28
+        h: 3.0
+        fill: "$colors.primary"

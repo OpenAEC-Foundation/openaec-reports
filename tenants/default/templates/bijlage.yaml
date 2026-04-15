@@ -1,0 +1,36 @@
+# ==============================================================================
+# Default — Appendix divider page
+# ==============================================================================
+
+page_type: appendix_divider
+background: null
+
+# Full page background
+bg_color: "#1E293B"
+
+# Primary accent bar bottom-left
+accent_bar:
+  x: 0
+  y: 0
+  width: 282
+  height: 70.3
+  color: "#2563EB"
+
+# Dynamic: appendix number
+number:
+  bind: "appendix.label"
+  font: "SpaceGrotesk-Bold"
+  size: 41.4
+  color: "#2563EB"
+  x: 103.0
+  y: 602.3
+
+# Dynamic: appendix title (supports 2 lines)
+title:
+  bind: "appendix.title_line1"
+  font: "Inter-Regular"
+  size: 41.4
+  color: "#FFFFFF"
+  x: 136.1
+  y: 535.2
+  line_spacing: 66.4

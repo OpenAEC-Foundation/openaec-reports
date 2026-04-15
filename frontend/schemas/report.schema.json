@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://openaec-bouwkunde.nl/schemas/report.schema.json",
+  "$id": "https://report.open-aec.com/schemas/report.schema.json",
   "title": "OpenAEC Report Definition",
-  "description": "JSON schema voor het definiëren van een OpenAEC rapport. Dit schema is het contract tussen de library, API en frontend.",
+  "description": "JSON schema voor het definiëren van een engineering rapport. Dit schema is het contract tussen de library, API en frontend.",
   "type": "object",
   "required": ["template", "project"],
   "properties": {
@@ -38,8 +38,7 @@
       "examples": ["Gemeente Den Haag"]
     },
     "author": {
-      "type": "string",
-      "default": "OpenAEC"
+      "type": "string"
     },
     "date": {
       "type": "string",
@@ -110,7 +109,7 @@
           "type": "object",
           "description": "Extra velden op voorblad (key-value)",
           "additionalProperties": { "type": "string" },
-          "examples": [{"Kenmerk": "OpenAEC-2026-031-R01", "Classificatie": "Vertrouwelijk"}]
+          "examples": [{"Kenmerk": "OA-2026-031-R01", "Classificatie": "Vertrouwelijk"}]
         }
       }
     },

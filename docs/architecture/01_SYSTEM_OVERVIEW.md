@@ -108,7 +108,7 @@ tenants/
 │   │   └── achterblad.yaml
 │   └── modules/                       ◄── (Legacy, niet gebruikt door V3)
 │
-├── default/                    ◄── ANDERE TENANT
+├── default/                           ◄── DEFAULT TENANT (public)
 │   ├── brand.yaml
 │   ├── fonts/
 │   ├── stationery/

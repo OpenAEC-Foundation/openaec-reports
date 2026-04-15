@@ -20,6 +20,7 @@ from __future__ import annotations
 import base64
 import json
 import logging
+import os
 import re
 import tempfile
 from pathlib import Path
@@ -50,9 +51,8 @@ A4_LANDSCAPE_HEIGHT = 595.28
 
 # Maximum y coordinate for content (bottom boundary, top-down).
 # Conservatieve fallback waarden — tenants overrulen dit via
-# `templates/<brand>/standaard.yaml` content_area.y_td_end. Voor de
-# openaec-stationery start de footer/logo zone op y=768; daarom 760 als
-# generieke veilige bovengrens (8pt clearance).
+# `templates/<brand>/standaard.yaml` content_area.y_td_end. Typische
+# stationery begint de footer/logo zone rond y=768; 760 geeft 8pt clearance.
 Y_MAX_PORTRAIT = 760.0
 Y_MAX_LANDSCAPE = 533.0
 
@@ -133,9 +133,9 @@ def _parse_cell(value: object) -> tuple[str, bool]:
 class TemplateSet:
     """Loads and holds all YAML templates + stationery paths for a brand."""
 
-    def __init__(self, brand: str = "default"):
-        self.brand = brand
-        self.dir = TEMPLATES_DIR / brand
+    def __init__(self, brand: str | None = None):
+        self.brand = brand or os.environ.get("OPENAEC_DEFAULT_BRAND", "default")
+        self.dir = TEMPLATES_DIR / self.brand
         if not self.dir.exists():
             raise FileNotFoundError(f"Template directory not found: {self.dir}")
 
@@ -427,8 +427,8 @@ class CoverGenerator:
         """Generate cover PDF.
 
         Twee modi:
-        - PNG overlay (OpenAEC): ReportLab canvas met foto + PNG overlay + tekst
-        - PDF stationery (Customer): PyMuPDF insert tekst op PDF stationery
+        - PNG overlay: ReportLab canvas met foto + PNG overlay + tekst
+        - PDF stationery: PyMuPDF insert tekst op PDF stationery
         """
         if cover_is_pdf and stationery and stationery.exists():
             return self._generate_from_pdf(data, stationery, output)
@@ -489,7 +489,7 @@ class CoverGenerator:
         return output
 
     def _generate_from_png(self, data: dict, stationery_png: Path | None, output: Path) -> Path:
-        """Bestaande ReportLab PNG overlay cover (OpenAEC)."""
+        """Legacy ReportLab PNG overlay cover."""
         self.fonts.register_reportlab()
         w, h = A4
         c = rl_canvas.Canvas(str(output), pagesize=A4)
@@ -816,7 +816,7 @@ class ColofonGenerator:
             "opdrachtgever_naam": colofon.get("opdrachtgever_naam", data.get("client", "")),
             "opdrachtgever_adres": colofon.get("opdrachtgever_adres", ""),
             "adviseur_bedrijf": colofon.get(
-                "adviseur_bedrijf", data.get("author", "OpenAEC")
+                "adviseur_bedrijf", data.get("author", "")
             ),
             "adviseur_naam": colofon.get("adviseur_naam", ""),
             "adviseur_email": colofon.get("adviseur_email", ""),
@@ -2224,8 +2224,8 @@ class ReportGeneratorV2:
         gen = ReportGeneratorV2.from_json("report.json", stationery_dir, output)
     """
 
-    def __init__(self, brand: str = "default"):
-        self.brand_name = brand
+    def __init__(self, brand: str | None = None):
+        self.brand_name = brand or os.environ.get("OPENAEC_DEFAULT_BRAND", "default")
         self.templates = TemplateSet(brand)
 
         # Laad brand config voor stationery mapping en font info
@@ -2347,7 +2347,7 @@ class ReportGeneratorV2:
         cover_stationery = stationery.get("cover")
         cover_is_pdf = bool(cover_stationery and cover_stationery.suffix.lower() == ".pdf")
 
-        # PNG overlay (legacy OpenAEC)
+        # PNG overlay (legacy cover mode)
         if not cover_is_pdf:
             overlay_name = self.templates.cover.get("overlay", {}).get("file")
             stationery_png = (stationery_dir / overlay_name) if overlay_name else None
@@ -2560,7 +2560,7 @@ class ReportGeneratorV2:
         json_path: str | Path,
         stationery_dir: str | Path,
         output_path: str | Path,
-        brand: str = "default",
+        brand: str | None = None,
     ) -> Path:
         """Generate report directly from JSON file.
 

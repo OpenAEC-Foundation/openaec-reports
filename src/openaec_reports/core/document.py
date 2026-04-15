@@ -72,7 +72,7 @@ class DocumentConfig:
     project: str = ""
     project_number: str = ""
     client: str = ""
-    author: str = "OpenAEC"
+    author: str = ""
     report_type: str = ""
     subtitle: str = ""
 

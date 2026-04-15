@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -208,9 +209,9 @@ class TemplateLoader:
         today = date.today().isoformat()
 
         default_disclaimer = (
-            "Dit rapport is opgesteld door OpenAEC en is uitsluitend "
-            "bedoeld voor de opdrachtgever. Verspreiding aan derden is niet "
-            "toegestaan zonder schriftelijke toestemming."
+            "Dit rapport is uitsluitend bedoeld voor de opdrachtgever. "
+            "Verspreiding aan derden is niet toegestaan zonder schriftelijke "
+            "toestemming van de auteur."
         )
 
         # Colofon
@@ -278,8 +279,12 @@ class TemplateLoader:
             "project": "",
             "project_number": "",
             "client": "",
-            "author": "OpenAEC",
-            "brand": config.tenant if config.tenant else "default",
+            "author": "",
+            "brand": (
+                config.tenant
+                if config.tenant
+                else os.environ.get("OPENAEC_DEFAULT_BRAND", "default")
+            ),
             "date": today,
             "version": "1.0",
             "status": "CONCEPT",

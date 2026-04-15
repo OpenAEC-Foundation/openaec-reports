@@ -30,9 +30,13 @@ COPY --from=frontend-build /app/frontend/dist /app/static
 RUN adduser --disabled-password --gecos '' appuser
 RUN mkdir -p /app/uploads /app/data && chown -R appuser:appuser /app
 
-# Multi-tenant: alle tenant directories beschikbaar voor brand resolution
+# Multi-tenant: alle tenant directories beschikbaar voor brand resolution.
+# Default tenant is de neutrale open-source placeholder onder tenants/default.
+# Productie-deployments kunnen een andere tenant bind-mounten en de env
+# vars OPENAEC_DEFAULT_BRAND + OPENAEC_TENANT_DIR overschrijven.
 ENV OPENAEC_TENANTS_ROOT=/app/tenants
 ENV OPENAEC_TENANT_DIR=/app/tenants/default
+ENV OPENAEC_DEFAULT_BRAND=default
 
 USER appuser
 

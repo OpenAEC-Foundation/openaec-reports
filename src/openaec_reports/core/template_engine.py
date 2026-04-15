@@ -4,7 +4,7 @@ Bouwt PDF rapporten op basis van template YAML configuratie.
 Drie pagina-modes:
 - special: stationery + text zones (voorblad, achterblad)
 - fixed:   stationery + text zones + tabel op vaste positie (BIC controles)
-- flow:    stationery + ReportLab flowables (OpenAEC inhoudspagina's)
+- flow:    stationery + ReportLab flowables (inhoudspagina's)
 
 Gebruikt Optie C: alles via ReportLab DocTemplate.
 Special/fixed pagina's zijn PageTemplates met onPage callbacks.

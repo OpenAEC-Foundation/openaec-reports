@@ -5,8 +5,8 @@ op basis van tenant en template type.
 
 Gebruik:
     python examples/scripts/generate_all_examples.py
-    python examples/scripts/generate_all_examples.py --only customer
-    python examples/scripts/generate_all_examples.py --only default/structural_report
+    python examples/scripts/generate_all_examples.py --only openaec_foundation
+    python examples/scripts/generate_all_examples.py --only openaec_foundation/structural_report
     python examples/scripts/generate_all_examples.py --list
 """
 
@@ -28,7 +28,7 @@ OUTPUT_DIR = PROJECT_ROOT / "output" / "examples"
 TENANTS_DIR = PROJECT_ROOT / "tenants"
 
 # Tenant folders in examples/
-TENANT_DIRS = ["default", "customer", "openaec_foundation"]
+TENANT_DIRS = ["openaec_foundation"]
 
 # Template Engine (V3) templates — pages bevat list[dict]
 # Alle andere zijn legacy (V1/V2)
@@ -183,7 +183,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--only",
-        help="Filter op tenant of bestandsnaam (bijv. 'customer' of 'default/structural')",
+        help="Filter op tenant of bestandsnaam (bijv. 'openaec_foundation/structural')",
     )
     parser.add_argument(
         "--list",

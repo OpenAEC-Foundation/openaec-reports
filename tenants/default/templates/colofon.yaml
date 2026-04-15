@@ -1,0 +1,70 @@
+# ==============================================================================
+# Default — Colophon page configuration
+# ==============================================================================
+
+page_type: colofon
+background: null
+
+# Dynamic fields
+title:
+  bind: "project"
+  font: "SpaceGrotesk-Bold"
+  size: 22.0
+  color: "#1E293B"
+  x: 70.9
+  y: 695.0
+
+subtitle:
+  bind: "cover.subtitle"
+  font: "Inter-Regular"
+  size: 14.0
+  color: "#64748B"
+  x: 70.9
+  y: 672.0
+
+# Metadata table columns
+table:
+  label_x: 103.0
+  value_x: 229.0
+  row_height: 24.0
+  label_font: "SpaceGrotesk-Bold"
+  label_size: 10.0
+  value_font: "Inter-Regular"
+  value_size: 10.0
+  separator:
+    x_start: 102
+    x_end: 420
+    stroke: 0.25
+    color: "#E2E8F0"
+
+# Project info section (dark labels)
+project_info:
+  y_start: 521.1
+  label_color: "#1E293B"
+  value_color: "#1E293B"
+  fields:
+    - {label: "Project", bind: "colofon.project_description"}
+    - {label: "Client", bind: "colofon.client_block"}
+
+# Author section (primary labels)
+author_info:
+  y_start: 353.1
+  label_color: "#2563EB"
+  value_color: "#1E293B"
+  fields:
+    - {label: "Author", bind: "colofon.advisor"}
+    - {label: "Applicable norms", bind: "colofon.norms"}
+    - {label: "Document description", bind: "colofon.document_info"}
+    - {label: "Report date", bind: "colofon.date"}
+    - {label: "Phase", bind: "colofon.phase"}
+    - {label: "Status", bind: "colofon.status"}
+    - {label: "Document code", bind: "colofon.document_code"}
+
+# Page number
+page_number:
+  x: 538.6
+  y: 18.0
+  font: "Inter-Regular"
+  size: 9.5
+  color: "#2563EB"
+  align: right

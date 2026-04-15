@@ -9,7 +9,7 @@
 #   1. Kopieer .env.example naar .env en vul de secrets in
 #   2. docker compose up -d
 #   3. Wacht tot Authentik klaar is (~2 min eerste keer)
-#   4. Open https://auth.open-aec.com/if/flow/initial-setup/
+#   4. Open https://${AUTH_DOMAIN}/if/flow/initial-setup/
 #   5. Configureer de OAuth2 application (zie README.md)
 #
 # Updaten:
@@ -117,7 +117,7 @@ services:
       # JWT
       OPENAEC_JWT_SECRET: ${OPENAEC_JWT_SECRET:?Set OPENAEC_JWT_SECRET in .env}
       # Cookies
-      OPENAEC_COOKIE_DOMAIN: ${OPENAEC_COOKIE_DOMAIN:-.open-aec.com}
+      OPENAEC_COOKIE_DOMAIN: ${OPENAEC_COOKIE_DOMAIN:-.example.com}
       OPENAEC_COOKIE_SECURE: "true"
       # OIDC — Authentik
       OPENAEC_OIDC_ISSUER: https://${AUTH_DOMAIN}/application/o/openaec-reports/
@@ -129,7 +129,8 @@ services:
       OPENAEC_REGISTRATION_ENABLED: ${OPENAEC_REGISTRATION_ENABLED:-false}
       # Tenants
       OPENAEC_TENANTS_ROOT: /app/tenants
-      OPENAEC_TENANT_DIR: /app/tenants/default
+      OPENAEC_TENANT_DIR: /app/tenants/${OPENAEC_DEFAULT_BRAND:-default}
+      OPENAEC_DEFAULT_BRAND: ${OPENAEC_DEFAULT_BRAND:-default}
     volumes:
       - openaec_data:/app/data
       - openaec_uploads:/app/uploads

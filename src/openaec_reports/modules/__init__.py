@@ -19,9 +19,9 @@ class ModuleRegistry:
     Usage::
 
         ModuleRegistry.register_core("paragraph", ParagraphModule)
-        ModuleRegistry.register_tenant("customer", "bic_table", BICTableModule)
+        ModuleRegistry.register_tenant("acme", "invoice_table", InvoiceTableModule)
 
-        cls = ModuleRegistry.get("bic_table", tenant="customer")
+        cls = ModuleRegistry.get("invoice_table", tenant="acme")
         cls = ModuleRegistry.get("paragraph")  # core fallback
     """
 

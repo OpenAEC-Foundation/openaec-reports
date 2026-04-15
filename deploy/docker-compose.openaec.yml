@@ -13,7 +13,7 @@
 #   3. docker compose -f docker-compose.openaec.yml up -d
 #   4. Voeg Caddyfile.openaec snippet toe aan bestaande Caddyfile
 #   5. Herlaad Caddy: docker exec caddy caddy reload --config /etc/caddy/Caddyfile
-#   6. Open https://auth.open-aec.com/if/flow/initial-setup/
+#   6. Open https://${AUTH_DOMAIN}/if/flow/initial-setup/
 #   7. Configureer de OAuth2 application (zie README.md)
 #
 # Updaten:
@@ -124,7 +124,8 @@ services:
       OPENAEC_REGISTRATION_ENABLED: ${OPENAEC_REGISTRATION_ENABLED:-false}
       # Tenants
       OPENAEC_TENANTS_ROOT: /app/tenants
-      OPENAEC_TENANT_DIR: /app/tenants/default
+      OPENAEC_TENANT_DIR: /app/tenants/${OPENAEC_DEFAULT_BRAND:-default}
+      OPENAEC_DEFAULT_BRAND: ${OPENAEC_DEFAULT_BRAND:-default}
     volumes:
       - openaec_data:/app/data
       - openaec_uploads:/app/uploads

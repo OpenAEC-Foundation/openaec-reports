@@ -1,24 +1,12 @@
 # Voorbeelden — openaec-reports
 
-Voorbeeld JSON-bestanden per tenant, direct bruikbaar via API, CLI of frontend.
+Voorbeeld JSON-bestanden bruikbaar via API, CLI of frontend.
 
 ## Structuur
 
 ```
 examples/
-├── default/           V1/V2 engine rapporten
-│   ├── structural_report.json
-│   ├── constructieve_berekening.json
-│   ├── bouwkundige_opname.json
-│   ├── haalbaarheidsadvies.json
-│   ├── bbl_toetsing.json
-│   └── adviesbrief.json
-├── customer/                 V3 template engine rapporten
-│   ├── bic_factuur.json          BIC factuur (kort)
-│   ├── bic_rapport.json          BIC rapport (volledig, 17 pagina's)
-│   ├── bic_rapport_kort.json     BIC rapport (minimaal)
-│   └── bic_rapport_minimal.json  BIC rapport (schema-conform, beknopt)
-├── openaec_foundation/       OpenAEC branded rapporten
+├── openaec_foundation/       OpenAEC Foundation branded rapport
 │   └── structural_report.json
 └── scripts/                  Python voorbeeldscripts
     ├── example_structural.py
@@ -27,32 +15,27 @@ examples/
     └── pyrevit_generate_report.py
 ```
 
+> Tenant-specifieke klantrapporten worden NIET in de public repo gecommit.
+> Productie-deployments leveren hun eigen tenant-data via bind-mounts
+> (zie `deploy/docker-compose.yml`).
+
 ## Gebruik
 
 ### CLI
 ```bash
 openaec-report generate \
   --template structural \
-  --data examples/default/structural_report.json \
+  --data examples/openaec_foundation/structural_report.json \
   --output output/test.pdf
 ```
 
 ### API
 ```bash
-curl -X POST https://report.open-aec.com/api/generate/v2 \
+curl -X POST https://report.example.com/api/generate/v2 \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
-  -d @examples/default/constructieve_berekening.json \
+  -d @examples/openaec_foundation/structural_report.json \
   -o rapport.pdf
-```
-
-### Template Engine (Customer)
-```bash
-curl -X POST https://report.open-aec.com/api/generate/template \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d @examples/customer/bic_rapport.json \
-  -o bic_rapport.pdf
 ```
 
 ### Python
@@ -60,18 +43,22 @@ curl -X POST https://report.open-aec.com/api/generate/template \
 from openaec_reports.core.template_engine import TemplateEngine
 import json
 
-with open("examples/customer/bic_rapport.json") as f:
+with open("examples/openaec_foundation/structural_report.json") as f:
     data = json.load(f)
 
 engine = TemplateEngine()
-engine.build(template_name="bic_rapport", tenant="customer",
-             data=data, output_path="output/test.pdf")
+engine.build(
+    template_name="structural_report",
+    tenant="default",
+    data=data,
+    output_path="output/test.pdf",
+)
 ```
 
 ## Engines
 
-| Tenant | Engine | Endpoint |
-|--------|--------|----------|
-| `default` | V1/V2 (ReportLab/PyMuPDF) | `/api/generate` of `/api/generate/v2` |
-| `customer` | V3 (TemplateEngine) | `/api/generate/template` |
-| `openaec_foundation` | V3 (TemplateEngine) | `/api/generate/template` |
+| Engine | Endpoint | Gebruik |
+|--------|----------|---------|
+| V1 (`Report.from_dict()`) | `/api/generate` | Flow-based content-block rapporten |
+| V2 (`ReportGeneratorV2`) | `/api/generate/v2` | Pixel-perfect `renderer_v2` |
+| V3 (`TemplateEngine`) | `/api/generate/template` | YAML page_types, fixed-page layouts |

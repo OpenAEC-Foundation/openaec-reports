@@ -63,7 +63,7 @@ class BMDocTemplate(BaseDocTemplate):
 
 
 class Report:
-    """Hoofdklasse voor het bouwen en genereren van OpenAEC rapporten.
+    """Hoofdklasse voor het bouwen en genereren van engineering rapporten.
 
     Usage:
         report = Report(
@@ -83,7 +83,7 @@ class Report:
         project: str = "",
         project_number: str = "",
         client: str = "",
-        author: str = "OpenAEC",
+        author: str = "",
         report_type: str = "",
         template: str | None = None,
         brand: str | BrandConfig | None = None,
@@ -586,7 +586,7 @@ class Report:
             project=data.get("project", ""),
             project_number=data.get("project_number", ""),
             client=data.get("client", ""),
-            author=data.get("author", "OpenAEC"),
+            author=data.get("author", ""),
             report_type=data.get("report_type", ""),
             template=data.get("template"),
             brand=brand or data.get("brand"),

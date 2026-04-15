@@ -89,18 +89,18 @@ data = {
     "report_type": "Constructieve berekening",
     "project_number": "2026-031",
     "client": "Gemeente Den Haag",
-    "author": "OpenAEC",
+    "author": "Default Author",
     "date": "2026-02-21",
     "version": "1.0",
     "status": "CONCEPT",            # CONCEPT | DEFINITIEF | REVISIE
-    "brand": "default",       # Huisstijl (default: default)
+    "brand": "default",             # Huisstijl (default: value of OPENAEC_DEFAULT_BRAND)
 
     # --- Voorblad ---
     "cover": {
         "enabled": True,             # False = geen voorblad
         "subtitle": "Constructieve berekening hoofddraagconstructie",
         "extra_fields": {
-            "Kenmerk": "OpenAEC-2026-031-R01",
+            "Kenmerk": "OA-2026-031-R01",
             "Classificatie": "Vertrouwelijk"
         }
         # "image": { ... }          # Zie sectie "Afbeeldingen" hieronder

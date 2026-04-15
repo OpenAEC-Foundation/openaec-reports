@@ -4,7 +4,7 @@
   "project": "Kijkduin Reddingspost",
   "project_number": "2024-031",
   "client": "Gemeente Den Haag",
-  "author": "OpenAEC",
+  "author": "Default Author",
   "date": "2026-02-18",
   "version": "1.0",
   "status": "CONCEPT",
@@ -13,7 +13,7 @@
     "subtitle": "Constructieve berekening hoofddraagconstructie",
     "image": "renders/gevel_west.png",
     "extra_fields": {
-      "Kenmerk": "OpenAEC-2024-031-R01"
+      "Kenmerk": "OA-2024-031-R01"
     }
   },
 
@@ -163,7 +163,7 @@
   },
 
   "metadata": {
-    "software": "OpenAEC Report Generator v0.1.0",
+    "software": "OpenAEC Report Generator",
     "revit_model": "2024-031_Kijkduin_S.rvt",
     "calculation_software": "Technosoft Frilo R-2024.1"
   }

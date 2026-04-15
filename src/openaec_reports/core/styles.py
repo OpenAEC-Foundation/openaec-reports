@@ -27,7 +27,7 @@ def _ensure_fonts_registered() -> None:
 
 
 # ============================================================
-# OpenAEC Huisstijl Kleuren
+# Default huisstijl kleuren (overrulable per tenant brand.yaml)
 # ============================================================
 
 
@@ -35,8 +35,8 @@ def _ensure_fonts_registered() -> None:
 class Colors:
     """Huisstijl kleurenpalet (activeerbaar per brand)."""
 
-    primary: str = "#40124A"  # Donkerpaars (OpenAEC huisstijl)
-    secondary: str = "#38BDA0"  # Turquoise (OpenAEC huisstijl)
+    primary: str = "#40124A"  # Donkerpaars
+    secondary: str = "#38BDA0"  # Turquoise
     accent: str = "#2ECC71"  # Groen (voldoet)
     warning: str = "#E74C3C"  # Rood (voldoet niet)
     text: str = "#45243D"  # Donkerpaars tekst
@@ -114,7 +114,7 @@ BM_FONTS = _make_font_config()
 
 
 def create_stylesheet(brand: BrandConfig | None = None) -> StyleSheet1:
-    """Maak de OpenAEC stylesheet, optioneel met brand-specifieke overrides.
+    """Maak de default stylesheet, optioneel met brand-specifieke overrides.
 
     Args:
         brand: Optionele brand configuratie met style overrides.

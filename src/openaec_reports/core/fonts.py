@@ -53,7 +53,8 @@ _HELVETICA_TO_LIBERATION: dict[str, str] = {
 }
 
 # ---------------------------------------------------------------------------
-# Inter — custom OpenAEC fonts
+# Inter — optional proprietary fonts, only loaded if present in tenant.
+# Not bundled in the public repo; tenants may provide their own licenses.
 # ---------------------------------------------------------------------------
 
 # Mapping van ReportLab font naam → mogelijke bestandsnamen (meerdere varianten)

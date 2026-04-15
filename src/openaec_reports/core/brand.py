@@ -179,8 +179,7 @@ class BrandLoader:
 
     Usage:
         loader = BrandLoader()
-        brand = loader.load("customer")   # vindt tenants/customer/brand.yaml
-        brand = loader.load("default")
+        brand = loader.load("default")   # vindt tenants/default/brand.yaml
         available = loader.list_brands()
     """
 

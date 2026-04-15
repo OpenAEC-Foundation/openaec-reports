@@ -1,0 +1,38 @@
+# ==============================================================================
+# Default — Cover page configuration
+# ==============================================================================
+# Dark top zone (67%) + light bottom zone (33%)
+# Title + subtitle below top band
+# ==============================================================================
+
+page_type: cover
+background: null
+
+# Dark zone
+dark_zone:
+  y: 280.0
+  height: 561.89
+  color: "#1E293B"
+
+# Primary gradient strip
+gradient_strip:
+  y: 277.0
+  height: 3.0
+  color: "#2563EB"
+
+# Dynamic fields
+title:
+  bind: "project"
+  font: "SpaceGrotesk-Bold"
+  size: 28.0
+  color: "#1E293B"
+  x: 54.0
+  y: 95.0
+
+subtitle:
+  bind: "cover.subtitle"
+  font: "Inter-Regular"
+  size: 16.0
+  color: "#64748B"
+  x: 54.0
+  y: 65.0

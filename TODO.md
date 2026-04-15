@@ -39,7 +39,7 @@
 
 ### Overige renderer-bugs die in Python gefixt zijn
 - [ ] Tabel footer overflow: Y_max / bottom margin constanten matchen
-  met tenant yaml (openaec-footer begint op y=768)
+  met tenant yaml (sommige tenants starten de footer op y=768)
 - [ ] HTML cell-parsing: `<b>...</b>` of `<strong>...</strong>` als
   volledige cell-wrap → bold font i.p.v. literal tags
 - [ ] Idempotente paginanummers (voorkomt "167"-overlay bug als
@@ -115,10 +115,10 @@ Uitgebreide code review over 3 domeinen (Python backend, Frontend, Config/Infra)
 
 ### CR-H: Hoog — Snel oppakken
 
-- [ ] **CR-H1** — 15+ hardcoded "default" / "OpenAEC" in codebase
-  - Default brand, author, stationery paden — schendt multi-tenant architectuur
-  - **Fix:** Centraal config-bestand of env var `OPENAEC_DEFAULT_BRAND`, author zonder default
-  - **Bestanden:** `api.py:52,74`, `renderer_v2.py:81,1910`, `template_loader.py:282`, `engine.py:83,580`, `document.py:75`
+- [~] **CR-H1** — Hardcoded tenant-namen in codebase (gedeeltelijk opgelost)
+  - api.py: default brand nu env-driven via `OPENAEC_DEFAULT_BRAND` ✅
+  - Nog te doen: `renderer_v2.py:1910`, `template_loader.py:282`, `engine.py:83,580`, `document.py:75`
+    — vervang overige hardcoded defaults door tenant-agnostische fallbacks.
 
 - [ ] **CR-H2** — Cookie naam nog "bm_access_token" (oude branding)
   - Inconsistent met alle `OPENAEC_*` variabelen, breaking change bij rename
@@ -675,7 +675,7 @@ Zie `PLAN-rust-implementation.md` voor details.
 - [ ] Q5 — Type validatie in `TemplateConfig` constructor (margins als dict, format als string, etc.)
 - [ ] Q6 — YAML parse errors loggen i.p.v. stilletjes inslikken (`brand.py` regels 243-244)
 - [ ] Q7 — `organisation_id` op User model ofwel volledig implementeren (org-level isolatie) ofwel verwijderen (dead code)
-- [ ] Q8 — Default brand configureerbaar maken via `OPENAEC_DEFAULT_BRAND` env var (nu hardcoded `"default"`)
+- [x] Q8 — Default brand configureerbaar via `OPENAEC_DEFAULT_BRAND` env var (default `"default"`, zie api.py)
 
 ---
 

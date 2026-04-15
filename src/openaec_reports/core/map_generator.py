@@ -234,7 +234,7 @@ class MapGenerator:
         self.session = requests.Session()
         self.session.headers.update(
             {
-                "User-Agent": "OpenAEC-ReportGenerator/1.0",
+                "User-Agent": "openaec-reports/1.0",
             }
         )
 

@@ -10,7 +10,7 @@
 - **1264 tests** collected (1214 passed, 50 skipped)
 - **BIC Rapport:** 17 pagina's compleet, field groups, PDOK kaarten, flow layout met auto page-break
 - **Security:** Alle 6 kritieke items gefixt (K1-K6), 1 hoge + 8 medium open (zie TODO.md)
-- **Productie:** `report.open-aec.com` / `report.open-aec.com` — SSO-only, multi-tenant
+- **Productie:** `report.open-aec.com` — SSO-only, multi-tenant (via bind-mount tenants/)
 - **Cloud:** Project container model geintegreerd (Python + Rust)
 - **Open:** S2 Sanering template
 
@@ -107,8 +107,12 @@
 | Omgeving | URL | Status |
 |----------|-----|--------|
 | Productie | https://report.open-aec.com | ✅ Online |
-| API Health | https://report.open-aec.com/api/health | ✅ OK (v0.1.0) |
+| API Health | https://report.open-aec.com/api/health | ✅ OK |
 | Deploy script | `deploy.sh` | ✅ Git pull → docker build → deploy → health check |
+
+**Tenant data:** privé tenant-directories (brand, templates, logos, stationery)
+worden NIET in de public repo gecommit. Productie draait met bind-mounts vanuit
+`/opt/openaec/reports-tenants/` op de host.
 
 ---
 
@@ -116,20 +120,23 @@
 
 | Engine | Endpoint | Status | Gebruik |
 |--------|----------|--------|---------|
-| V1 — `Report.from_dict()` | `/api/generate` | ✅ Productie | Legacy, OpenAEC content-block rapporten |
-| V2 — `ReportGeneratorV2` | `/api/generate/v2` | ✅ Productie | OpenAEC rapporten (renderer_v2) |
-| V3 — `TemplateEngine` | `/api/generate/template` | ✅ Lokaal | Customer BIC (YAML page_types) |
+| V1 — `Report.from_dict()` | `/api/generate` | ✅ Productie | Legacy flow-based content-block rapporten |
+| V2 — `ReportGeneratorV2` | `/api/generate/v2` | ✅ Productie | Pixel-perfect rapporten via `renderer_v2` |
+| V3 — `TemplateEngine` | `/api/generate/template` | ✅ Productie | YAML page_types, fixed-page layouts |
 
 ---
 
 ## Tenants
 
-| Tenant | Templates | Engine | Status |
-|--------|-----------|--------|--------|
-| `default` | structural, daylight, building_code | V1/V2 | ✅ Productie |
-| `openaec_v2` | (kopie cooperatie in V3 formaat) | V3 | ⏳ Experimenteel |
-| `customer` | bic_factuur, bic_rapport | V3 | ✅ Lokaal, deploy nodig |
-| `openaec_foundation` | (V3 formaat) | V3 | ⏳ Experimenteel |
+In deze public repo staat alleen de neutrale `tenants/default/` placeholder.
+Private tenant-directories (klantspecifieke brand, templates, stationery, fonts)
+worden via host bind-mounts aan productie-containers gekoppeld en zitten niet
+in git.
+
+| Tenant | Locatie | Engine | Status |
+|--------|---------|--------|--------|
+| `default` | `tenants/default/` (public) | V1/V2/V3 | ✅ Repo MVP, OFL fonts |
+| Privé tenants | bind-mount op host | V1/V2/V3 | ✅ Productie |
 
 ---
 

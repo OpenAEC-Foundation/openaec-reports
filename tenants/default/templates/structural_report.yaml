@@ -1,0 +1,108 @@
+# ==============================================================================
+# Default — Structural Calculation Report Template
+# ==============================================================================
+# Template for structural engineering reports.
+# Neutral default branding. Inter + Space Grotesk (OFL).
+# ==============================================================================
+
+report_type: structural
+format: A4
+orientation: portrait
+
+margins:
+  top: 48       # mm (header 38mm + 10mm padding)
+  bottom: 20
+  left: 12
+  right: 12
+
+# Header (on every content page)
+header:
+  height: 38    # mm
+  show_rule: false
+  elements:
+    - type: text
+      content: "{project_number} | {project}"
+      position: right
+      style: header_text
+
+# Footer (on every content page)
+footer:
+  height: 15    # mm
+  show_rule: false
+  elements:
+    - type: text
+      content: "Page {page}"
+      position: right
+      style: footer_text
+
+# Cover page
+cover:
+  background_color: "#1E293B"
+  elements:
+    - type: color_bar
+      color: "#2563EB"
+      position: bottom
+      height: 3
+    - type: image
+      src: "{cover_image}"
+      position: top
+      width: 170
+      offset_y: 10
+    - type: title
+      content: "{project}"
+      style: cover_title
+      position: center-left
+      offset_y: -40
+    - type: subtitle
+      content: "{subtitle}"
+      style: cover_subtitle
+      position: center-left
+      offset_y: -60
+    - type: info_block
+      position: bottom-right
+      fields:
+        - label: "Project number"
+          value: "{project_number}"
+        - label: "Client"
+          value: "{client}"
+        - label: "Date"
+          value: "{date}"
+        - label: "Status"
+          value: "{status}"
+
+# Colophon (page 2)
+colofon:
+  enabled: true
+  fields:
+    - label: "Document"
+      value: "{subtitle}"
+    - label: "Project number"
+      value: "{project_number}"
+    - label: "Client"
+      value: "{client}"
+    - label: "Author"
+      value: "{author}"
+    - label: "Date"
+      value: "{date}"
+    - label: "Version"
+      value: "{version}"
+    - label: "Status"
+      value: "{status}"
+
+# Table of contents
+toc:
+  enabled: true
+  title: "Table of contents"
+  max_depth: 3
+
+# Back cover
+backcover:
+  background_color: "#1E293B"
+
+# Structure — section order
+structure:
+  - cover
+  - colofon
+  - toc
+  - sections
+  - backcover

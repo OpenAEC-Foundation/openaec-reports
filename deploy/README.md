@@ -16,8 +16,8 @@ Er zijn twee deployment varianten:
 ```
 Internet
   │
-  ├── report.open-aec.com ──→ Caddy (:443) ──→ openaec-reports (:8000)
-  └── auth.open-aec.com   ──→ Caddy (:443) ──→ authentik-server (:9000)
+  ├── report.example.com ──→ Caddy (:443) ──→ openaec-reports (:8000)
+  └── auth.example.com   ──→ Caddy (:443) ──→ authentik-server (:9000)
                                                ├── postgresql
                                                └── redis
 ```
@@ -81,8 +81,8 @@ Maak A-records aan die naar het server IP wijzen:
 
 | Record | Type | Waarde |
 |--------|------|--------|
-| `report.open-aec.com` | A | `<server-ip>` |
-| `auth.open-aec.com` | A | `<server-ip>` |
+| `report.example.com` | A | `<server-ip>` |
+| `auth.example.com` | A | `<server-ip>` |
 
 **Let op:** DNS propagatie kan tot 24 uur duren. Caddy probeert automatisch TLS-certificaten op te halen zodra de domeinen bereikbaar zijn.
 
@@ -111,7 +111,7 @@ openaec-reports   | INFO:     Uvicorn running on http://0.0.0.0:8000
 
 ### 6.1 Admin account
 
-1. Open `https://auth.open-aec.com/if/flow/initial-setup/`
+1. Open `https://auth.example.com/if/flow/initial-setup/`
 2. Maak het admin account aan (bewaar credentials veilig!)
 
 ### 6.2 Custom Scope Mapping
@@ -143,7 +143,7 @@ openaec-reports   | INFO:     Uvicorn running on http://0.0.0.0:8000
    - **Client ID:** `openaec-reports`
    - **Redirect URIs:**
      ```
-     https://report.open-aec.com/auth/callback
+     https://report.example.com/auth/callback
      http://localhost:5173/auth/callback
      ```
    - **Scopes:** selecteer `openid`, `profile`, `email`, en `openaec_profile`
@@ -157,7 +157,7 @@ openaec-reports   | INFO:     Uvicorn running on http://0.0.0.0:8000
    - **Name:** `OpenAEC Reports`
    - **Slug:** `openaec-reports`
    - **Provider:** selecteer de zojuist aangemaakte provider
-   - **Launch URL:** `https://report.open-aec.com`
+   - **Launch URL:** `https://report.example.com`
 
 ### 6.5 Gebruikers aanmaken
 
@@ -168,7 +168,7 @@ openaec-reports   | INFO:     Uvicorn running on http://0.0.0.0:8000
    job_title: "Constructeur"
    phone: "078 7400 250"
    registration_number: "IBS-12345"
-   company: "OpenAEC"
+   company: "Acme Engineering B.V."
    tenant: "default"
    ```
 
@@ -176,16 +176,16 @@ openaec-reports   | INFO:     Uvicorn running on http://0.0.0.0:8000
 
 ```bash
 # Health check
-curl https://report.open-aec.com/api/health
+curl https://report.example.com/api/health
 
 # OIDC config check (moet enabled: true tonen)
-curl https://report.open-aec.com/api/auth/oidc/config
+curl https://report.example.com/api/auth/oidc/config
 
 # Authentik discovery
-curl https://auth.open-aec.com/application/o/openaec-reports/.well-known/openid-configuration
+curl https://auth.example.com/application/o/openaec-reports/.well-known/openid-configuration
 ```
 
-Open `https://report.open-aec.com` — je zou nu de **"Inloggen via SSO"** knop moeten zien.
+Open `https://report.example.com` — je zou nu de **"Inloggen via SSO"** knop moeten zien.
 
 ---
 

@@ -1,0 +1,114 @@
+# ==============================================================================
+# Default — Content styling rules
+# ==============================================================================
+
+# Body text
+body:
+  font: "Inter-Regular"
+  size: 9.5
+  leading: 16.2
+  color: "#1E293B"
+  alignment: justify
+  max_width_pt: 527.3
+
+# Section headings
+heading1:
+  font: "SpaceGrotesk-Bold"
+  size: 18.0
+  leading: 21.6
+  color: "#1E293B"
+  space_before_pt: 22.7
+  space_after_pt: 8.5
+
+heading2:
+  font: "SpaceGrotesk-Bold"
+  size: 13.0
+  leading: 15.6
+  color: "#1E293B"
+  space_before_pt: 17.0
+  space_after_pt: 5.7
+
+heading3:
+  font: "SpaceGrotesk-Medium"
+  size: 11.0
+  leading: 14.3
+  color: "#1E293B"
+  space_before_pt: 22.7
+  space_after_pt: 4.3
+
+# Emphasis
+bold:
+  font: "Inter-Bold"
+
+medium:
+  font: "Inter-Medium"
+
+# Small text
+small:
+  font: "Inter-Regular"
+  size: 8.0
+  color: "#1E293B"
+
+# Extra small
+xs:
+  font: "Inter-Regular"
+  size: 7.0
+  color: "#64748B"
+
+# Section labels
+section_label:
+  font: "Inter-SemiBold"
+  size: 7.0
+  color: "#2563EB"
+  text_transform: uppercase
+  letter_spacing: 0.1
+
+# Table styles
+table:
+  header:
+    font: "Inter-SemiBold"
+    size: 7.0
+    color: "#475569"
+    bg_color: "#F1F5F9"
+    text_transform: uppercase
+    letter_spacing: 0.05
+  cell:
+    font: "Inter-Regular"
+    size: 8.0
+    padding_h: 12
+    padding_v: 8
+    border_color: "#F1F5F9"
+  row_hover_bg: "#FFFFFF"
+
+# Alerts/notes
+alert:
+  padding: 16
+  border_radius: 8
+  border_left_width: 4
+  font: "Inter-Regular"
+  size: 8.0
+  variants:
+    info:
+      bg: "#EFF6FF"
+      border: "#2563EB"
+      text: "#1E40AF"
+    success:
+      bg: "#F0FDF4"
+      border: "#16A34A"
+      text: "#166534"
+    warning:
+      bg: "#FFFBEB"
+      border: "#F59E0B"
+      text: "#92400E"
+    error:
+      bg: "#FEF2F2"
+      border: "#DC2626"
+      text: "#991B1B"
+
+# Blockquote
+blockquote:
+  border_left_width: 4
+  border_color: "#2563EB"
+  padding: 16
+  bg: "#F1F5F9"
+  font_style: italic

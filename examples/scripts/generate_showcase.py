@@ -14,7 +14,7 @@ def main():
         format=A4,
         project="Component Showcase",
         project_number="SHOWCASE-001",
-        client="OpenAEC",
+        client="Acme Engineering B.V.",
         report_type="showcase",
     )
 
@@ -92,7 +92,7 @@ def main():
     report.add_section("Paragrafen", level=1, content=[
         "Dit is een reguliere paragraaf in de Normal stijl.",
         "Meerdere paragrafen worden automatisch onder elkaar geplaatst met de juiste spacing.",
-        "De tekst gebruikt de OpenAEC huisstijl kleuren: donkerpaars voor koppen, turquoise voor accenten.",
+        "De tekst gebruikt de default huisstijl kleuren uit de tenant brand.yaml.",
     ])
 
     report.add_backcover()

@@ -18,7 +18,7 @@ from openaec_reports import Report, A4
 from openaec_reports.components import CalculationBlock, CheckBlock, ImageBlock, TableBlock
 
 OUTPUT_DIR = Path(__file__).parent.parent.parent / "output"
-LOGO_PATH = Path(__file__).parent.parent.parent / "src" / "openaec_reports" / "assets" / "logos" / "default.png"
+LOGO_PATH = Path(__file__).parent.parent.parent / "tenants" / "default" / "logos" / "default-logo.svg"
 
 
 def main():
@@ -213,7 +213,7 @@ def main():
         logo_image = ImageBlock(
             path=LOGO_PATH,
             width_mm=60,
-            caption="Figuur 1 — OpenAEC logo (test afbeelding)",
+            caption="Figuur 1 — Default tenant logo (test afbeelding)",
             align="center",
         )
         report.add_section(
@@ -222,7 +222,7 @@ def main():
             page_break_before=True,
             content=[
                 "Ter illustratie van de ImageBlock functionaliteit is hieronder "
-                "het OpenAEC logo opgenomen als testafbeelding.",
+                "het default-tenant logo opgenomen als testafbeelding.",
                 logo_image,
             ],
         )

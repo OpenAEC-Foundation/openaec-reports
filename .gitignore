@@ -94,3 +94,56 @@ Cargo.lock
 # Tauri
 src-tauri/target/
 src-tauri/gen/
+
+# Tenant-data (per-tenant bind-mounts op host) — behalve de public default
+/tenants/*
+!/tenants/default
+!/tenants/default/**
+
+# Tenant-specifieke assets in src — private, niet publiceren
+/src/openaec_reports/assets/brands/default.yaml
+/src/openaec_reports/assets/brands/customer/
+/src/openaec_reports/assets/stationery/default/
+/src/openaec_reports/assets/templates/default/
+/src/openaec_reports/assets/templates/default.yaml
+/src/openaec_reports/assets/templates/customer/
+/src/openaec_reports/assets/logos/default*
+
+# Tenant-specifieke Python modules (plugins)
+/src/openaec_reports/modules/customer/
+
+# Tenant-specifieke tests
+/tests/test_customer_*.py
+/tests/test_yaml_modules.py
+
+# Tenant-specifieke docs + scripts
+/docs/CUSTOMER_*.md
+/docs/customer_*.json
+/docs/ai-instructions.md
+/docs/architecture/02_JSON_SCHEMA_CUSTOMER.md
+/docs/architecture/03_JSON_SCHEMA_OpenAEC.md
+/docs/architecture/architecture.html
+/docs/uitleg.html
+/docs/ARCHITECTURE_PLAN_TENANT_MODULES.md
+/examples/default/
+/examples/customer/
+/frontend/_archive/
+/schemas/example_customer_*.json
+/scripts/compare_pdfs.py
+/scripts/extract_openaec_stationery.py
+/scripts/generate_flyer.py
+/scripts/SKILL_BRAND_EXTRACTION.md
+/PLAN-rust-implementation.md
+
+# Huisstijl-bronmateriaal (private)
+/huisstijl/
+
+# Archief (dev notes, niet voor public)
+/_archive/
+
+# User-specifieke Claude Code config
+.claude/settings.local.json
+.mcp.json
+
+# Fonts met proprietary licentie (precautie)
+src/openaec_reports/assets/fonts/Inter-*

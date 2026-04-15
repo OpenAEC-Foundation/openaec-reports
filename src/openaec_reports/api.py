@@ -50,8 +50,10 @@ from openaec_reports.storage.routes import (
 
 logger = logging.getLogger(__name__)
 
-# Default brand naam als er geen brand in de request data zit
-_DEFAULT_BRAND = "default"
+# Default brand naam als er geen brand in de request data zit.
+# Env-driven zodat deployments hun eigen canonical tenant kunnen kiezen
+# zonder code te patchen.
+_DEFAULT_BRAND = os.environ.get("OPENAEC_DEFAULT_BRAND", "default")
 
 
 def _find_schema_path() -> Path | None:
@@ -73,7 +75,13 @@ SCHEMA_PATH = _find_schema_path()
 # Tenant configuratie — leest OPENAEC_TENANT_DIR environment variable
 tenant_config = TenantConfig()
 
-_default_stationery = str(Path(__file__).parent / "assets" / "stationery" / "default")
+# Stationery fallback: tenant-config → OPENAEC_STATIONERY_DIR → package default.
+# Geen hardcoded klant meer; gebruik een neutrale placeholder onder
+# ``assets/stationery/default`` (of de actieve tenant). Eindconsumenten
+# kunnen via OPENAEC_STATIONERY_DIR expliciet overschrijven.
+_default_stationery = str(
+    Path(__file__).parent / "assets" / "stationery" / _DEFAULT_BRAND
+)
 STATIONERY_DIR = tenant_config.stationery_dir or Path(
     os.environ.get("OPENAEC_STATIONERY_DIR", _default_stationery)
 )

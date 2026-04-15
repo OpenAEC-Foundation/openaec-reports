@@ -80,8 +80,7 @@ Template naam = `[tenant]_[document_type]`
 
 | Voorbeeld | Tenant | Document |
 |---|---|---|
-| `customer_bic_factuur` | customer | bic_factuur |
-| `openaec_structural_report` | default | structural_report |
+| `default_structural_report` | default | structural_report |
 | `acme_inspectie_rapport` | acme | inspectie_rapport |
 
 De API herkent de tenant uit de template naam:
@@ -111,7 +110,7 @@ met een nieuwe parser functie.
 
 ```bash
 # Op de server (report.open-aec.com)
-cd /opt/openaec-reports
+cd /opt/openaec
 git pull origin main
 docker compose build --no-cache
 docker compose up -d

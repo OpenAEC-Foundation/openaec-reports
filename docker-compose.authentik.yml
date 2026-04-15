@@ -4,23 +4,23 @@
 #   docker compose -f docker-compose.authentik.yml up -d
 #
 # Services:
-#   - authentik-server:  Authentik web UI + API (auth.open-aec.com)
+#   - authentik-server:  Authentik web UI + API (auth.example.com)
 #   - authentik-worker:  Authentik background tasks
 #   - postgresql:        Database voor Authentik
 #   - redis:             Cache/broker voor Authentik
-#   - openaec-reports:   Report generator API + frontend (report.open-aec.com)
+#   - openaec-reports:   Report generator API + frontend (report.example.com)
 #
 # Vereist:
 #   - .env bestand met secrets (zie onderaan voor voorbeeld)
 #   - Caddy/Nginx reverse proxy voor TLS en domain routing
 #
 # Authentik configuratie (na eerste start):
-#   1. Open https://auth.open-aec.com/if/flow/initial-setup/
+#   1. Open https://${AUTH_DOMAIN}/if/flow/initial-setup/
 #   2. Maak admin account aan
 #   3. Maak Application "openaec-reports" aan
 #   4. Provider: OAuth2/OIDC, Client type: Public (SPA)
 #   5. Redirect URIs:
-#      - https://report.open-aec.com/auth/callback
+#      - https://${REPORT_DOMAIN}/auth/callback
 #      - http://localhost:5173/auth/callback (development)
 #   6. Scopes: openid, profile, email, openaec_profile
 #   7. Custom scope mapping "openaec_profile":
@@ -113,16 +113,17 @@ services:
     environment:
       # Auth
       OPENAEC_JWT_SECRET: ${OPENAEC_JWT_SECRET:?Set OPENAEC_JWT_SECRET in .env}
-      OPENAEC_COOKIE_DOMAIN: ${OPENAEC_COOKIE_DOMAIN:-.open-aec.com}
+      OPENAEC_COOKIE_DOMAIN: ${OPENAEC_COOKIE_DOMAIN:-.example.com}
       OPENAEC_COOKIE_SECURE: "true"
       # OIDC (Authentik)
-      OPENAEC_OIDC_ISSUER: ${OPENAEC_OIDC_ISSUER:-https://auth.open-aec.com/application/o/openaec-reports/}
+      OPENAEC_OIDC_ISSUER: ${OPENAEC_OIDC_ISSUER:-https://${AUTH_DOMAIN}/application/o/openaec-reports/}
       OPENAEC_OIDC_CLIENT_ID: ${OPENAEC_OIDC_CLIENT_ID:-openaec-reports}
       # CORS
-      CORS_ORIGINS: "https://report.open-aec.com,http://localhost:5173"
+      CORS_ORIGINS: "https://${REPORT_DOMAIN:-report.example.com},http://localhost:5173"
       # Tenants
       OPENAEC_TENANTS_ROOT: /app/tenants
-      OPENAEC_TENANT_DIR: /app/tenants/default
+      OPENAEC_TENANT_DIR: /app/tenants/${OPENAEC_DEFAULT_BRAND:-default}
+      OPENAEC_DEFAULT_BRAND: ${OPENAEC_DEFAULT_BRAND:-default}
     volumes:
       - openaec_data:/app/data
       - openaec_uploads:/app/uploads
@@ -144,6 +145,8 @@ volumes:
 # AUTHENTIK_SECRET_KEY=<genereer met: openssl rand -base64 36>
 # AUTHENTIK_PG_PASS=<sterk wachtwoord>
 # OPENAEC_JWT_SECRET=<genereer met: openssl rand -base64 36>
-# OPENAEC_OIDC_ISSUER=https://auth.open-aec.com/application/o/openaec-reports/
+# AUTH_DOMAIN=auth.example.com
+# REPORT_DOMAIN=report.example.com
 # OPENAEC_OIDC_CLIENT_ID=openaec-reports
-# OPENAEC_COOKIE_DOMAIN=.open-aec.com
+# OPENAEC_COOKIE_DOMAIN=.example.com
+# OPENAEC_DEFAULT_BRAND=default

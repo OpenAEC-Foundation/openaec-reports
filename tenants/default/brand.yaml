@@ -1,0 +1,366 @@
+# ==============================================================================
+# Default — Brand Configuration (open-source MVP)
+# ==============================================================================
+# Generieke, tenant-neutrale branding die meekomt met de public repo.
+# Bedoeld als startpunt voor nieuwe tenants: kopieer deze directory,
+# vervang kleuren/logo/fonts en stel OPENAEC_TENANT_DIR in.
+#
+# Fonts: Inter (OFL) + Space Grotesk (OFL) — vrij te distribueren.
+# ==============================================================================
+
+brand:
+  name: "Default"
+  slug: "default"
+
+colors:
+  # Primary
+  primary: "#2563EB"           # Neutraal blauw — links, accents
+  secondary: "#1E293B"         # Slate 800 — dark backgrounds, text
+  # Secondary
+  signal_orange: "#F97316"     # Hover states, CTAs, warnings
+  warm_gold: "#F59E0B"         # Highlights, badges
+  scaffold_gray: "#94A3B8"     # Secondary text, borders
+  # Backgrounds
+  blueprint_white: "#FFFFFF"   # Light background
+  concrete: "#F1F5F9"          # Cards, sections
+  night_build: "#0F172A"       # Darkest background
+  # Semantic
+  accent: "#16A34A"            # Success
+  warning: "#DC2626"           # Error
+  info: "#2563EB"              # Informational
+  # Text
+  text: "#1E293B"              # Primary text
+  text_accent: "#2563EB"       # Blue accent text
+  text_light: "#64748B"        # Secondary text
+  # Table
+  table_header_bg: "#1E293B"
+  table_header_text: "#FFFFFF"
+  table_footer_bg: "#2563EB"
+  # Backgrounds (component-level)
+  background: "#FFFFFF"
+  background_alt: "#F1F5F9"
+  # Borders
+  rule: "#E2E8F0"
+  separator: "#E2E8F0"
+  # Gradient
+  gradient_start: "#2563EB"
+  gradient_mid: "#3B82F6"
+  gradient_end: "#1D4ED8"
+
+fonts:
+  heading: "SpaceGrotesk-Bold"
+  subheading: "SpaceGrotesk-Medium"
+  body: "Inter-Regular"
+  medium: "Inter-Medium"
+  semibold: "Inter-SemiBold"
+  bold: "Inter-Bold"
+  heading_fb: "Helvetica-Bold"
+  body_fb: "Helvetica"
+
+font_files:
+  SpaceGrotesk-Bold: "fonts/SpaceGrotesk-Bold.ttf"
+  SpaceGrotesk-Medium: "fonts/SpaceGrotesk-Medium.ttf"
+  SpaceGrotesk-Regular: "fonts/SpaceGrotesk-Regular.ttf"
+  Inter-Regular: "fonts/Inter-Regular.ttf"
+  Inter-Medium: "fonts/Inter-Medium.ttf"
+  Inter-SemiBold: "fonts/Inter-SemiBold.ttf"
+  Inter-Bold: "fonts/Inter-Bold.ttf"
+
+logos:
+  main: "logos/default-logo.svg"
+  light: "logos/default-logo.svg"
+  white: "logos/default-logo.svg"
+  symbol: "logos/default-logo.svg"
+
+contact:
+  name: ""
+  tagline: ""
+  secondary_tagline: ""
+  website: ""
+
+# ==============================================================================
+# HEADER — 38mm, dark achtergrond, primary gradient onderrand
+# ==============================================================================
+header:
+  height: 38
+  elements:
+    - type: line
+      x: 0
+      y: 0
+      width: 210
+      color: "$primary"
+      stroke_width: 1.4
+
+    - type: text
+      content: "{project_number}"
+      x: 195
+      y: 28
+      font: "$semibold"
+      size: 7.5
+      color: "#FFFFFF"
+      align: right
+
+    - type: text
+      content: "{project}"
+      x: 195
+      y: 22
+      font: "$body"
+      size: 7.0
+      color: "#94A3B8"
+      align: right
+
+# ==============================================================================
+# FOOTER — 15mm, dark achtergrond, primary gradient bovenrand
+# ==============================================================================
+footer:
+  height: 15
+  elements:
+    - type: line
+      x: 0
+      y: 13
+      width: 210
+      color: "$primary"
+      stroke_width: 1.0
+
+    - type: text
+      content: "Pagina {page}"
+      x: 195
+      y: 5
+      font: "$body"
+      size: 7.0
+      color: "$primary"
+      align: right
+
+# ==============================================================================
+# STYLES — Paragraph styles
+# ==============================================================================
+styles:
+  Normal:
+    fontName: "Inter-Regular"
+    fontSize: 9.5
+    leading: 13.5
+    textColor: "#1E293B"
+  Heading1:
+    fontName: "SpaceGrotesk-Bold"
+    fontSize: 18.0
+    leading: 21.6
+    textColor: "#1E293B"
+    spaceBefore: 14
+    spaceAfter: 6
+  Heading2:
+    fontName: "SpaceGrotesk-Bold"
+    fontSize: 13.0
+    leading: 15.6
+    textColor: "#1E293B"
+    spaceBefore: 10
+    spaceAfter: 4
+  Heading3:
+    fontName: "SpaceGrotesk-Medium"
+    fontSize: 11.0
+    leading: 14.3
+    textColor: "#1E293B"
+    spaceBefore: 8
+    spaceAfter: 3
+
+# ==============================================================================
+# PAGES — Page-specific layout configuratie
+# ==============================================================================
+pages:
+  cover:
+    stationery_only: false
+    bg_rect_y_ref: 280.0
+    bg_rect_h_ref: 561.89
+    bg_color: "#1E293B"
+
+    illustration: ""
+    illustration_opacity: 0.0
+
+    logo_key: "main"
+    logo_fallback: "light"
+    logo_x_ref: 62
+    logo_y_ref: 775
+    logo_w_ref: 120
+
+    tagline: ""
+    tagline_font: "SpaceGrotesk-Medium"
+    tagline_size: 10.0
+    tagline_color: "#94A3B8"
+    tagline_x_ref: 62
+    tagline_y_ref: 755
+
+    badges: []
+    badge_radius_ref: 8
+    badge_font_size_ref: 9.0
+
+    title_size_ref: 28.0
+    title_x_ref: 54.0
+    title_y_ref: 95.0
+    title_color: "#1E293B"
+
+    subtitle_size_ref: 16.0
+    subtitle_x_ref: 54.0
+    subtitle_y_ref: 65.0
+    subtitle_color: "#94A3B8"
+
+  backcover:
+    bg_color: "#1E293B"
+    accent_rect:
+      - [0, 0]
+      - [0, 140]
+      - [595, 140]
+      - [595, 0]
+    accent_color: "#0F172A"
+    logo_key: "main"
+    logo_x_ref: 168
+    logo_y_ref: 450
+    logo_w_ref: 260
+    tagline: ""
+    tagline_font: "SpaceGrotesk-Bold"
+    tagline_size: 14.0
+    tagline_color: "#2563EB"
+    tagline_x_ref: 298
+    tagline_y_ref: 380
+    tagline_align: center
+    contact_x_ref: 298
+    contact_y_ref: 180
+    contact_line_h_ref: 16
+    contact_name_size_ref: 10
+    contact_detail_size_ref: 8.5
+
+  colofon:
+    report_type_font: "SpaceGrotesk-Bold"
+    report_type_size: 22.0
+    report_type_color: "#1E293B"
+    report_type_x_pt: 70.9
+    report_type_y_pt: 57.3
+    subtitle_font: "Inter-Regular"
+    subtitle_size: 14.0
+    subtitle_color: "#94A3B8"
+    subtitle_x_pt: 70.9
+    subtitle_y_pt: 86.8
+    label_x_pt: 103
+    value_x_pt: 229
+    first_labels_color: "#1E293B"
+    other_labels_color: "#2563EB"
+    value_color: "#1E293B"
+    label_font: "SpaceGrotesk-Bold"
+    label_size: 10.0
+    value_font: "Inter-Regular"
+    value_size: 10.0
+    line_x1_pt: 102
+    line_x2_pt: 420
+    line_stroke_pt: 0.25
+    line_color: "#E2E8F0"
+    footer_rect: [0, 771, 282, 842]
+    footer_rect_color: "#2563EB"
+    page_num_x_pt: 534
+    page_num_y_pt: 796.3
+    page_num_font: "Inter-Regular"
+    page_num_size: 9.5
+    page_num_color: "#2563EB"
+    fields:
+      - {label: "Project", type: "project", y_pt: 320.8}
+      - {label: "Client", type: "client", y_pt: 368.8}
+      - {type: "line", y_pt: 517}
+      - {label: "Author", type: "author", y_pt: 488.8}
+      - {label: "Applicable norms", type: "norms", y_pt: 524.8}
+      - {type: "line", y_pt: 542}
+      - {label: "Document description", type: "document_description", y_pt: 548.8}
+      - {type: "line", y_pt: 566}
+      - {label: "Report date", type: "date", y_pt: 572.8}
+      - {type: "line", y_pt: 590}
+      - {label: "Phase", type: "phase", y_pt: 596.8}
+      - {type: "line", y_pt: 614}
+      - {label: "Status", type: "status", y_pt: 620.8}
+      - {type: "line", y_pt: 638}
+      - {label: "Document code", type: "document_code", y_pt: 644.8}
+
+  toc:
+    title: "Table of contents"
+    title_font: "SpaceGrotesk-Bold"
+    title_size: 18.0
+    title_color: "#1E293B"
+    title_x_pt: 90
+    title_y_pt: 74.9
+    level1_font: "SpaceGrotesk-Bold"
+    level1_size: 12.0
+    level1_color: "#2563EB"
+    level2_font: "Inter-Regular"
+    level2_size: 9.5
+    level2_color: "#1E293B"
+    number_x_pt: 90
+    text_x_pt: 160.9
+    page_x_pt: 515.4
+    chapter_spacing_pt: 39
+    item_spacing_pt: 17
+
+  appendix_divider:
+    bg_color: "#1E293B"
+    accent_rect: [0, 771, 282, 842]
+    accent_color: "#2563EB"
+    number_font: "SpaceGrotesk-Bold"
+    number_size: 41.4
+    number_color: "#2563EB"
+    number_x_pt: 103
+    number_y_pt: 193.9
+    title_font: "Inter-Regular"
+    title_size: 41.4
+    title_color: "#FFFFFF"
+    title_x_pt: 136.1
+    title_first_y_pt: 262.2
+    title_line_spacing_pt: 66.4
+    tagline: ""
+    tagline_font: "SpaceGrotesk-Bold"
+    tagline_size: 17.9
+    tagline_color: "#2563EB"
+    tagline_x_pt: 330.5
+    tagline_y_pt: 785.1
+
+# ==============================================================================
+# STATIONERY — Page background configuration
+# ==============================================================================
+stationery:
+  cover:
+    source: ""
+    text_zones: []
+  colofon:
+    source: ""
+    header_footer: null
+    text_zones: []
+  content:
+    source: ""
+    header_footer: null
+    content_frame:
+      x_pt: 34.0
+      y_pt: 57.0
+      width_pt: 527.3
+      height_pt: 677.0
+  toc:
+    source: ""
+    header_footer: null
+  appendix_divider:
+    source: ""
+    header_footer: null
+    text_zones: []
+  backcover:
+    source: ""
+    header_footer: null
+    text_zones: []
+
+# ==============================================================================
+# MODULES — Component-specific styling
+# ==============================================================================
+modules:
+  table:
+    header_bg: "$colors.table_header_bg"
+    header_text_color: "#FFFFFF"
+    body_font: "Inter-Regular"
+    body_size: 9.0
+    footer_bg: "$colors.table_footer_bg"
+    grid_color: "$colors.separator"
+  calculation:
+    title_color: "$colors.primary"
+    accent_line_color: "$colors.warm_gold"
+  check:
+    pass_color: "$colors.accent"
+    fail_color: "$colors.warning"

@@ -141,6 +141,28 @@ src-tauri/gen/
 # Archief (dev notes, niet voor public)
 /_archive/
 
+# Tenant-data — Synology sync protection (added 2026-04-16)
+# Tenant-specifieke modules + brands + templates (geen public repo)
+src/openaec_reports/modules/symitech/
+src/openaec_reports/assets/brands/symitech/
+src/openaec_reports/assets/brands/3bm_cooperatie.yaml
+src/openaec_reports/assets/templates/symitech/
+src/openaec_reports/assets/templates/3bm_cooperatie/
+src/openaec_reports/assets/templates/3bm_cooperatie.yaml
+src/openaec_reports/assets/stationery/
+
+# Proprietary fonts (Hoefler&Co Gotham)
+src/openaec_reports/assets/fonts/Gotham-*
+
+# Tenant tests + voorbeelden + docs
+tests/test_symitech_*.py
+examples/symitech/
+examples/3bm_cooperatie/
+docs/SYMITECH_*.md
+docs/symitech_*.json
+docs/architecture/02_JSON_SCHEMA_SYMITECH.md
+schemas/example_symitech_*.json
+
 # User-specifieke Claude Code config
 .claude/settings.local.json
 .mcp.json

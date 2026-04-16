@@ -1,4 +1,19 @@
-"""Auth endpoints — login, logout, sessie-info, registratie en OIDC token exchange."""
+"""Auth endpoints — sessie-info, profielbeheer en (lokale) login/registratie.
+
+Sinds de Authentik unified-SSO migratie wordt browser-authenticatie
+volledig door Caddy + Authentik forward_auth gedaan. De backend
+exposeert hier nog:
+
+- ``GET /api/auth/me`` — huidige user op basis van Authentik headers
+- ``GET /api/auth/profile`` + ``PATCH /api/auth/profile`` — profiel-API
+- ``POST /api/auth/logout`` — wist legacy cookie + verwijst naar Authentik logout
+- ``POST /api/auth/login`` / ``/register`` — alleen actief als
+  ``OPENAEC_LOCAL_AUTH_ENABLED=true`` (lokale dev / tests). In productie
+  geven deze routes 403.
+
+OIDC-discovery, token-exchange en PKCE code-exchange endpoints zijn
+verwijderd; die functionaliteit ligt nu volledig bij Caddy + Authentik.
+"""
 
 from __future__ import annotations
 
@@ -11,7 +26,6 @@ from fastapi.responses import JSONResponse
 
 from openaec_reports.auth.dependencies import get_current_user, get_user_db
 from openaec_reports.auth.models import User, UserRole
-from openaec_reports.auth.oidc import is_oidc_enabled
 from openaec_reports.auth.security import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     COOKIE_NAME,
@@ -228,6 +242,10 @@ async def registration_enabled():
 async def logout():
     """Verwijder de auth cookie.
 
+    De Authentik forward_auth sessie wordt door Caddy/Authentik
+    afgehandeld; clients kunnen na deze call doorverwijzen naar
+    ``/outpost.goauthentik.io/sign_out`` om volledig uit te loggen.
+
     Returns:
         Bevestigingsbericht + cookie deletion.
     """
@@ -243,6 +261,9 @@ async def logout():
 @auth_router.get("/me")
 async def me(request: Request):
     """Retourneer de huidige gebruiker.
+
+    Gebruikt de Authentik forward_auth headers (Caddy) als primaire bron;
+    valt terug op legacy cookie/JWT auth voor lokale dev.
 
     Returns:
         User data (zonder wachtwoord).
@@ -291,223 +312,3 @@ async def update_profile(request: Request):
     db = get_user_db()
     updated = db.update(user.id, **fields)
     return {"user": updated.to_dict() if updated else user.to_dict()}
-
-
-@auth_router.get("/oidc/config")
-async def oidc_config():
-    """Retourneer OIDC configuratie voor de frontend.
-
-    Doet server-side OIDC discovery zodat de frontend geen cross-origin
-    requests naar de IdP hoeft te doen (CORS).
-
-    Returns:
-        Dict met enabled status, publieke OIDC settings en authorization_endpoint.
-    """
-    import os
-
-    import requests as http_requests
-
-    enabled = is_oidc_enabled()
-    if not enabled:
-        return {"enabled": False}
-
-    issuer = os.environ.get("OPENAEC_OIDC_ISSUER", "").rstrip("/")
-    client_id = os.environ.get("OPENAEC_OIDC_CLIENT_ID", "")
-
-    # Server-side discovery om authorization_endpoint op te halen
-    authorization_endpoint = ""
-    try:
-        discovery = http_requests.get(
-            f"{issuer}/.well-known/openid-configuration", timeout=10
-        )
-        discovery.raise_for_status()
-        authorization_endpoint = discovery.json().get("authorization_endpoint", "")
-    except Exception:
-        logger.warning("OIDC discovery mislukt voor %s", issuer)
-
-    return {
-        "enabled": True,
-        "issuer": issuer,
-        "client_id": client_id,
-        "authorization_endpoint": authorization_endpoint,
-    }
-
-
-@auth_router.post("/oidc/token-exchange")
-async def oidc_token_exchange(request: Request):
-    """Exchange OIDC tokens voor een lokale sessie.
-
-    De frontend stuurt het access_token en/of id_token na de
-    OIDC Authorization Code flow. Backend valideert, synct de user,
-    en zet een httpOnly cookie.
-
-    Body:
-        {"access_token": "...", "id_token": "..."}
-
-    Returns:
-        User data + httpOnly cookie.
-    """
-    from openaec_reports.auth.dependencies import _authenticate_via_oidc
-
-    if not is_oidc_enabled():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="OIDC is niet geconfigureerd",
-        )
-
-    body = await request.json()
-    # Gebruik bij voorkeur het id_token (bevat user claims),
-    # fallback naar access_token
-    token = body.get("id_token") or body.get("access_token")
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="access_token of id_token is verplicht",
-        )
-
-    user = _authenticate_via_oidc(token)
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="OIDC token validatie mislukt",
-        )
-
-    # Maak lokale JWT voor cookie-based sessie
-    local_token = create_access_token(
-        user_id=user.id,
-        username=user.username,
-        role=user.role.value,
-    )
-
-    response = JSONResponse(content={"user": user.to_dict()})
-    response.set_cookie(
-        key=COOKIE_NAME,
-        value=local_token,
-        httponly=True,
-        secure=get_cookie_secure(),
-        samesite=COOKIE_SAMESITE,
-        domain=get_cookie_domain(),
-        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        path="/",
-    )
-
-    logger.info("OIDC token exchange: %s", user.username)
-    return response
-
-
-@auth_router.post("/oidc/code-exchange")
-async def oidc_code_exchange(request: Request):
-    """Server-side Authorization Code → Token exchange.
-
-    De frontend stuurt de authorization code + PKCE code_verifier.
-    De backend exchanget deze server-side bij de IdP token endpoint
-    (geen CORS issues) en zet een httpOnly cookie.
-
-    Body:
-        {"code": "...", "code_verifier": "...", "redirect_uri": "..."}
-
-    Returns:
-        User data + httpOnly cookie.
-    """
-    from openaec_reports.auth.dependencies import _authenticate_via_oidc
-    from openaec_reports.auth.oidc import _get_oidc_client_id, _get_oidc_issuer
-
-    if not is_oidc_enabled():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="OIDC is niet geconfigureerd",
-        )
-
-    body = await request.json()
-    code = body.get("code", "").strip()
-    code_verifier = body.get("code_verifier", "").strip()
-    redirect_uri = body.get("redirect_uri", "").strip()
-
-    if not code or not code_verifier or not redirect_uri:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="code, code_verifier en redirect_uri zijn verplicht",
-        )
-
-    # Haal token endpoint uit OIDC discovery
-    issuer = _get_oidc_issuer().rstrip("/")
-    try:
-        import requests as http_requests
-        discovery = http_requests.get(
-            f"{issuer}/.well-known/openid-configuration", timeout=10
-        )
-        discovery.raise_for_status()
-        token_endpoint = discovery.json()["token_endpoint"]
-    except Exception as exc:
-        logger.error("OIDC discovery mislukt: %s", exc)
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Kan OIDC discovery niet laden",
-        ) from exc
-
-    # Server-side token exchange
-    try:
-        token_res = http_requests.post(
-            token_endpoint,
-            data={
-                "grant_type": "authorization_code",
-                "code": code,
-                "redirect_uri": redirect_uri,
-                "client_id": _get_oidc_client_id(),
-                "code_verifier": code_verifier,
-            },
-            timeout=10,
-        )
-    except Exception as exc:
-        logger.error("Token exchange HTTP fout: %s", exc)
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Kan IdP token endpoint niet bereiken",
-        ) from exc
-
-    if not token_res.ok:
-        ct = token_res.headers.get("content-type", "")
-        err_body = token_res.json() if ct.startswith("application/json") else {}
-        detail = err_body.get("error_description", err_body.get("error", token_res.reason))
-        logger.warning("IdP token exchange mislukt (%s): %s", token_res.status_code, detail)
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"IdP token exchange mislukt: {detail}",
-        )
-
-    tokens = token_res.json()
-    # Gebruik id_token (bevat user claims), fallback naar access_token
-    oidc_token = tokens.get("id_token") or tokens.get("access_token")
-    if not oidc_token:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="IdP retourneerde geen bruikbaar token",
-        )
-
-    user = _authenticate_via_oidc(oidc_token)
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="OIDC token validatie mislukt",
-        )
-
-    local_token = create_access_token(
-        user_id=user.id,
-        username=user.username,
-        role=user.role.value,
-    )
-
-    response = JSONResponse(content={"user": user.to_dict()})
-    response.set_cookie(
-        key=COOKIE_NAME,
-        value=local_token,
-        httponly=True,
-        secure=get_cookie_secure(),
-        samesite=COOKIE_SAMESITE,
-        domain=get_cookie_domain(),
-        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        path="/",
-    )
-
-    logger.info("OIDC code exchange: %s", user.username)
-    return response

@@ -114,18 +114,18 @@ services:
     image: ghcr.io/openaec-foundation/openaec-reports:latest
     restart: unless-stopped
     environment:
-      # JWT
+      # JWT (alleen voor legacy lokale cookie/Bearer flow; browser-auth
+      # gaat via Caddy + Authentik forward_auth)
       OPENAEC_JWT_SECRET: ${OPENAEC_JWT_SECRET:?Set OPENAEC_JWT_SECRET in .env}
       # Cookies
       OPENAEC_COOKIE_DOMAIN: ${OPENAEC_COOKIE_DOMAIN:-.example.com}
       OPENAEC_COOKIE_SECURE: "true"
-      # OIDC — Authentik
-      OPENAEC_OIDC_ISSUER: https://${AUTH_DOMAIN}/application/o/openaec-reports/
-      OPENAEC_OIDC_CLIENT_ID: ${OPENAEC_OIDC_CLIENT_ID:-openaec-reports}
-      OPENAEC_OIDC_TRUSTED_CLIENTS: ${OPENAEC_OIDC_TRUSTED_CLIENTS:-}
+      # Authentik forward_auth — backend leest X-Authentik-Meta-* headers
+      OPENAEC_AUTH_MODE: ${OPENAEC_AUTH_MODE:-authentik}
+      OPENAEC_LOCAL_AUTH_ENABLED: ${OPENAEC_LOCAL_AUTH_ENABLED:-false}
       # CORS
       CORS_ORIGINS: "https://${REPORT_DOMAIN},http://localhost:5173"
-      # Registratie
+      # Registratie (alleen relevant met OPENAEC_LOCAL_AUTH_ENABLED=true)
       OPENAEC_REGISTRATION_ENABLED: ${OPENAEC_REGISTRATION_ENABLED:-false}
       # Tenants
       OPENAEC_TENANTS_ROOT: /app/tenants

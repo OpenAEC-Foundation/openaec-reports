@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { AppShell } from '@/components/layout/AppShell';
 import { LoginPage } from '@/components/auth/LoginPage';
-import { OidcCallback } from '@/components/auth/OidcCallback';
 import { useReportStore, STORAGE_KEY } from '@/stores/reportStore';
 import { useApiStore } from '@/stores/apiStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -41,14 +40,13 @@ export function App() {
   const user = useAuthStore((s) => s.user);
   const isAuthLoading = useAuthStore((s) => s.isLoading);
   const checkSession = useAuthStore((s) => s.checkSession);
-  const checkOidcEnabled = useAuthStore((s) => s.checkOidcEnabled);
   const loadReport = useReportStore((s) => s.loadReport);
 
-  // Check bestaande sessie + OIDC config bij startup
+  // Check huidige sessie via /api/auth/me — Caddy + Authentik forward_auth
+  // levert de juiste headers aan de backend voor browser-traffic.
   useEffect(() => {
     checkSession();
-    checkOidcEnabled();
-  }, [checkSession, checkOidcEnabled]);
+  }, [checkSession]);
 
   // Restore from localStorage or load example data (alleen als ingelogd)
   useEffect(() => {
@@ -104,17 +102,12 @@ export function App() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
-  // OIDC callback route
-  if (window.location.pathname === '/auth/callback') {
-    return <OidcCallback />;
-  }
-
   // Auth loading state
   if (isAuthLoading) {
     return <LoadingSpinner />;
   }
 
-  // Niet ingelogd → SSO login pagina
+  // Niet ingelogd → SSO splash (auto-redirect naar Authentik)
   if (!user) {
     return <LoginPage />;
   }

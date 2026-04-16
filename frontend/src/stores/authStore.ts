@@ -1,10 +1,5 @@
 import { create } from "zustand";
-import { getOidcConfig } from "@/config/oidc";
-import {
-  generatePkceChallenge,
-  storePkceVerifier,
-  generateState,
-} from "@/utils/pkce";
+import { getAuthentikLoginUrl, getAuthentikLogoutUrl } from "@/config/oidc";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
@@ -27,29 +22,30 @@ interface AuthState {
   user: AuthUser | null;
   isLoading: boolean;
   error: string | null;
-  oidcEnabled: boolean | null;
-  registrationEnabled: boolean | null;
+  /**
+   * Vraag de huidige sessie op via /api/auth/me.
+   * Caddy + Authentik forward_auth zorgt dat de backend de juiste
+   * X-Authentik-Meta-* headers ontvangt voor browser-traffic.
+   */
   checkSession: () => Promise<void>;
-  login: (username: string, password: string) => Promise<boolean>;
-  register: (
-    username: string,
-    email: string,
-    password: string,
-    displayName?: string,
-  ) => Promise<boolean>;
-  loginWithOidc: () => Promise<void>;
+  /**
+   * Start een nieuwe Authentik login door de browser naar de outpost
+   * start-URL te sturen. Caddy fangt de callback op en zet de cookie.
+   */
+  loginWithSso: () => void;
+  /**
+   * Logout: roep eerst het backend ``/api/auth/logout`` aan om legacy
+   * cookies (lokale dev) op te ruimen, en stuur de browser daarna naar
+   * de Authentik sign-out endpoint zodat ook de outpost-cookie weg is.
+   */
   logout: () => Promise<void>;
   clearError: () => void;
-  checkOidcEnabled: () => Promise<void>;
-  checkRegistrationEnabled: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isLoading: true,
   error: null,
-  oidcEnabled: null,
-  registrationEnabled: null,
 
   checkSession: async () => {
     set({ isLoading: true, error: null });
@@ -68,105 +64,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  login: async (username: string, password: string) => {
-    set({ error: null, isLoading: true });
-    try {
-      const res = await fetch(`${API_BASE}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ username, password }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        set({ user: data.user, isLoading: false, error: null });
-        return true;
-      }
-      const body = await res.json().catch(() => ({ detail: "Login mislukt" }));
-      set({ error: body.detail, isLoading: false });
-      return false;
-    } catch {
-      set({ error: "Kan geen verbinding maken met de server", isLoading: false });
-      return false;
-    }
-  },
-
-  register: async (
-    username: string,
-    email: string,
-    password: string,
-    displayName?: string,
-  ) => {
-    set({ error: null, isLoading: true });
-    try {
-      const res = await fetch(`${API_BASE}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          username,
-          email,
-          password,
-          display_name: displayName || "",
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        set({ user: data.user, isLoading: false, error: null });
-        return true;
-      }
-      const body = await res
-        .json()
-        .catch(() => ({ detail: "Registratie mislukt" }));
-      const detail = Array.isArray(body.detail)
-        ? body.detail.join(", ")
-        : body.detail;
-      set({ error: detail, isLoading: false });
-      return false;
-    } catch {
-      set({
-        error: "Kan geen verbinding maken met de server",
-        isLoading: false,
-      });
-      return false;
-    }
-  },
-
-  loginWithOidc: async () => {
-    try {
-      const config = await getOidcConfig();
-      if (!config.enabled) {
-        set({ error: "SSO is niet geconfigureerd" });
-        return;
-      }
-
-      if (!config.authorizationEndpoint) {
-        set({ error: "SSO authorization endpoint niet beschikbaar" });
-        return;
-      }
-
-      // PKCE challenge genereren
-      const pkce = await generatePkceChallenge();
-      storePkceVerifier(pkce.codeVerifier);
-
-      // State parameter voor CSRF protection
-      const state = generateState();
-
-      // Redirect naar Authentik (endpoint komt van backend discovery)
-      const params = new URLSearchParams({
-        response_type: "code",
-        client_id: config.clientId,
-        redirect_uri: config.redirectUri,
-        scope: config.scopes,
-        state,
-        code_challenge: pkce.codeChallenge,
-        code_challenge_method: pkce.codeChallengeMethod,
-      });
-
-      window.location.href = `${config.authorizationEndpoint}?${params.toString()}`;
-    } catch {
-      set({ error: "Kan SSO login niet starten" });
-    }
+  loginWithSso: () => {
+    window.location.href = getAuthentikLoginUrl();
   },
 
   logout: async () => {
@@ -179,32 +78,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       // Altijd uitloggen, ook bij netwerk fout
     }
     set({ user: null, error: null });
+    // Hard redirect zodat ook de Authentik outpost cookie wordt gewist
+    window.location.href = getAuthentikLogoutUrl();
   },
 
   clearError: () => set({ error: null }),
-
-  checkOidcEnabled: async () => {
-    try {
-      const config = await getOidcConfig();
-      set({ oidcEnabled: config.enabled });
-    } catch {
-      set({ oidcEnabled: false });
-    }
-  },
-
-  checkRegistrationEnabled: async () => {
-    try {
-      const res = await fetch(
-        `${API_BASE}/api/auth/registration-enabled`,
-      );
-      if (res.ok) {
-        const data = await res.json();
-        set({ registrationEnabled: data.enabled });
-      } else {
-        set({ registrationEnabled: false });
-      }
-    } catch {
-      set({ registrationEnabled: false });
-    }
-  },
 }));

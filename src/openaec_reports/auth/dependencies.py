@@ -1,21 +1,36 @@
 """FastAPI dependencies voor authenticatie.
 
-Ondersteunt vier authenticatie-methoden (in volgorde van prioriteit):
-1. X-API-Key header — statische key voor machine-to-machine (pyRevit, MCP, scripts)
-2. httpOnly cookie — browser / frontend sessies
-3. Authorization: Bearer <token> — lokale JWT voor scripts die login() gebruiken
-4. Authorization: Bearer <token> — OIDC token (RS256) van Authentik
+Sinds de Authentik unified-SSO migratie (april 2026) draait Reports
+achter Caddy + Authentik proxy outpost. Caddy doet de OIDC-flow en
+forwardt het resultaat als ``X-Authentik-*`` headers naar de backend.
+Het backend hoeft dus geen JWKS meer te valideren.
+
+Authenticatie volgorde voor browser-traffic:
+1. ``X-Authentik-Meta-Username`` header (forward_auth) → primair pad
+2. Lokale legacy login (``OPENAEC_LOCAL_AUTH_ENABLED=true``):
+   - ``X-API-Key`` header (machine clients via legacy DB-keys)
+   - httpOnly cookie ``bm_access_token`` (eigen JWT)
+   - ``Authorization: Bearer <local-jwt>`` (pyRevit / scripts)
+3. ``Authorization: Bearer ak_*`` (Authentik service-tokens, fase 6 — TODO)
+
+Bij ontbreken van alle bovenstaande → 401.
 """
 
 from __future__ import annotations
 
 import logging
+import uuid
 
 from fastapi import HTTPException, Request, status
 
 from openaec_reports.auth.api_keys import ApiKeyDB
 from openaec_reports.auth.models import OrganisationDB, User, UserDB, UserRole
-from openaec_reports.auth.security import COOKIE_NAME, decode_access_token
+from openaec_reports.auth.oidc import (
+    AuthentikHeaders,
+    is_authentik_enabled,
+    parse_authentik_headers,
+)
+from openaec_reports.auth.security import COOKIE_NAME, decode_access_token, hash_password
 
 logger = logging.getLogger(__name__)
 
@@ -169,135 +184,157 @@ def _authenticate_via_api_key(request: Request) -> User | None:
     return user
 
 
-def _authenticate_via_oidc(token: str) -> User | None:
-    """Probeer authenticatie via OIDC token (RS256 van Authentik).
+def _authenticate_via_authentik(request: Request) -> User | None:
+    """Probeer authenticatie via Caddy + Authentik forward_auth headers.
 
-    Valideert het token, zoekt de user op via oidc_subject of email,
-    en maakt indien nodig een nieuwe user aan (auto-provisioning).
+    Leest ``X-Authentik-Meta-*`` headers, koppelt of provisioneert een
+    lokale ``User`` record (zodat bestaande FK-relaties met projecten en
+    rapporten blijven werken) en synct profiel-velden bij elke call.
 
     Args:
-        token: Bearer token string.
+        request: FastAPI Request object.
 
     Returns:
-        User of None als OIDC niet enabled of token ongeldig.
+        User of None als de verplichte ``X-Authentik-Meta-Username``
+        header ontbreekt.
     """
-    from openaec_reports.auth.oidc import is_oidc_enabled, validate_oidc_token
-
-    if not is_oidc_enabled():
-        return None
-
-    try:
-        claims = validate_oidc_token(token)
-    except ValueError as exc:
-        logger.debug("OIDC token validatie mislukt: %s", exc)
+    parsed = parse_authentik_headers(request.headers)
+    if parsed is None:
         return None
 
     db = get_user_db()
 
-    # 1. Zoek op oidc_subject (bestaande SSO user)
-    user = db.get_by_oidc_subject(claims.subject)
+    # 1. Zoek op stabiele subject (Authentik UID of username fallback)
+    user = db.get_by_oidc_subject(parsed.subject)
 
-    # 2. Fallback: email-matching (migratie van lokale user)
-    #    Alleen koppelen als er PRECIES één user met dit emailadres is.
-    #    Bij meerdere matches is niet duidelijk welke user bedoeld is.
-    if user is None and claims.email:
-        email_matches = db.get_all_by_email(claims.email)
+    # 2. Fallback: email-matching (migratie van bestaande lokale user)
+    if user is None and parsed.email:
+        email_matches = db.get_all_by_email(parsed.email)
         if len(email_matches) == 1:
             user = email_matches[0]
-            # Koppel bestaande lokale user aan OIDC
             db.update(
                 user.id,
-                oidc_subject=claims.subject,
-                auth_provider="oidc",
+                oidc_subject=parsed.subject,
+                auth_provider="authentik",
             )
             logger.info(
-                "Lokale user '%s' gekoppeld aan OIDC subject %s",
+                "Lokale user '%s' gekoppeld aan Authentik subject %s",
                 user.username,
-                claims.subject,
+                parsed.subject,
             )
         elif len(email_matches) > 1:
             logger.warning(
-                "OIDC email '%s' matcht %d users — auto-koppeling overgeslagen. "
-                "Koppel handmatig via oidc_subject.",
-                claims.email,
+                "Authentik email '%s' matcht %d users — auto-koppeling overgeslagen",
+                parsed.email,
                 len(email_matches),
             )
 
     # 3. Auto-provisioning: maak nieuwe user aan
     if user is None:
-        import uuid
-
-        from openaec_reports.auth.security import hash_password
-
         user = User(
             id=uuid.uuid4().hex,
-            username=claims.preferred_username or claims.email.split("@")[0],
-            email=claims.email,
-            display_name=claims.name,
+            username=parsed.username,
+            email=parsed.email,
+            display_name=parsed.name or parsed.username,
             role=UserRole.user,
-            tenant=claims.tenant,
+            tenant=parsed.tenant,
             is_active=True,
             hashed_password=hash_password(uuid.uuid4().hex),  # Random, niet bruikbaar
-            phone=claims.phone,
-            job_title=claims.job_title,
-            registration_number=claims.registration_number,
-            company=claims.company,
-            auth_provider="oidc",
-            oidc_subject=claims.subject,
+            phone=parsed.phone,
+            job_title=parsed.job_title,
+            registration_number=parsed.registration_number,
+            company=parsed.company,
+            auth_provider="authentik",
+            oidc_subject=parsed.subject,
         )
         try:
             db.create(user)
             logger.info(
-                "OIDC auto-provisioning: user '%s' aangemaakt",
+                "Authentik auto-provisioning: user '%s' aangemaakt",
                 user.username,
             )
         except Exception:
             # Username conflict — probeer met suffix
-            user.username = f"{user.username}_{claims.subject[:8]}"
+            user.username = f"{user.username}_{parsed.subject[:8]}"
             db.create(user)
             logger.info(
-                "OIDC auto-provisioning (met suffix): user '%s' aangemaakt",
+                "Authentik auto-provisioning (met suffix): user '%s' aangemaakt",
                 user.username,
             )
 
-    # Profiel sync bij elke login
-    sync_fields: dict[str, str] = {}
-    if claims.email and claims.email != user.email:
-        sync_fields["email"] = claims.email
-    if claims.name and claims.name != user.display_name:
-        sync_fields["display_name"] = claims.name
-    if claims.phone and claims.phone != user.phone:
-        sync_fields["phone"] = claims.phone
-    if claims.job_title and claims.job_title != user.job_title:
-        sync_fields["job_title"] = claims.job_title
-    if claims.registration_number and claims.registration_number != user.registration_number:
-        sync_fields["registration_number"] = claims.registration_number
-    if claims.company and claims.company != user.company:
-        sync_fields["company"] = claims.company
-    if claims.tenant and claims.tenant != user.tenant:
-        sync_fields["tenant"] = claims.tenant
-
+    # Profiel sync bij elke request — zodat de eigen DB altijd in sync
+    # loopt met de Authentik attributen (geen aparte oidc_profile-call meer)
+    sync_fields = _diff_authentik_to_user(parsed, user)
     if sync_fields:
         db.update(user.id, **sync_fields)
-        # Herlaad user met gesyncte velden
         user = db.get_by_id(user.id) or user
-        logger.debug("OIDC profiel sync voor '%s': %s", user.username, list(sync_fields.keys()))
+        logger.debug(
+            "Authentik profiel sync voor '%s': %s", user.username, list(sync_fields.keys())
+        )
 
     if not user.is_active:
         return None
 
-    logger.debug("Auth via OIDC: subject %s → user %s", claims.subject, user.username)
     return user
 
 
-async def get_current_user(request: Request) -> User:
-    """Haal de huidige user op via API key, cookie, of Bearer token.
+def _diff_authentik_to_user(parsed: AuthentikHeaders, user: User) -> dict[str, str]:
+    """Vergelijk header-claims met de bewaarde user en geef te updaten velden terug.
 
-    Authenticatie volgorde:
-    1. X-API-Key header (machine-to-machine)
-    2. httpOnly cookie (browser / frontend)
-    3. Authorization: Bearer <token> — lokale JWT
-    4. Authorization: Bearer <token> — OIDC token (RS256, Authentik)
+    Args:
+        parsed: De geparseerde Authentik headers.
+        user: De huidige in DB opgeslagen ``User``.
+
+    Returns:
+        Dict van veld → nieuwe waarde voor velden die afwijken.
+    """
+    sync: dict[str, str] = {}
+    if parsed.email and parsed.email != user.email:
+        sync["email"] = parsed.email
+    if parsed.name and parsed.name != user.display_name:
+        sync["display_name"] = parsed.name
+    if parsed.phone and parsed.phone != user.phone:
+        sync["phone"] = parsed.phone
+    if parsed.job_title and parsed.job_title != user.job_title:
+        sync["job_title"] = parsed.job_title
+    if parsed.registration_number and parsed.registration_number != user.registration_number:
+        sync["registration_number"] = parsed.registration_number
+    if parsed.company and parsed.company != user.company:
+        sync["company"] = parsed.company
+    if parsed.tenant and parsed.tenant != user.tenant:
+        sync["tenant"] = parsed.tenant
+    return sync
+
+
+def _is_authentik_service_token(request: Request) -> bool:
+    """Detecteer een Authentik machine-client token in de Authorization header.
+
+    Caddy laat ``Authorization: Bearer ak_*`` headers ongemoeid passeren
+    naar de upstream (zie ``authentik_forward_auth`` Caddy snippet, fase 4).
+    De backend moet dat token zelf valideren via Authentik's
+    ``/api/v3/core/tokens/<id>/view_key/`` endpoint.
+
+    Args:
+        request: FastAPI Request object.
+
+    Returns:
+        True als er een ``Bearer ak_*`` of ``Bearer ak-*`` token is.
+    """
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        return False
+    token = auth[7:].strip()
+    return token.startswith(("ak_", "ak-"))
+
+
+async def get_current_user(request: Request) -> User:
+    """Haal de huidige user op via Authentik-headers, API key of cookie.
+
+    Volgorde:
+    1. ``X-Authentik-Meta-Username`` (Caddy forward_auth) — primair pad
+    2. ``X-API-Key`` (legacy machine clients in de DB)
+    3. Lokale JWT via cookie of ``Authorization: Bearer`` header
+    4. Authentik service token ``Bearer ak_*`` — TODO fase 6 (501)
 
     Args:
         request: FastAPI Request object.
@@ -307,36 +344,53 @@ async def get_current_user(request: Request) -> User:
 
     Raises:
         HTTPException: 401 als geen geldige authenticatie aanwezig.
+        HTTPException: 501 voor nog niet geïmplementeerde Authentik
+            service-token validatie (zie fase 6 van het SSO-plan).
     """
-    # Methode 1: API Key
+    # Methode 1: Authentik forward_auth headers
+    user = _authenticate_via_authentik(request)
+    if user is not None:
+        return user
+
+    # Methode 2: legacy DB API key (alleen relevant als geen Authentik headers)
     user = _authenticate_via_api_key(request)
     if user is not None:
         return user
 
-    # Methode 2 + 3: JWT (cookie of Bearer header)
+    # Methode 3: lokale JWT (cookie of Bearer) — uitsluitend voor lokale dev/tests
     token = _extract_token(request)
-    if not token:
+    if token:
+        payload = decode_access_token(token)
+        if payload is not None:
+            db = get_user_db()
+            user = db.get_by_id(payload["sub"])
+            if user is not None and user.is_active:
+                return user
+
+    # Methode 4: Authentik service token — fase 6, nog niet geimplementeerd
+    if _is_authentik_service_token(request):
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Niet ingelogd",
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail=(
+                "Authentik service-token validatie is nog niet geimplementeerd "
+                "(zie fase 6 van het Unified SSO plan)."
+            ),
         )
 
-    # Probeer eerst lokale JWT
-    payload = decode_access_token(token)
-    if payload is not None:
-        db = get_user_db()
-        user = db.get_by_id(payload["sub"])
-        if user is not None and user.is_active:
-            return user
-
-    # Methode 4: OIDC token (als lokale JWT mislukt)
-    user = _authenticate_via_oidc(token)
-    if user is not None:
-        return user
+    # Geen enkel pad werkte
+    if is_authentik_enabled():
+        # In productie verwacht we forward_auth — geef diagnostische hint
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=(
+                "Authentik forward_auth headers ontbreken. "
+                "Controleer de Caddy configuratie."
+            ),
+        )
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Sessie verlopen — log opnieuw in",
+        detail="Niet ingelogd",
     )
 
 

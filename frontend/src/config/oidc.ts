@@ -1,107 +1,66 @@
 /**
- * OIDC configuratie voor Authentik SSO.
+ * Authentik helpers — overgebleven na migratie naar forward_auth.
  *
- * Haalt alle OIDC info op via de backend (/api/auth/oidc/config),
- * inclusief het authorization_endpoint (server-side discovery).
- * Fallback naar Vite env vars voor lokale dev.
+ * De Caddy + Authentik proxy outpost regelt sinds april 2026 alle
+ * browser-authenticatie. Deze module bevat enkel nog UI-helpers
+ * (account-link en logout-redirect) zodat de frontend niets meer
+ * weet van OIDC discovery, PKCE of token-exchange.
  */
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
-export interface OidcConfig {
-  enabled: boolean;
-  authority: string;
-  clientId: string;
-  redirectUri: string;
-  scopes: string;
-  authorizationEndpoint: string;
-}
-
-const DISABLED_CONFIG: OidcConfig = {
-  enabled: false,
-  authority: "",
-  clientId: "",
-  redirectUri: "",
-  scopes: "",
-  authorizationEndpoint: "",
-};
-
-/** Cached config na discovery */
-let _cachedConfig: OidcConfig | null = null;
-let _discoveryDone = false;
-
 /**
- * Haal OIDC config op via de backend (die server-side discovery doet).
- * Fallback naar Vite env vars voor lokale dev zonder backend.
+ * Genereer de Authentik outpost start-URL voor een (her)login.
+ *
+ * Caddy stuurt anonieme requests al automatisch door, maar deze helper
+ * is bruikbaar voor expliciete "log opnieuw in" knoppen of het opvangen
+ * van een 401 vanuit de API.
  */
-export async function getOidcConfig(): Promise<OidcConfig> {
-  // Cache hit
-  if (_discoveryDone && _cachedConfig) {
-    return _cachedConfig;
-  }
-
-  // Backend discovery (inclusief authorization_endpoint)
-  try {
-    const res = await fetch(`${API_BASE}/api/auth/oidc/config`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.enabled) {
-        _cachedConfig = {
-          enabled: true,
-          authority: (data.issuer as string).replace(/\/$/, ""),
-          clientId: data.client_id,
-          redirectUri: `${window.location.origin}/auth/callback`,
-          scopes: "openid profile email openaec_profile",
-          authorizationEndpoint: data.authorization_endpoint || "",
-        };
-        _discoveryDone = true;
-        return _cachedConfig;
-      }
-    }
-  } catch {
-    // Backend niet bereikbaar — probeer statische fallback
-  }
-
-  // Statische fallback (Vite env vars, lokale dev)
-  const authority = import.meta.env.VITE_OIDC_AUTHORITY;
-  const clientId = import.meta.env.VITE_OIDC_CLIENT_ID;
-  if (authority && clientId) {
-    _cachedConfig = {
-      enabled: true,
-      authority: authority.replace(/\/$/, ""),
-      clientId,
-      redirectUri: `${window.location.origin}/auth/callback`,
-      scopes: "openid profile email openaec_profile",
-      authorizationEndpoint: "",  // Niet beschikbaar zonder discovery
-    };
-    _discoveryDone = true;
-    return _cachedConfig;
-  }
-
-  _discoveryDone = true;
-  return DISABLED_CONFIG;
+export function getAuthentikLoginUrl(returnTo?: string): string {
+  const target = returnTo || window.location.href;
+  return `/outpost.goauthentik.io/start?rd=${encodeURIComponent(target)}`;
 }
 
 /**
- * Check snel of OIDC mogelijk enabled is (zonder async fetch).
- * Gebruikt cached discovery resultaat.
+ * Authentik sign-out endpoint — wist de outpost-cookie en redirect
+ * doorgaans terug naar de Authentik login flow.
  */
-export function isOidcPossiblyEnabled(): boolean {
-  if (_cachedConfig) return _cachedConfig.enabled;
-  // Statische fallback check
-  return !!(import.meta.env.VITE_OIDC_AUTHORITY && import.meta.env.VITE_OIDC_CLIENT_ID);
+export function getAuthentikLogoutUrl(): string {
+  return "/outpost.goauthentik.io/sign_out";
 }
 
 /**
- * Geeft de Authentik user interface URL terug, afgeleid van de cached authority.
- * Voorbeeld: "https://auth.open-aec.com/application/o/openaec-reports/" → "https://auth.open-aec.com/if/user/"
- * Retourneert null als OIDC niet geconfigureerd is of er geen authority beschikbaar is.
+ * Probeer de Authentik instance-URL af te leiden uit ``VITE_AUTHENTIK_URL``
+ * (compile-time). Productie deployments zetten deze env var tijdens de
+ * Vite build (zie ``frontend/.env.production``).
+ *
+ * Returns:
+ *   "https://auth.open-aec.com/if/user/" indien geconfigureerd, anders null.
  */
 export function getAuthentikUserUrl(): string | null {
-  if (!_cachedConfig?.enabled || !_cachedConfig.authority) return null;
+  const raw = import.meta.env.VITE_AUTHENTIK_URL || "";
+  if (!raw) return null;
   try {
-    const url = new URL(_cachedConfig.authority);
+    const url = new URL(raw);
     return `${url.origin}/if/user/`;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Vraag het backend ``/api/auth/me`` endpoint zodat de frontend snel
+ * kan checken of de Authentik headers aankwamen. Returnt ``null`` bij
+ * een 401 — caller kan dan ``getAuthentikLoginUrl()`` aanroepen.
+ */
+export async function fetchSession(): Promise<unknown | null> {
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/me`, {
+      credentials: "include",
+    });
+    if (!res.ok) return null;
+    const body = await res.json();
+    return body.user ?? null;
   } catch {
     return null;
   }

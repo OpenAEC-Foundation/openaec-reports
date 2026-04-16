@@ -49,5 +49,20 @@
     "serverDesc": "Open een eerder opgeslagen rapport vanuit de projectbrowser",
     "local": "Lokaal bestand openen",
     "localDesc": "Laad een JSON-rapport vanaf je computer"
-  }
+  },
+  "fromServer": "Van server",
+  "localFile": "Lokaal bestand (.json)",
+  "toServer": "Naar server",
+  "localExport": "Lokaal export",
+  "close": "Sluiten",
+  "exit": "Afsluiten",
+  "projectNamePrompt": "Voer een projectnaam in:",
+  "savedToServer": "Rapport opgeslagen op server",
+  "savedLocally": "Rapport lokaal opgeslagen",
+  "savedLocallyNotLoggedIn": "Lokaal opgeslagen — je bent niet ingelogd",
+  "opened": "Rapport geopend",
+  "newProject": "Nieuw rapport aangemaakt",
+  "closed": "Rapport gesloten",
+  "importError": "Fout bij importeren",
+  "saveError": "Fout bij opslaan"
 }

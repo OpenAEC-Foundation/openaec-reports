@@ -9,8 +9,6 @@ import TitleBar from "@/components/chrome/TitleBar";
 import Ribbon from "@/components/chrome/ribbon/Ribbon";
 import StatusBar from "@/components/chrome/StatusBar";
 import Backstage from "@/components/chrome/backstage/Backstage";
-import { SaveAsDialog } from "@/components/chrome/backstage/SaveAsDialog";
-import { OpenDialog } from "@/components/chrome/backstage/OpenDialog";
 import SettingsDialog, { applyTheme } from "@/components/chrome/settings/SettingsDialog";
 import { Sidebar } from "./Sidebar";
 import { MainPanel } from "./MainPanel";
@@ -25,9 +23,7 @@ const SIDEBAR_VISIBLE_KEY = "openaec-sidebar-visible";
 export function AppShell() {
   const viewMode = useReportStore((s) => s.viewMode);
   const setViewMode = useReportStore((s) => s.setViewMode);
-  const exportJson = useReportStore((s) => s.exportJson);
   const importJson = useReportStore((s) => s.importJson);
-  const report = useReportStore((s) => s.report);
 
   const error = useApiStore((s) => s.error);
   const validateReport = useApiStore((s) => s.validateReport);
@@ -36,13 +32,11 @@ export function AppShell() {
   const saveReport = useProjectStore((s) => s.saveReport);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [backstageOpen, setBackstageOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [saveAsOpen, setSaveAsOpen] = useState(false);
-  const [openDialogOpen, setOpenDialogOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [theme, setTheme] = useState(() => getSetting("theme", "light"));
   const [sidebarVisible, setSidebarVisible] = useState(() => {
@@ -119,17 +113,6 @@ export function AppShell() {
     onToggleShortcuts: () => setShowShortcuts((v) => !v),
   });
 
-  // Export JSON
-  function handleExport() {
-    const json = exportJson();
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${report.project_number || "rapport"}_${report.template}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
 
   // Validate
   async function handleValidate() {
@@ -149,9 +132,6 @@ export function AppShell() {
     }
   }
 
-  function handleImportClick() {
-    fileInputRef.current?.click();
-  }
 
   function handleFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -289,29 +269,10 @@ export function AppShell() {
         open={backstageOpen}
         onClose={() => setBackstageOpen(false)}
         onOpenSettings={() => setSettingsOpen(true)}
-        onSave={handleSaveToServer}
-        onSaveAs={() => setSaveAsOpen(true)}
-        onOpenDialog={() => setOpenDialogOpen(true)}
-        onOpenProjects={() => setViewMode("projects")}
-        onAdmin={() => setViewMode("admin")}
-        onFeedback={() => setFeedbackOpen(true)}
+        onNavigate={(path) => setViewMode(path === "/projects" ? "projects" : "editor")}
+        onToast={(message, type) => setToast({ message, type })}
       />
 
-      {/* Save As dialog */}
-      <SaveAsDialog
-        open={saveAsOpen}
-        onClose={() => setSaveAsOpen(false)}
-        onSaveServer={handleSaveToServer}
-        onSaveLocal={handleExport}
-      />
-
-      {/* Open dialog */}
-      <OpenDialog
-        open={openDialogOpen}
-        onClose={() => setOpenDialogOpen(false)}
-        onOpenServer={() => setViewMode("projects")}
-        onOpenLocal={handleImportClick}
-      />
 
       {/* Settings dialog */}
       <SettingsDialog

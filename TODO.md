@@ -1,779 +1,187 @@
 # TODO — openaec-reports
 
-> Prioriteit: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
-> Laatst bijgewerkt: 2026-04-10
+**Laatst bijgewerkt:** 2026-04-19 | **Status:** [`STATUS.md`](STATUS.md) | **Archief:** [`archief/2026-Q1-voltooid.md`](archief/2026-Q1-voltooid.md)
+
+> Legenda: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
+> Voltooid werk is verplaatst naar `archief/2026-Q1-voltooid.md` (1 apr 2026). Deze file bevat alleen open items.
 
 ---
 
-## 🟡 Rust renderer — feature parity met Python `renderer_v2.py`
+## 🔴 Kritiek / hoog
 
-> Achtergrond: op 2026-04-10 is in de Python renderer een aantal
-> rendering-bugs gefixt (tabel-overflow, HTML-cellen, idempotente
-> paginanummers, colofon text-wrap, deferred TOC rendering, auto-
-> nummering). De live deploy draait Python dus dit is niet blokkerend,
-> maar de Rust port (`rust/crates/openaec-core/`) heeft vergelijkbare
-> gaps die later dichtgelopen moeten worden. Zie commits `e971395` en
-> `58a2046` voor de Python reference implementation.
+### Security — Hoog (SEC-H, 3 open)
 
-### Heading nummering + TOC
-- [ ] `Section.number: Option<String>` toevoegen aan `schema.rs`
-  (Rust kent het veld nu niet, Python leest het wel)
-- [ ] Counter-state (`section_counter`, `subsection_counter`) in
-  `engine.rs` — nu wordt `section_num = i + 1` doorgegeven maar reset
-  per level-1 ontbreekt voor nested level-2 blocks
+- [ ] **SEC-H1** IDOR op `list_reports` endpoint — `GET /api/reports?project_id=X` valideert niet dat user eigenaar is. Fix: `db.get_project(project_id)` → `project.user_id == user.id` check. **Bestand:** `storage/routes.py:210-224`
+- [ ] **SEC-H2** Admin endpoints missen tenant-check — admin van tenant A kan templates van tenant B wijzigen. Fix: `if user.tenant and user.tenant != tenant: raise 403` in alle admin endpoints met `{tenant}` parameter. **Bestand:** `admin/routes.py`
+- [ ] **SEC-H4** `_resolve_brand_from_template()` valideert tenant niet — template kan `tenant: "andere_tenant"` bevatten → brand wordt zonder check gebruikt. Fix: na resolve matchen tegen `user.tenant`. **Bestand:** `api.py:154-168`
+
+### Code review — Hoog (CR-H, 9 open)
+
+- [ ] **CR-H1** Hardcoded tenant-namen in `renderer_v2.py:1910`, `template_loader.py:282`, `engine.py:83,580`, `document.py:75` — vervang door tenant-agnostische fallbacks (api.py is al gefixt via `OPENAEC_DEFAULT_BRAND`)
+- [ ] **CR-H2** Cookie naam nog `bm_access_token` (oude branding). Rename naar `openaec_access_token` in gecoördineerde deploy. **Bestand:** `auth/security.py:25`
+- [ ] **CR-H3** 6+ bare `except Exception: pass` — MemoryError/TypeError worden onzichtbaar ingeslikt. Fix: specifieke exceptions vangen, altijd loggen. **Bestanden:** `modules/yaml_module.py:673,802`, `template_engine.py:130,434,509`, `auth/dependencies.py:254`
+- [ ] **CR-H4** God files: `api.py` (890+), `admin/routes.py` (1776+), `renderer_v2.py` (2191+). Split: api → generate/pdok/templates; admin → users/tenants/brands; renderer_v2 → builder/page_renderer/font_manager package
+- [ ] **CR-H5** 10+ modules zonder tests — prioriteit `cloud.py` (security-gevoelig), `brand_api.py`, `data_transform.py`. Ook: `map_generator.py`, `title_block.py`, `base_report.py`, `visual_diff.py`, `pattern_detector.py`, `page_classifier.py`, `config_generator.py`, `diff_engine.py`, `pdf_extractor.py`, `auth/seed.py`
+- [ ] **CR-H7** Geen Docker layer caching in CI — elke build ~5-10 min from scratch. Fix: `cache-from: type=gha` + `cache-to: type=gha,mode=max`. **Bestand:** `.github/workflows/ci.yml:68-76`
+- [ ] **CR-H8** Frontend: Object URL memory leak bij herhaald PDF genereren — revoke is fragiel (regex replace op hash), geen unmount cleanup. Fix: raw blob URL apart bewaren, altijd revoke, cleanup in store. **Bestand:** `frontend/src/stores/apiStore.ts:182-184`
+- [ ] **CR-H11** Temp files lekken bij PDOK kaart — `NamedTemporaryFile(delete=False, prefix="pdok_")` nooit opgeruimd. Fix: cleanup-mechanisme of context manager. **Bestand:** `core/template_engine.py:579-585`
+- [ ] **CR-H12** SQLite connecties zonder pooling — `_get_connection()` maakt nieuwe connectie per call → "database is locked" risico. Fix: connectie-pool of thread-local, overweeg aiosqlite. **Bestand:** `storage/models.py:113-123`
+- [ ] **CR-H13** `brand_api.upload_pairs` geen file size validatie — PDF uploads zonder max → disk filling. Fix: max 25 MB check. **Bestand:** `brand_api.py:359-364`
+
+---
+
+## 🟡 Middel
+
+### Rust renderer — feature parity met Python `renderer_v2.py`
+
+Python is live op productie, dus de Rust port hoeft niet meteen, maar zelfde gaps moeten dicht. Referentie: Python commits `e971395` en `58a2046` (10 apr).
+
+**Heading-nummering + TOC (counter-state):**
+- [ ] `Section.number: Option<String>` aan `schema.rs`
+- [ ] Counter-state (`section_counter`, `subsection_counter`) in `engine.rs` — level-1 reset ontbreekt voor nested level-2
 - [ ] Level-2 auto-nummering in `render_heading2` via die counter
-  (huidig: `h.number` alleen als expliciet gezet, anders alleen titel)
-- [ ] Resolver-logica: expliciet > auto > leeg (zie Python
-  `_resolve_heading_number`)
-- [ ] `toc.auto_number` opt-out flag in `ReportData` voor rapporten
-  met nummering-in-titel (bijv. BBL "Afd. 4.3 — ...")
-
-### TOC vulling tijdens rendering
-- [ ] `TocBuilder::add_entry(title, level, number)` daadwerkelijk
-  aanroepen vanuit `render_section` / `render_heading2` — nu wordt
-  de builder alleen in tests gebruikt, niet in de engine
+- [ ] Resolver-logica: expliciet > auto > leeg (zie Python `_resolve_heading_number`)
+- [ ] `toc.auto_number` opt-out flag voor rapporten met nummering-in-titel (bv. BBL "Afd. 4.3 — …")
+- [ ] `TocBuilder::add_entry(title, level, number)` daadwerkelijk aanroepen vanuit `render_section`/`render_heading2` (nu alleen in tests)
 - [ ] `TocEntry` uitbreiden met `number: Option<String>`
-- [ ] Two-pass TOC rendering zodat paginanummers na de sections-pass
-  worden teruggeschreven (zie Python `render_toc_to_fresh_doc()` +
-  `doc.insert_pdf(toc_doc, start_at=0)`)
+- [ ] Two-pass TOC rendering voor paginanummers (Python: `render_toc_to_fresh_doc` + `doc.insert_pdf(start_at=0)`)
 
-### Overige renderer-bugs die in Python gefixt zijn
-- [ ] Tabel footer overflow: Y_max / bottom margin constanten matchen
-  met tenant yaml (sommige tenants starten de footer op y=768)
-- [ ] HTML cell-parsing: `<b>...</b>` of `<strong>...</strong>` als
-  volledige cell-wrap → bold font i.p.v. literal tags
-- [ ] Idempotente paginanummers (voorkomt "167"-overlay bug als
-  cleanup-calls nogmaals `_add_page_number` aanroepen)
+**Renderer-bugs in Python al gefixt, Rust nog:**
+- [ ] Tabel footer overflow: Y_max / bottom margin constanten matchen tenant yaml (sommige starten footer op y=768)
+- [ ] HTML cell-parsing: `<b>…</b>` / `<strong>…</strong>` als full wrap → bold font
+- [ ] Idempotente paginanummers (voorkomt "167"-overlay bug)
 - [ ] Stationery PDF caching: voorkom re-open per pagina
 
----
+### Rust Server — volgende fasen
 
-## 🟡 Rust Server — Volgende Fasen
-
-### Phase 2: Auth systeem
+**Phase 2 — Auth systeem**
 - [ ] Auth models + security (User struct, JWT create/decode, bcrypt)
-- [ ] Auth database (users table, api_keys table — apart `auth.db`)
+- [ ] Auth database (users, api_keys — apart `auth.db`)
 - [ ] Auth middleware (AuthUser extractor: API key → JWT cookie → Bearer)
-- [ ] Auth routes (/api/auth/login, register, logout, me, profile)
+- [ ] Auth routes (`/api/auth/login`, register, logout, me, profile)
 - [ ] OIDC support (JWKS fetch, RS256 validatie, auto-provisioning)
-- [ ] Route protection (alle /api/* behalve health/auth)
+- [ ] Route protection (alle `/api/*` behalve health/auth)
 
-### Phase 3: Ontbrekende core endpoints
-- [ ] File upload (`/api/upload` — multipart, 10MB max)
+**Phase 3 — Core endpoints**
+- [ ] File upload (`/api/upload` — multipart, 10 MB max)
 - [ ] PDOK map proxy (`/api/pdok/map`, `/api/pdok/services`)
 - [ ] User profile injection in rapport colofon
 
-### Phase 4: Admin endpoints
+**Phase 4 — Admin endpoints**
 - [ ] User management CRUD
 - [ ] API key management
 - [ ] Organisation management
 - [ ] Tenant/template/brand YAML CRUD
 
-### Phase 5: Nice-to-haves
-- [x] Cloud storage (Nextcloud WebDAV) — openaec-cloud crate + 3 cloud routes (30 maart)
+**Phase 5 — nice-to-haves**
 - [ ] Brand onboarding wizard (of als Python microservice houden)
 
----
+### Security — Middel (SEC-M, 8 open)
 
-## 🔴 CR — Code Review Bevindingen (27 maart)
+- [ ] **SEC-M1** CORS te permissief — `allow_methods=["*"]`, `allow_headers=["*"]`. Fix: expliciet `["GET","POST","PUT","DELETE","OPTIONS"]` + `["Content-Type","Authorization","X-API-Key"]`. **Bestand:** `api.py:104-110`
+- [ ] **SEC-M2** Geen rate limiting op auth endpoints — `/api/auth/login` + `/api/auth/register` onbeperkt. Fix: `slowapi` of custom middleware. **Bestand:** `auth/routes.py`
+- [ ] **SEC-M4** Exception type in API response — `type(exc).__name__` lekt in 500 responses. Fix: alleen `{"detail":"Interne serverfout"}`. **Bestand:** `api.py:257`
+- [ ] **SEC-M5** Template namen path-traversal — `load("../../../etc/passwd")` — Path biedt enige bescherming maar niet waterdicht. Fix: regex `^[a-zA-Z0-9_-]+$`. **Bestanden:** `core/template_loader.py`, `core/brand.py` (`_resolve_path`)
+- [ ] **SEC-M6** Frontend geen 401 interceptor — na token expiry blijft frontend "ingelogd". Fix: in `apiFetch()` 401 → uitloggen + redirect. **Bestand:** `frontend/src/services/api.ts`
+- [ ] **SEC-M7** Frontend PKCE state validatie optioneel — `if (state &&` skipt check als OIDC server geen state retourneert. Fix: verplicht maken. **Bestand:** `frontend/src/components/auth/OidcCallback.tsx:41`
+- [ ] **SEC-M8** Frontend localStorage restore zonder schema validatie — `as ReportDefinition` type cast zonder runtime check. Fix: Zod validatie vóór laden. **Bestand:** `frontend/src/App.tsx:57-74`
+- [ ] **SEC-M9** Admin path validation onvoldoende — `_validate_path_segment()` checkt `..`/`/` maar geen `Path.resolve()` + `is_relative_to()`. Fix: post-constructie resolve-check. **Bestand:** `admin/routes.py:141-162`
 
-Uitgebreide code review over 3 domeinen (Python backend, Frontend, Config/Infra).
-86 bevindingen, gededupliceerd en geordend per ernst.
+### Code review — Middel (CR-M, 24 open — samengevat)
 
-### CR-K: Kritiek — Direct oppakken
+Uitgebreide lijst in commit `651b7fd` code review doc. Thematisch:
 
-- [x] **CR-K1** — Dockerfile draait als root — GEFIXT (27 maart)
-  - Geen `USER` directive, container draait als root → bij container escape direct root op host
-  - **Fix:** `RUN adduser --disabled-password appuser && chown -R appuser:appuser /app` + `USER appuser`
-  - **Bestand:** `Dockerfile`
+- **Frontend refactor (9 items):** ~50+ hardcoded NL strings buiten i18n (CR-M1), click-outside hook dupliceren (CR-M2), SpreadsheetEditor god component 1127 regels (CR-M3), SectionHeader/TableEditor/SpreadsheetEditor state sync bij undo/redo (CR-M4, CR-M5), `confirm()` in Backstage i.p.v. custom dialog (CR-M6), MapEditor debounce cleanup (CR-M7), unsafe `as unknown as` cast (CR-M8), hardcoded versie "0.1.0" op 2 plekken (CR-M9)
+- **Schema / JSON (3 items):** `$id` + `title` nog "OpenAEC" in report.schema.json (CR-M10), draft-07 vs draft/2020-12 inconsistentie (CR-M11), `test_tenant_brand/` fixture in productie dir (CR-M13)
+- **Build / config (5 items):** pyproject `pymupdf`/`httpx` duplicaten (CR-M14), ruff `line-length=100` vs CLAUDE.md `max 88` (CR-M15), geen pip caching Dockerfile (CR-M16), geen matrix test Python 3.10/3.11 (CR-M17), geen coverage report/threshold (CR-M18)
+- **Python refactor (4 items):** circular import risk `cloud.py → api.py` private functies (CR-M19), `format_value()` gedupliceerd (CR-M20), CORS `allow_*=["*"]` (CR-M21, dubbelt met SEC-M1), ValueError globaal gevangen maskeert bugs (CR-M22)
+- **Housekeeping (3 items):** `__init__.py` docstring nog "BM" (CR-M23), `brand_api.SESSIONS_DIR` nog `"bm_brand_sessions"` (CR-M24), geen `.env.example` in root (CR-M25)
 
-- [x] **CR-K2** — JWT default secret niet afgedwongen in productie (=SEC-M3) — GEFIXT (27 maart)
-  - `enforce_jwt_secret()` in `auth/security.py`: productie → RuntimeError, dev → warning
-  - Verplaatst van module-level check naar FastAPI `lifespan` startup
-  - 3 tests in `test_auth.py::TestJwtSecretEnforcement`
+### UX — Frontend
+- [ ] **UX-1** Template wisselen behoudt bestaande content — nu gooit `loadTemplate()` alles leeg. Gewenst: secties/metadata behouden, alleen template-specifieke instellingen (format, margins, cover/colofon config) overschrijven. **Bestanden:** `frontend/src/stores/reportStore.ts`, `apiStore.ts`
 
-- [x] **CR-K3** — Brand session temp directory zonder cleanup (DoS vector) — GEFIXT (27 maart)
-  - `cleanup_stale_sessions(max_age_hours=24)` in `brand_api.py`
-  - `created_at` timestamp in session metadata bij aanmaak
-  - Aangeroepen vanuit FastAPI `lifespan` startup
-  - 8 tests in `test_brand_session_cleanup.py`
+### Features / templates
+- [ ] **S2 Sanering template** — referentie-PDF nodig voor pixel-exacte coördinaten. Template-YAML `tenants/customer/templates/sanering.yaml`
+- [ ] **#1 ERPNext integratie** — projectinfo via API keys vanuit ERPNext
+- [ ] **#10 IFC read/write** — IFC bestandsformaat lezen en schrijven
 
-- [x] **CR-K4** — `dangerouslySetInnerHTML` voor SVG icons — FALSE POSITIVE (27 maart)
-  - Alle 6 locaties gebruiken hardcoded SVG constanten uit `icons.ts`, geen user input
-  - Gedowngraded naar CR-L (nice-to-have: migratie naar lucide-react)
+### T5.9 / T5.10 — Brand onboarding wizard (Fase 3 resterend)
+- [ ] **T5.9** Upload referentie PDF → coordinaten-extractie naar YAML
+- [ ] **T5.10** Stationery PDF generator vanuit guidelines
 
-- [x] **CR-K5** — SQL queries via f-string in storage models — GEFIXT (27 maart)
-  - `storage/sql_utils.py`: `quote_identifier()` met regex validatie + double-quote escaping
-  - 4 locaties geupdate: `storage/models.py` (2x) + `auth/models.py` (2x)
-  - Whitelist-validatie behouden als defense-in-depth
-  - 11 tests in `test_sql_utils.py`
+### T7 — Revit Adapter (`data/revit_adapter.py` stub)
+- [ ] **T7.1** `get_project_info()` — ProjectInfo uitlezing via pyRevit
+- [ ] **T7.2** `get_elements()` — `FilteredElementCollector`
+- [ ] **T7.3** `get_rooms()` — Room-ophaling
+- [ ] **T7.4** `build_report_data()` — element data mapping naar report JSON
+- [ ] **T7.5** WebSocket bridge voor live Revit → frontend push
 
-- [x] **CR-K6** — Nextcloud credentials als module-level constanten — GEFIXT (27 maart)
-  - Module-level `NEXTCLOUD_URL/USER/PASS` vervangen door lazy `_get_nextcloud_*()` functies
-  - Credentials worden pas bij aanroep uit environment gelezen
-  - 8 tests in `test_cloud_credentials.py`
+### Desktop Tauri v2
+- [ ] **D4** Authentik redirect URI `http://tauri.localhost/auth/callback`
+- [ ] **D5** OA logo vervangen (huidige is Pillow-placeholder)
+- [ ] **D6** Code signing (Windows Authenticode, macOS notarization) — v0.3+
+- [ ] **D7** Auto-updater (`tauri-plugin-updater`) — v0.3+
+- [ ] **D8** Native file dialogs (`tauri-plugin-dialog`) — v0.3+
+- [ ] **D9** Offline modus / embedded Rust backend (Optie B) — v0.4+
 
-### CR-H: Hoog — Snel oppakken
-
-- [~] **CR-H1** — Hardcoded tenant-namen in codebase (gedeeltelijk opgelost)
-  - api.py: default brand nu env-driven via `OPENAEC_DEFAULT_BRAND` ✅
-  - Nog te doen: `renderer_v2.py:1910`, `template_loader.py:282`, `engine.py:83,580`, `document.py:75`
-    — vervang overige hardcoded defaults door tenant-agnostische fallbacks.
-
-- [ ] **CR-H2** — Cookie naam nog "bm_access_token" (oude branding)
-  - Inconsistent met alle `OPENAEC_*` variabelen, breaking change bij rename
-  - **Fix:** Rename naar `openaec_access_token`, plan als coordinated deploy
-  - **Bestand:** `auth/security.py:25`
-
-- [ ] **CR-H3** — 6+ bare `except Exception: pass` die alle errors silencen
-  - MemoryError, TypeError etc. worden onzichtbaar ingeslikt
-  - **Fix:** Vang specifieke exceptions, log altijd, nooit `pass` op bare except
-  - **Bestanden:** `modules/yaml_module.py:673,802`, `template_engine.py:130,434,509`, `auth/dependencies.py:254`
-
-- [ ] **CR-H4** — God files: api.py (890+), admin/routes.py (1776+), renderer_v2.py (2191+)
-  - Monolithische bestanden met mixed responsibilities, moeilijk te onderhouden/testen
-  - **Fix:** Split api.py → api/generate.py + api/pdok.py + api/templates.py
-  - Split admin/routes.py → admin/users.py + admin/tenants.py + admin/brands.py
-  - renderer_v2.py → renderer_v2/ package met builder/page_renderer/font_manager
-
-- [ ] **CR-H5** — 10+ Python modules zonder tests
-  - `cloud.py`, `brand_api.py`, `map_generator.py`, `title_block.py`, `base_report.py`, `visual_diff.py`, `pattern_detector.py`, `page_classifier.py`, `config_generator.py`, `diff_engine.py`, `pdf_extractor.py`, `auth/seed.py`
-  - **Fix:** Prioriteit: `cloud.py` (security-gevoelig), `brand_api.py`, `data_transform.py`
-
-- [x] **CR-H6** — `uploads/` directory met user content in repo (niet in .gitignore) — GEFIXT (27 maart)
-  - 10 bestanden (PDF's, PNG's) — `git add .` stuurt ze mee
-  - **Fix:** Toevoegen aan `.gitignore`, bestanden uit tracking verwijderen
-
-- [ ] **CR-H7** — Geen Docker layer caching in CI
-  - Elke build from scratch (~5-10 min), geen `cache-from: type=gha`
-  - **Fix:** `cache-from: type=gha` + `cache-to: type=gha,mode=max` in workflow
-  - **Bestand:** `.github/workflows/ci.yml:68-76`
-
-- [ ] **CR-H8** — Frontend: Object URL memory leak bij herhaald PDF genereren
-  - Blob URL revoke is fragiel (regex replace op hash), geen cleanup bij unmount
-  - **Fix:** Bewaar raw blob URL apart, revoke altijd raw URL, cleanup actie in store
-  - **Bestand:** `frontend/src/stores/apiStore.ts:182-184`
-
-- [x] **CR-H9** — Frontend: console.log met volledige rapport payload in productie — GEFIXT (27 maart)
-  - Klantdata zichtbaar in browser console — information leakage
-  - **Fix:** Verwijder of wrap in `if (import.meta.env.DEV)` guard
-  - **Bestanden:** `apiStore.ts:160-173`, `api.ts:512-546`
-
-- [x] **CR-H10** — Frontend: useEffect zonder dependency array in SpreadsheetEditor — GEFIXT (27 maart)
-  - Resize handlers draaien op ELKE render — performance hit bij grote spreadsheets
-  - **Fix:** Voeg `[resizingCol, resizingRow]` toe als dependency array
-  - **Bestand:** `SpreadsheetEditor.tsx:534-571, 576-585`
-
-- [ ] **CR-H11** — Temp files lekken bij PDOK kaart ophalen
-  - `NamedTemporaryFile(delete=False, prefix="pdok_")` — nooit opgeruimd
-  - **Fix:** Cleanup-mechanisme na build, of context manager
-  - **Bestand:** `core/template_engine.py:579-585`
-
-- [ ] **CR-H12** — SQLite connecties per call zonder pooling
-  - `_get_connection()` maakt bij ELKE call een nieuwe connectie → "database is locked" risico
-  - **Fix:** Connectie-pool of thread-local connectie, overweeg aiosqlite
-  - **Bestand:** `storage/models.py:113-123`
-
-- [ ] **CR-H13** — brand_api upload_pairs: geen file size validatie
-  - PDF uploads zonder max grootte check → disk filling mogelijk
-  - **Fix:** Max 25 MB check voordat content gelezen wordt
-  - **Bestand:** `brand_api.py:359-364`
-
-### CR-M: Middel — Plannen
-
-- [ ] **CR-M1** — Frontend: ~50+ hardcoded Nederlandse strings buiten i18n
-  - Editor, block editors, admin panel, forms — alles buiten chrome componenten
-  - **Fix:** Nieuwe `editor` i18n namespace, geleidelijke migratie
-  - **Bestanden:** `MainPanel.tsx`, `BlockToolbox.tsx`, `TableEditor.tsx`, `MapEditor.tsx`, `AdminPanel.tsx`, `LoginPage.tsx`
-
-- [ ] **CR-M2** — Frontend: click-outside hook gedupliceerd op 6+ plaatsen
-  - Zelfde `useRef` + `useEffect` + `mousedown` patroon steeds opnieuw
-  - **Fix:** Extraheer `useClickOutside(ref, callback)` hook
-
-- [ ] **CR-M3** — Frontend: SpreadsheetEditor is god component (1127 regels)
-  - 30+ state variabelen, inline sub-componenten, resize/merge/paste logica
-  - **Fix:** Split in SpreadsheetToolbar, SpreadsheetGrid, useSpreadsheetSelection, useSpreadsheetResize
-
-- [ ] **CR-M4** — Frontend: SectionHeader state raakt out-of-sync na undo/redo
-  - Lokale `useState(section.title)` synchroniseert niet bij externe changes
-  - **Fix:** `useEffect(() => setTitle(section.title), [section.title])` of `key={section.id}`
-  - **Bestand:** `MainPanel.tsx:278-346`
-
-- [ ] **CR-M5** — Frontend: TableEditor/SpreadsheetEditor props sync probleem
-  - Zelfde als CR-M4: lokale state initialiseert vanuit props maar synchroniseert niet
-  - **Bestanden:** `TableEditor.tsx:23-27`, `SpreadsheetEditor.tsx:263-276`
-
-- [ ] **CR-M6** — Frontend: `confirm()` in Backstage (blocking browser API)
-  - Native browser dialoog inconsistent met custom Modal componenten
-  - **Fix:** Vervang door custom confirmatie-dialog
-  - **Bestand:** `Backstage.tsx:101`
-
-- [ ] **CR-M7** — Frontend: MapEditor debounce timer niet opgeruimd bij unmount
-  - setState op unmounted component mogelijk
-  - **Fix:** `useEffect(() => () => clearTimeout(debounceRef.current), [])`
-  - **Bestand:** `MapEditor.tsx:64,101-103`
-
-- [ ] **CR-M8** — Frontend: `as unknown as ReportDefinition` unsafe type assertion
-  - Alle type checking uitgeschakeld, crash downstream bij verkeerde data
-  - **Fix:** Runtime validatie (Zod schema) vóór laden in editor store
-  - **Bestand:** `ProjectBrowser.tsx:60`
-
-- [ ] **CR-M9** — Frontend: hardcoded versie "0.1.0" op 2 plekken
-  - Bij version bump moeten beide handmatig geupdate worden
-  - **Fix:** Centraliseer in package.json, importeer via Vite define
-  - **Bestanden:** `Backstage.tsx:177`, `SettingsDialog.tsx:253`
-
-- [ ] **CR-M10** — JSON Schema: `$id` en `title` nog "OpenAEC" in report.schema.json
-  - Niet hernoemd bij OpenAEC rebranding
-  - **Fix:** Hernoem `$id` → `report.open-aec.com/...`, `title` → `"OpenAEC Report Definition"`
-  - **Bestand:** `schemas/report.schema.json:3-5`
-
-- [ ] **CR-M11** — JSON Schema: draft-07 vs draft/2020-12 inconsistentie
-  - `report.schema.json` = draft-07, `bic_rapport.schema.json` = draft/2020-12
-  - **Fix:** Kies één draft (2020-12) en migreer de ander
-
-- [x] **CR-M12** — Spook-templates in package assets (=S3, nog steeds open) — GEFIXT (27 maart)
-  - `customer_bic_factuur.yaml`, `customer_bic_rapport.yaml`, `customer_sanering.yaml`
-  - Tenant-specifieke templates zichtbaar voor ALLE tenants op de API
-  - **Fix:** Verwijder deze 3 bestanden uit `src/openaec_reports/assets/templates/`
-
-- [ ] **CR-M13** — `test_tenant_brand/` in productie tenants directory
-  - Test fixture met `primary_color: '#FF0000'` — bereikt de server via Docker
-  - **Fix:** Verplaats naar `tests/fixtures/` of `.gitignore`
-
-- [ ] **CR-M14** — pyproject.toml: `pymupdf` dubbel (core + optional), `httpx` dubbel (core + dev)
-  - Misleidende optional dependency, inconsistente versiespecificatie
-  - **Fix:** Verwijder duplicaten
-
-- [ ] **CR-M15** — pyproject.toml: ruff `line-length = 100` vs CLAUDE.md "max 88"
-  - Configuratie en documentatie spreken elkaar tegen
-  - **Fix:** Synchroniseer (100 als bewuste keuze → CLAUDE.md aanpassen)
-
-- [ ] **CR-M16** — Dockerfile: geen pip dependency caching
-  - Elke codewijziging invalideert pip cache → langzame builds
-  - **Fix:** Split `COPY pyproject.toml` + `pip install` vóór `COPY src/`
-
-- [ ] **CR-M17** — CI: geen matrix testing voor Python 3.10/3.11
-  - pyproject.toml declareert 3.10+, tests draaien alleen op 3.12
-  - **Fix:** Matrix: `python-version: ["3.10", "3.11", "3.12"]`
-
-- [ ] **CR-M18** — CI: geen coverage report of threshold
-  - pytest-cov in deps maar niet in CI, geen coverage gating
-  - **Fix:** `--cov=openaec_reports --cov-fail-under=70` in pytest command
-
-- [ ] **CR-M19** — Circular import risico: cloud.py importeert private functies uit api.py
-  - `from openaec_reports.api import _generate_and_respond` — private API, fragiel
-  - **Fix:** Verplaats gedeelde logica naar `core/report_service.py`
-  - **Bestand:** `cloud.py:233-234`
-
-- [ ] **CR-M20** — `format_value()` gedupliceerd in template_engine.py en yaml_module.py
-  - Exact dezelfde currency_nl formatting op twee plekken
-  - **Fix:** Extraheer naar `core/formatting.py`
-
-- [ ] **CR-M21** — CORS met `allow_methods=["*"]` en `allow_headers=["*"]` (=SEC-M1)
-  - Te permissief voor productie
-  - **Fix:** Expliciet `["GET", "POST", "PUT", "DELETE", "OPTIONS"]` + `["Content-Type", "Authorization", "X-API-Key"]`
-  - **Bestand:** `api.py:108-109`
-
-- [ ] **CR-M22** — ValueError globaal gevangen → maskeert echte programmeerfouten
-  - `int("abc")` in interne logica wordt 422 i.p.v. 500
-  - **Fix:** Custom `ValidationError` voor input validatie, alleen die door handler vangen
-  - **Bestand:** `api.py:286-292`
-
-- [ ] **CR-M23** — `__init__.py` docstring noemt nog "OpenAEC Report Generator"
-  - **Fix:** Update naar "OpenAEC Report Generator"
-  - **Bestand:** `src/openaec_reports/__init__.py:1`
-
-- [ ] **CR-M24** — brand_api.py SESSIONS_DIR nog "bm_brand_sessions"
-  - **Fix:** Rename naar "openaec_brand_sessions"
-  - **Bestand:** `brand_api.py:45`
-
-- [ ] **CR-M25** — Geen `.env.example` in project root
-  - Developer krijgt geen overzicht van beschikbare env vars
-  - **Fix:** Root `.env.example` met alle variabelen voor lokale dev
-
-### CR-L: Laag — Nice-to-have
-
-- [ ] **CR-L1** — Frontend: geen focus trap in dialogen (WCAG 2.1 AA)
-  - Tab-navigatie kan "achter" de dialoog komen
-  - **Bestanden:** `ShortcutHelp.tsx`, `SaveAsDialog.tsx`, `OpenDialog.tsx`
-- [ ] **CR-L2** — Frontend: inconsistente export patterns (default vs named)
-  - Chrome componenten: default export, editor componenten: named export
-- [ ] **CR-L3** — Frontend: SpreadsheetEditor BG_COLORS bevat hardcoded OpenAEC kleuren (#40124A)
-  - **Fix:** Importeer uit brand config
-- [ ] **CR-L4** — Frontend: MetadataTabs.tsx mogelijk dead code (nergens geimporteerd)
-- [ ] **CR-L5** — Frontend: RegisterPage.tsx niet zichtbaar in routing (dead code?)
-- [ ] **CR-L6** — JSON Schema: geen `additionalProperties: false` — typo's in veldnamen worden genegeerd
-- [ ] **CR-L7** — `schemas/PYREVIT_GUIDE.md` hoort in `docs/`, verouderde naming
-- [ ] **CR-L8** — Customer brand.yaml: fonts refereren Helvetica maar font_files laden Arial
-- [ ] **CR-L9** — scripts/ bevat verouderde eenmalige scripts (naar _archive/)
-- [ ] **CR-L10** — docs/ bevat duplicaat voorbeeld JSON's (al in examples/)
-- [ ] **CR-L11** — `BMFlowable`, `BM_COLORS`, `BM_FONTS` class namen zijn "BM" branding restanten
-- [ ] **CR-L12** — `ASSETS_DIR` op 3+ plekken gedefinieerd met zelfde resultaat
-- [ ] **CR-L13** — Geen Dependabot of CodeQL security scanning
-- [ ] **CR-L14** — SVG wordt twee keer geladen in ImageBlock (geen caching van svg2rlg)
-- [ ] **CR-L15** — Environment variabelen niet centraal gedocumenteerd
-- [ ] **CR-L16** — English vs Dutch inconsistentie in docstrings/comments
-- [ ] **CR-L17** — `_KNOWN_PAGE_TYPES` in brand_api.py gedefinieerd maar nooit gebruikt
-- [ ] **CR-L18** — `_content` als mutable class variable in BMFlowable i.p.v. instance variable
+### Deploy
+- [ ] **R4.4** Rust server deploy als `report-rs.open-aec.com` (wacht op subdomein)
 
 ---
 
-## 🔴 SEC — Security Audit Bevindingen (22 maart)
+## 🟢 Laag / nice-to-have
 
-Volledige code review uitgevoerd. Bevindingen per prioriteit:
+### Code review — Laag (CR-L, 18 items — zie review-doc)
 
-### SEC-K: Kritiek — GEFIXT (23 maart)
+Dead code, style consistency, i18n defaults, accessibility. Niet-blokkerend. Highlights:
 
-- [x] **SEC-K1** — `load()` / `_resolve_path()` tenant-isolatie
-  - Fix: `_resolve_path()` in template_loader.py en brand.py respecteert nu `tenant_slug`
-  - Met tenant: alleen eigen tenant directory doorzoeken, geen fallback naar andere tenants
-  - 5 unit tests in `test_security_fixes.py`
+- **Accessibility:** geen focus-trap in dialogen (WCAG 2.1 AA) — `ShortcutHelp.tsx`, `SaveAsDialog.tsx`, `OpenDialog.tsx`
+- **Dead code suspicion:** `MetadataTabs.tsx`, `RegisterPage.tsx` niet in routing — verifiëren
+- **Branding resten:** `BMFlowable`, `BM_COLORS`, `BM_FONTS` class namen — package-interne rename
+- **JSON Schema:** `additionalProperties: false` ontbreekt — typo's in veldnamen worden stil genegeerd
+- **Security scanning:** geen Dependabot/CodeQL
+- **Docstring/comments:** NL/EN inconsistentie
+- Volledige lijst in code review documentatie (commit `651b7fd` warmteverlies-aanpak werkt ook hier als referentie-patroon)
 
-- [x] **SEC-K2** — Brand-override in generate endpoints
-  - Fix: `_resolve_brand_with_tenant_check()` helper in api.py
-  - Alle 3 generate endpoints (`/generate`, `/generate/v2`, `/generate/template`) gebruiken de check
-  - Expliciete brand die niet matcht met user.tenant → 403
-  - 2 tests in `test_security_fixes.py`
+### Frontend — Geavanceerde features
+- [ ] **F1** Block copy/paste (Ctrl+C/V)
+- [ ] **F2** Section templates (pre-filled blocks)
+- [ ] **F4** Visuele template editor (drag & drop sectie volgorde)
+- [ ] **F5** Revit bridge — WebSocket listener + auto-fill berekening blocks
+- [ ] **F6** Undo in tekstvelden — Ctrl+Z/Y van `alwaysActive` naar `contextual` in `AppShell.tsx` (browser-native undo binnen input/textarea)
 
-- [x] **SEC-K3** — Upload endpoint bestandstype + size validatie
-  - Fix: Allowlist extensies (.jpg, .jpeg, .png, .gif, .webp, .svg, .pdf) + max 10 MB
-  - Ongeldige extensie → 400, te groot → 413
-  - 6 tests in `test_security_fixes.py`
+### Admin panel
+- [ ] **A1** Shared sub-components verder consolideren (TenantManagement/TemplateManagement/BrandManagement gebruiken nog eigen spinners)
+- [ ] **A2** API key expiry datumpicker in create-form
+- [ ] **A3** Bulk operaties (meerdere keys tegelijk intrekken)
 
-- [x] **SEC-K4** — Path traversal in rapport opslag
-  - Fix: `_SAFE_ID` regex (`^[a-zA-Z0-9_-]+$`) + `is_relative_to()` check in `_report_path()`
-  - `../` en `/` in IDs → ValueError
-  - 5 tests in `test_security_fixes.py`
+### Housekeeping
+- [ ] **H1** `_temp_analyze.py` uit project root verwijderen
+- [ ] **H3** `lessons_learned.md` aanmaken
 
-- [x] **SEC-K5** — Brand sessies user-isolatie
-  - Fix: `owner_id` opgeslagen in session metadata bij creatie
-  - `verify_owner()` methode op BrandSession, aangeroepen in alle 7 session endpoints
-  - Andere user → 403
-  - 3 tests in `test_security_fixes.py`
+### Infrastructure
+- [ ] **I1** Caddyfile vereenvoudigen
+- [ ] **I2** fail2ban installeren
+- [ ] **I3** Portainer installeren
+- [ ] **I5** Node.js 20 deprecation in CI (upgrade naar actions@v5)
 
-### SEC-H: Hoog — Snel oppakken
+### Code quality
+- [ ] **Q1** Review alle store slices op dead state (vergelijkbaar met `usersError` patroon)
+- [ ] **Q2** Stringly-typed user roles → `UserRole` union type
+- [ ] **Q3** `formatDate` naar `frontend/src/utils/` als gedeelde utility
+- [ ] **Q4** Logging in `template_loader.py` en `brand.py` (audit trail)
+- [ ] **Q5** Type validatie in `TemplateConfig` constructor
+- [ ] **Q6** YAML parse errors loggen i.p.v. stilletjes inslikken (`brand.py:243-244`)
+- [ ] **Q7** `organisation_id` op User: ofwel volledig implementeren (org-isolatie) ofwel dead code verwijderen
 
-- [ ] **SEC-H1** — IDOR op `list_reports` endpoint
-  - `GET /api/reports?project_id=X` valideert niet dat user eigenaar is van project X
-  - User kan `project_id` van een ander project invullen en rapporten zien
-  - **Fix:** In `list_reports()` check toevoegen: `db.get_project(project_id)` → `project.user_id == user.id`
-  - **Bestand:** `storage/routes.py` regels 210-224
+### GitHub Issues — laag
+- [ ] **#3** Brand visualiser — visuele editor voor brand configuratie (kleuren, fonts, layout)
 
-- [ ] **SEC-H2** — Admin endpoints missen tenant-check
-  - Admin van tenant A kan templates/assets van tenant B wijzigen
-  - `/api/admin/tenants/{tenant}/templates` → geen check `user.tenant == tenant`
-  - **Fix:** In admin routes: `if user.tenant and user.tenant != tenant: raise 403`
-  - **Bestand:** `admin/routes.py` alle endpoints met `{tenant}` parameter
-
-- [x] **SEC-H3** — OIDC email-linking kwetsbaar voor account takeover — GEFIXT (23 maart)
-  - Fix 1: Email-fallback koppelt alleen als PRECIES 1 user matcht (meerdere → skip + warning)
-  - Fix 2: Tenant wordt niet meer gesynct vanuit OIDC claims (admin-managed)
-  - Fix 3: Authentik sub_mode gewijzigd van `user_email` → `hashed_user_id`
-  - **Bestanden:** `auth/dependencies.py`, `auth/models.py` (get_all_by_email)
-
-- [ ] **SEC-H4** — `_resolve_brand_from_template()` valideert tenant niet
-  - Template kan `tenant: "andere_tenant"` bevatten → die brand wordt zonder check gebruikt
-  - **Fix:** Na resolve checken dat brand matcht met user.tenant
-  - **Bestand:** `api.py` regels 154-168
-
-### SEC-M: Medium — Plannen
-
-- [ ] **SEC-M1** — CORS te permissief
-  - `allow_methods=["*"]` en `allow_headers=["*"]` → zou expliciete lijst moeten zijn
-  - **Fix:** `allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]`
-  - **Bestand:** `api.py` regels 104-110
-
-- [ ] **SEC-M2** — Geen rate limiting op auth endpoints
-  - `/api/auth/login` en `/api/auth/register` → onbeperkte pogingen mogelijk
-  - **Fix:** Rate limiting middleware (bijv. `slowapi` of custom)
-  - **Bestand:** `auth/routes.py`
-
-- [x] **SEC-M3** — Default JWT secret niet afgedwongen — GEFIXT (27 maart, zie CR-K2)
-  - `enforce_jwt_secret()` in lifespan: productie → RuntimeError, dev → warning
-
-- [ ] **SEC-M4** — Exception type in API response
-  - `type(exc).__name__` wordt meegestuurd in 500 responses → info lekkage
-  - **Fix:** Alleen `{"detail": "Interne serverfout"}` retourneren, geen type
-  - **Bestand:** `api.py` regel 257
-
-- [ ] **SEC-M5** — Template namen niet gevalideerd tegen path traversal
-  - `load("../../../etc/passwd")` → Path objecten bieden enige bescherming maar niet waterdicht
-  - **Fix:** Regex validatie op template namen: `^[a-zA-Z0-9_-]+$`
-  - **Bestanden:** `core/template_loader.py:_resolve_path()`, `core/brand.py:_resolve_path()`
-
-- [ ] **SEC-M6** — Frontend: geen 401 interceptor
-  - Na token expiry blijft frontend "ingelogd" tonen met failing API calls
-  - **Fix:** In `apiFetch()` bij 401 response automatisch uitloggen + redirect naar login
-  - **Bestand:** `frontend/src/services/api.ts`
-
-- [ ] **SEC-M7** — Frontend: PKCE state validatie optioneel
-  - `if (state &&` → als OIDC server geen state retourneert wordt check geskipped
-  - **Fix:** State verplicht maken: `if (!state || !validateState(state))`
-  - **Bestand:** `frontend/src/components/auth/OidcCallback.tsx` regel 41
-
-- [ ] **SEC-M8** — Frontend: localStorage restore zonder schema validatie
-  - Rapport data wordt geladen met `as ReportDefinition` type cast zonder validatie
-  - Bij XSS kan kwaadaardige data geïnjecteerd worden
-  - **Fix:** Valideer restored data tegen JSON schema vóór laden
-  - **Bestand:** `frontend/src/App.tsx` regels 57-74
-
-- [ ] **SEC-M9** — Admin path validation onvoldoende
-  - `_validate_path_segment()` checkt op `..` en `/` maar doet geen `Path.resolve()` + `is_relative_to()` check
-  - Symlinks of unicode tricks kunnen validatie omzeilen
-  - **Fix:** Na pad-constructie: `filepath.resolve().is_relative_to(expected_base.resolve())`
-  - **Bestand:** `admin/routes.py` regel 141-162
+### Inline TODO's in Code
+- [ ] `data/revit_adapter.py:42, 64, 69, 89` — 4 methoden, onderdeel van T7
 
 ---
 
-## 🟡 UX — Frontend
+## 📚 Archief
 
-- [ ] **UX-1** — Template wisselen behoudt bestaande content
-  - Nu wordt alles leeggegooid bij template switch (`loadTemplate()` maakt nieuw leeg rapport)
-  - Gewenst: secties/metadata behouden, alleen template-specifieke instellingen overschrijven (format, margins, cover/colofon config)
-  - **Bestanden:** `frontend/src/stores/reportStore.ts` (`loadTemplate`, `loadScaffold`), `apiStore.ts`
-
----
-
-## 🔴 Features — Hoog
-
-- [x] **#13** — MCP-server toevoegen
-  - OpenAEC MCP wrapper operationeel (`Z:\50_projecten\7_OpenAEC_bouwkunde\_MCP_servers\bm_reports\server.py`)
-  - Tools: list_templates, get_template_scaffold, validate_report, generate_report, generate_report_v2
-  - Draait via dedicated venv (`C:\MCP_venvs\bm_reports\`)
-- [x] **#9** — Spreadsheet blok inclusief copy/paste naar LibreOffice Calc
-  - SpreadsheetBlock component + frontend SpreadsheetEditor met TSV copy/paste
-  - JSON schema uitgebreid, block_registry bijgewerkt
-- [ ] **#1** — ERPNext integratie
-  - Projectinfo ophalen via API keys vanuit ERPNext
-
----
-
-## 🔴 Tenant — User-Tenant Koppeling
-
-- [x] **T-FIX** — Users krijgen geen correcte `tenant` claim via OIDC — GEFIXT (23 maart)
-  - Oplossing: Tenant wordt NIET meer gesynct vanuit OIDC — admin beheert tenant in DB
-  - Nieuwe SSO users krijgen `tenant=""`, admin wijst toe via admin panel
-  - Authentik sub_mode → `hashed_user_id` voor unieke user identificatie
-  - TODO: "tenant toewijzen" optie toevoegen in admin panel UI
-
----
-
-## 🟡 Customer — Nieuwe Templates
-
-2 nieuwe Customer templates toevoegen (naast bestaande `bic_factuur`).
-Bestaande assets herbruikbaar: brand.yaml, stationery PDF's, fonts, modules.
-
-- [x] S1 — **BIC Rapport** template ✅ Compleet (24 maart), flow layout fix (26 maart), auto page-break (27 maart)
-  - 17 pagina's, field groups, PDOK kaarten, text wrapping, layout fine-tuning
-  - Flow layout: text zones verschuiven automatisch bij wrapping overflow (pag 4-5 overlap opgelost)
-  - Auto page-break: overflow zones splitsen naar vervolg-pagina's met footer herhaling
-  - Formeel JSON schema: `schemas/bic_rapport.schema.json`
-  - Voorbeeld JSON: 114/125 velden gevuld
-  - 5 nieuwe page_types: tekening_overzicht, tekening_detail, tekening_kadaster, vvv_verklaring, schade_fotos
-- [ ] S2 — **Sanering** template
-  - Template YAML: `tenants/customer/templates/sanering.yaml`
-  - Page types: hergebruik bestaande + nieuwe waar nodig
-  - Referentie-PDF nodig voor pixel-exacte coördinaten
-- [x] S3 — Opruimen: 3 spook-templates in `src/openaec_reports/assets/templates/` verwijderen — GEFIXT (27 maart, zie CR-M12)
-  - `customer_bic_factuur.yaml`, `customer_bic_rapport.yaml`, `customer_sanering.yaml`
-  - Zijn package defaults die voor elke tenant zichtbaar zijn op de server
-
----
-
-## 🟡 T5 — YAML Editor in Admin Panel
-
-Self-service YAML beheer per tenant.
-
-**Fase 1 — Upload & beheer:** ✅
-- [x] T5.1 — API: `/api/admin/tenants/{tenant}/page_types/` CRUD
-- [x] T5.2 — Frontend: YAML file browser per tenant
-- [x] T5.3 — Upload/download YAML's + brand.yaml
-- [x] T5.4 — Preview: upload → render test-PDF → bekijk resultaat
-
-**Fase 2 — Visuele editor:** ✅
-- [x] T5.5 — YAML als formulier: text_zones, line_zones, image_zones, content_frame, table als bewerkbare rijen
-- [x] T5.6 — Live preview bij wijziging
-- [x] T5.7 — Kleurenpicker uit brand.yaml
-
-**Fase 3 — Brand onboarding wizard (deels klaar):**
-- [x] T5.8 — BrandExtractWizard (4-stap, paurs) in admin panel
-- [ ] T5.9 — Upload referentie PDF → coordinaten-extractie naar YAML
-- [ ] T5.10 — Stationery PDF generator vanuit guidelines
-
----
-
-## ~~🟡 T6 — Report Type Stubs Implementeren~~ ✅
-
-- [x] T6.1 — `reports/structural.py` — Uitgangspunten, belastingen, berekeningen per element, UC overzicht, conclusie
-- [x] T6.2 — `reports/daylight.py` — Uitgangspunten, situatie, daglichtberekening per ruimte, toetsing, conclusie
-- [x] T6.3 — `reports/building_code.py` — Projectgegevens, toetsingen per hoofdstuk met CheckBlocks, overzicht, conclusie
-
----
-
-## 🟡 T7 — Revit Adapter
-
-`data/revit_adapter.py` is een stub. Alle methoden zijn `# TODO`.
-
-- [ ] T7.1 — `get_project_info()` — ProjectInfo uitlezing via pyRevit
-- [ ] T7.2 — `get_elements()` — FilteredElementCollector
-- [ ] T7.3 — `get_rooms()` — Room ophaling
-- [ ] T7.4 — `build_report_data()` — Element data mapping naar report JSON
-- [ ] T7.5 — WebSocket bridge voor live Revit → frontend push
-
----
-
-## ~~🟡 T8 — Kadaster/PDOK Verbetering~~ ✅
-
-- [x] T8.1 — `data/kadaster.py` RD ↔ WGS84 conversie via pyproj (<1mm nauwkeurigheid) + rd_to_wgs84() reverse
-
----
-
-## 🟡 GitHub Issues — Middel
-
-- [ ] **#10** — Read/Write to IFC
-  - IFC bestandsformaat lezen en schrijven (integratie)
-- [x] **#8** — Bij regenerate blijf op oorspronkelijke pagina
-  - `previewPage` state in apiStore + `#page=N` fragment op blob URL
-  - Page input in preview toolbar, page bewaard bij regeneratie
-- [x] **#7** — Adviseur ook aan account koppelen + Authentik SSO
-  - User model uitgebreid met phone, job_title, registration_number, company, auth_provider, oidc_subject
-  - OIDC token validatie (JWKS/RS256) + auto-provisioning
-  - Frontend SSO login flow (PKCE, OidcCallback)
-  - Colofon auto-fill vanuit user profiel
-  - Docker Compose met Authentik
-- [x] **#5** — Organisation / Project Browser
-  - ProjectBrowser component (split-panel: projectlijst + rapportenlijst)
-  - Server-side rapport opslag (SQLite metadata + JSON op disk)
-  - "Projecten" tab in AppShell, server-save via Ctrl+S
-  - 11 API endpoints: CRUD projecten + rapporten + verplaatsen
-- [x] **#4** — Project → Report (mother-children relatie)
-  - `projects` en `reports` tabellen met foreign key relatie
-  - Rapport kan in project of standalone bestaan (nullable project_id)
-  - Cascade delete: project verwijderen verwijdert ook rapporten
-- [x] **#2** — Auteur koppelen aan user
-  - Colofon adviseur velden auto-filled vanuit user profiel (display_name, email, phone, etc.)
-
----
-
-## 🔴 Rust Implementatie — Deadline 17 maart
-
-Zie `PLAN-rust-implementation.md` voor details.
-
-**Phase 0 — Setup + Schema Types:** ✅ Compleet (40 tests)
-
-**Phase 1 — openaec-layout (eigen ReportLab in Rust):** ✅ Compleet (9 tests)
-- [x] R1.1 — Basis types (Pt, Mm, Size, Rect, Color, A4/A3) + FontRegistry
-- [x] R1.2 — DrawList (tekst, lijnen, rects, images)
-- [x] R1.3 — Flowable trait + SplitResult
-- [x] R1.4 — Spacer + PageBreak
-- [x] R1.5 — Paragraph (styled text, word-wrap, leading)
-- [x] R1.6 — Table (kolommen, stijlen, split over pagina's)
-- [x] R1.7 — Image flowable
-- [x] R1.8 — Frame (flowable container, overflow detectie)
-- [x] R1.9 — PageTemplate (PageCallback)
-- [x] R1.10 — DocTemplate (multi-page PDF assembly)
-- [x] R1.11 — PDF backend (printpdf crate)
-
-**Phase 2 — Python libs porten:** ✅ Compleet (169 tests)
-- [x] R2.1 — Schema sync: Spreadsheet block toegevoegd
-- [x] R2.2 — document.rs (page sizes, marges, content dimensions) — 260 LOC, 7 tests
-- [x] R2.3 — styles.rs (font rollen, kleuren, paragraph styles) — 463 LOC, 9 tests
-- [x] R2.4 — template_config.rs (PageType, TextZone, ImageZone, flow layout) — 460 LOC, 11 tests
-- [x] R2.5 — template_loader.rs (YAML discovery, scaffold, multi-dir) — 507 LOC, 7 tests
-- [x] R2.6 — block_renderer.rs (ContentBlock → Flowable, alle block types)
-- [x] R2.7 — data_transform.rs (JSON → flat dict, BIC inject helpers) — 560 LOC, 13 tests
-- [x] R2.8 — stationery.rs (path resolver, format detection, caching) — 223 LOC, 7 tests
-- [x] R2.9 — toc.rs (TOC builder, styles, page numbers) — 224 LOC, 6 tests
-- [x] R2.10 — kadaster.rs (RD↔WGS84 polynoom, PDOK WMS URL builder) — 354 LOC, 7 tests
-- [x] R2.11 — json_adapter.rs (JSON laden, validatie, project/section extractie) — 271 LOC, 9 tests
-- [x] R2.12 — report_types.rs (structural, daylight, building_code builders) — 1020 LOC, 12 tests
-
-**Phase 3 — Rendering pipeline:** ✅ Compleet
-- [x] R3.1 — Block renderers (ContentBlock → Flowable) — alle types
-- [x] R3.2 — Special pages (cover, colofon, TOC, backcover) — RawPage canvas rendering
-- [x] R3.3 — Engine (ReportData → PDF)
-
-**Phase 4 — Server + CLI:** ✅ Compleet
-- [x] R4.1 — CLI wiring (generate, validate)
-- [x] R4.2 — Axum API server (health, generate, validate, templates, brands)
-- [x] R4.3 — Dockerfile (multi-stage, rust:1.85 + debian:bookworm-slim)
-- [ ] R4.4 — Deploy als report-rs.open-aec.com (wacht op subdomein)
-
----
-
-## 🟢 GitHub Issues — Laag
-
-- [x] **#12** — RUST Library — Actief, zie Rust Implementatie sectie hierboven
-- [x] **#11** — AI-instructies meegeven voor gebruik in andere tools
-  - `docs/ai-instructions.md`: Engelstalig document met API, auth, block types, MCP server, voorbeeld JSON
-- [ ] **#3** — Brand visualiser maken
-  - Visuele editor voor brand configuratie (kleuren, fonts, layout)
-
----
-
-## 🟢 Frontend — Geavanceerde Features
-
-- [ ] F1 — Block copy/paste (Ctrl+C/V)
-- [ ] F2 — Section templates (standaard secties met pre-filled blocks)
-- [x] F3 — Multi-rapport beheer (lijst, dupliceren, verwijderen) — via ProjectBrowser
-- [ ] F4 — Visuele template editor (drag & drop sectie volgorde)
-- [ ] F5 — Revit bridge: WebSocket listener + auto-fill berekening blocks
-- [ ] F6 — Undo in tekstvelden: Ctrl+Z/Y verplaatsen van `alwaysActive` naar `contextual` in AppShell.tsx, zodat browser-native undo werkt binnen input/textarea
-
----
-
-## 🟢 Admin Panel — Verbeteringen
-
-- [ ] A1 — Shared sub-components verder consolideren (TenantManagement, TemplateManagement, BrandManagement gebruiken nog eigen spinners)
-- [ ] A2 — API key expiry datumpicker in create form
-- [ ] A3 — Bulk operaties (meerdere keys tegelijk intrekken)
-
----
-
-## 🟢 Housekeeping
-
-- [ ] H1 — `_temp_analyze.py` verwijderen uit project root
-- [x] H2 — Dead code `src/bm_reports/` verwijderd + `docs/TENANT_GUIDE.md` verwijderd
-- [ ] H3 — `lessons_learned.md` aanmaken
-- [x] H4 — `fonts.py` herschreven met Liberation Sans documentatie (was: verouderde Inter pad instructies)
-- [x] H5 — STATUS.md en TODO.md actualiseren (20 maart: Tauri + Chrome)
-
----
-
-## 🟡 Desktop App — Tauri v2
-
-- [x] D1 — Tauri v2 scaffold (`src-tauri/`, thin wrapper, cloud API)
-- [x] D2 — GitHub Actions release workflow (4-platform matrix build)
-- [x] D3 — Release v0.2.0-alpha (draft op GitHub, alle artifacts)
-- [ ] D4 — Authentik: redirect URI `http://tauri.localhost/auth/callback` toevoegen
-- [ ] D5 — OA logo vervangen (huidige is Pillow-gegenereerd placeholder)
-- [ ] D6 — Code signing (Windows Authenticode, macOS notarization) — v0.3+
-- [ ] D7 — Auto-updater (`tauri-plugin-updater`) — v0.3+
-- [ ] D8 — Native file dialogs (`tauri-plugin-dialog`) — v0.3+
-- [ ] D9 — Offline modus / embedded Rust backend (Optie B) — v0.4+
-
----
-
-## 🟢 Infrastructure
-
-- [x] I0 — Deploy script (`deploy.sh`): git pull → docker build --no-cache → deploy → health check
-- [ ] I1 — Caddyfile vereenvoudigen
-- [ ] I2 — fail2ban installeren
-- [ ] I3 — Portainer installeren
-- [x] I4 — CI/CD pipeline (GitHub Actions: lint, test, build, deploy + release-desktop)
-- [ ] I5 — Node.js 20 deprecation warnings fixen in CI (upgrade naar actions@v5)
-
----
-
-## 🟢 Code Quality
-
-- [ ] Q1 — `usersError` was dead state — nu gefixt, maar review alle store slices voor vergelijkbare patronen
-- [ ] Q2 — Stringly-typed user roles → `UserRole` union type
-- [ ] Q3 — `formatDate` verplaatsen naar `frontend/src/utils/` als gedeelde utility
-- [ ] Q4 — Logging toevoegen aan `template_loader.py` en `brand.py` (audit trail voor template/brand loads)
-- [ ] Q5 — Type validatie in `TemplateConfig` constructor (margins als dict, format als string, etc.)
-- [ ] Q6 — YAML parse errors loggen i.p.v. stilletjes inslikken (`brand.py` regels 243-244)
-- [ ] Q7 — `organisation_id` op User model ofwel volledig implementeren (org-level isolatie) ofwel verwijderen (dead code)
-- [x] Q8 — Default brand configureerbaar via `OPENAEC_DEFAULT_BRAND` env var (default `"default"`, zie api.py)
-
----
-
-## Inline TODO's in Code
-
-| Bestand | Regel | TODO |
-|---------|-------|------|
-| ~~`core/fonts.py`~~ | ~~13~~ | ~~Inter TTF pad instructies updaten~~ — OPGELOST in T9 |
-| ~~`data/kadaster.py`~~ | ~~60~~ | ~~RD↔WGS84 conversie~~ — OPGELOST in T8 (pyproj) |
-| `data/revit_adapter.py` | 42, 64, 69, 89 | Volledige Revit integratie (4 methoden) |
-| ~~`reports/building_code.py`~~ | ~~33~~ | ~~Bouwbesluit toetsingssecties~~ — OPGELOST in T6 |
-| ~~`reports/daylight.py`~~ | ~~27~~ | ~~Daglichtsecties~~ — OPGELOST in T6 |
-| ~~`reports/structural.py`~~ | ~~28~~ | ~~Sectie-opbouw vanuit data~~ — OPGELOST in T6 |
-
----
-
-## ✅ VOLTOOID
-
-### T5/T6/T8 — YAML Editor + Report Types + Kadaster (14 maart)
-- [x] **T5** — YAML Editor fase 1+2 compleet: ImageZoneSection + ContentFrameSection form editors toegevoegd
-- [x] **T6** — Drie rapporttypen geïmplementeerd met volledige build_sections():
-  - StructuralReport: uitgangspunten, belastingen, elementen met CalculationBlock/CheckBlock, UC overzicht
-  - DaylightReport: ruimtes met raamberekening, equivalente daglichtoppervlakte, toetsing per NEN 2057
-  - BuildingCodeReport: hoofdstukken met CheckBlocks per artikel, samenvattend overzicht
-- [x] **T8** — Kadaster RD↔WGS84 conversie: polynoom-benadering vervangen door pyproj Transformer (<1mm)
-  - `rd_to_wgs84()` reverse methode toegevoegd
-  - 17 tests (referentiepunten Amsterdam, Rotterdam, Maastricht, Groningen + roundtrip)
-  - 28 tests voor rapporttypen (unit + PDF integratie)
-
-### T9 — Font Embedding Fix (11 maart, 2de2741)
-- [x] **T9** — Liberation Sans als embedded fallback, vervangt Helvetica Type1
-  - 5 Liberation Sans/Mono TTFs gebundeld (Apache 2.0)
-  - `fonts.py`: `register_liberation_fonts()`, `_HELVETICA_TO_LIBERATION` mapping
-  - `renderer_v2.py`: FontManager TTF i.p.v. `fitz.Font("helv")`
-  - Alle Helvetica defaults vervangen in 15 bronbestanden
-  - 1045 tests passed
-
-### Bug Fixes: Rendering + Colofon (5 maart)
-- [x] **#14** — Colofon: `revision_history` en `disclaimer` rendering in V1 en V2
-  - V1: `_draw_revision_table()` aangeroepen vanuit `draw_colofon_page()`, disclaimer rendering
-  - V2: ColofonGenerator uitgebreid met revision_history tabel + disclaimer tekst
-  - `colofon.yaml` uitgebreid met revision_history en disclaimer configuratie
-- [x] **#6** — Colofon update niet → Geverifieerd: werkt correct (frontend chain intact)
-- [x] Tabel text-wrap: cellen gewrapt in `Paragraph` objecten i.p.v. plain strings (`table_block.py`)
-- [x] Tabel page-break: `split()` methode toegevoegd aan `BMFlowable` + `repeatRows=1` (`base.py`, `table_block.py`)
-- [x] Colofon velden: `field_values` mapping uitgebreid met alle adviseur/opdrachtgever velden (`special_pages.py`)
-- [x] Cover images: `base_dir` parameter toegevoegd aan MCP server `generate_report()` (`server.py`)
-- [x] **#13** — MCP-server wrapper operationeel (OpenAEC-specifiek, buiten repo)
-
-### Self-Registratie + Server-side Opslag + Projectstructuur (4 maart)
-- [x] Open registratie: `POST /api/auth/register` met validatie, env var guard (`OPENAEC_REGISTRATION_ENABLED`)
-- [x] RegisterPage frontend + authStore `register()` actie
-- [x] Server-side rapport opslag: `storage/models.py` (SQLite + bestandssysteem)
-- [x] 11 API endpoints: projecten CRUD, rapporten CRUD, verplaatsen, filteren
-- [x] ProjectBrowser UI (split-panel), projectStore (Zustand), server-save (Ctrl+S)
-- [x] Eigendom-isolatie: users zien alleen eigen projecten/rapporten
-- [x] 37 nieuwe tests (registratie + opslag), 1059 bestaande tests ongewijzigd
-
-### API Key Management UI (2 maart)
-- [x] Frontend: ApiKeyManagement component + admin tab
-- [x] API types + store actions (list, create, revoke, delete)
-- [x] Eenmalige plaintext key display + kopieer-knop
-- [x] Code review: shared.tsx geextraheerd, usersError gefixt, staleness guard, clipboard error handling
-
-### OpenAEC TemplateEngine Migratie (2 maart)
-- [x] OpenAEC templates werkend en gevalideerd
-
-### OpenAEC Rebranding — Volledig (2 maart)
-- [x] Package rename, env vars, CLI, frontend, Docker, domain, README, LICENSE, API key prefix
-
-### Deploy + Visuele Validatie (2 maart)
-- [x] Docker rebuild op Hetzner VPS
-- [x] Customer BIC rapporten visueel gevalideerd — pixel-perfect
-
-### OpenAEC Rebranding — Package Rename (2 maart)
-- [x] `git mv src/bm_reports src/openaec_reports`
-- [x] 218 bestanden: imports, env vars, CLI, Dockerfile, docs
-- [x] 1035 tests passed
-
-### Pixel Precision Fixes (1 maart)
-- [x] Arial per-tenant font registratie
-- [x] Page numbering "Pagina X van Y"
-- [x] Font ascent Y-offset correctie (<0.7pt)
-- [x] ImageZone support
-- [x] Achterblad text zones
-- [x] BIC tabel fontsize 10pt
-
-### Admin Panel Cleanup (1 maart)
-- [x] Replace button per asset
-- [x] BrandWizard (blauw, 3-stap) verwijderd
-- [x] BrandExtractWizard (paurs, 4-stap) operationeel
-
-### Tenant Resolution Fix (1 maart)
-- [x] `_resolve_tenant_and_template()` helper
-- [x] `_resolve_tenants_dir()` robuust met env vars
-- [x] 888 tests passed
-
-### TemplateEngine V3 (28 feb)
-- [x] 102+ unit tests, 3 E2E tests
-- [x] 6-pagina PDF mixed orientation + stationery
-- [x] Customer BIC factuur template compleet
+- [`archief/2026-Q1-voltooid.md`](archief/2026-Q1-voltooid.md) — Q1 2026 voltooid werk (februari + maart): Rust Phase 0-6, CR-K + SEC-K security fixes, BIC Rapport 17 pagina's, OpenAEC rebranding, T5/T6/T8, cloud migratie Python + Rust, Tauri v0.2.0-alpha, 9 GitHub issues gesloten

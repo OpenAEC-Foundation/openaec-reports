@@ -1,168 +1,105 @@
 # STATUS — openaec-reports
 
-> Laatst bijgewerkt: 2026-03-30
-> Sessie-historie ouder dan 2 sessies: zie `git log` of `git show <commit>:STATUS.md`
+**Laatste update:** 2026-04-19 | **Productie:** [`report.open-aec.com`](https://report.open-aec.com)
+**Archief:** [`archief/2026-Q1-voltooid.md`](archief/2026-Q1-voltooid.md) | **Git history:** `git log --oneline -30`
 
 ---
 
-## Huidige Staat
+## Huidige staat
 
-- **1264 tests** collected (1214 passed, 50 skipped)
-- **BIC Rapport:** 17 pagina's compleet, field groups, PDOK kaarten, flow layout met auto page-break
-- **Security:** Alle 6 kritieke items gefixt (K1-K6), 1 hoge + 8 medium open (zie TODO.md)
-- **Productie:** `report.open-aec.com` — SSO-only, multi-tenant (via bind-mount tenants/)
-- **Cloud:** Project container model geintegreerd (Python + Rust)
-- **Open:** S2 Sanering template
-
----
-
-## Laatste Sessie — 30 maart
-
-### Cloud Migratie — Project Container Model
-- **Python `cloud.py`:** Gemigreerd van `99_overige_documenten/reports/` naar `reports/` met backward compatibility
-  - Constanten: `DIR_REPORTS = "reports"`, `MANIFEST_FILENAME = "project.wefc"`
-  - Alle lees-endpoints (list_files, get_file) proberen nieuw pad eerst, fallback naar legacy
-  - Alle schrijf-endpoints (save) schrijven altijd naar het nieuwe pad
-  - Na PDF upload: `project.wefc` manifest wordt bijgewerkt met `WefcReport` object
-  - Manifest read-merge-write patroon: bestaande entries worden ge-update (guid + created behouden)
-- **Rust server:** `openaec-cloud` crate als dependency toegevoegd
-  - 3 nieuwe cloud routes: `GET /api/cloud/projects`, `GET /api/cloud/projects/{project}/reports`, `POST /api/cloud/projects/{project}/upload`
-  - Upload endpoint accepteert multipart PDF, schrijft naar `reports/`, updatet `project.wefc`
-  - Tenant-aware via `OPENAEC_TENANT` env var + `tenants.json`
-  - Volume mount reads (snel) met WebDAV fallback
-- **Tests:** Rust 208 tests passing, Python 8 cloud tests passing, geen nieuwe failures
+- **Tests:** 1264 collected (1214 passed, 50 skipped) — Python backend
+- **Rust tests:** 197 totaal (9 phases compleet, deploy van Rust server wacht op subdomein `report-rs.open-aec.com`)
+- **Productie:** multi-tenant via bind-mount `/opt/openaec/reports-tenants/`, SSO-only via Authentik
+- **Engines live:** V1 (`/api/generate`), V2 (`/api/generate/v2`), V3 (`/api/generate/template`)
+- **Security:** alle 6 CR-K + alle 5 SEC-K + T-FIX gefixt (Q1) — 3 SEC-H open, 8 SEC-M open, zie `TODO.md`
+- **Cloud integratie:** project container model (`project.wefc`) live in Python `cloud.py` en Rust server (3 routes)
 
 ---
 
-## Sessie — 28 maart (sessie 2)
+## 🎯 Actieve sporen
 
-### Rust Server Uitbouw + openaec-engine crate
-- **openaec-engine crate:** V3 TemplateEngine in pure Rust (~2400 LOC), coordinate-based PDF rendering, 28 tests
-  - Modules: engine, pdf_backend, font_engine, text, data_bind, zone_renderer, flow_layout, special_pages
-  - Pure Rust stack: `pdf-writer` + `lopdf` + `ttf-parser` (geen Python/AGPL)
-- **Server module split:** `main.rs` (769 regels) → 14 bestanden in modulaire structuur
-  - `routes/`: health, templates, brands, stationery, generate, validate, admin, auth
-  - `db/`: projects CRUD, reports CRUD
-  - `state.rs`, `error.rs` (AppError enum), `helpers.rs`
-- **CORS middleware:** `tower-http::CorsLayer` met expliciete origins, `allow_credentials(true)`, configureerbaar via `CORS_ORIGINS` env var
-- **V3 Engine endpoint:** `POST /api/generate/template` → `openaec_engine::Engine` (apart van legacy V1/V2)
-- **Async-safety:** Alle PDF generatie in `tokio::task::spawn_blocking()`
-- **Template loader:** Scant alle tenants in `OPENAEC_TENANTS_ROOT` (15 templates gevonden)
-- **BIC Schema docs:** `docs/CUSTOMER_BIC_SCHEMA.md` (598 regels), `test_bic_rapport.py`
-- **Deployed:** `01cf2f4` naar `report.open-aec.com`
+| Spoor | Status | Volgende stap |
+|---|---|---|
+| **S2 Sanering template** | spec open | Referentie-PDF voor pixel-exacte coördinaten |
+| **T7 Revit Adapter** | stub (4 methoden) | `get_project_info` via pyRevit |
+| **Phase 2 Auth (Rust)** | niet begonnen | User struct, JWT, bcrypt, api_keys |
+| **Phase 3 Rust endpoints** | niet begonnen | `/api/upload` + PDOK proxy |
+| **Rust renderer feature parity** | parity gap vs Python `renderer_v2.py` | Heading-nummering + TOC counter state |
+| **Authentik Unified SSO migratie** | plan klaar, blokkeert op auth-fix | Fase 5 Reports migratie (dependencies.py refactor, JWT exit) |
+| **Desktop Tauri v2** | v0.2.0-alpha draft | D4 Authentik redirect URI, D5 OA logo, D6-D9 signing/updater/dialogs |
 
 ---
 
-## Sessie — 28 maart (sessie 1)
+## 📐 Engines
 
-### CR-K Security Fixes (4 van 6 resterende kritieke items)
-- **CR-K6:** Nextcloud credentials lazy loading — `_get_nextcloud_*()` functies i.p.v. module-level constanten (8 tests)
-- **CR-K2:** JWT default secret enforcement — `enforce_jwt_secret()` in FastAPI `lifespan` startup, productie → RuntimeError (3 tests)
-- **CR-K5:** SQL identifier quoting — `quote_identifier()` helper met regex validatie, 4 locaties geupdate (11 tests)
-- **CR-K3:** Brand session cleanup — `cleanup_stale_sessions()` verwijdert sessies >24u bij startup (8 tests)
-- **CR-K4:** False positive — SVG icons zijn hardcoded constanten, geen XSS-vector
-- **Totaal:** 30 nieuwe tests, 1214 passed, 50 skipped, 0 failures
-
----
-
-## Sessie — 27 maart
-
-### Flow Layout Auto Page-Break bij Overflow
-- **Probleem:** Dynamische velden die veel wrappen duwden content zones voorbij de footer grens (260mm), tekst viel over voettekst heen
-- **Oplossing:** `_paginate_flow_zones()` — splitst overflow zones automatisch naar vervolg-pagina's
-- **Mechanisme:** Zones die na shifting y >= `flow_footer_y_mm` hebben → nieuwe pagina, herpositionering vanaf `flow_content_start_y_mm` (default 32mm), footer zones herhaald op elke pagina
-- **Config:** `flow_content_start_y_mm: float` veld toegevoegd aan PageType
-- **Engine:** Flow layout pagina's worden als chunks behandeld (zelfde patroon als tabel-paginering), inclusief correcte paginanummering
-- **Tests:** 26 tests in `test_flow_layout.py` (13 bestaand + 13 nieuw)
-- **Deployed:** `2a413a8` naar `report.open-aec.com`
-
-### Openstaand uit vorige sessies
-- [ ] Frontend: field groups UI testen na deploy
-- [ ] PDOK luchtfoto: 2025_orthoHR layer geconfigureerd (service was down)
+| Engine | Endpoint | Gebruik |
+|---|---|---|
+| V1 `Report.from_dict()` | `/api/generate` | Legacy flow-based content-block rapporten |
+| V2 `ReportGeneratorV2` | `/api/generate/v2` | Pixel-perfect via `renderer_v2` (Python) |
+| V3 `TemplateEngine` | `/api/generate/template` | YAML page_types, fixed-page layouts |
+| V3-Rust `openaec_engine::Engine` | (zelfde endpoint, alternatieve deploy) | Pure Rust V3 — 28 tests, wacht op `report-rs.open-aec.com` |
 
 ---
 
-## Vorige Sessie — 26 maart
+## 🏢 Tenants
 
-### Flow Layout voor Template Engine Text Zones
-- `_apply_flow_layout()` pre-processing — berekent extra ruimte door text wrapping en verschuift onderliggende zones automatisch
-- PageType config: `flow_layout: bool` + `flow_footer_y_mm: float`
-- 4 page_types geactiveerd: voorziening_object, bic_rapport_details, herstelwerkzaamheden, locatie
+Public repo bevat alleen `tenants/default/` placeholder. Private tenant-directories (brand, templates, stationery, fonts) via host bind-mount op productie, niet in git.
 
----
+| Tenant | Locatie | Engines | Status |
+|---|---|---|---|
+| `default` | `tenants/default/` (public) | V1/V2/V3 | Repo MVP, OFL fonts |
+| Private tenants | bind-mount op Hetzner | V1/V2/V3 | Productie |
 
-## Sessie — 24 maart
-
-### BIC Rapport: Field Groups, Layout, PDOK Kaarten
-- **Field groups:** `_extract_field_groups()` scant page_type YAML's → `FieldGroupForm` component in sidebar (25 groepen)
-- **BIC Template:** 17 pagina's compleet (5 nieuwe page_types), formeel schema `schemas/bic_rapport.schema.json`, voorbeeld JSON (114/125 velden)
-- **Text wrapping:** `TextZone.max_width_mm` + `_wrap_text()`, 87 text_zones voorzien
-- **PDOK kaarten:** `/api/pdok/map` + `/api/pdok/services` endpoints, image zones met lat/lon → automatisch kaart
-- **Layout fixes:** rechterkolom verschoven, tabel origin_y gecorrigeerd, paginanummers consistent, TOC paginanummers rechts
+Tenant-model: user.tenant wordt **admin-managed** (niet uit OIDC). SSO-users krijgen initieel `tenant=""` en admin wijst toe via admin panel. Authentik gebruikt `sub_mode=hashed_user_id` voor unieke user-identificatie. Brand-override in generate endpoints wordt gevalideerd tegen `user.tenant`.
 
 ---
 
-## Deployment
+## 🔧 Deployment
 
 | Omgeving | URL | Status |
-|----------|-----|--------|
-| Productie | https://report.open-aec.com | ✅ Online |
-| API Health | https://report.open-aec.com/api/health | ✅ OK |
-| Deploy script | `deploy.sh` | ✅ Git pull → docker build → deploy → health check |
+|---|---|---|
+| Productie Python | [`report.open-aec.com`](https://report.open-aec.com) | ✅ Online |
+| API Health | `/api/health` | ✅ OK |
+| Productie Rust | `report-rs.open-aec.com` | ⏳ Wacht op subdomein (R4.4) |
 
-**Tenant data:** privé tenant-directories (brand, templates, logos, stationery)
-worden NIET in de public repo gecommit. Productie draait met bind-mounts vanuit
-`/opt/openaec/reports-tenants/` op de host.
+**Deploy pipeline:** `deploy.sh` — `git pull` → `docker build --no-cache` → deploy → health check. GitHub Actions voor lint/test/build/deploy + release-desktop (4-platform matrix).
 
 ---
 
-## Engines
-
-| Engine | Endpoint | Status | Gebruik |
-|--------|----------|--------|---------|
-| V1 — `Report.from_dict()` | `/api/generate` | ✅ Productie | Legacy flow-based content-block rapporten |
-| V2 — `ReportGeneratorV2` | `/api/generate/v2` | ✅ Productie | Pixel-perfect rapporten via `renderer_v2` |
-| V3 — `TemplateEngine` | `/api/generate/template` | ✅ Productie | YAML page_types, fixed-page layouts |
-
----
-
-## Tenants
-
-In deze public repo staat alleen de neutrale `tenants/default/` placeholder.
-Private tenant-directories (klantspecifieke brand, templates, stationery, fonts)
-worden via host bind-mounts aan productie-containers gekoppeld en zitten niet
-in git.
-
-| Tenant | Locatie | Engine | Status |
-|--------|---------|--------|--------|
-| `default` | `tenants/default/` (public) | V1/V2/V3 | ✅ Repo MVP, OFL fonts |
-| Privé tenants | bind-mount op host | V1/V2/V3 | ✅ Productie |
-
----
-
-## Rust Implementatie
+## 🦀 Rust implementatie — samenvatting
 
 | Phase | Status | Tests |
-|-------|--------|-------|
-| Phase 0 — Schema Types | ✅ Compleet | 40 |
-| Phase 1 — openaec-layout | ✅ Compleet | 11 |
-| Phase 2 — Python ports | ✅ Compleet | 102 |
-| Phase 3 — Rendering pipeline | ✅ Compleet | incl. in P2 |
-| Phase 4 — Server + CLI | ✅ Compleet (deploy wacht) | 2 |
-| Phase 5 — openaec-engine (V3) | ✅ Compleet | 28 |
-| Phase 6 — Server module split + CORS | ✅ Compleet | 0 (integration) |
-| **Totaal** | **197 tests** | **~9.000 LOC** |
+|---|---|---|
+| 0 Setup + Schema Types | ✅ | 40 |
+| 1 openaec-layout (eigen ReportLab) | ✅ | 11 |
+| 2 Python libs porten | ✅ | 102 |
+| 3 Rendering pipeline | ✅ | incl. P2 |
+| 4 Server + CLI | ✅ | 2 (deploy open) |
+| 5 openaec-engine V3 | ✅ | 28 |
+| 6 Server module split + CORS | ✅ | integration |
+| **Totaal** | | **197 tests / ~9.000 LOC** |
+
+Phase-detail in [`archief/2026-Q1-voltooid.md`](archief/2026-Q1-voltooid.md) §"Rust implementatie".
 
 ---
 
-## Desktop App — Tauri v2
+## 🖥️ Frontend + Desktop
 
-- Scaffold compleet, GitHub Actions 4-platform build, Release v0.2.0-alpha (draft)
-- Open: Authentik redirect URI, OA logo, code signing, auto-updater
+**Frontend Chrome (19-20 maart):** TitleBar, Ribbon, Backstage, StatusBar, Modal, SettingsDialog, FeedbackDialog, ShortcutHelp ✅. Theme systeem (~80 CSS vars, light + openaec), i18n (5 namespaces NL+EN), SSO Authentik.
+
+**Desktop Tauri v2:** scaffold + GitHub Actions 4-platform build + Release v0.2.0-alpha (draft) ✅. Open: Authentik redirect URI (`http://tauri.localhost/auth/callback`), OA logo vervangen, code signing, auto-updater, native file dialogs.
 
 ---
 
-## Frontend Chrome (19-20 maart)
+## 🔗 Integraties
 
-TitleBar, Ribbon, Backstage, StatusBar, Modal, SettingsDialog, FeedbackDialog, ShortcutHelp — allemaal ✅
-Theme systeem (~80 CSS vars, light + openaec), i18n (5 namespaces, NL + EN), SSO (Authentik)
+- **warmteverlies → reports:** JSON resultaten als rapportinput (via `/api/generate/v2` met water-voetnoot hook sinds 10 apr)
+- **pyrevit-gis2bim → reports:** Revit-knop triggert rapportgeneratie met `X-API-Key` header, key `pyrevit-rc` op user `jochem`
+- **openaec-cloud crate:** reports-rs gebruikt het voor Nextcloud WebDAV opslag van gegenereerde rapporten
+- **reports (Rust) → reports (Python):** delen JSON schema als contract; Rust is drop-in vervanging
+
+---
+
+## 📚 Archief
+
+- [`archief/2026-Q1-voltooid.md`](archief/2026-Q1-voltooid.md) — Q1 2026 (februari + maart): Rust Phase 0-6, CR-K/SEC-K security fixes, BIC Rapport 17 pagina's, OpenAEC rebranding, T5/T6/T8, cloud migratie, Tauri v0.2.0-alpha

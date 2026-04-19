@@ -60,7 +60,6 @@ frontend/dist/
 # Claude Code
 SESSION_STATUS.md
 .claude/
-CLAUDE.md
 
 # Development artifacts (prompts, analysis, archive)
 _archive/

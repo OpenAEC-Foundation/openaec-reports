@@ -351,12 +351,19 @@ class FontManager:
         )
 
     def register_reportlab(self) -> None:
-        """Register fonts with ReportLab (once)."""
+        """Register fonts with ReportLab (once).
+
+        Volgorde:
+        1. Liberation Sans als embedded fallback (via core/fonts module).
+        2. Expliciete FONT_MAP (legacy Inter-* conventie).
+        3. **Alle .ttf/.otf in de font-cascade** — elk bestand wordt
+           geregistreerd onder zijn stem (``Gotham-Bold``) én onder de
+           variant zonder separators (``GothamBold``). Dit is noodzakelijk
+           voor tenant-specifieke fonts (brand.yaml verwijst vaak naar
+           ``GothamBold`` terwijl het bestand ``Gotham-Bold.ttf`` heet).
+        """
         if self._rl_registered:
             return
-        # Registreer Liberation Sans via core fonts module; tenant-cascade
-        # wordt gerespecteerd door eerste directory uit ``_font_cascade`` te
-        # gebruiken die Liberation bevat.
         from openaec_reports.core.fonts import register_liberation_fonts
         lib_dir = None
         for base in self._font_cascade:
@@ -364,7 +371,8 @@ class FontManager:
                 lib_dir = base
                 break
         register_liberation_fonts(lib_dir)
-        # Registreer custom fonts via cascade lookup
+
+        # Legacy Inter FONT_MAP (blijft voor backward compat)
         for name, filename in self.FONT_MAP.items():
             path = self._find_font_path(filename)
             if path is not None:
@@ -372,6 +380,27 @@ class FontManager:
                     pdfmetrics.registerFont(TTFont(name, str(path)))
                 except (OSError, ValueError):
                     logger.warning("Could not register font: %s", name)
+
+        # Cascade auto-register — alle .ttf/.otf in tenant fonts + fallback
+        # dirs. Eerste match wint (cascade-order) bij duplicate keys.
+        _registered: set[str] = set()
+        for base in self._font_cascade:
+            if not base.exists():
+                continue
+            for font_path in sorted(base.glob("*.ttf")) + sorted(base.glob("*.otf")):
+                stem = font_path.stem  # "Gotham-Bold"
+                stripped = stem.replace("-", "").replace("_", "").replace(" ", "")
+                for key in {stem, stripped}:
+                    if key in _registered:
+                        continue
+                    try:
+                        pdfmetrics.registerFont(TTFont(key, str(font_path)))
+                        _registered.add(key)
+                    except (OSError, ValueError) as e:  # noqa: PERF203
+                        logger.debug(
+                            "Could not auto-register font %s from %s: %s",
+                            key, font_path, e,
+                        )
         self._rl_registered = True
 
     def insert_into_page(self, page: fitz.Page) -> None:

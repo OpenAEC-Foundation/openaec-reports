@@ -9,12 +9,19 @@ Environment variables:
         Als niet gezet, afgeleid van parent van OPENAEC_TENANT_DIR.
 
 Fallback-chain: tenant → tenants_root/<name> → package defaults.
+
+Sinds 2026-04-20 is ``TenantConfig`` het canonieke asset-path resolver-contract
+voor renderer, fonts, templates en brand. Per-request instantiëring gebeurt via
+``tenant_resolver.get_tenant_config(slug)`` (LRU gecached).
 """
 
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 # Package defaults
 _PACKAGE_ASSETS = Path(__file__).parent.parent / "assets"
@@ -159,4 +166,93 @@ class TenantConfig:
             d = self._tenant_dir / "modules"
             if d.exists():
                 return d
+        return None
+
+    # ------------------------------------------------------------------
+    # Cascade-helpers voor renderer / font manager
+    # ------------------------------------------------------------------
+
+    @property
+    def fonts_dirs(self) -> list[Path]:
+        """Font lookup-cascade: tenant fonts/ eerst, dan package fonts/.
+
+        Consumers die een single ``Path`` nodig hebben (backward compat)
+        gebruiken ``fonts_dir``. Consumers die per-font willen resolveren
+        gebruiken ``fonts_dirs`` + ``find_font()``.
+        """
+        dirs: list[Path] = []
+        if self._tenant_dir:
+            d = self._tenant_dir / "fonts"
+            if d.exists():
+                dirs.append(d)
+        pkg = _PACKAGE_ASSETS / "fonts"
+        if pkg.exists():
+            dirs.append(pkg)
+        return dirs
+
+    def find_template(
+        self, filename: str, brand: str | None = None
+    ) -> Path | None:
+        """Resolveer een template-bestand via de tenant → package cascade.
+
+        Lookup-volgorde:
+        1. ``<tenant_dir>/templates/<filename>`` (tenant-specifiek)
+        2. ``<tenant_dir>/templates/<brand>/<filename>`` (brand-prefix in tenant)
+        3. ``<package_assets>/templates/<brand>/<filename>`` (legacy per-brand
+           sub-dir onder package, bijv. ``3bm_cooperatie/``)
+        4. ``<package_assets>/templates/<filename>`` (gedeelde defaults zoals
+           ``blank.yaml``, ``building_code.yaml``)
+
+        Args:
+            filename: Bestandsnaam (incl. ``.yaml``), bijv. ``cover.yaml``.
+            brand: Optioneel brand-subdirectory naam (voor legacy layout).
+
+        Returns:
+            Eerste bestaand pad, of ``None`` als niets gevonden.
+        """
+        candidates: list[Path] = []
+        if self._tenant_dir:
+            candidates.append(self._tenant_dir / "templates" / filename)
+            if brand:
+                candidates.append(
+                    self._tenant_dir / "templates" / brand / filename
+                )
+        if brand:
+            candidates.append(_PACKAGE_ASSETS / "templates" / brand / filename)
+        candidates.append(_PACKAGE_ASSETS / "templates" / filename)
+
+        for path in candidates:
+            if path.exists():
+                return path
+        return None
+
+    def find_font(self, filename: str) -> Path | None:
+        """Resolveer een font-bestand via tenant → package cascade."""
+        for base in self.fonts_dirs:
+            candidate = base / filename
+            if candidate.exists():
+                return candidate
+        return None
+
+    def find_asset(
+        self, relative_path: str | Path, brand_dir: Path | None = None
+    ) -> Path | None:
+        """Resolveer een willekeurig asset (logo, image) via cascade.
+
+        Lookup:
+        1. ``<brand_dir>/<relative_path>`` (brand uit brand.yaml, bijv.
+           logos/main.svg)
+        2. ``<tenant_dir>/<relative_path>``
+        3. ``<package_assets>/<relative_path>``
+        """
+        rel = Path(relative_path)
+        candidates: list[Path] = []
+        if brand_dir:
+            candidates.append(brand_dir / rel)
+        if self._tenant_dir:
+            candidates.append(self._tenant_dir / rel)
+        candidates.append(_PACKAGE_ASSETS / rel)
+        for path in candidates:
+            if path.exists():
+                return path
         return None

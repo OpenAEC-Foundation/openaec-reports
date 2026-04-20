@@ -30,7 +30,7 @@ from openaec_reports.auth.dependencies import (
 )
 from openaec_reports.auth.models import OrganisationDB, User, UserDB
 from openaec_reports.auth.routes import auth_router
-from openaec_reports.auth.security import enforce_jwt_secret, is_default_secret
+from openaec_reports.auth.security import enforce_jwt_secret
 from openaec_reports.core.data_transform import transform_json_to_engine_data
 from openaec_reports.core.engine import Report
 from openaec_reports.core.renderer_v2 import ReportGeneratorV2
@@ -519,7 +519,10 @@ async def generate_report_v2(request: Request, user: User = Depends(get_current_
         if brand_stationery.exists():
             stationery_dir = brand_stationery
 
-    generator = ReportGeneratorV2(brand=brand)
+    # Tenant_slug doorgeven zodat TemplateSet/FontManager de cascade gebruiken
+    # (tenant bind-mount → package defaults). Zonder slug valt alles terug op
+    # de oude package-only resolver.
+    generator = ReportGeneratorV2(brand=brand, tenant_slug=user.tenant or None)
 
     def build(output_path: Path) -> None:
         generator.generate(data, stationery_dir, output_path)

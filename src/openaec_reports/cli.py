@@ -146,15 +146,29 @@ def _cmd_generate(args):
 
 
 def _cmd_templates(args):
-    """Toon beschikbare templates."""
-    templates_dir = Path(__file__).parent / "assets" / "templates"
-    if not templates_dir.exists():
-        print("Geen templates gevonden.")
-        return
+    """Toon beschikbare templates (tenant-cascade, dedup op bestandsnaam)."""
+    from openaec_reports.core.tenant import TenantConfig
 
+    # TenantConfig resolvet OPENAEC_TENANT_DIR → tenant_dir, anders package
+    tc = TenantConfig()
+    dirs = tc.templates_dirs  # [tenant, package] of [package]
+
+    seen: set[str] = set()
+    has_any = False
     print("Beschikbare templates:")
-    for tmpl in sorted(templates_dir.glob("*.yaml")):
-        print(f"  - {tmpl.stem}")
+    for tdir in dirs:
+        if not tdir.exists():
+            continue
+        for tmpl in sorted(tdir.glob("*.yaml")):
+            if tmpl.stem in seen:
+                continue
+            seen.add(tmpl.stem)
+            has_any = True
+            source = "tenant" if tdir == dirs[0] and tc.tenant_dir else "package"
+            print(f"  - {tmpl.stem} ({source})")
+
+    if not has_any:
+        print("  (geen templates gevonden)")
 
 
 def _cmd_validate(args):

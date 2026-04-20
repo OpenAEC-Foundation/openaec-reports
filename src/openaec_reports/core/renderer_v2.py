@@ -24,7 +24,7 @@ import os
 import re
 import tempfile
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import fitz
 import yaml
@@ -33,6 +33,9 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas as rl_canvas
+
+if TYPE_CHECKING:
+    from openaec_reports.core.tenant import TenantConfig  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
@@ -131,13 +134,38 @@ def _parse_cell(value: object) -> tuple[str, bool]:
 # Template Loader
 # ---------------------------------------------------------------------------
 class TemplateSet:
-    """Loads and holds all YAML templates + stationery paths for a brand."""
+    """Loads and holds all YAML templates + stationery paths for a brand.
 
-    def __init__(self, brand: str | None = None):
+    Sinds 2026-04-20 multi-tenant aware: een optionele ``tenant_config``
+    activeert de cascade ``<tenant>/templates/[<brand>/]<file>`` →
+    ``<package>/templates/<brand>/<file>`` → ``<package>/templates/<file>``
+    (gedeelde defaults). Bij gebruik zonder ``tenant_config`` gedraagt de
+    klasse zich backward-compatible: zoekt in ``<package>/templates/<brand>/``
+    en faalt met ``FileNotFoundError`` als die directory ontbreekt.
+    """
+
+    def __init__(
+        self,
+        brand: str | None = None,
+        tenant_config: TenantConfig | None = None,  # noqa: F821 — fwd-ref
+    ):
         self.brand = brand or os.environ.get("OPENAEC_DEFAULT_BRAND", "default")
-        self.dir = TEMPLATES_DIR / self.brand
-        if not self.dir.exists():
-            raise FileNotFoundError(f"Template directory not found: {self.dir}")
+        self._tenant_config = tenant_config
+
+        if tenant_config is not None:
+            # Cascade mode: directory wordt per-template bepaald, maar exposeer
+            # ``self.dir`` (primaire bron) voor backward compat met callers
+            # die het attribuut inspecteren.
+            if tenant_config.tenant_dir:
+                self.dir = tenant_config.tenant_dir / "templates"
+            else:
+                self.dir = TEMPLATES_DIR / self.brand
+        else:
+            self.dir = TEMPLATES_DIR / self.brand
+            if not self.dir.exists():
+                raise FileNotFoundError(
+                    f"Template directory not found: {self.dir}"
+                )
 
         self.cover = self._load("cover.yaml")
         self.colofon = self._load("colofon.yaml")
@@ -147,10 +175,27 @@ class TemplateSet:
         self.bijlage = self._load("bijlage.yaml")
 
     def _load(self, filename: str) -> dict:
-        path = self.dir / filename
-        if not path.exists():
-            logger.warning("Template not found: %s", path)
-            return {}
+        """Laad een template-bestand met tenant → package cascade.
+
+        Wanneer ``tenant_config`` beschikbaar is, gebruikt ``find_template``
+        de volledige cascade. Zonder tenant_config blijft het oude gedrag
+        actief (package-only).
+        """
+        path: Path | None
+        if self._tenant_config is not None:
+            path = self._tenant_config.find_template(filename, brand=self.brand)
+            if path is None:
+                logger.warning(
+                    "Template niet gevonden in tenant '%s' of package: %s",
+                    getattr(self._tenant_config, "tenant_dir", None),
+                    filename,
+                )
+                return {}
+        else:
+            path = self.dir / filename
+            if not path.exists():
+                logger.warning("Template not found: %s", path)
+                return {}
         with open(path, encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
 
@@ -196,8 +241,29 @@ class FontManager:
         "LiberationSans", "LiberationSans-Bold", "LiberationSans-Italic",
     }
 
-    def __init__(self, font_dir: Path | None = None, brand_fonts: dict | None = None):
+    def __init__(
+        self,
+        font_dir: Path | None = None,
+        brand_fonts: dict | None = None,
+        tenant_config: TenantConfig | None = None,  # noqa: F821 — fwd-ref
+    ):
+        # Primair font_dir = tenant override / backward-compat single dir
         self.font_dir = font_dir or FONT_DIR
+        self._tenant_config = tenant_config
+
+        # Effectieve cascade: tenant → expliciete font_dir → package. Laatste
+        # wint bij duplicate naam; zie ``_find_font_path`` voor lookup-volgorde.
+        cascade: list[Path] = []
+        if tenant_config is not None:
+            for d in tenant_config.fonts_dirs:
+                if d not in cascade:
+                    cascade.append(d)
+        if font_dir and font_dir not in cascade:
+            cascade.insert(0, font_dir)
+        if FONT_DIR not in cascade and FONT_DIR.exists():
+            cascade.append(FONT_DIR)
+        self._font_cascade: list[Path] = cascade
+
         self._rl_registered = False
         self._fitz_fonts: dict[str, fitz.Font] = {}
         self._uses_custom_fonts = True
@@ -217,8 +283,8 @@ class FontManager:
         if self._uses_custom_fonts:
             self.FONT_MAP = dict(self._DEFAULT_FONT_MAP)
             for name, filename in self.FONT_MAP.items():
-                path = self.font_dir / filename
-                if path.exists():
+                path = self._find_font_path(filename)
+                if path is not None:
                     self._fitz_fonts[name] = fitz.Font(fontfile=str(path))
             self._bold_font = self._fitz_fonts.get("Inter-Bold") or self._liberation_bold
             self._book_font = self._fitz_fonts.get("Inter-Regular") or self._liberation_regular
@@ -227,27 +293,38 @@ class FontManager:
             self._bold_font = self._liberation_bold
             self._book_font = self._liberation_regular
 
+    def _find_font_path(self, filename: str) -> Path | None:
+        """Zoek een font-bestand via de cascade (tenant → font_dir → package).
+
+        Eerste match wint.
+        """
+        for base in self._font_cascade:
+            candidate = base / filename
+            if candidate.exists():
+                return candidate
+        return None
+
     def _load_liberation_fonts(self) -> None:
         """Laad Liberation Sans als embedded fallback voor PyMuPDF."""
-        lib_bold_path = FONT_DIR / "LiberationSans-Bold.ttf"
-        lib_regular_path = FONT_DIR / "LiberationSans-Regular.ttf"
-        lib_italic_path = FONT_DIR / "LiberationSans-Italic.ttf"
+        lib_bold_path = self._find_font_path("LiberationSans-Bold.ttf")
+        lib_regular_path = self._find_font_path("LiberationSans-Regular.ttf")
+        lib_italic_path = self._find_font_path("LiberationSans-Italic.ttf")
 
-        if lib_bold_path.exists():
+        if lib_bold_path is not None:
             self._liberation_bold = fitz.Font(fontfile=str(lib_bold_path))
             self._fitz_fonts["LiberationSans-Bold"] = self._liberation_bold
         else:
             logger.warning("LiberationSans-Bold.ttf niet gevonden, val terug op helv")
             self._liberation_bold = fitz.Font("helv")
 
-        if lib_regular_path.exists():
+        if lib_regular_path is not None:
             self._liberation_regular = fitz.Font(fontfile=str(lib_regular_path))
             self._fitz_fonts["LiberationSans"] = self._liberation_regular
         else:
             logger.warning("LiberationSans-Regular.ttf niet gevonden, val terug op helv")
             self._liberation_regular = fitz.Font("helv")
 
-        if lib_italic_path.exists():
+        if lib_italic_path is not None:
             self._liberation_italic = fitz.Font(fontfile=str(lib_italic_path))
             self._fitz_fonts["LiberationSans-Italic"] = self._liberation_italic
         else:
@@ -277,13 +354,20 @@ class FontManager:
         """Register fonts with ReportLab (once)."""
         if self._rl_registered:
             return
-        # Registreer Liberation Sans via core fonts module
+        # Registreer Liberation Sans via core fonts module; tenant-cascade
+        # wordt gerespecteerd door eerste directory uit ``_font_cascade`` te
+        # gebruiken die Liberation bevat.
         from openaec_reports.core.fonts import register_liberation_fonts
-        register_liberation_fonts()
-        # Registreer custom fonts
+        lib_dir = None
+        for base in self._font_cascade:
+            if (base / "LiberationSans-Regular.ttf").exists():
+                lib_dir = base
+                break
+        register_liberation_fonts(lib_dir)
+        # Registreer custom fonts via cascade lookup
         for name, filename in self.FONT_MAP.items():
-            path = self.font_dir / filename
-            if path.exists():
+            path = self._find_font_path(filename)
+            if path is not None:
                 try:
                     pdfmetrics.registerFont(TTFont(name, str(path)))
                 except (OSError, ValueError):
@@ -292,16 +376,16 @@ class FontManager:
 
     def insert_into_page(self, page: fitz.Page) -> None:
         """Insert fonts into a PyMuPDF page (custom + Liberation fallback)."""
-        # Altijd Liberation Sans inserten als embedded fallback
+        # Altijd Liberation Sans inserten als embedded fallback (cascade)
         for name, filename in self._LIBERATION_FONT_MAP.items():
-            path = FONT_DIR / filename
-            if path.exists():
+            path = self._find_font_path(filename)
+            if path is not None:
                 page.insert_font(fontname=name, fontfile=str(path))
         # Custom fonts
         if self._uses_custom_fonts:
             for name, filename in self.FONT_MAP.items():
-                path = self.font_dir / filename
-                if path.exists():
+                path = self._find_font_path(filename)
+                if path is not None:
                     page.insert_font(fontname=name, fontfile=str(path))
 
     def get_fitz_font(self, fontname: str) -> fitz.Font:
@@ -751,7 +835,7 @@ class ColofonGenerator:
 
     def _render_dynamic_field(
         self,
-        page: "fitz.Page",
+        page: fitz.Page,
         *,
         field_key: str,
         value: str,
@@ -942,7 +1026,7 @@ class ContentRenderer:
 
     # --- Low level ---
 
-    def _get_stationery_doc(self, pdf_path: Path) -> "fitz.Document":
+    def _get_stationery_doc(self, pdf_path: Path) -> fitz.Document:
         """Geeft een (gecachte) ``fitz.Document`` voor de stationery terug.
 
         PyMuPDF's ``insert_pdf`` kopieert pagina's uit de source-doc, dus
@@ -1140,7 +1224,7 @@ class ContentRenderer:
         self,
         entries: list[tuple],
         toc_page_nr: int,
-    ) -> "fitz.Document":
+    ) -> fitz.Document:
         """Render de TOC in een gloednieuwe ``fitz.Document``.
 
         Voor deferred TOC-rendering: na het rendern van alle sections
@@ -2220,32 +2304,81 @@ class ReportGeneratorV2:
         gen = ReportGeneratorV2(brand="default")
         gen.generate(data, stationery_dir, output_pdf)
 
+        # Multi-tenant: per-request tenant (Authentik forward_auth header):
+        gen = ReportGeneratorV2(brand="3bm", tenant_slug="3bm")
+
     Or from JSON file:
         gen = ReportGeneratorV2.from_json("report.json", stationery_dir, output)
     """
 
-    def __init__(self, brand: str | None = None):
+    def __init__(
+        self,
+        brand: str | None = None,
+        tenant_slug: str | None = None,
+        tenant_config: TenantConfig | None = None,
+    ):
         self.brand_name = brand or os.environ.get("OPENAEC_DEFAULT_BRAND", "default")
-        self.templates = TemplateSet(brand)
+
+        # Resolve tenant_config: expliciet > slug-lookup > env-var > None.
+        # Env-var (OPENAEC_TENANT_DIR) blijft ondersteund voor legacy CLI /
+        # examples scripts die geen tenant_slug meegeven.
+        if tenant_config is None and tenant_slug:
+            try:
+                from openaec_reports.core.tenant_resolver import (
+                    get_tenant_config,
+                )
+                tenant_config = get_tenant_config(tenant_slug)
+            except Exception:  # pragma: no cover — defensief
+                logger.exception(
+                    "Kon tenant_config niet resolven voor slug '%s' — "
+                    "fallback naar package defaults", tenant_slug,
+                )
+                tenant_config = None
+        elif tenant_config is None and os.environ.get("OPENAEC_TENANT_DIR"):
+            try:
+                from openaec_reports.core.tenant import TenantConfig
+
+                tenant_config = TenantConfig()
+            except Exception:  # pragma: no cover — defensief
+                tenant_config = None
+        self._tenant_config = tenant_config
+
+        self.templates = TemplateSet(brand, tenant_config=tenant_config)
 
         # Laad brand config voor stationery mapping en font info
         from openaec_reports.core.brand import BrandLoader
 
         try:
-            loader = BrandLoader()
+            loader = BrandLoader(
+                tenant_config=tenant_config,
+                tenant_slug=tenant_slug or "",
+            )
             self.brand_config = loader.load(brand)
         except FileNotFoundError:
             self.brand_config = None
-            logger.warning("Brand config niet gevonden voor '%s', gebruik defaults", brand)
+            if tenant_config is not None:
+                logger.warning(
+                    "Brand config '%s' niet gevonden in tenant '%s' of package — "
+                    "fallback naar defaults",
+                    brand, tenant_slug or tenant_config.tenant_dir,
+                )
+            else:
+                logger.warning(
+                    "Brand config niet gevonden voor '%s', gebruik defaults", brand,
+                )
 
-        # FontManager met brand font info
+        # FontManager met brand font info + tenant cascade
         brand_fonts = self.brand_config.fonts if self.brand_config else None
         font_dir = None
         if self.brand_config and self.brand_config.brand_dir:
             candidate = self.brand_config.brand_dir / "fonts"
             if candidate.exists() and any(candidate.glob("*.ttf")):
                 font_dir = candidate
-        self.fonts = FontManager(font_dir=font_dir, brand_fonts=brand_fonts)
+        self.fonts = FontManager(
+            font_dir=font_dir,
+            brand_fonts=brand_fonts,
+            tenant_config=tenant_config,
+        )
 
     def _resolve_stationery(self, stationery_dir: Path) -> dict[str, Path]:
         """Resolve stationery bestandspaden uit brand config of fallback naar conventie."""

@@ -6,7 +6,7 @@ forwardt het resultaat als ``X-Authentik-*`` headers naar de backend.
 Het backend hoeft dus geen JWKS meer te valideren.
 
 Authenticatie volgorde voor browser-traffic:
-1. ``X-Authentik-Meta-Username`` header (forward_auth) → primair pad
+1. ``X-Authentik-Username`` header (forward_auth) → primair pad
 2. Lokale legacy login (``OPENAEC_LOCAL_AUTH_ENABLED=true``):
    - ``X-API-Key`` header (machine clients via legacy DB-keys)
    - httpOnly cookie ``bm_access_token`` (eigen JWT)
@@ -187,7 +187,7 @@ def _authenticate_via_api_key(request: Request) -> User | None:
 def _authenticate_via_authentik(request: Request) -> User | None:
     """Probeer authenticatie via Caddy + Authentik forward_auth headers.
 
-    Leest ``X-Authentik-Meta-*`` headers, koppelt of provisioneert een
+    Leest ``X-Authentik-*`` headers, koppelt of provisioneert een
     lokale ``User`` record (zodat bestaande FK-relaties met projecten en
     rapporten blijven werken) en synct profiel-velden bij elke call.
 
@@ -195,7 +195,7 @@ def _authenticate_via_authentik(request: Request) -> User | None:
         request: FastAPI Request object.
 
     Returns:
-        User of None als de verplichte ``X-Authentik-Meta-Username``
+        User of None als de verplichte ``X-Authentik-Username``
         header ontbreekt.
     """
     parsed = parse_authentik_headers(request.headers)
@@ -331,7 +331,7 @@ async def get_current_user(request: Request) -> User:
     """Haal de huidige user op via Authentik-headers, API key of cookie.
 
     Volgorde:
-    1. ``X-Authentik-Meta-Username`` (Caddy forward_auth) — primair pad
+    1. ``X-Authentik-Username`` (Caddy forward_auth) — primair pad
     2. ``X-API-Key`` (legacy machine clients in de DB)
     3. Lokale JWT via cookie of ``Authorization: Bearer`` header
     4. Authentik service token ``Bearer ak_*`` — TODO fase 6 (501)

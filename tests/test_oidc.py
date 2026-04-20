@@ -2,7 +2,7 @@
 
 Sinds april 2026 doet de backend geen JWT/JWKS-validatie meer; auth wordt
 volledig door Caddy + Authentik proxy outpost afgehandeld en als
-``X-Authentik-Meta-*`` headers naar deze service gestuurd. Deze test-suite
+``X-Authentik-*`` headers naar deze service gestuurd. Deze test-suite
 checkt de header-parsing, user provisioning en profiel-sync.
 """
 
@@ -95,7 +95,7 @@ class TestParseHeaders:
         assert parsed.registration_number == "REG-001"
 
     def test_missing_username_returns_none(self):
-        """Zonder X-Authentik-Meta-Username → None (= 401 in dependency)."""
+        """Zonder X-Authentik-Username → None (= 401 in dependency)."""
         headers = _headers()
         del headers[HEADER_USERNAME]
         assert parse_authentik_headers(headers) is None
@@ -298,7 +298,7 @@ class TestMeEndpointWithAuthentik:
         # te reloaden, headers zijn per request.
 
     def test_me_with_authentik_headers(self):
-        """Met X-Authentik-Meta-Username → 200 + user data."""
+        """Met X-Authentik-Username → 200 + user data."""
         from openaec_reports.api import app
 
         client = TestClient(app)

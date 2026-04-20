@@ -20,10 +20,10 @@ from dataclasses import dataclass
 # Header-namen — single source of truth zodat dependencies + tests overeenkomen
 # ---------------------------------------------------------------------------
 
-HEADER_USERNAME = "X-Authentik-Meta-Username"
-HEADER_EMAIL = "X-Authentik-Meta-Email"
-HEADER_NAME = "X-Authentik-Meta-Name"
-HEADER_GROUPS = "X-Authentik-Meta-Groups"
+HEADER_USERNAME = "X-Authentik-Username"
+HEADER_EMAIL = "X-Authentik-Email"
+HEADER_NAME = "X-Authentik-Name"
+HEADER_GROUPS = "X-Authentik-Groups"
 HEADER_UID = "X-Authentik-Uid"
 HEADER_TENANT = "X-Authentik-Meta-Tenant"
 HEADER_COMPANY = "X-Authentik-Meta-Company"
@@ -38,7 +38,7 @@ class AuthentikHeaders:
 
     Alle velden zijn strings (mogelijk leeg). De ``subject`` waarde is
     de stabiele identifier waaronder we de user in onze eigen database
-    opslaan; we gebruiken bij voorkeur ``X-Authentik-Meta-Username``
+    opslaan; we gebruiken bij voorkeur ``X-Authentik-Username``
     omdat dat ook in de Caddyfile ``copy_headers`` lijst zit en stabiel
     is bij Authentik gebruikersnaam-wissels.
     """
@@ -62,7 +62,7 @@ def parse_authentik_headers(headers) -> AuthentikHeaders | None:
         headers: Het ``request.headers`` mapping object (case-insensitive).
 
     Returns:
-        ``AuthentikHeaders`` als de verplichte ``X-Authentik-Meta-Username``
+        ``AuthentikHeaders`` als de verplichte ``X-Authentik-Username``
         aanwezig is, anders ``None``.
     """
     username = (headers.get(HEADER_USERNAME) or "").strip()

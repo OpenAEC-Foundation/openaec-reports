@@ -140,14 +140,15 @@ src-tauri/gen/
 # Archief (dev notes, niet voor public)
 /_archive/
 
-# Tenant-data — Synology sync protection (added 2026-04-16)
-# Tenant-specifieke modules + brands + templates (geen public repo)
+# Tenant-data — leven in openaec-tenants private repo (B-3, 2026-04-20)
+# Bind-mount in productie: /opt/openaec/reports-tenants → /app/tenants
+# Assets per tenant onder slug-key (3bm, symitech, openaec_foundation, ...)
 src/openaec_reports/modules/symitech/
 src/openaec_reports/assets/brands/symitech/
-src/openaec_reports/assets/brands/3bm_cooperatie.yaml
+src/openaec_reports/assets/brands/3bm.yaml
 src/openaec_reports/assets/templates/symitech/
-src/openaec_reports/assets/templates/3bm_cooperatie/
-src/openaec_reports/assets/templates/3bm_cooperatie.yaml
+src/openaec_reports/assets/templates/3bm/
+src/openaec_reports/assets/templates/3bm.yaml
 src/openaec_reports/assets/stationery/
 
 # Proprietary fonts (Hoefler&Co Gotham)

@@ -19,7 +19,9 @@ Bij ontbreken van alle bovenstaande → 401.
 from __future__ import annotations
 
 import logging
+import os
 import uuid
+from functools import lru_cache
 
 from fastapi import HTTPException, Request, status
 
@@ -309,22 +311,133 @@ def _diff_authentik_to_user(parsed: AuthentikHeaders, user: User) -> dict[str, s
 def _is_authentik_service_token(request: Request) -> bool:
     """Detecteer een Authentik machine-client token in de Authorization header.
 
-    Caddy laat ``Authorization: Bearer ak_*`` headers ongemoeid passeren
-    naar de upstream (zie ``authentik_forward_auth`` Caddy snippet, fase 4).
-    De backend moet dat token zelf valideren via Authentik's
-    ``/api/v3/core/tokens/<id>/view_key/`` endpoint.
-
-    Args:
-        request: FastAPI Request object.
-
-    Returns:
-        True als er een ``Bearer ak_*`` of ``Bearer ak-*`` token is.
+    Behandelt elke ``Authorization: Bearer`` die GEEN lokale JWT is (JWTs
+    beginnen met ``eyJ``). Validatie gebeurt in
+    :func:`_authenticate_via_authentik_token` tegen Authentik's
+    ``/api/v3/core/users/me/`` endpoint met een 5 min cache.
     """
     auth = request.headers.get("Authorization", "")
     if not auth.startswith("Bearer "):
         return False
     token = auth[7:].strip()
-    return token.startswith(("ak_", "ak-"))
+    return bool(token) and not token.startswith("eyJ")
+
+
+# ---------------------------------------------------------------------------
+# Authentik service-token authentication (Fase 6)
+# ---------------------------------------------------------------------------
+_AUTHENTIK_API_URL = os.environ.get(
+    "AUTHENTIK_API_URL", "https://auth.open-aec.com"
+).rstrip("/")
+_AUTHENTIK_ME_ENDPOINT = f"{_AUTHENTIK_API_URL}/api/v3/core/users/me/"
+_TOKEN_CACHE_TTL = 300  # 5 min
+
+
+@lru_cache(maxsize=256)
+def _cached_authentik_user(token_fingerprint: str, bucket_minute: int, token: str) -> dict | None:
+    """5-min bucketed token validation. Bucket-minute forceert TTL expiry."""
+    try:
+        import httpx  # lazy import — alleen geladen bij eerste gebruik
+        with httpx.Client(timeout=5.0) as client:
+            resp = client.get(
+                _AUTHENTIK_ME_ENDPOINT,
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            if resp.status_code == 200:
+                return resp.json().get("user")
+            logger.debug(
+                "Authentik token validation returned %s for fingerprint %s",
+                resp.status_code, token_fingerprint,
+            )
+    except Exception as e:  # pragma: no cover — defensief
+        logger.warning(
+            "Authentik token validation error (fingerprint=%s): %s",
+            token_fingerprint, e,
+        )
+    return None
+
+
+def _authenticate_via_authentik_token(request: Request) -> User | None:
+    """Probeer authenticatie via Authentik service-token.
+
+    Flow:
+    1. Strip ``Bearer`` prefix, skip JWTs (die zijn lokaal).
+    2. Valideer tegen Authentik ``/api/v3/core/users/me/`` (5 min cache).
+    3. Auto-provision lokale User record op basis van service-account.
+    4. Honorer optionele ``X-Original-Tenant`` header voor backend-to-backend
+       impersonation — vertrouwd omdat de Bearer al door Authentik gevalideerd is.
+
+    Returns:
+        User als Authentik het token accepteert, anders None.
+    """
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        return None
+    token = auth[7:].strip()
+    if not token or token.startswith("eyJ"):  # JWT → fallthrough naar lokaal pad
+        return None
+
+    # Cache key: sha256 van token (eerste 16 hex) + 5-min bucket
+    import hashlib
+    import time as _time
+    fingerprint = hashlib.sha256(token.encode()).hexdigest()[:16]
+    bucket = int(_time.time()) // _TOKEN_CACHE_TTL
+    ak_user = _cached_authentik_user(fingerprint, bucket, token)
+    if ak_user is None:
+        logger.debug("Authentik token niet geaccepteerd (fingerprint=%s)", fingerprint)
+        return None
+
+    username = ak_user.get("username") or ""
+    attributes = ak_user.get("attributes") or {}
+    tenant = attributes.get("tenant", "")
+    display_name = ak_user.get("name") or username
+
+    if not username:
+        logger.warning("Authentik token valide maar username ontbreekt")
+        return None
+
+    # Honorer X-Original-Tenant voor backend-to-backend impersonation.
+    # Alleen geaccepteerd als Bearer al is gevalideerd (hierboven).
+    override_tenant = request.headers.get("X-Original-Tenant", "").strip()
+    effective_tenant = override_tenant or tenant
+
+    db = get_user_db()
+    # Lookup via stabiele subject 'authentik-svc:<username>'
+    subject = f"authentik-svc:{username}"
+    user = db.get_by_oidc_subject(subject)
+
+    if user is None:
+        # Auto-provision service-account als lokale User
+        user = User(
+            id=uuid.uuid4().hex,
+            username=f"svc_{username.replace('-', '_')}"[:50],
+            email=f"{username}@service.openaec.local",
+            display_name=display_name,
+            role=UserRole.user,
+            tenant=effective_tenant,
+            is_active=True,
+            hashed_password=hash_password(uuid.uuid4().hex),  # nooit bruikbaar
+            auth_provider="authentik-token",
+            oidc_subject=subject,
+        )
+        try:
+            db.create(user)
+            logger.info(
+                "Authentik token: auto-provisioned service user '%s' (tenant=%s)",
+                username, effective_tenant,
+            )
+        except Exception:
+            user.username = f"{user.username}_{fingerprint[:6]}"
+            db.create(user)
+    elif override_tenant and user.tenant != override_tenant:
+        # Service gebruikt X-Original-Tenant voor on-behalf-of call — update live
+        db.update(user.id, tenant=override_tenant)
+        user = db.get_by_id(user.id) or user
+
+    if not user.is_active:
+        return None
+
+    return user
 
 
 async def get_current_user(request: Request) -> User:
@@ -352,12 +465,17 @@ async def get_current_user(request: Request) -> User:
     if user is not None:
         return user
 
-    # Methode 2: legacy DB API key (alleen relevant als geen Authentik headers)
+    # Methode 2: Authentik service-token (Bearer, niet-JWT)
+    user = _authenticate_via_authentik_token(request)
+    if user is not None:
+        return user
+
+    # Methode 3: legacy DB API key (alleen relevant als geen Authentik headers)
     user = _authenticate_via_api_key(request)
     if user is not None:
         return user
 
-    # Methode 3: lokale JWT (cookie of Bearer) — uitsluitend voor lokale dev/tests
+    # Methode 4: lokale JWT (cookie of Bearer) — uitsluitend voor lokale dev/tests
     token = _extract_token(request)
     if token:
         payload = decode_access_token(token)
@@ -366,16 +484,6 @@ async def get_current_user(request: Request) -> User:
             user = db.get_by_id(payload["sub"])
             if user is not None and user.is_active:
                 return user
-
-    # Methode 4: Authentik service token — fase 6, nog niet geimplementeerd
-    if _is_authentik_service_token(request):
-        raise HTTPException(
-            status_code=status.HTTP_501_NOT_IMPLEMENTED,
-            detail=(
-                "Authentik service-token validatie is nog niet geimplementeerd "
-                "(zie fase 6 van het Unified SSO plan)."
-            ),
-        )
 
     # Geen enkel pad werkte
     if is_authentik_enabled():

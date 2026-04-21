@@ -14,7 +14,6 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 from fastapi import APIRouter, Depends, FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.background import BackgroundTask
@@ -31,11 +30,16 @@ from openaec_reports.auth.dependencies import (
 from openaec_reports.auth.models import OrganisationDB, User, UserDB
 from openaec_reports.auth.routes import auth_router
 from openaec_reports.auth.security import enforce_jwt_secret
+from openaec_reports.core.cors_middleware import TenantAwareCORSMiddleware
 from openaec_reports.core.data_transform import transform_json_to_engine_data
 from openaec_reports.core.engine import Report
 from openaec_reports.core.renderer_v2 import ReportGeneratorV2
 from openaec_reports.core.template_engine import TemplateEngine
-from openaec_reports.core.tenant import TenantConfig
+from openaec_reports.core.tenant import TenantConfig, detect_tenants_root
+from openaec_reports.core.tenant_cors import (
+    build_allowed_origins_set,
+    load_tenant_cors_configs,
+)
 from openaec_reports.core.tenant_resolver import (
     get_brand_loader,
     get_template_loader,
@@ -116,8 +120,12 @@ app = FastAPI(
 )
 
 # ============================================================
-# CORS
+# CORS — tenant-aware (Golf 5c B-4, 2026-04-21)
 # ============================================================
+# Origins worden dynamisch geladen uit ``tenants/<slug>/tenant.yaml`` onder
+# ``OPENAEC_TENANTS_ROOT``. Bij ontbrekende tenants-dir of lege union valt
+# de middleware terug op de ``CORS_ORIGINS`` env var zodat bestaande
+# productie-deploys tijdens de transitie blijven werken.
 
 _DEFAULT_CORS_ORIGINS = [
     "http://localhost:5173",
@@ -125,14 +133,59 @@ _DEFAULT_CORS_ORIGINS = [
     "http://127.0.0.1:5173",
     "https://report.open-aec.com",
 ]
-_cors_env = os.environ.get("CORS_ORIGINS", "")
-_cors_origins = (
-    [o.strip() for o in _cors_env.split(",") if o.strip()] if _cors_env else _DEFAULT_CORS_ORIGINS
-)
+
+
+def _resolve_allowed_origins() -> tuple[frozenset[str], str]:
+    """Bouw de toegestane-origin set op basis van tenant.yaml files.
+
+    Returns:
+        (origins, source) — ``source`` is een korte string voor startup-log
+        zodat we kunnen zien of we op tenants of de env-fallback draaien.
+    """
+    tenants_root = detect_tenants_root()
+    environment = os.environ.get("OPENAEC_ENV", "development")
+    include_dev = environment != "production"
+
+    if tenants_root is not None:
+        configs = load_tenant_cors_configs(tenants_root, include_dev=include_dev)
+        allowed = build_allowed_origins_set(configs)
+        if allowed:
+            logger.info(
+                "CORS: %d origin(s) geladen uit %d tenant(s) onder %s (include_dev=%s)",
+                len(allowed),
+                len(configs),
+                tenants_root,
+                include_dev,
+            )
+            return allowed, f"tenants:{tenants_root}"
+        logger.warning(
+            "CORS: tenants_root=%s gevonden maar geen origins opgeleverd — fallback op env",
+            tenants_root,
+        )
+    else:
+        logger.warning(
+            "CORS: geen OPENAEC_TENANTS_ROOT / OPENAEC_TENANT_DIR gezet — fallback op env"
+        )
+
+    _cors_env = os.environ.get("CORS_ORIGINS", "")
+    fallback_list = (
+        [o.strip() for o in _cors_env.split(",") if o.strip()]
+        if _cors_env
+        else _DEFAULT_CORS_ORIGINS
+    )
+    logger.info(
+        "CORS: fallback — %d origin(s) uit %s",
+        len(fallback_list),
+        "CORS_ORIGINS env" if _cors_env else "hardcoded defaults",
+    )
+    return frozenset(fallback_list), "env"
+
+
+_cors_allowed_origins, _cors_source = _resolve_allowed_origins()
 
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=_cors_origins,
+    TenantAwareCORSMiddleware,
+    allowed_origins=_cors_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

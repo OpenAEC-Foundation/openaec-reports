@@ -114,3 +114,26 @@ class ModuleRegistry:
 
 
 __all__ = ["ContentModule", "ModuleConfig", "ModuleRegistry"]
+
+
+# Auto-register tenant-specific plugin modules on package import.
+#
+# Plugin packages leven privé (buiten deze repo, bv. in openaec-tenants).
+# Als een plugin package geïnstalleerd is bundelt de image-build hem in
+# ``openaec_reports.modules.<tenant>`` en roept onderstaande hook de
+# bijbehorende ``register_*_modules()`` functie aan. Wanneer een plugin
+# niet aanwezig is (bv. in de publieke open-source build), slaan we het
+# stilzwijgend over zonder breaking imports.
+_TENANT_PLUGINS = (
+    ("openaec_reports.modules.symitech", "register_symitech_modules"),
+    # Nieuwe tenant-plugins hier toevoegen:
+    # ("openaec_reports.modules.<tenant>", "register_<tenant>_modules"),
+)
+
+for _module_path, _register_fn in _TENANT_PLUGINS:
+    try:
+        _mod = __import__(_module_path, fromlist=[_register_fn])
+        getattr(_mod, _register_fn)()
+    except (ImportError, AttributeError):
+        # Plugin niet geïnstalleerd (publieke build) of register-fn afwezig.
+        pass

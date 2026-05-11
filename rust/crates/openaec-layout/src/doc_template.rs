@@ -177,26 +177,12 @@ impl DocTemplate {
                 let flowable = &mut flowables[idx];
 
                 if flowable.is_page_break() {
-                    if std::env::var("OAEC_LAYOUT_DEBUG").is_ok() {
-                        eprintln!(
-                            "[layout] page={} idx={} cursor_y={:.1} PAGEBREAK",
-                            pages.len() + 1, idx, cursor_y.0,
-                        );
-                    }
                     idx += 1;
                     break;
                 }
 
                 let remaining = Pt(inner_h.0 - cursor_y.0);
                 let size = flowable.wrap(inner_w, remaining, ctx);
-                let debug = std::env::var("OAEC_LAYOUT_DEBUG").is_ok();
-                if debug {
-                    eprintln!(
-                        "[layout] page={} idx={} cursor_y={:.1} inner_h={:.1} remaining={:.1} size.h={:.1} fits={}",
-                        pages.len() + 1, idx, cursor_y.0, inner_h.0, remaining.0, size.height.0,
-                        size.height.0 <= remaining.0,
-                    );
-                }
 
                 if size.height.0 <= remaining.0 {
                     // Fits entirely
@@ -206,28 +192,10 @@ impl DocTemplate {
                 } else {
                     // Doesn't fit — try to split
                     let split_result = flowable.split(inner_w, remaining, ctx);
-                    let split_kind = match &split_result {
-                        crate::flowable::SplitResult::Split(_, _) => "Split",
-                        crate::flowable::SplitResult::CannotSplit => "CannotSplit",
-                        crate::flowable::SplitResult::Fits => "Fits",
-                    };
-                    if std::env::var("OAEC_LAYOUT_DEBUG").is_ok() {
-                        eprintln!(
-                            "[layout]   → split_result={} (remaining={:.1})",
-                            split_kind, remaining.0,
-                        );
-                    }
                     match split_result {
                         crate::flowable::SplitResult::Split(mut first, second) => {
                             // Draw the first part on this page
                             let first_size = first.wrap(inner_w, remaining, ctx);
-                            if std::env::var("OAEC_LAYOUT_DEBUG").is_ok() {
-                                eprintln!(
-                                    "[layout]   → Split first_size.h={:.1} (remaining was {:.1}; overflow={})",
-                                    first_size.height.0, remaining.0,
-                                    first_size.height.0 > remaining.0,
-                                );
-                            }
                             first.draw(start_x, Pt(start_y.0 + cursor_y.0), &mut draw_list);
                             cursor_y = Pt(cursor_y.0 + first_size.height.0);
                             // Replace current flowable with the remainder

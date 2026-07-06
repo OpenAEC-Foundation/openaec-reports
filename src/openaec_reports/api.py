@@ -908,7 +908,10 @@ async def pdok_services(user: User = Depends(get_current_user)):
 # Static frontend (moet ONDERAAN staan, na alle API routes)
 # ============================================================
 
-_static_dir = Path(__file__).parent.parent.parent / "static"
+# In de src-layout (dev) staat de frontend-dist naast de repo-root; in het
+# Docker-image is de package pip-installed (site-packages) en staat de dist op
+# /app/static — dan wijst OPENAEC_STATIC_DIR (Dockerfile-ENV) ernaartoe.
+_static_dir = Path(os.environ.get("OPENAEC_STATIC_DIR") or Path(__file__).parent.parent.parent / "static")
 if _static_dir.exists():
     # Kopieer uitleg.html naar static dir zodat /uitleg.html direct werkt
     _docs_dir = _find_docs_dir()

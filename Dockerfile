@@ -23,8 +23,10 @@ COPY tenants/ ./tenants/
 COPY docs/ ./docs/
 RUN pip install --no-cache-dir .
 
-# Frontend dist van stage 1
+# Frontend dist van stage 1 — api.py vindt hem via OPENAEC_STATIC_DIR (de
+# package is pip-installed, dus het relatieve src-layout-pad bestaat hier niet).
 COPY --from=frontend-build /app/frontend/dist /app/static
+ENV OPENAEC_STATIC_DIR=/app/static
 
 # Non-root user voor security
 RUN adduser --disabled-password --gecos '' appuser

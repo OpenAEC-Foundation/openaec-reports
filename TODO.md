@@ -1,6 +1,6 @@
 # TODO — openaec-reports
 
-**Laatst bijgewerkt:** 2026-04-19 | **Status:** [`STATUS.md`](STATUS.md) | **Archief:** [`archief/2026-Q1-voltooid.md`](archief/2026-Q1-voltooid.md)
+**Laatst bijgewerkt:** 2026-07-10 | **Status:** [`STATUS.md`](STATUS.md) | **Archief:** [`archief/2026-Q1-voltooid.md`](archief/2026-Q1-voltooid.md)
 
 > Legenda: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
 > Voltooid werk is verplaatst naar `archief/2026-Q1-voltooid.md` (1 apr 2026). Deze file bevat alleen open items.
@@ -8,6 +8,13 @@
 ---
 
 ## 🔴 Kritiek / hoog
+
+### Renderer brand-lekkage — Fase 3 (open, hoofddoel)
+
+- [ ] **RV-1** `renderer_v2.py` valt op 14 plekken terug op een hardcoded 3BM-hexkleur als `.get()`-default (o.a. regels 587, 599, 672, 679, 745, 779, 795, 798, 852, 876, 1202, 1221-1264, 1502-1506) — zodra een tenant een blok niet definieert schildert de engine dat blok stilzwijgend 3BM-turquoise/paars. Fix: generieke `static_elements`-renderer die zonder tenant-config hard faalt i.p.v. stil op 3BM-kleur terugvalt (zelfde faal-luid-patroon als `core/refs.py`).
+- [ ] **RV-2** `tenants/kba/templates/content_styles.yaml` mist de blokken `calculation` en `check` (alleen `paragraph`/`bullet_list`/`table` gedefinieerd onder `blocks:`) — die vallen daardoor sowieso terug op de RV-1 hardcoded defaults.
+- [ ] **RV-3** `SegoeUI-Semibold.ttf` ontbreekt in `tenants/kba/fonts/` (alleen Bold/Italic/Semilight/Regular aanwezig) — ReportLab kan `font-weight:600` niet synthetiseren.
+- [ ] **RV-4** Bug: `openaec_foundation`-tenant crasht op content-secties — `KeyError: 'x'` in `heading_1()`, `core/renderer_v2.py:1317` (`n["x"]` ontbreekt). Content-secties gebruiken een afwijkend `content_styles`-schema dan waar `heading_1` vanuit gaat. Vastgelegd in `tests/baseline/FAILURES.md`, buiten scope fase 1-3.
 
 ### Security — Hoog (SEC-H, 3 open)
 

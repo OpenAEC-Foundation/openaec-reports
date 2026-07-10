@@ -148,9 +148,16 @@ class TemplateSet:
         self,
         brand: str | None = None,
         tenant_config: TenantConfig | None = None,  # noqa: F821 — fwd-ref
+        brand_config: Any | None = None,  # BrandConfig — fwd-ref, zie core.brand
     ):
         self.brand = brand or os.environ.get("OPENAEC_DEFAULT_BRAND", "default")
         self._tenant_config = tenant_config
+        # BrandConfig voor $colors./$fonts.-substitutie tijdens het laden
+        # (zie core/refs.py). Optioneel en achterwaarts compatibel: zonder
+        # brand_config wordt geen substitutie uitgevoerd (bestaande
+        # call-sites/tests die TemplateSet zonder brand_config aanroepen
+        # blijven ongewijzigd werken).
+        self.brand_config = brand_config
 
         if tenant_config is not None:
             # Cascade mode: directory wordt per-template bepaald, maar exposeer
@@ -197,7 +204,18 @@ class TemplateSet:
                 logger.warning("Template not found: %s", path)
                 return {}
         with open(path, encoding="utf-8") as f:
-            return yaml.safe_load(f) or {}
+            data = yaml.safe_load(f) or {}
+
+        if self.brand_config is not None:
+            from openaec_reports.core.refs import resolve_refs
+
+            data = resolve_refs(
+                data,
+                self.brand_config,
+                tenant=getattr(self.brand_config, "tenant", "") or self.brand,
+                source=filename,
+            )
+        return data
 
     @property
     def blocks(self) -> dict:
@@ -2372,9 +2390,11 @@ class ReportGeneratorV2:
                 tenant_config = None
         self._tenant_config = tenant_config
 
-        self.templates = TemplateSet(brand, tenant_config=tenant_config)
-
-        # Laad brand config voor stationery mapping en font info
+        # Laad brand config vóór de templates: TemplateSet gebruikt hem om
+        # $colors./$fonts.-refs in de template-YAML's te resolven bij het
+        # laden (zie core/refs.py). Zo hoeft geen enkele call-site verderop
+        # in de renderer iets van refs te weten — de YAML-dicts die uit
+        # TemplateSet komen zijn al volledig resolved.
         from openaec_reports.core.brand import BrandLoader
 
         try:
@@ -2395,6 +2415,10 @@ class ReportGeneratorV2:
                 logger.warning(
                     "Brand config niet gevonden voor '%s', gebruik defaults", brand,
                 )
+
+        self.templates = TemplateSet(
+            brand, tenant_config=tenant_config, brand_config=self.brand_config,
+        )
 
         # FontManager met brand font info + tenant cascade
         brand_fonts = self.brand_config.fonts if self.brand_config else None

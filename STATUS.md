@@ -1,6 +1,6 @@
 # STATUS — openaec-reports
 
-**Laatste update:** 2026-04-19 | **Productie:** [`report.open-aec.com`](https://report.open-aec.com)
+**Laatste update:** 2026-07-10 | **Productie:** [`report.open-aec.com`](https://report.open-aec.com)
 **Archief:** [`archief/2026-Q1-voltooid.md`](archief/2026-Q1-voltooid.md) | **Git history:** `git log --oneline -30`
 
 ---
@@ -27,6 +27,19 @@
 | **Rust renderer feature parity** | parity gap vs Python `renderer_v2.py` | Heading-nummering + TOC counter state |
 | **Authentik Unified SSO migratie** | plan klaar, blokkeert op auth-fix | Fase 5 Reports migratie (dependencies.py refactor, JWT exit) |
 | **Desktop Tauri v2** | v0.2.0-alpha draft | D4 Authentik redirect URI, D5 OA logo, D6-D9 signing/updater/dialogs |
+| **Renderer brand-substitutie** | Fase 1+2 klaar | Fase 3: generieke `static_elements`-renderer (14 hardcoded 3BM-kleuren als `.get()`-default in `renderer_v2.py`) |
+
+---
+
+## 🎨 Renderer-refactor (`renderer_v2.py`) — brand-lekkage
+
+**Probleem:** tenant-templates bevatten hardcoded 3BM-huisstijlkleuren; een tenant die van 3BM gekopieerd wordt rendert daardoor zonder fout in 3BM-paars/turquoise. `$colors`/`$fonts`-substitutie bestond alleen in het engine.Report-pad (`brand_renderer`/`page_templates`), niet in `ReportGeneratorV2` dat het live v2-endpoint bedient.
+
+- **Fase 1 (klaar):** `tenants/kba/brand.yaml` wordt afgeleid uit de canonieke `kba-brand.json` via `scripts/build_tenant_brand.py` (`--check` als CI-guard tegen handmatige bewerking).
+- **Fase 2 (klaar):** resolver in `src/openaec_reports/core/refs.py`, toegepast bij het laden van de template-YAML in `TemplateSet`. Onbekende sleutel faalt luid (tenant + bestand + sleutel in de melding), geen stille fallback. Regressie-vangrail: `scripts/render_baseline.py` + `scripts/diff_baseline.py` — 3BM 8/8 pagina's pixel-identiek vastgelegd (tolerance=0 px), `tests/baseline/manifest.json` + PNG's in git.
+- **Fase 3 (open, hoofddoel):** `renderer_v2.py` valt op **14 plekken** terug op een hardcoded 3BM-hexkleur als `.get()`-default (bv. `tf.get("color", "#006FAB")`, `title_cfg.get("color", "#401246")`) zodra een tenant een blok niet definieert. Dat is de resterende brand-lekkagebron — een generieke `static_elements`-renderer die zonder tenant-config hard faalt (i.p.v. stil op 3BM-kleur terugvalt) is de vervolgstap.
+- **Bijvangst:** `tenants/kba/templates/content_styles.yaml` mist de blokken `calculation` en `check` (alleen `paragraph`/`bullet_list`/`table` gedefinieerd) — die vallen dus sowieso terug op de fase-3 hardcoded defaults. `SegoeUI-Semibold.ttf` ontbreekt in `tenants/kba/fonts/` (alleen Bold/Italic/Semilight/Regular aanwezig); ReportLab kan `font-weight:600` niet synthetiseren.
+- **Bekende bug (buiten scope fase 1-3):** `openaec_foundation`-tenant crasht op content-secties — `KeyError: 'x'` in `heading_1()` (`renderer_v2.py:1317`), content-secties gebruiken een afwijkend `content_styles`-schema. Vastgelegd in `tests/baseline/FAILURES.md`.
 
 ---
 

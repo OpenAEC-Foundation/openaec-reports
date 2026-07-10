@@ -87,15 +87,12 @@ def load_base(tenant_dir: Path) -> dict[str, Any]:
 def build_colors(kleuren: dict[str, str]) -> dict[str, str]:
     """Map kba-brand.json 'kleuren' naar het colors:-schema van renderer_v2.
 
-    'warning' (fail-kleur voor check-blocks) bestaat niet in de canonieke
-    huisstijl (``kba-brand.json``'s ``kleuren``-object kent geen rood/fail-
-    tint) en wordt daarom bewust NIET verzonnen. Het veld ontbreekt hier
-    volledig; ``modules.check.fail_color`` in brand.base.yaml verwijst nog
-    naar ``$colors.warning``, maar die substitutie is op dit moment INERT
-    (renderer_v2 lost "$colors.*"-referenties in modules: nog niet op — dat
-    is losstaand vervolgwerk). Het live check-block leest zijn fail-kleur
-    uit content_styles.yaml met een hardcoded fallback "#FF0000", niet uit
-    brand.yaml. Zie de toelichting in brand.base.yaml.
+    'warning' (fail-kleur voor check-blocks) is sinds 2026-07-10 afgeleid
+    van kba-brand.json's ``kleuren.rood`` — de canonieke bron kreeg die
+    tint toegevoegd nadat gebleken was dat een niet-canonieke placeholder
+    ("#E74C3C") in ``tenants/kba/templates/content_styles.yaml`` stond te
+    wachten op precies deze aanvulling (zie git-historie van dat bestand
+    voor de oude placeholder-noot).
 
     'table_header_bg' / 'table_footer_bg' hebben geen 1-op-1 bron in
     kba-brand.json — de HTML-referentietemplates (coverblad.html,
@@ -114,6 +111,7 @@ def build_colors(kleuren: dict[str, str]) -> dict[str, str]:
         "separator": kleuren["lijn"],
         "surface": kleuren["vlak"],
         "paper": kleuren["papier"],
+        "warning": kleuren["rood"],
         "table_header_bg": kleuren["petrol"],
         "table_header_text": kleuren["papier"],
         "table_footer_bg": kleuren["teal"],

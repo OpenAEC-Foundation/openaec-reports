@@ -12,6 +12,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 import yaml
@@ -276,6 +277,28 @@ class BrandLoader:
             tenant_modules = data.get("tenant_modules", [])
             modules_dict = raw_modules
 
+        # $colors./$fonts.-refs in "pages" (bijv. pages.cover.static_elements,
+        # zie core/static_elements.py) resolven vóórdat BrandConfig gebouwd
+        # wordt. TemplateSet._load doet dit al voor template-YAML's (zie
+        # core/refs.py); "pages" leeft in brand.yaml zelf en liep tot nu toe
+        # NIET door die resolver — static_elements zou dus "$colors.primary"
+        # als letterlijke string doorgeven i.p.v. de hex-waarde. colors/fonts
+        # zijn op dit punt al bekend (regels hierboven), dus we resolven
+        # tegen een lichte stand-in met diezelfde twee attributen.
+        raw_pages = data.get("pages", {})
+        if raw_pages:
+            from openaec_reports.core.refs import resolve_refs
+
+            _colors_fonts_ns = SimpleNamespace(
+                colors=data.get("colors", {}), fonts=data.get("fonts", {})
+            )
+            raw_pages = resolve_refs(
+                raw_pages,
+                _colors_fonts_ns,
+                tenant=brand_info.get("tenant", "") or brand_info.get("slug", name or ""),
+                source="brand.yaml#pages",
+            )
+
         return BrandConfig(
             name=brand_info.get("name", name),
             slug=brand_info.get("slug", name),
@@ -288,7 +311,7 @@ class BrandLoader:
             logos=data.get("logos", {}),
             contact=data.get("contact", {}),
             styles=data.get("styles", {}),
-            pages=data.get("pages", {}),
+            pages=raw_pages,
             stationery=stationery,
             modules=modules_dict,
             tenant_modules=tenant_modules,

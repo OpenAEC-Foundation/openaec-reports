@@ -1,6 +1,6 @@
 # TODO — openaec-reports
 
-**Laatst bijgewerkt:** 2026-07-10 | **Status:** [`STATUS.md`](STATUS.md) | **Archief:** [`archief/2026-Q1-voltooid.md`](archief/2026-Q1-voltooid.md)
+**Laatst bijgewerkt:** 2026-07-10 (KBA-kicker uppercase) | **Status:** [`STATUS.md`](STATUS.md) | **Archief:** [`archief/2026-Q1-voltooid.md`](archief/2026-Q1-voltooid.md)
 
 > Legenda: 🔴 Blocker | 🟡 Middel | 🟢 Nice-to-have
 > Voltooid werk is verplaatst naar `archief/2026-Q1-voltooid.md` (1 apr 2026). Deze file bevat alleen open items.
@@ -9,12 +9,19 @@
 
 ## 🔴 Kritiek / hoog
 
-### Renderer brand-lekkage — Fase 3 (open, hoofddoel)
+### Renderer brand-lekkage — Fase 1-3 afgerond, restpunten open
 
-- [ ] **RV-1** `renderer_v2.py` valt op 14 plekken terug op een hardcoded 3BM-hexkleur als `.get()`-default (o.a. regels 587, 599, 672, 679, 745, 779, 795, 798, 852, 876, 1202, 1221-1264, 1502-1506) — zodra een tenant een blok niet definieert schildert de engine dat blok stilzwijgend 3BM-turquoise/paars. Fix: generieke `static_elements`-renderer die zonder tenant-config hard faalt i.p.v. stil op 3BM-kleur terugvalt (zelfde faal-luid-patroon als `core/refs.py`).
-- [ ] **RV-2** `tenants/kba/templates/content_styles.yaml` mist de blokken `calculation` en `check` (alleen `paragraph`/`bullet_list`/`table` gedefinieerd onder `blocks:`) — die vallen daardoor sowieso terug op de RV-1 hardcoded defaults.
-- [ ] **RV-3** `SegoeUI-Semibold.ttf` ontbreekt in `tenants/kba/fonts/` (alleen Bold/Italic/Semilight/Regular aanwezig) — ReportLab kan `font-weight:600` niet synthetiseren.
+Fase 1 (brand.yaml uit kba-brand.json), Fase 2 ($colors/$fonts-resolver) en Fase 3
+(generieke `static_elements`-renderer, `core/static_elements.py`) zijn afgerond.
+RV-1 (14 hardcoded 3BM-defaults) en RV-2 (ontbrekende KBA content_styles-blokken
+voor de cover) zijn daarmee opgelost — de KBA-cover (variant a) rendert nu volledig
+data-gedreven, inclusief `transform: upper` op de kicker (`{kicker}` → "CONSTRUCTIEF
+ADVIES", tekstextractie blijft aaneengesloten ondanks `char_space`-letterspacing).
+
+- [ ] **RV-3** `SegoeUI-Semibold.ttf` ontbreekt in `tenants/kba/fonts/` (alleen Bold/Italic/Semilight/Regular aanwezig) — ReportLab kan `font-weight:600` niet synthetiseren, dus meta-kopjes en kicker vallen terug op Bold of Regular. User moet het bestand aanleveren.
 - [ ] **RV-4** Bug: `openaec_foundation`-tenant crasht op content-secties — `KeyError: 'x'` in `heading_1()`, `core/renderer_v2.py:1317` (`n["x"]` ontbreekt). Content-secties gebruiken een afwijkend `content_styles`-schema dan waar `heading_1` vanuit gaat. Vastgelegd in `tests/baseline/FAILURES.md`, buiten scope fase 1-3.
+- [ ] **RV-5** Covervarianten b (full-bleed), c (venster) en d (45°-snede) zijn niet geïmplementeerd — alleen variant a. De generieke `static_elements`-primitieven (rect/rounded_rect/line/polygon/image/text, incl. `transform`) maken ze mogelijk; nog niet uitgewerkt in `tenants/kba/brand.base.yaml`.
+- [ ] **RV-6** `tenants/kba/` (nieuwe brand.yaml/brand.base.yaml/templates) is nog niet gedeployed naar `/opt/openaec/reports-tenants/kba/` op productie — `tenants/*` is gitignored, dit is een losse deploy-stap (geen deel van deze commit).
 
 ### Security — Hoog (SEC-H, 3 open)
 

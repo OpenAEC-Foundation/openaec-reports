@@ -66,6 +66,76 @@ def _hex_to_rgb(h: str) -> tuple[float, float, float]:
     return tuple(int(h[i : i + 2], 16) / 255 for i in (0, 2, 4))
 
 
+def _style_color(
+    style: dict,
+    key: str,
+    semantic: str,
+    brand_config: Any | None,
+    *,
+    block: str,
+) -> str:
+    """Resolveer een hex-kleur voor ``style[key]`` zonder stille merk-fallback.
+
+    Achtergrond: renderer_v2 bevatte historisch ~50 ``.get(key, "#40124A")``
+    -achtige aanroepen. Zolang een tenant-template een blok volledig
+    definieerde (zoals 3BM's ``content_styles.yaml`` voor de meeste blokken
+    deed) was dat onschuldig — de default werd nooit geraakt. Maar zodra een
+    tenant een blok NIET definieert (bijv. KBA's ontbrekende
+    ``calculation``/``check``-secties), rendert de pagina alsnog, in 3BM's
+    paars/turquoise — een silent brand-lekkage die geen enkele test ving
+    (zie orchestrator-sessie 2026-07-10, "699 paarse pixels").
+
+    Volgorde:
+    1. ``style.get(key)`` — expliciete waarde uit het tenant-template
+       (letterlijke hex, of een ``$colors.<naam>``-ref die door
+       ``core/refs.py`` al is opgelost tijdens het laden — zie
+       ``TemplateSet._load``).
+    2. ``brand_config.colors[semantic]`` — semantische merk-kleur, gebruikt
+       wanneer het blok de sleutel niet expliciet zet.
+    3. Geen van beide beschikbaar → ``ValueError`` met tenant, blok en
+       sleutel. Er is bewust GEEN derde stap die terugvalt op een
+       hardcoded kleur.
+
+    Args:
+        style: Style-dict voor het huidige blok (bijv. de ``calc_s`` /
+            ``chk_s`` dict uit ``ContentRenderer.calculation``/``check``).
+        key: Veldnaam binnen ``style`` (bijv. ``"background"``).
+        semantic: Sleutel in ``brand_config.colors`` om op terug te vallen
+            (bijv. ``"surface"``, ``"primary"``, ``"warning"``).
+        brand_config: Actieve ``BrandConfig``, of ``None`` wanneer de
+            renderer buiten de normale ``ReportGeneratorV2``-pijplijn om
+            wordt gebruikt (bijv. losse unit tests zonder brand-context).
+        block: Naam van het blok/veld, uitsluitend voor de foutmelding
+            (bijv. ``"calculation.background"``).
+
+    Returns:
+        Hex-kleur string (bijv. ``"#40124A"``).
+
+    Raises:
+        ValueError: Als noch het template noch het merk-palet de kleur
+            definieert.
+    """
+    val = style.get(key)
+    if val:
+        return val
+    colors = getattr(brand_config, "colors", None) if brand_config is not None else None
+    if colors and semantic in colors:
+        return colors[semantic]
+    tenant_label = "?"
+    if brand_config is not None:
+        tenant_label = (
+            getattr(brand_config, "tenant", "") or getattr(brand_config, "slug", "?")
+        )
+    raise ValueError(
+        f"Ontbrekende kleur voor tenant '{tenant_label}', blok '{block}': "
+        f"veld '{key}' is niet gezet in het template EN brand.colors."
+        f"{semantic} bestaat niet (beschikbare merk-kleuren: "
+        f"{sorted(colors) if colors else []}). Geen stille fallback naar "
+        "een hardcoded kleur — voeg de sleutel toe aan content_styles.yaml "
+        "(of het relevante template-bestand), of aan brand.colors."
+    )
+
+
 _RE_HTML_TAG = re.compile(r"<[^>]+>")
 # Matcht alleen als de VOLLEDIGE celinhoud omhuld is met ``<b>...</b>``
 # of ``<strong>...</strong>``. Partial markup zoals ``"<b>foo</b> bar"``
@@ -548,9 +618,15 @@ def _resolve_image(src) -> Path | None:
 class CoverGenerator:
     """Generates cover page using ReportLab 3-layer approach."""
 
-    def __init__(self, templates: TemplateSet, fonts: FontManager):
+    def __init__(
+        self, templates: TemplateSet, fonts: FontManager, brand_config: Any | None = None
+    ):
         self.tpl = templates.cover
         self.fonts = fonts
+        self._brand_config = brand_config
+
+    def _color(self, style: dict, key: str, semantic: str, block: str) -> str:
+        return _style_color(style, key, semantic, self._brand_config, block=block)
 
     def generate(
         self, data: dict, stationery: Path | None, output: Path, cover_is_pdf: bool = False,
@@ -584,7 +660,8 @@ class CoverGenerator:
             y_td = page.rect.height - y_bl
             tw = fitz.TextWriter(page.rect)
             tw.append((tf.get("x", 54), y_td), title_text, font=font_obj, fontsize=size)
-            tw.write_text(page, color=_hex_to_rgb(tf.get("color", "#006FAB")))
+            color = self._color(tf, "color", "primary", "cover.rapport_type(pdf)")
+            tw.write_text(page, color=_hex_to_rgb(color))
 
         # Project naam
         sf = fields.get("project_naam", {})
@@ -596,7 +673,8 @@ class CoverGenerator:
             y_td = page.rect.height - y_bl
             tw = fitz.TextWriter(page.rect)
             tw.append((sf.get("x", 55), y_td), subtitle_text, font=font_obj, fontsize=size)
-            tw.write_text(page, color=_hex_to_rgb(sf.get("color", "#94571E")))
+            color = self._color(sf, "color", "secondary", "cover.project_naam(pdf)")
+            tw.write_text(page, color=_hex_to_rgb(color))
 
         # Cover image (als beschikbaar en er is een foto-zone in de template)
         photo_cfg = self.tpl.get("photo")
@@ -619,8 +697,240 @@ class CoverGenerator:
         doc.close()
         return output
 
+    def _static_elements_for_page(self, page_type: str) -> list[dict] | None:
+        """Haal ``pages.<page_type>.static_elements`` op uit brand_config.
+
+        Zie ``core/static_elements.py`` voor het element-formaat. Retourneert
+        ``None`` als er geen brand_config is, of als de tenant dit
+        paginatype niet als static_elements uitdrukt (backward compat: dan
+        blijft de bestaande, 3BM-specifieke tekencode actief).
+        """
+        if self._brand_config is None:
+            return None
+        page_cfg = (self._brand_config.pages or {}).get(page_type, {})
+        elements = page_cfg.get("static_elements")
+        return elements if elements else None
+
+    def _prepare_duotone_photo(
+        self, image_path: Path, tint_hex: str, strength: float = 0.55
+    ) -> Path:
+        """Genereer een duotone (HSL-luminositeit + merk-tint) variant.
+
+        CSS-bron (``coverblad.html``, klasse ``.a``)::
+
+            .a .band { background: var(--petrol); }
+            .a .band img { filter: grayscale(1) contrast(1.15);
+                            mix-blend-mode: luminosity; opacity: .55; }
+
+        ``mix-blend-mode: luminosity`` is GEEN lineaire interpolatie naar
+        wit (dat was de vorige, systematisch te lichte implementatie —
+        zie git-historie van dit bestand). Het is een HSL-compositie: de
+        **hue + saturation van de onderlaag** (petrol) blijven staan, en
+        alleen de **lightness** wordt overgenomen van de bovenlaag (de
+        gefilterde foto). Dat resultaat wordt vervolgens met ``opacity``
+        over de vlakke petrol-achtergrond gelegd.
+
+        Implementatiestappen:
+
+        1. **Lightness van de foto — bewuste HSL-keuze, niet Pillow's
+           "L"-band.** We gebruiken ``L = (max(R,G,B) + min(R,G,B)) / 2``
+           — dezelfde formule als ``colorsys.rgb_to_hls`` — in plaats van
+           ``PIL.ImageOps.grayscale()`` (dat ITU-R BT.601 fotometrische
+           luma gebruikt: ``0.299R + 0.587G + 0.114B``). Reden: CSS'
+           ``luminosity``-blendmode hoort tot dezelfde HSL-kleurmodel-
+           familie als ``hue``/``saturation``/``color`` (zie de CSS
+           Compositing-spec, die overigens zelf wél Rec.601-gewichten
+           gebruikt voor de exacte ``SetLum``-berekening — dit blijft dus
+           een gedocumenteerde BENADERING, geen pixel-exacte W3C-
+           reproductie, maar wel de HSL-conforme interpretatie die de
+           opdracht vraagt in plaats van de vorige wit-interpolatie).
+        2. Contrastversterking op die lightness (≈ CSS ``contrast(1.15)``
+           in dezelfde filter-keten, vóór de blend).
+        3. Hue en saturation van de petrol-tint (via ``colorsys.
+           rgb_to_hls``) blijven constant over het hele beeld — petrol is
+           een vlakke kleur, geen foto — en worden gecombineerd met de
+           per-pixel lightness via ``colorsys.hls_to_rgb``. Vectorized met
+           een 256-staps lookup-table op lightness (H/S zijn constant,
+           dus goedkoop) i.p.v. een Python-loop per pixel.
+        4. Composite met ``opacity=strength`` over het vlakke petrol-vlak
+           (≈ CSS ``opacity: var(--duotone)`` over ``background: petrol``).
+
+        Resultaat wordt als tijdelijke PNG weggeschreven; de aanroeper is
+        verantwoordelijk voor cleanup (net als ``_resolve_image`` elders in
+        dit bestand voor base64-afbeeldingen).
+        """
+        import colorsys
+
+        import numpy as np
+        from PIL import Image as PILImage
+
+        img = PILImage.open(image_path).convert("RGB")
+        arr = np.asarray(img).astype(np.float64) / 255.0  # (H, W, 3), 0..1
+
+        # --- Stap 1+2: HSL-lightness van de foto + contrastversterking ---
+        r, g, b = arr[..., 0], arr[..., 1], arr[..., 2]
+        cmax = np.maximum(np.maximum(r, g), b)
+        cmin = np.minimum(np.minimum(r, g), b)
+        lum = (cmax + cmin) / 2.0
+        lum = np.clip((lum - 0.5) * 1.15 + 0.5, 0.0, 1.0)  # contrast(1.15)
+
+        # --- Stap 3: hue/saturation van petrol + lightness van de foto ---
+        tint_hex_clean = tint_hex.lstrip("#")
+        tint_rgb = tuple(
+            int(tint_hex_clean[i : i + 2], 16) / 255.0 for i in (0, 2, 4)
+        )
+        tint_h, _tint_l, tint_s = colorsys.rgb_to_hls(*tint_rgb)
+
+        lut = np.array(
+            [
+                colorsys.hls_to_rgb(tint_h, lightness / 255.0, tint_s)
+                for lightness in range(256)
+            ],
+            dtype=np.float64,
+        )  # (256, 3)
+        lum_idx = np.clip((lum * 255.0).round().astype(np.int32), 0, 255)
+        hsl_composite = lut[lum_idx]  # (H, W, 3), 0..1
+
+        # --- Stap 4: opacity-blend over het vlakke petrol-vlak ---
+        flat_tint = np.array(tint_rgb, dtype=np.float64)
+        blended = flat_tint * (1.0 - strength) + hsl_composite * strength
+
+        result_arr = np.clip(blended * 255.0, 0, 255).astype(np.uint8)
+        result = PILImage.fromarray(result_arr, mode="RGB")
+        tmp = tempfile.NamedTemporaryFile(suffix="_duotone.png", delete=False)
+        result.save(tmp.name)
+        tmp.close()
+        return Path(tmp.name)
+
+    def _generate_static_cover(
+        self, data: dict, elements: list[dict], output: Path
+    ) -> Path:
+        """Render de cover volledig uit ``pages.cover.static_elements``.
+
+        Gebruikt voor tenants (bijv. KBA variant a) die geen hand-getekende
+        PNG-stationery hebben en hun ontwerp puur data-gedreven uitdrukken.
+        De projectfoto ("{cover_photo}"-token) wordt, als het element
+        ``duotone: true`` zet, eerst via :meth:`_prepare_duotone_photo`
+        omgezet.
+        """
+        from openaec_reports.core.static_elements import render_static_elements
+
+        self.fonts.register_reportlab()
+        w, h = A4
+        c = rl_canvas.Canvas(str(output), pagesize=A4)
+
+        colofon_data = data.get("colofon", {})
+        contact = getattr(self._brand_config, "contact", {}) or {}
+        context: dict[str, str] = {
+            "report_type": data.get("report_type", ""),
+            "kicker": data.get("kicker", ""),
+            "project": data.get("project", ""),
+            "project_number": data.get("project_number", ""),
+            "date": data.get("date", ""),
+            "version": data.get("version", ""),
+            "status": data.get("status", ""),
+            "client": colofon_data.get("opdrachtgever_naam", data.get("client", "")),
+            "author": colofon_data.get("adviseur_naam", data.get("author", "")),
+            "company_name": contact.get("name", ""),
+            "company_website": contact.get("website", ""),
+            "company_email": contact.get("email", ""),
+            "company_address": contact.get("address", ""),
+        }
+
+        cover_image_src = data.get("cover", {}).get("image")
+        cover_image_path = _resolve_image(cover_image_src)
+        tmp_duotone: Path | None = None
+        if cover_image_path:
+            wants_duotone = any(
+                el.get("type") == "image"
+                and el.get("src") == "{cover_photo}"
+                and el.get("duotone")
+                for el in elements
+            )
+            if wants_duotone:
+                tint = None
+                for el in elements:
+                    if el.get("type") == "image" and el.get("duotone"):
+                        tint = el.get("duotone_tint") or el.get("fill")
+                        break
+                tint = tint or "#000000"
+                tmp_duotone = self._prepare_duotone_photo(
+                    cover_image_path, tint,
+                    strength=next(
+                        (
+                            float(el.get("duotone_strength", 0.55))
+                            for el in elements
+                            if el.get("type") == "image" and el.get("duotone")
+                        ),
+                        0.55,
+                    ),
+                )
+                context["cover_photo"] = str(tmp_duotone)
+            else:
+                context["cover_photo"] = str(cover_image_path)
+        elif cover_image_src:
+            # Bron is opgegeven maar bestaat niet op disk (_resolve_image
+            # gaf None). We zetten toch het RUWE pad in de context — niet
+            # om het te laten renderen (dat gebeurt niet, want het bestand
+            # bestaat niet), maar zodat static_elements._resolve_image_src
+            # het werkelijk gezochte pad kan noemen in zijn "required:
+            # true"-ValueError i.p.v. het generieke "geen waarde ingevuld".
+            context["cover_photo"] = str(cover_image_src)
+
+        tenant_dir = None
+        tenant_label = ""
+        if self._brand_config is not None:
+            if self._brand_config.brand_dir:
+                tenant_dir = self._brand_config.brand_dir
+            tenant_label = (
+                getattr(self._brand_config, "tenant", "")
+                or getattr(self._brand_config, "slug", "")
+            )
+
+        try:
+            render_static_elements(
+                c, elements,
+                page_height_pt=h,
+                tenant_dir=tenant_dir,
+                context=context,
+                block="cover.static_elements",
+                tenant=tenant_label,
+            )
+
+            # Dynamische titel/subtitel blijven via het bestaande
+            # dynamic_fields-mechanisme lopen (title=report_type,
+            # subtitle=project) — dat mechanisme was al data-gedreven en
+            # hoeft niet gemigreerd te worden.
+            fields = self.tpl.get("dynamic_fields", {})
+            tf = fields.get("rapport_type", {})
+            title_text = data.get("report_type", "")
+            if title_text:
+                c.setFont(tf.get("font", "Inter-Bold"), tf.get("size", 28.9))
+                color = self._color(tf, "color", "primary", "cover.rapport_type(static)")
+                c.setFillColor(HexColor(color))
+                c.drawString(tf.get("x", 54.3), tf.get("y_bl", 120.5), title_text)
+
+            sf = fields.get("project_naam", {})
+            subtitle_text = data.get("project", "")
+            if subtitle_text:
+                c.setFont(sf.get("font", "Inter-Regular"), sf.get("size", 17.8))
+                color = self._color(sf, "color", "secondary", "cover.project_naam(static)")
+                c.setFillColor(HexColor(color))
+                c.drawString(sf.get("x", 55.0), sf.get("y_bl", 78.6), subtitle_text)
+
+            c.save()
+        finally:
+            if tmp_duotone is not None:
+                tmp_duotone.unlink(missing_ok=True)
+
+        return output
+
     def _generate_from_png(self, data: dict, stationery_png: Path | None, output: Path) -> Path:
         """Legacy ReportLab PNG overlay cover."""
+        static_elements = self._static_elements_for_page("cover")
+        if static_elements:
+            return self._generate_static_cover(data, static_elements, output)
+
         self.fonts.register_reportlab()
         w, h = A4
         c = rl_canvas.Canvas(str(output), pagesize=A4)
@@ -647,13 +957,16 @@ class CoverGenerator:
             c.drawImage(img, draw_x, draw_y, width=draw_w, height=draw_h)
             c.restoreState()
         else:
-            c.setFillColor(HexColor("#38BDAB"))
+            ph_cfg = self.tpl.get("placeholder", {})
+            bg_color = self._color(ph_cfg, "background", "secondary", "cover.placeholder")
+            text_color = self._color(ph_cfg, "text_color", "paper", "cover.placeholder.text")
+            c.setFillColor(HexColor(bg_color))
             c.rect(55.6, 161.7, 484.0, 560.8, fill=1, stroke=0)
             c.setFillColor(Color(0.15, 0.35, 0.35, alpha=0.4))
             c.rect(55.6, 161.7, 484.0, 280, fill=1, stroke=0)
-            c.setFillColor(HexColor("#FFFFFF"))
+            c.setFillColor(HexColor(text_color))
             c.setFont("LiberationSans", 16)
-            c.drawCentredString(w / 2, 440, "[ PROJECTFOTO ]")
+            c.drawCentredString(w / 2, 440, ph_cfg.get("label", "[ PROJECTFOTO ]"))
 
         # Layer 2: Stationery overlay (with alpha channel)
         if stationery_png and stationery_png.exists():
@@ -669,14 +982,16 @@ class CoverGenerator:
         title_text = data.get("report_type", "")
         if title_text:
             c.setFont(tf.get("font", "Inter-Bold"), tf.get("size", 28.9))
-            c.setFillColor(HexColor(tf.get("color", "#401246")))
+            color = self._color(tf, "color", "primary", "cover.rapport_type(png)")
+            c.setFillColor(HexColor(color))
             c.drawString(tf.get("x", 54.3), tf.get("y_bl", 120.5), title_text)
 
         sf = fields.get("project_naam", {})
         subtitle_text = data.get("project", "")
         if subtitle_text:
             c.setFont(sf.get("font", "Inter-Regular"), sf.get("size", 17.8))
-            c.setFillColor(HexColor(sf.get("color", "#38BDAB")))
+            color = self._color(sf, "color", "secondary", "cover.project_naam(png)")
+            c.setFillColor(HexColor(color))
             c.drawString(sf.get("x", 55.0), sf.get("y_bl", 78.6), subtitle_text)
 
         c.save()
@@ -689,9 +1004,15 @@ class CoverGenerator:
 class ColofonGenerator:
     """Generates colofon page by inserting text onto stationery PDF."""
 
-    def __init__(self, templates: TemplateSet, fonts: FontManager):
+    def __init__(
+        self, templates: TemplateSet, fonts: FontManager, brand_config: Any | None = None
+    ):
         self.tpl = templates.colofon
         self.fonts = fonts
+        self._brand_config = brand_config
+
+    def _color(self, style: dict, key: str, semantic: str, block: str) -> str:
+        return _style_color(style, key, semantic, self._brand_config, block=block)
 
     def generate(
         self, data: dict, stationery_pdf: Path, output: Path, page_number: int = 2
@@ -718,7 +1039,7 @@ class ColofonGenerator:
             default_y_td=57.3,
             default_size=22,
             default_font="LiberationSans-Bold",
-            default_color="#40124A",
+            color_semantic="primary",
             page_w=page_w,
             right_margin=right_margin,
         )
@@ -730,7 +1051,7 @@ class ColofonGenerator:
             default_y_td=86.8,
             default_size=14,
             default_font="LiberationSans",
-            default_color="#38BDA0",
+            color_semantic="secondary",
             page_w=page_w,
             right_margin=right_margin,
         )
@@ -742,7 +1063,9 @@ class ColofonGenerator:
         value_x = table_cfg.get("value_x", 229.1)
         value_size = table_cfg.get("value_size", 10)
         value_font = table_cfg.get("value_font", "LiberationSans")
-        value_color = _hex_to_rgb(table_cfg.get("value_color", "#40124A"))
+        value_color = _hex_to_rgb(
+            self._color(table_cfg, "value_color", "primary", "colofon.table.value")
+        )
         value_max_w = table_cfg.get(
             "value_max_width", max(50.0, page_w - value_x - right_margin)
         )
@@ -776,7 +1099,9 @@ class ColofonGenerator:
             # Label
             lbl_font_name = rev_cfg.get("label_font", "LiberationSans-Bold")
             lbl_size = rev_cfg.get("label_size", 10.0)
-            lbl_color = _hex_to_rgb(rev_cfg.get("label_color", "#38BDA0"))
+            lbl_color = _hex_to_rgb(
+                self._color(rev_cfg, "label_color", "secondary", "colofon.revision.label")
+            )
             lbl_x = rev_cfg.get("label_x", 103.0)
             font_obj = self.fonts.get_fitz_font(lbl_font_name)
             tw = fitz.TextWriter(page.rect)
@@ -792,10 +1117,14 @@ class ColofonGenerator:
             tbl_end_x = rev_cfg.get("table_end_x", 420.0)
             hdr_font_name = rev_cfg.get("header_font", "LiberationSans-Bold")
             hdr_size = rev_cfg.get("header_size", 8.0)
-            hdr_color = _hex_to_rgb(rev_cfg.get("header_color", "#40124A"))
+            hdr_color = _hex_to_rgb(
+                self._color(rev_cfg, "header_color", "primary", "colofon.revision.header")
+            )
             body_font_name = rev_cfg.get("body_font", "LiberationSans")
             body_size = rev_cfg.get("body_size", 8.0)
-            body_color = _hex_to_rgb(rev_cfg.get("body_color", "#45243D"))
+            body_color = _hex_to_rgb(
+                self._color(rev_cfg, "body_color", "text", "colofon.revision.body")
+            )
             row_h = rev_cfg.get("row_height", 14.0)
 
             tbl_width = tbl_end_x - tbl_x
@@ -849,7 +1178,9 @@ class ColofonGenerator:
             discl_x = discl_cfg.get("x", 103.0)
             discl_font_name = discl_cfg.get("font", "LiberationSans-Italic")
             discl_size = discl_cfg.get("size", 7.0)
-            discl_color = _hex_to_rgb(discl_cfg.get("color", "#7F8C8D"))
+            discl_color = _hex_to_rgb(
+                self._color(discl_cfg, "color", "text_light", "colofon.disclaimer")
+            )
             discl_y = current_y + 8.0
 
             discl_font = self.fonts.get_fitz_font(discl_font_name)
@@ -873,7 +1204,10 @@ class ColofonGenerator:
             str(page_number), font=font_obj, fontsize=pn_size,
         )
         tw.write_text(
-            page, color=_hex_to_rgb(pn_cfg.get("color", "#38BDA0"))
+            page,
+            color=_hex_to_rgb(
+                self._color(pn_cfg, "color", "secondary", "colofon.page_number")
+            ),
         )
 
         doc.save(str(output))
@@ -890,7 +1224,7 @@ class ColofonGenerator:
         default_y_td: float,
         default_size: float,
         default_font: str,
-        default_color: str,
+        color_semantic: str,
         page_w: float,
         right_margin: float,
     ) -> None:
@@ -913,7 +1247,9 @@ class ColofonGenerator:
             default_y_td: Fallback y (top-down) als fallback.
             default_size: Fallback font-size.
             default_font: Fallback font-naam.
-            default_color: Fallback hex-kleur.
+            color_semantic: Semantische ``brand.colors``-sleutel om op
+                terug te vallen als het template geen ``color`` zet
+                (zie ``_style_color``).
             page_w: Breedte van de pagina (voor max-width berekening).
             right_margin: Rechtermarge (voor max-width berekening).
         """
@@ -923,7 +1259,9 @@ class ColofonGenerator:
         x = cfg.get("x", default_x)
         size = cfg.get("size", default_size)
         font_name = cfg.get("font", default_font)
-        color = _hex_to_rgb(cfg.get("color", default_color))
+        color = _hex_to_rgb(
+            self._color(cfg, "color", color_semantic, f"colofon.{field_key}")
+        )
         y_base = cfg.get("y_td", default_y_td)
         max_w = max(50.0, page_w - x - right_margin)
         bold = "Bold" in font_name
@@ -1071,6 +1409,9 @@ class ContentRenderer:
         self._section_counter: int = 0
         self._subsection_counter: int = 0
 
+    def _color(self, style: dict, key: str, semantic: str, block: str) -> str:
+        return _style_color(style, key, semantic, self._brand_config, block=block)
+
     # --- Low level ---
 
     def _get_stationery_doc(self, pdf_path: Path) -> fitz.Document:
@@ -1193,13 +1534,14 @@ class ContentRenderer:
 
         # Title
         title_cfg = toc_cfg.get("title", {})
+        title_color = self._color(title_cfg, "color", "primary", "toc.title")
         self._text(
             title_cfg.get("x", 90.0),
             title_cfg.get("y_td", 74.9),
             title_cfg.get("text", "Inhoud"),
             title_cfg.get("font", "Inter-Regular"),
             title_cfg.get("size", 18.0),
-            title_cfg.get("color", "#401246"),
+            title_color,
         )
 
         self.y = toc_cfg.get("entries_start_y", 127.2)
@@ -1207,6 +1549,8 @@ class ContentRenderer:
         levels = toc_cfg.get("levels", {})
         lv1 = levels.get("1", {})
         lv2 = levels.get("2", {})
+        lv1_color = self._color(lv1, "color", "text_accent", "toc.level1")
+        lv2_color = self._color(lv2, "color", "primary", "toc.level2")
 
         for level, number, title, pg in entries:
             if level == 1:
@@ -1218,7 +1562,7 @@ class ContentRenderer:
                     number,
                     lv1.get("font", "Inter-Regular"),
                     lv1.get("size", 12.0),
-                    lv1.get("color", "#56B49B"),
+                    lv1_color,
                 )
                 self._text(
                     lv1.get("title_x", 160.9),
@@ -1226,7 +1570,7 @@ class ContentRenderer:
                     title,
                     lv1.get("font", "Inter-Regular"),
                     lv1.get("size", 12.0),
-                    lv1.get("color", "#56B49B"),
+                    lv1_color,
                 )
                 self._text(
                     lv1.get("page_x", 515.4),
@@ -1234,7 +1578,7 @@ class ContentRenderer:
                     str(pg),
                     lv1.get("font", "Inter-Regular"),
                     lv1.get("size", 12.0),
-                    lv1.get("color", "#56B49B"),
+                    lv1_color,
                 )
                 self.y += lv1.get("spacing_after", 20.0)
             else:
@@ -1245,7 +1589,7 @@ class ContentRenderer:
                     number,
                     lv2.get("font", "Inter-Regular"),
                     lv2.get("size", 9.5),
-                    lv2.get("color", "#401246"),
+                    lv2_color,
                 )
                 self._text(
                     lv2.get("title_x", 160.9),
@@ -1253,7 +1597,7 @@ class ContentRenderer:
                     title,
                     lv2.get("font", "Inter-Regular"),
                     lv2.get("size", 9.5),
-                    lv2.get("color", "#401246"),
+                    lv2_color,
                 )
                 self._text(
                     lv2.get("page_x", 515.4),
@@ -1261,7 +1605,7 @@ class ContentRenderer:
                     str(pg),
                     lv2.get("font", "Inter-Regular"),
                     lv2.get("size", 9.5),
-                    lv2.get("color", "#401246"),
+                    lv2_color,
                 )
                 self.y += lv2.get("spacing_after", 17.3)
 
@@ -1499,14 +1843,18 @@ class ContentRenderer:
 
         h_fontname = header_s.get("font", "Inter-Bold")
         h_fontsize = header_s.get("size", 9)
-        h_color = _hex_to_rgb(header_s.get("color", "#FFFFFF"))
+        h_color = _hex_to_rgb(self._color(header_s, "color", "paper", "table.header.text"))
         b_fontname = body_s.get("font", "Inter-Regular")
         b_fontsize = body_s.get("size", 8)
-        b_color = _hex_to_rgb(body_s.get("color", "#401246"))
-        bg_color = _hex_to_rgb(header_s.get("background", "#56B49B"))
-        stripe_color = _hex_to_rgb(s.get("stripe_color", "#F5F5F5"))
-        grid_color = _hex_to_rgb(s.get("grid_color", "#E0E0E0"))
-        line_color_hdr = _hex_to_rgb(s.get("header_grid_color", "#FFFFFF"))
+        b_color = _hex_to_rgb(self._color(body_s, "color", "primary", "table.body.text"))
+        bg_color = _hex_to_rgb(
+            self._color(header_s, "background", "text_accent", "table.header.background")
+        )
+        stripe_color = _hex_to_rgb(self._color(s, "stripe_color", "surface", "table.stripe"))
+        grid_color = _hex_to_rgb(self._color(s, "grid_color", "separator", "table.grid"))
+        line_color_hdr = _hex_to_rgb(
+            self._color(s, "header_grid_color", "paper", "table.header_grid")
+        )
         cell_line_h = b_fontsize * 1.35  # line height within cells
 
         # Pre-wrap all header cells
@@ -1529,7 +1877,7 @@ class ContentRenderer:
                 x, self.y, title,
                 title_s.get("font", "Inter-Bold"),
                 title_s.get("size", 9.5),
-                title_s.get("color", "#401246"),
+                self._color(title_s, "color", "primary", "table.title"),
             )
             self.y += 16
         else:
@@ -1672,7 +2020,7 @@ class ContentRenderer:
                 x, self.y, f"[Image: {src or 'niet gevonden'}]",
                 error_s.get("font", "Inter-Regular"),
                 error_s.get("size", 9.5),
-                error_s.get("color", "#FF0000"),
+                self._color(error_s, "color", "warning", "image.error"),
             )
             self.y += 16
             return
@@ -1709,7 +2057,7 @@ class ContentRenderer:
                 x, self.y, f"[Image error: {e}]",
                 error_s.get("font", "Inter-Regular"),
                 error_s.get("size", 9.5),
-                error_s.get("color", "#FF0000"),
+                self._color(error_s, "color", "warning", "image.error"),
             )
 
         self.y += target_h + 4
@@ -1719,7 +2067,7 @@ class ContentRenderer:
                 x, self.y, caption,
                 caption_s.get("font", "Inter-Regular"),
                 caption_s.get("size", 8.0),
-                caption_s.get("color", "#401246"),
+                self._color(caption_s, "color", "primary", "image.caption"),
             )
             self.y += 14
 
@@ -1826,7 +2174,7 @@ class ContentRenderer:
                     "[Kaart: geen adres of coördinaten opgegeven]",
                     error_s.get("font", "Inter-Regular"),
                     error_s.get("size", 9.5),
-                    error_s.get("color", "#FF0000"),
+                    self._color(error_s, "color", "warning", "map.error"),
                 )
                 self.y += 20
                 return
@@ -1840,7 +2188,7 @@ class ContentRenderer:
                     f"[Kaart kon niet worden opgehaald voor: {loc_str}]",
                     error_s.get("font", "Inter-Regular"),
                     error_s.get("size", 9.5),
-                    error_s.get("color", "#FF0000"),
+                    self._color(error_s, "color", "warning", "map.error"),
                 )
                 self.y += 20
                 return
@@ -1863,7 +2211,7 @@ class ContentRenderer:
                         x, self.y + 10, f"[Kaart fout: {e}]",
                         error_s.get("font", "Inter-Regular"),
                         error_s.get("size", 9.5),
-                        error_s.get("color", "#FF0000"),
+                        self._color(error_s, "color", "warning", "map.error"),
                     )
                 self.y += target_h + 4
 
@@ -1872,7 +2220,7 @@ class ContentRenderer:
                         x, self.y, map_caption,
                         caption_s.get("font", "Inter-Regular"),
                         caption_s.get("size", 8.0),
-                        caption_s.get("color", "#401246"),
+                        self._color(caption_s, "color", "primary", "map.caption"),
                     )
                     self.y += 14
 
@@ -1896,7 +2244,7 @@ class ContentRenderer:
                 "[Kaartmodule niet beschikbaar — PIL/requests ontbreekt]",
                 error_s.get("font", "Inter-Regular"),
                 error_s.get("size", 9.5),
-                error_s.get("color", "#FF0000"),
+                self._color(error_s, "color", "warning", "map.error"),
             )
             self.y += 20
         except (OSError, ValueError, RuntimeError) as e:
@@ -1906,7 +2254,7 @@ class ContentRenderer:
                 x, self.y, f"[Kaart fout: {e}]",
                 error_s.get("font", "Inter-Regular"),
                 error_s.get("size", 9.5),
-                error_s.get("color", "#FF0000"),
+                self._color(error_s, "color", "warning", "map.error"),
             )
             self.y += 20
 
@@ -1941,11 +2289,15 @@ class ContentRenderer:
         self._check_overflow(block_h + 8)
 
         # Light background box
-        bg_color = _hex_to_rgb(cad_s.get("background", "#F8F8F8"))
+        bg_color = _hex_to_rgb(
+            self._color(cad_s, "background", "surface", "cadastral.background")
+        )
         bg_rect = fitz.Rect(x, self.y, x + max_w, self.y + block_h)
         self.page.draw_rect(bg_rect, color=None, fill=bg_color)
         # Left accent bar
-        accent_color = _hex_to_rgb(cad_s.get("accent_color", "#56B49B"))
+        accent_color = _hex_to_rgb(
+            self._color(cad_s, "accent_color", "text_accent", "cadastral.accent")
+        )
         accent_rect = fitz.Rect(x, self.y, x + 3, self.y + block_h)
         self.page.draw_rect(accent_rect, color=None, fill=accent_color)
 
@@ -1957,9 +2309,11 @@ class ContentRenderer:
             inner_x, y_line, f"Kadastraal perceel:  {identificatie}",
             title_s.get("font", "Inter-Bold"),
             title_s.get("size", 8.5),
-            title_s.get("color", "#401246"),
+            self._color(title_s, "color", "primary", "cadastral.title"),
         )
         y_line += 14
+
+        cad_body_color = self._color(body_s, "color", "primary", "cadastral.body")
 
         # Gemeente
         if gemeentenaam:
@@ -1970,7 +2324,7 @@ class ContentRenderer:
                 inner_x, y_line, gem_str,
                 body_s.get("font", "Inter-Regular"),
                 body_s.get("size", 8.5),
-                body_s.get("color", "#401246"),
+                cad_body_color,
             )
             y_line += 14
 
@@ -1981,7 +2335,7 @@ class ContentRenderer:
                 inner_x, y_line, opp_str,
                 body_s.get("font", "Inter-Regular"),
                 body_s.get("size", 8.5),
-                body_s.get("color", "#401246"),
+                cad_body_color,
             )
             y_line += 14
 
@@ -2039,7 +2393,9 @@ class ContentRenderer:
         self.y += spacing_before
 
         # Background rect
-        bg_color = _hex_to_rgb(calc_s.get("background", "#F5F5F5"))
+        bg_color = _hex_to_rgb(
+            self._color(calc_s, "background", "surface", "calculation.background")
+        )
         bg_rect = fitz.Rect(x - 4, self.y - 2, x + max_w + 4, self.y + block_h - 8)
         self.page.draw_rect(bg_rect, color=None, fill=bg_color)
 
@@ -2048,9 +2404,11 @@ class ContentRenderer:
             x, self.y, title,
             title_s.get("font", "Inter-Bold"),
             title_s.get("size", 9.5),
-            title_s.get("color", "#401246"),
+            self._color(title_s, "color", "primary", "calculation.title"),
         )
         self.y += 16
+
+        calc_body_color = self._color(body_s, "color", "primary", "calculation.body")
 
         # Formula
         if formula:
@@ -2058,7 +2416,7 @@ class ContentRenderer:
                 x + 8, self.y, formula,
                 body_s.get("font", "Inter-Regular"),
                 body_s.get("size", 9.5),
-                body_s.get("color", "#401246"),
+                calc_body_color,
             )
             self.y += 16
 
@@ -2068,7 +2426,7 @@ class ContentRenderer:
                 x + 8, self.y, substitution,
                 body_s.get("font", "Inter-Regular"),
                 body_s.get("size", 9.5),
-                body_s.get("color", "#401246"),
+                calc_body_color,
             )
             self.y += 16
 
@@ -2078,7 +2436,7 @@ class ContentRenderer:
             x + 8, self.y, result_text,
             result_s.get("font", "Inter-Bold"),
             result_s.get("size", 9.5),
-            result_s.get("color", "#401246"),
+            self._color(result_s, "color", "primary", "calculation.result"),
         )
         self.y += 16
 
@@ -2088,7 +2446,7 @@ class ContentRenderer:
                 x + 8, self.y, f"Ref: {reference}",
                 ref_s.get("font", "Inter-Regular"),
                 ref_s.get("size", 8.0),
-                ref_s.get("color", "#56B49B"),
+                self._color(ref_s, "color", "text_accent", "calculation.reference"),
             )
             self.y += 14
 
@@ -2118,16 +2476,20 @@ class ContentRenderer:
         self.y += spacing_before
 
         # Background rect
-        bg_color = _hex_to_rgb(chk_s.get("background", "#F5F5F5"))
+        bg_color = _hex_to_rgb(
+            self._color(chk_s, "background", "surface", "check.background")
+        )
         bg_rect = fitz.Rect(x - 4, self.y - 2, x + max_w + 4, self.y + block_h - 16)
         self.page.draw_rect(bg_rect, color=None, fill=bg_color)
+
+        chk_body_color = self._color(body_s, "color", "primary", "check.body")
 
         # Description
         self._text(
             x, self.y, description,
             title_s.get("font", "Inter-Bold"),
             title_s.get("size", 9.5),
-            title_s.get("color", "#401246"),
+            self._color(title_s, "color", "primary", "check.title"),
         )
         self.y += 16
 
@@ -2136,14 +2498,14 @@ class ContentRenderer:
             x + 8, self.y, f"Vereist: {required}",
             body_s.get("font", "Inter-Regular"),
             body_s.get("size", 9.5),
-            body_s.get("color", "#401246"),
+            chk_body_color,
         )
         self.y += 14
         self._text(
             x + 8, self.y, f"Berekend: {calculated}",
             body_s.get("font", "Inter-Regular"),
             body_s.get("size", 9.5),
-            body_s.get("color", "#401246"),
+            chk_body_color,
         )
         self.y += 14
 
@@ -2153,13 +2515,13 @@ class ContentRenderer:
             x + 8, self.y, uc_text,
             body_s.get("font", "Inter-Regular"),
             body_s.get("size", 9.5),
-            body_s.get("color", "#401246"),
+            chk_body_color,
         )
 
         # Result indicator
         is_ok = result.upper() == "VOLDOET"
-        ok = chk_s.get("ok_color", "#56B49B")
-        fail = chk_s.get("fail_color", "#FF0000")
+        ok = self._color(chk_s, "ok_color", "text_accent", "check.ok_color")
+        fail = self._color(chk_s, "fail_color", "warning", "check.fail_color")
         result_color = ok if is_ok else fail
         self._text(
             x + 200, self.y, result,
@@ -2307,13 +2669,14 @@ class ContentRenderer:
             nummer,
             nr_cfg.get("font", "Inter-Bold"),
             nr_cfg.get("size", 41.4),
-            nr_cfg.get("color", "#401246"),
+            self._color(nr_cfg, "color", "primary", "bijlage.nummer"),
         )
 
         # Title (fixed 20pt, multiline)
         ti_cfg = bijl_cfg.get("titel", {})
         fontsize = ti_cfg.get("size", 20.0)
         line_height = fontsize * 1.6
+        ti_color = self._color(ti_cfg, "color", "paper", "bijlage.titel")
         for i, line in enumerate(titel.split("\n")):
             y_td = ti_cfg.get("y_td", 262.2) + i * line_height
             self._text(
@@ -2322,7 +2685,7 @@ class ContentRenderer:
                 line,
                 ti_cfg.get("font", "Inter-Regular"),
                 fontsize,
-                ti_cfg.get("color", "#FFFFFF"),
+                ti_color,
             )
         # No page number on divider, but increment counter
         self.current_page_nr += 1
@@ -2556,7 +2919,9 @@ class ReportGeneratorV2:
             # 1. Cover (optioneel)
             if data.get("cover", {}).get("enabled", True):
                 logger.info("Generating cover...")
-                cover_gen = CoverGenerator(self.templates, self.fonts)
+                cover_gen = CoverGenerator(
+                    self.templates, self.fonts, brand_config=self.brand_config
+                )
                 if cover_is_pdf:
                     cover_gen.generate(data, cover_stationery, tmp_cover, cover_is_pdf=True)
                 else:
@@ -2568,7 +2933,9 @@ class ReportGeneratorV2:
             colofon_enabled = data.get("colofon", {}).get("enabled", True)
             if colofon_enabled and colofon_stationery and colofon_stationery.exists():
                 logger.info("Generating colofon...")
-                colofon_gen = ColofonGenerator(self.templates, self.fonts)
+                colofon_gen = ColofonGenerator(
+                    self.templates, self.fonts, brand_config=self.brand_config
+                )
                 colofon_gen.generate(data, colofon_stationery, tmp_colofon)
                 parts.append(tmp_colofon)
 

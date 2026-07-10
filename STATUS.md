@@ -7,7 +7,7 @@
 
 ## Huidige staat
 
-- **Tests:** 1264 collected (1214 passed, 50 skipped) — Python backend
+- **Tests:** 1358 collected (1256 passed, 92 skipped, 10 pre-existing failures — zie git-history) — Python backend
 - **Rust tests:** 197 totaal (9 phases compleet, deploy van Rust server wacht op subdomein `report-rs.open-aec.com`)
 - **Productie:** multi-tenant via bind-mount `/opt/openaec/reports-tenants/`, SSO-only via Authentik
 - **Engines live:** V1 (`/api/generate`), V2 (`/api/generate/v2`), V3 (`/api/generate/template`)
@@ -27,7 +27,7 @@
 | **Rust renderer feature parity** | parity gap vs Python `renderer_v2.py` | Heading-nummering + TOC counter state |
 | **Authentik Unified SSO migratie** | plan klaar, blokkeert op auth-fix | Fase 5 Reports migratie (dependencies.py refactor, JWT exit) |
 | **Desktop Tauri v2** | v0.2.0-alpha draft | D4 Authentik redirect URI, D5 OA logo, D6-D9 signing/updater/dialogs |
-| **Renderer brand-substitutie** | Fase 1+2 klaar | Fase 3: generieke `static_elements`-renderer (14 hardcoded 3BM-kleuren als `.get()`-default in `renderer_v2.py`) |
+| **Renderer brand-substitutie** | Fase 1-3 klaar | RV-3 (SegoeUI-Semibold.ttf), RV-5 (covervarianten b/c/d), RV-6 (KBA-tenant deploy naar server) — zie `TODO.md` |
 
 ---
 
@@ -37,9 +37,10 @@
 
 - **Fase 1 (klaar):** `tenants/kba/brand.yaml` wordt afgeleid uit de canonieke `kba-brand.json` via `scripts/build_tenant_brand.py` (`--check` als CI-guard tegen handmatige bewerking).
 - **Fase 2 (klaar):** resolver in `src/openaec_reports/core/refs.py`, toegepast bij het laden van de template-YAML in `TemplateSet`. Onbekende sleutel faalt luid (tenant + bestand + sleutel in de melding), geen stille fallback. Regressie-vangrail: `scripts/render_baseline.py` + `scripts/diff_baseline.py` — 3BM 8/8 pagina's pixel-identiek vastgelegd (tolerance=0 px), `tests/baseline/manifest.json` + PNG's in git.
-- **Fase 3 (open, hoofddoel):** `renderer_v2.py` valt op **14 plekken** terug op een hardcoded 3BM-hexkleur als `.get()`-default (bv. `tf.get("color", "#006FAB")`, `title_cfg.get("color", "#401246")`) zodra een tenant een blok niet definieert. Dat is de resterende brand-lekkagebron — een generieke `static_elements`-renderer die zonder tenant-config hard faalt (i.p.v. stil op 3BM-kleur terugvalt) is de vervolgstap.
-- **Bijvangst:** `tenants/kba/templates/content_styles.yaml` mist de blokken `calculation` en `check` (alleen `paragraph`/`bullet_list`/`table` gedefinieerd) — die vallen dus sowieso terug op de fase-3 hardcoded defaults. `SegoeUI-Semibold.ttf` ontbreekt in `tenants/kba/fonts/` (alleen Bold/Italic/Semilight/Regular aanwezig); ReportLab kan `font-weight:600` niet synthetiseren.
+- **Fase 3 (klaar):** `src/openaec_reports/core/static_elements.py` — generieke primitive-renderer (`rect`/`rounded_rect`/`line`/`polygon`/`image`/`text`) die `pages.<type>.static_elements` uit tenant-config tekent. Kleuren via `_style_color()`: template-waarde, dan semantische `brand.colors`, anders `ValueError` — geen stille 3BM-fallback meer (RV-1 opgelost). KBA-cover (variant a) is hiermee volledig data-gedreven: duotone-fotoband, accentstreep, metagrid, footerbalk, kicker met `char_space`-letterspacing én (2026-07-10) `transform: upper` — report-data blijft leesbare spreektaal ("Constructief advies"), de opmaakregel staat in `tenants/kba/brand.base.yaml`. `tests/test_brand_leakage.py` borgt dat de 3BM-lekkage niet terugkomt (RV-2 opgelost).
+- **Restpunten (RV-3, RV-5, RV-6):** `SegoeUI-Semibold.ttf` ontbreekt in `tenants/kba/fonts/` (font-weight 600 valt terug op Bold/Regular) — user moet aanleveren. Covervarianten b (full-bleed)/c (venster)/d (45°-snede) zijn nog niet uitgewerkt — de generieke primitieven maken ze mogelijk. `tenants/kba/` (nieuwe brand.yaml/brand.base.yaml) is nog niet gedeployed naar `/opt/openaec/reports-tenants/kba/` op productie.
 - **Bekende bug (buiten scope fase 1-3):** `openaec_foundation`-tenant crasht op content-secties — `KeyError: 'x'` in `heading_1()` (`renderer_v2.py:1317`), content-secties gebruiken een afwijkend `content_styles`-schema. Vastgelegd in `tests/baseline/FAILURES.md`.
+- **Nieuw in de canonieke bron:** `rood: #A6342B` toegevoegd aan `kba-brand.json` als fail-kleur voor unity-checks (user-besluit, 2026-07-10).
 
 ---
 

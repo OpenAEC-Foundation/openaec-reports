@@ -1,0 +1,143 @@
+{
+  "template": "standaard",
+  "format": "A4",
+  "project": "Baseline Regressierapport — Voorbeeldstraat 1",
+  "project_number": "BASE-0001",
+  "client": "Voorbeeld Opdrachtgever B.V.",
+  "author": "OpenAEC Reports",
+  "report_type": "Regressie-baseline",
+  "date": "2026-01-01",
+  "version": "1.0",
+  "status": "CONCEPT",
+
+  "cover": {
+    "enabled": true,
+    "subtitle": "Vaste fixture voor pixel-diff regressietest"
+  },
+
+  "colofon": {
+    "enabled": true,
+    "opdrachtgever_contact": "Dhr. J. Voorbeeld",
+    "opdrachtgever_naam": "Voorbeeld Opdrachtgever B.V.",
+    "opdrachtgever_adres": "Teststraat 1,\n1234 AB Voorbeeldstad",
+    "adviseur_bedrijf": "OpenAEC Reports",
+    "adviseur_naam": "Ir. A. Baseline",
+    "normen": "NEN-EN 1990, NEN-EN 1992",
+    "documentgegevens": "Regressie-baseline, pg 1-4",
+    "fase": "Regressietest",
+    "kenmerk": "BASE-0001-R01",
+    "status_colofon": "CONCEPT",
+    "disclaimer": "Dit document is gegenereerd als deterministische baseline voor pixel-regressietests. De inhoud is fictief."
+  },
+
+  "toc": {
+    "enabled": true,
+    "title": "Inhoud",
+    "max_depth": 2
+  },
+
+  "sections": [
+    {
+      "number": "1",
+      "title": "Inleiding",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Dit is een vaste, deterministische paragraaf-tekst voor de baseline-render. Er wordt bewust geen datum-van-vandaag of willekeurige waarde gebruikt, zodat elke render met dezelfde fixture pixel-identiek is aan de vorige render."
+        },
+        {
+          "type": "bullet_list",
+          "items": [
+            "Eerste opsommingspunt — vaste tekst zonder variabele inhoud.",
+            "Tweede opsommingspunt met <b>inline bold</b> markup ter dekking van de bold-detectie.",
+            "Derde opsommingspunt, iets langer om word-wrap te forceren over meerdere regels binnen de beschikbare kolombreedte van de contentzone.",
+            "Vierde en laatste opsommingspunt."
+          ]
+        }
+      ]
+    },
+    {
+      "number": "2",
+      "title": "Uitgangspunten",
+      "level": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "text": "Onderstaande subparagrafen dekken de overige contentblokken die de renderer ondersteunt: koppen niveau 2, tabellen, rekenbladen en toetsingen."
+        },
+        {
+          "type": "heading_2",
+          "number": "2.1",
+          "title": "Overzicht belastingen"
+        },
+        {
+          "type": "table",
+          "title": "Overzicht belastingen (vast)",
+          "headers": ["Belasting", "Waarde", "Norm"],
+          "rows": [
+            ["Permanente belasting", "1,5 kN/m²", "NEN-EN 1991-1-1"],
+            ["Veranderlijke belasting", "1,75 kN/m²", "NEN-EN 1991-1-1 tabel NB.1"],
+            ["Windbelasting", "0,73 kN/m²", "NEN-EN 1991-1-4"],
+            ["Sneeuwbelasting", "0,56 kN/m²", "NEN-EN 1991-1-3"]
+          ]
+        },
+        {
+          "type": "heading_2",
+          "number": "2.2",
+          "title": "Rekenvoorbeeld"
+        },
+        {
+          "type": "calculation",
+          "title": "Buigend moment vloerveld (vast rekenvoorbeeld)",
+          "formula": "M = q × l² / 8",
+          "substitution": "M = 8,5 × 7,2² / 8",
+          "result": "55.1",
+          "unit": "kNm",
+          "reference": "NEN-EN 1992-1-1 §6.1"
+        },
+        {
+          "type": "check",
+          "description": "Toetsing buigend moment vloerveld (vast)",
+          "required_value": "55.1 kNm",
+          "calculated_value": "72.4 kNm",
+          "unity_check": 0.76,
+          "result": "VOLDOET"
+        }
+      ]
+    }
+  ],
+
+  "appendices": [
+    {
+      "number": 1,
+      "label": "Bijlage 1",
+      "title": "Aanvullende gegevens",
+      "content_sections": [
+        {
+          "number": "B1",
+          "title": "Vaste bijlage-inhoud",
+          "level": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "text": "Vaste bijlage-tekst zonder variabele inhoud, uitsluitend bedoeld om de bijlage-stationery en paginanummering te dekken in de baseline-render."
+            },
+            {
+              "type": "bullet_list",
+              "items": [
+                "Vast gegeven A",
+                "Vast gegeven B",
+                "Vast gegeven C"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "backcover": {
+    "enabled": true
+  }
+}

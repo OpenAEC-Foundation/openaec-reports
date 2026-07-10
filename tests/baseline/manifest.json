@@ -1,0 +1,46 @@
+{
+  "generated_at": "2026-07-10T14:00:51.425347+00:00",
+  "raster_dpi": 100,
+  "fixture": "tests\\fixtures\\baseline_report.json",
+  "reports": [
+    {
+      "tenant": "3bm",
+      "template": "standaard",
+      "page_count": 8,
+      "pages": [
+        {
+          "file": "page_001.png",
+          "sha256": "fd2cb695d130a95b4ca722d9973353bad521d3c370e5ea9c7384e837b950c1f0"
+        },
+        {
+          "file": "page_002.png",
+          "sha256": "4899533f3ad34cf77e8bf8c3d60d5ed5402c53ee571d8002c8f43f8914929eca"
+        },
+        {
+          "file": "page_003.png",
+          "sha256": "24a08d89e209b76323df260aa32b76e58ee8951f84cf26a50151cf758eae5bf0"
+        },
+        {
+          "file": "page_004.png",
+          "sha256": "566a6b43c23a7c5deea14630ea68377220610dc517d4d45676fa20d2ae728683"
+        },
+        {
+          "file": "page_005.png",
+          "sha256": "f687ccd7f673fec197bcc954ffd78434e6ec4b6ffcf3849c451248a0207de4b8"
+        },
+        {
+          "file": "page_006.png",
+          "sha256": "cbb67b363eec5764bb87b2e5f6734a8ff44d86b0d578111554cecabd7e7c6db0"
+        },
+        {
+          "file": "page_007.png",
+          "sha256": "1dc2d9252519c40ee2314f48e028fd758959562329534575884dc33155ccc5e7"
+        },
+        {
+          "file": "page_008.png",
+          "sha256": "1743d4d625f4ff8fb7243bf879589fbeed05584c9cff219b82e140e90c3ee2f9"
+        }
+      ]
+    }
+  ]
+}

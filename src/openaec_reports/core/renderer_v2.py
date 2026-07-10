@@ -1749,6 +1749,23 @@ class ContentRenderer:
         x = s.get("x", 125.4)
         max_w = s.get("max_width", 415.9)
 
+        # In landscape is het portret-``max_width`` (~146mm) een te smal vak:
+        # column_widths worden erbinnen geschaald, waardoor brede tabellen per
+        # woord afbreken en de laatste kolom buiten beeld valt. Bereken de
+        # breedte dan dynamisch uit de paginageometrie. De portret-linkermarge
+        # (~125pt) zou in landscape links veel ruimte verspillen; gebruik in
+        # plaats daarvan een symmetrische marge (default = portret-rechtermarge
+        # 54pt) zodat de tabel breed en gecentreerd staat. Een template mag
+        # ``x_landscape`` / ``max_width_landscape`` expliciet overschrijven.
+        # Het portret-pad blijft ongemoeid — zo blijft de pixel-baseline gelijk.
+        if self._orientation == "landscape":
+            margin = s.get("right_margin_landscape", 54.0)
+            x = s.get("x_landscape", margin)
+            max_w = s.get(
+                "max_width_landscape",
+                max(50.0, A4_LANDSCAPE_WIDTH - x - margin),
+            )
+
         headers_raw = block.get("headers", [])
         rows_raw = block.get("rows", [])
         raw_widths = block.get("column_widths")

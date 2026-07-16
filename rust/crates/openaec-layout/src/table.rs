@@ -60,6 +60,9 @@ pub struct RowOverride {
     pub top_rule: bool,
     /// Dunne lijn onder de rij.
     pub bottom_rule: bool,
+    /// Som-lijn boven de rij (subtotalen): zwart en dikker, loopt ~5 mm
+    /// rechts voorbij de tabel door, met een '+'-teken boven het uiteinde.
+    pub top_rule_sum: bool,
 }
 
 /// Row data (pre-computed heights with text wrapping).
@@ -393,7 +396,7 @@ impl Table {
             if let Some(ov) = self.row_overrides.get(row_index).and_then(|o| o.as_ref()) {
                 if ov.top_rule || ov.bottom_rule {
                     draw_list.set_stroke_color(self.style.grid_color);
-                    draw_list.set_line_width(Pt(0.75));
+                    draw_list.set_line_width(Pt(1.1));
                     let total_width: f32 = self.computed_col_widths.iter().map(|w| w.0).sum();
                     if ov.top_rule {
                         draw_list.draw_line(x, y, Pt(x.0 + total_width), y);
@@ -406,6 +409,19 @@ impl Table {
                             Pt(y.0 + row.height.0),
                         );
                     }
+                }
+                if ov.top_rule_sum {
+                    // Som-lijn (subtotaal): zwart, dikker, ~5 mm rechts
+                    // doorgetrokken met een '+' boven het uiteinde.
+                    let total_width: f32 = self.computed_col_widths.iter().map(|w| w.0).sum();
+                    let extend: Pt = crate::types::Mm(5.0).into();
+                    let end_x = Pt(x.0 + total_width + extend.0);
+                    draw_list.set_stroke_color(Color::rgb(26, 26, 26));
+                    draw_list.set_line_width(Pt(1.4));
+                    draw_list.draw_line(x, y, end_x, y);
+                    draw_list.set_font(&self.style.font_name, Pt(8.0));
+                    draw_list.set_fill_color(Color::rgb(26, 26, 26));
+                    draw_list.draw_text(Pt(end_x.0 - 5.0), Pt(y.0 - 2.0), "+");
                 }
             }
         }

@@ -203,16 +203,24 @@ impl Table {
         let mut remaining = text;
 
         while !remaining.is_empty() {
-            if remaining.len() <= max_chars {
+            if remaining.chars().count() <= max_chars {
                 lines.push(remaining.to_string());
                 break;
             }
 
+            // Byte-index van de max_chars-de tekengrens: slicen op bytes
+            // paniekt midden in multi-byte tekens ('×', 'm²', 'm¹').
+            let hard_end = remaining
+                .char_indices()
+                .nth(max_chars)
+                .map(|(i, _)| i)
+                .unwrap_or(remaining.len());
+
             // Find last space within max_chars
-            let split_at = remaining[..max_chars.min(remaining.len())]
+            let split_at = remaining[..hard_end]
                 .rfind(' ')
                 .map(|pos| pos + 1)
-                .unwrap_or(max_chars.min(remaining.len()));
+                .unwrap_or(hard_end);
 
             lines.push(remaining[..split_at].trim_end().to_string());
             remaining = remaining[split_at..].trim_start();

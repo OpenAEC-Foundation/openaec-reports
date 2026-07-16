@@ -56,6 +56,10 @@ impl Default for TableStyleConfig {
 pub struct RowOverride {
     /// Ander lettertype voor de hele rij (bv. "LiberationSans-Bold").
     pub font_name: Option<String>,
+    /// Dunne lijn boven de rij (bv. hoofdstukregels in besteksopmaak).
+    pub top_rule: bool,
+    /// Dunne lijn onder de rij.
+    pub bottom_rule: bool,
 }
 
 /// Row data (pre-computed heights with text wrapping).
@@ -382,6 +386,28 @@ impl Table {
                 Pt(x.0 + total_width),
                 Pt(y.0 + row.height.0),
             );
+        }
+
+        // Per-rij lijnen uit de RowOverride (clean stijl: hoofdstukregels)
+        if !row.is_header {
+            if let Some(ov) = self.row_overrides.get(row_index).and_then(|o| o.as_ref()) {
+                if ov.top_rule || ov.bottom_rule {
+                    draw_list.set_stroke_color(self.style.grid_color);
+                    draw_list.set_line_width(Pt(0.75));
+                    let total_width: f32 = self.computed_col_widths.iter().map(|w| w.0).sum();
+                    if ov.top_rule {
+                        draw_list.draw_line(x, y, Pt(x.0 + total_width), y);
+                    }
+                    if ov.bottom_rule {
+                        draw_list.draw_line(
+                            x,
+                            Pt(y.0 + row.height.0),
+                            Pt(x.0 + total_width),
+                            Pt(y.0 + row.height.0),
+                        );
+                    }
+                }
+            }
         }
     }
 }

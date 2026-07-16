@@ -979,7 +979,17 @@ async def pdok_services(user: User = Depends(get_current_user)):
 # Static frontend (moet ONDERAAN staan, na alle API routes)
 # ============================================================
 
-_static_dir = Path(__file__).parent.parent.parent / "static"
+# When the package is installed via `pip install .` (e.g. in the Docker
+# image), api.py lives under site-packages and the relative
+# `parent.parent.parent / "static"` path no longer points at /app/static.
+# Allow an env override and fall back to the source-tree-relative path so
+# in-place dev runs from the repo root still work.
+_static_dir = Path(
+    os.environ.get(
+        "OPENAEC_STATIC_DIR",
+        str(Path(__file__).parent.parent.parent / "static"),
+    )
+)
 if _static_dir.exists():
     # Kopieer uitleg.html naar static dir zodat /uitleg.html direct werkt
     _docs_dir = _find_docs_dir()

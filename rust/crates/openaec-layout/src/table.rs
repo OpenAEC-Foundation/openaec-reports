@@ -2,7 +2,7 @@
 
 use crate::draw::DrawList;
 use crate::flowable::{Flowable, LayoutContext, SplitResult};
-use crate::types::{Color, Padding, Pt, Size};
+use crate::types::{Alignment, Color, Padding, Pt, Size};
 
 /// Table cell content.
 #[derive(Debug, Clone)]
@@ -17,6 +17,9 @@ pub struct TableStyleConfig {
     pub header_background: Option<Color>,
     pub header_text_color: Color,
     pub grid_color: Color,
+    /// Rasterlijnen. Bij `Pt(0.0)` of kleiner worden GEEN cellijnen getekend
+    /// ("clean" rapportstijl); combineer met `header_rule` voor alleen een
+    /// lijn onder de koprij.
     pub grid_width: Pt,
     pub row_backgrounds: Vec<Option<Color>>,
     pub cell_padding: Padding,
@@ -24,6 +27,8 @@ pub struct TableStyleConfig {
     pub header_font_name: String,
     pub font_size: Pt,
     pub header_font_size: Pt,
+    /// Teken (ook zonder raster) een dunne lijn onder de koprij.
+    pub header_rule: bool,
 }
 
 impl Default for TableStyleConfig {
@@ -39,8 +44,18 @@ impl Default for TableStyleConfig {
             header_font_name: "LiberationSans-Bold".to_string(),
             font_size: Pt(9.0),
             header_font_size: Pt(9.0),
+            header_rule: false,
         }
     }
+}
+
+/// Optionele stijl-afwijking per datarij (index = datarij-index, header telt
+/// niet mee). Gebruikt voor hoofdstuk- (vet), paragraaf- (vet-cursief),
+/// opmerking- (cursief) en subtotaalregels in de "clean" rapportstijl.
+#[derive(Debug, Clone, Default)]
+pub struct RowOverride {
+    /// Ander lettertype voor de hele rij (bv. "LiberationSans-Bold").
+    pub font_name: Option<String>,
 }
 
 /// Row data (pre-computed heights with text wrapping).
@@ -62,6 +77,10 @@ pub struct Table {
     col_widths: Option<Vec<Pt>>,
     style: TableStyleConfig,
     repeat_header: bool,
+    /// Per-datarij stijl-afwijkingen (zelfde index als `rows`).
+    row_overrides: Vec<Option<RowOverride>>,
+    /// Uitlijning per kolom (default: links). Rechts voor getalkolommen.
+    col_alignments: Vec<Alignment>,
     // Computed after wrap()
     computed_col_widths: Vec<Pt>,
     row_layouts: Vec<RowLayout>,
@@ -76,10 +95,24 @@ impl Table {
             col_widths: None,
             style: TableStyleConfig::default(),
             repeat_header: true,
+            row_overrides: Vec::new(),
+            col_alignments: Vec::new(),
             computed_col_widths: Vec::new(),
             row_layouts: Vec::new(),
             wrapped_height: Pt::ZERO,
         }
+    }
+
+    /// Per-datarij stijl-afwijkingen; index loopt gelijk met de datarijen.
+    pub fn with_row_overrides(mut self, overrides: Vec<Option<RowOverride>>) -> Self {
+        self.row_overrides = overrides;
+        self
+    }
+
+    /// Uitlijning per kolom (links is de default); rechts voor getallen.
+    pub fn with_col_alignments(mut self, alignments: Vec<Alignment>) -> Self {
+        self.col_alignments = alignments;
+        self
     }
 
     pub fn with_col_widths(mut self, widths: Vec<Pt>) -> Self {
@@ -154,6 +187,11 @@ impl Table {
             return vec![text.to_string()];
         }
 
+        // Inspring van de eerste regel (bv. hiërarchie-indent) ook op de
+        // vervolgregels toepassen, zodat een omgeslagen omschrijving in de
+        // eigen kolom-inspringing blijft hangen.
+        let indent: String = text.chars().take_while(|c| *c == ' ').collect();
+
         let mut lines = Vec::new();
         let mut remaining = text;
 
@@ -175,6 +213,11 @@ impl Table {
 
         if lines.is_empty() {
             lines.push(String::new());
+        }
+        if !indent.is_empty() {
+            for line in lines.iter_mut().skip(1) {
+                *line = format!("{indent}{line}");
+            }
         }
         lines
     }
@@ -261,7 +304,11 @@ impl Table {
         let font_name = if row.is_header {
             self.style.header_font_name.clone()
         } else {
-            self.style.font_name.clone()
+            self.row_overrides
+                .get(row_index)
+                .and_then(|o| o.as_ref())
+                .and_then(|o| o.font_name.clone())
+                .unwrap_or_else(|| self.style.font_name.clone())
         };
 
         draw_list.set_font(&font_name, font_size);
@@ -278,38 +325,64 @@ impl Table {
                 .copied()
                 .unwrap_or(Pt(50.0));
 
-            let text_x = Pt(cx.0 + self.style.cell_padding.left.0);
+            let align = self
+                .col_alignments
+                .get(col_idx)
+                .copied()
+                .unwrap_or(Alignment::Left);
 
             // Draw each wrapped line
             for (line_idx, line) in wrapped_lines.iter().enumerate() {
                 let line_y = Pt(base_text_y.0 + line_idx as f32 * leading);
-                draw_list.draw_text(text_x, line_y, line);
+                match align {
+                    Alignment::Right => {
+                        let right_x = Pt(cx.0 + col_width.0 - self.style.cell_padding.right.0);
+                        draw_list.draw_text_right(right_x, line_y, line);
+                    }
+                    _ => {
+                        let text_x = Pt(cx.0 + self.style.cell_padding.left.0);
+                        draw_list.draw_text(text_x, line_y, line);
+                    }
+                }
             }
 
             cx = Pt(cx.0 + col_width.0);
         }
 
-        // Draw grid lines
-        draw_list.set_stroke_color(self.style.grid_color);
-        draw_list.set_line_width(self.style.grid_width);
+        // Draw grid lines (clean stijl: grid_width <= 0 → geen cellijnen)
+        if self.style.grid_width.0 > 0.0 {
+            draw_list.set_stroke_color(self.style.grid_color);
+            draw_list.set_line_width(self.style.grid_width);
 
-        let total_width: f32 = self.computed_col_widths.iter().map(|w| w.0).sum();
-        // Bottom line
-        draw_list.draw_line(
-            x,
-            Pt(y.0 + row.height.0),
-            Pt(x.0 + total_width),
-            Pt(y.0 + row.height.0),
-        );
+            let total_width: f32 = self.computed_col_widths.iter().map(|w| w.0).sum();
+            // Bottom line
+            draw_list.draw_line(
+                x,
+                Pt(y.0 + row.height.0),
+                Pt(x.0 + total_width),
+                Pt(y.0 + row.height.0),
+            );
 
-        // Vertical lines
-        let mut vx = x;
-        for col_width in &self.computed_col_widths {
+            // Vertical lines
+            let mut vx = x;
+            for col_width in &self.computed_col_widths {
+                draw_list.draw_line(vx, y, vx, Pt(y.0 + row.height.0));
+                vx = Pt(vx.0 + col_width.0);
+            }
+            // Right edge
             draw_list.draw_line(vx, y, vx, Pt(y.0 + row.height.0));
-            vx = Pt(vx.0 + col_width.0);
+        } else if row.is_header && self.style.header_rule {
+            // Alleen een dunne lijn onder de koprij
+            draw_list.set_stroke_color(self.style.grid_color);
+            draw_list.set_line_width(Pt(0.75));
+            let total_width: f32 = self.computed_col_widths.iter().map(|w| w.0).sum();
+            draw_list.draw_line(
+                x,
+                Pt(y.0 + row.height.0),
+                Pt(x.0 + total_width),
+                Pt(y.0 + row.height.0),
+            );
         }
-        // Right edge
-        draw_list.draw_line(vx, y, vx, Pt(y.0 + row.height.0));
     }
 }
 
@@ -337,11 +410,13 @@ impl Flowable for Table {
     }
 
     fn draw(&self, x: Pt, y: Pt, draw_list: &mut DrawList) {
-        // Top border
-        let total_width: f32 = self.computed_col_widths.iter().map(|w| w.0).sum();
-        draw_list.set_stroke_color(self.style.grid_color);
-        draw_list.set_line_width(self.style.grid_width);
-        draw_list.draw_line(x, y, Pt(x.0 + total_width), y);
+        // Top border (niet in clean stijl)
+        if self.style.grid_width.0 > 0.0 {
+            let total_width: f32 = self.computed_col_widths.iter().map(|w| w.0).sum();
+            draw_list.set_stroke_color(self.style.grid_color);
+            draw_list.set_line_width(self.style.grid_width);
+            draw_list.draw_line(x, y, Pt(x.0 + total_width), y);
+        }
 
         let mut cy = y;
         let mut data_row_idx = 0;
@@ -397,8 +472,23 @@ impl Flowable for Table {
             .map(|r| r.cells.clone())
             .collect();
 
+        // Verdeel de per-rij overrides over beide tafel-helften (zelfde
+        // datarij-indexering als de rows zelf).
+        let n_first = first_data_rows.len();
+        let (ov_first, ov_second): (Vec<Option<RowOverride>>, Vec<Option<RowOverride>>) =
+            if self.row_overrides.is_empty() {
+                (Vec::new(), Vec::new())
+            } else {
+                let mut padded = self.row_overrides.clone();
+                padded.resize(self.rows.len(), None);
+                let second = padded.split_off(n_first.min(padded.len()));
+                (padded, second)
+            };
+
         let mut first = Table::new(self.headers.clone(), first_data_rows)
-            .with_style(self.style.clone());
+            .with_style(self.style.clone())
+            .with_row_overrides(ov_first)
+            .with_col_alignments(self.col_alignments.clone());
         if let Some(ref widths) = self.col_widths {
             first = first.with_col_widths(widths.clone());
         }
@@ -411,7 +501,9 @@ impl Flowable for Table {
             },
             second_data_rows,
         )
-        .with_style(self.style.clone());
+        .with_style(self.style.clone())
+        .with_row_overrides(ov_second)
+        .with_col_alignments(self.col_alignments.clone());
         if let Some(ref widths) = self.col_widths {
             second = second.with_col_widths(widths.clone());
         }

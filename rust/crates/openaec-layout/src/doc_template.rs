@@ -18,12 +18,14 @@ fn to_pdf_mm(pt: Pt) -> printpdf::Mm {
     printpdf::Mm(mm.0)
 }
 
-/// Nabewerking: hang alpha-kanalen als /SMask (indirect DeviceGray-image) aan
-/// de RGB-image-objecten in de opgeslagen PDF. printpdf 0.7 kan dit zelf niet
-/// correct (verwisselde afmetingen en een inline stream in de dictionary),
-/// dus we doen het via lopdf op de eindbytes. Matching gebeurt per
-/// (breedte, hoogte) in documentvolgorde, alleen op RGB-images zonder SMask.
-fn attach_smasks(
+/// Nabewerking op de opgeslagen PDF via lopdf:
+/// 1. alpha-kanalen als /SMask (indirect DeviceGray-image) aan de
+///    RGB-image-objecten hangen — printpdf 0.7 kan dit zelf niet correct
+///    (verwisselde afmetingen en een inline stream in de dictionary);
+///    matching per (breedte, hoogte) in documentvolgorde;
+/// 2. alle ongefilterde streams Flate-comprimeren — printpdf schrijft
+///    fonts en content onbewerkt weg, wat PDF's megabytes groter maakt.
+fn finalize_pdf(
     bytes: &[u8],
     smasks: &[(usize, usize, Vec<u8>)],
 ) -> Result<Vec<u8>, String> {
@@ -77,6 +79,10 @@ fn attach_smasks(
             s.dict.set("SMask", Object::Reference(sm_id));
         }
     }
+
+    // Flate-compressie van alle nog ongefilterde streams (fonts, content,
+    // afbeeldingen, smasks) — scheelt doorgaans meer dan de helft.
+    doc.compress();
 
     let mut out = Vec::new();
     doc.save_to(&mut out).map_err(|e| e.to_string())?;
@@ -328,20 +334,34 @@ impl DocTemplate {
             "Content",
         );
 
-        // Register fonts with printpdf
+        // Register fonts with printpdf — één embed per uniek font: aliassen
+        // delen de referentie. Voorheen werd het volledige TTF-bestand per
+        // alias opnieuw ingebed (9 kopieën ≈ 7 MB per PDF).
         let fonts_guard = self.fonts.lock().unwrap();
         let mut pdf_fonts: std::collections::HashMap<String, printpdf::IndirectFontRef> =
             std::collections::HashMap::new();
+        let mut per_font: std::collections::HashMap<usize, printpdf::IndirectFontRef> =
+            std::collections::HashMap::new();
 
         for (name, font_id) in fonts_guard.iter() {
-            let font_data = fonts_guard.font_data(font_id);
-            match doc.add_external_font(font_data) {
-                Ok(font_ref) => {
-                    pdf_fonts.insert(name.to_string(), font_ref);
+            let font_ref = match per_font.get(&font_id.0) {
+                Some(r) => Some(r.clone()),
+                None => {
+                    let font_data = fonts_guard.font_data(font_id);
+                    match doc.add_external_font(font_data) {
+                        Ok(r) => {
+                            per_font.insert(font_id.0, r.clone());
+                            Some(r)
+                        }
+                        Err(e) => {
+                            tracing::warn!("Failed to register font '{}': {}", name, e);
+                            None
+                        }
+                    }
                 }
-                Err(e) => {
-                    tracing::warn!("Failed to register font '{}': {}", name, e);
-                }
+            };
+            if let Some(r) = font_ref {
+                pdf_fonts.insert(name.to_string(), r);
             }
         }
         drop(fonts_guard);
@@ -372,15 +392,13 @@ impl DocTemplate {
             .into_inner()
             .map_err(|e| LayoutError::PdfError(e.to_string()))?;
 
-        // Echte transparantie: hang de verzamelde alpha-kanalen als /SMask aan
-        // de image-objecten (printpdf's eigen smask-pad is onbruikbaar).
-        if smask_queue.is_empty() {
-            return Ok(bytes);
-        }
-        match attach_smasks(&bytes, &smask_queue) {
+        // Nabewerking op de eindbytes: alpha-kanalen als /SMask aanhangen
+        // (printpdf's eigen smask-pad is onbruikbaar) en alle streams
+        // comprimeren — printpdf schrijft fonts en content ongecomprimeerd.
+        match finalize_pdf(&bytes, &smask_queue) {
             Ok(b) => Ok(b),
             Err(e) => {
-                tracing::warn!("SMask-nabewerking mislukt, PDF zonder alpha: {}", e);
+                tracing::warn!("PDF-nabewerking mislukt, ruwe uitvoer gebruikt: {}", e);
                 Ok(bytes)
             }
         }

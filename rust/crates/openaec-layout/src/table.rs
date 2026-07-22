@@ -65,6 +65,30 @@ pub struct RowOverride {
     pub top_rule_sum: bool,
 }
 
+/// Geschatte breedte van één teken, uitgedrukt in em (× font_size).
+///
+/// Genoeg om terugloop op te baseren zonder de fonttabellen in te lezen. De
+/// waarden liggen dicht bij Liberation Sans / DejaVu Sans: kapitalen en
+/// cijfers zijn duidelijk breder dan de oude vlakke schatting van 0.5, smalle
+/// letters juist smaller. Zonder dit onderscheid liep een titel in kapitalen
+/// over de volgende kolom heen.
+fn char_em_width(c: char) -> f32 {
+    match c {
+        ' ' => 0.28,
+        'i' | 'j' | 'l' | 'I' | '.' | ',' | ':' | ';' | '\'' | '|' | '!' | '`' => 0.26,
+        'f' | 't' | 'r' | '(' | ')' | '[' | ']' | '-' | '/' | '\\' => 0.34,
+        'm' | 'w' => 0.79,
+        'M' | 'W' => 0.87,
+        c if c.is_ascii_uppercase() => 0.67,
+        c if c.is_ascii_digit() => 0.56,
+        c if c.is_ascii_lowercase() => 0.53,
+        // Accenten, €, ², ³ en overige tekens: net iets ruimer dan een
+        // gemiddelde kleine letter, zodat we eerder te vroeg dan te laat
+        // afbreken.
+        _ => 0.58,
+    }
+}
+
 /// Row data (pre-computed heights with text wrapping).
 #[derive(Debug, Clone)]
 struct RowLayout {
@@ -176,8 +200,12 @@ impl Table {
 
     /// Wrap cell text to fit within column width.
     ///
-    /// Uses approximate character width (0.5 × font_size for proportional fonts).
-    fn wrap_text(&self, text: &str, col_width: Pt, font_size: Pt) -> Vec<String> {
+    /// Meet de tekst per teken in plaats van met één vaste breedte. Een vlakke
+    /// 0.5 × font_size onderschat hoofdletters fors — in een proportioneel
+    /// font is een 'M' ruim twee keer zo breed als een 'i' — waardoor een
+    /// hoofdstuktitel in kapitalen niet omsloeg maar over de buurkolom heen
+    /// werd getekend.
+    fn wrap_text(&self, text: &str, col_width: Pt, font_size: Pt, bold: bool) -> Vec<String> {
         let usable_width = col_width.0
             - self.style.cell_padding.left.0
             - self.style.cell_padding.right.0;
@@ -186,11 +214,13 @@ impl Table {
             return vec![text.to_string()];
         }
 
-        // Approximate char width (proportional fonts ≈ 0.5 × font_size)
-        let char_width = font_size.0 * 0.5;
-        let max_chars = (usable_width / char_width).max(1.0) as usize;
+        // Vet is bij Liberation/DejaVu enkele procenten breder dan regulier.
+        let bold_factor = if bold { 1.06 } else { 1.0 };
+        let width_of = |s: &str| -> f32 {
+            s.chars().map(char_em_width).sum::<f32>() * font_size.0 * bold_factor
+        };
 
-        if text.len() <= max_chars {
+        if width_of(text) <= usable_width {
             return vec![text.to_string()];
         }
 
@@ -203,20 +233,34 @@ impl Table {
         let mut remaining = text;
 
         while !remaining.is_empty() {
-            if remaining.chars().count() <= max_chars {
+            if width_of(remaining) <= usable_width {
                 lines.push(remaining.to_string());
                 break;
             }
 
-            // Byte-index van de max_chars-de tekengrens: slicen op bytes
-            // paniekt midden in multi-byte tekens ('×', 'm²', 'm¹').
-            let hard_end = remaining
-                .char_indices()
-                .nth(max_chars)
-                .map(|(i, _)| i)
-                .unwrap_or(remaining.len());
+            // Loop mee tot de breedte vol is en onthoud de byte-index van dat
+            // teken. Op bytes slicen paniekt midden in een multi-byte teken
+            // ('×', 'm²', 'm¹'), dus altijd via char_indices.
+            let mut breedte = 0.0f32;
+            let mut hard_end = remaining.len();
+            for (idx, ch) in remaining.char_indices() {
+                breedte += char_em_width(ch) * font_size.0 * bold_factor;
+                if breedte > usable_width {
+                    // Minstens één teken per regel, anders loopt dit vast.
+                    hard_end = if idx == 0 {
+                        remaining
+                            .char_indices()
+                            .nth(1)
+                            .map(|(i, _)| i)
+                            .unwrap_or(remaining.len())
+                    } else {
+                        idx
+                    };
+                    break;
+                }
+            }
 
-            // Find last space within max_chars
+            // Terug naar de laatste spatie die nog binnen de breedte viel
             let split_at = remaining[..hard_end]
                 .rfind(' ')
                 .map(|pos| pos + 1)
@@ -242,6 +286,7 @@ impl Table {
         &self,
         cells: &[String],
         is_header: bool,
+        bold: bool,
     ) -> RowLayout {
         let font_size = if is_header {
             self.style.header_font_size
@@ -258,7 +303,7 @@ impl Table {
                     .get(col_idx)
                     .copied()
                     .unwrap_or(Pt(50.0));
-                self.wrap_text(text, col_width, font_size)
+                self.wrap_text(text, col_width, font_size, bold)
             })
             .collect();
 
@@ -442,16 +487,24 @@ impl Flowable for Table {
 
         self.row_layouts.clear();
 
-        // Header row
+        // Header row — koppen staan vet, dus ook breder meten.
         if !self.headers.is_empty() {
             self.row_layouts
-                .push(self.compute_row_layout(&self.headers.clone(), true));
+                .push(self.compute_row_layout(&self.headers.clone(), true, true));
         }
 
-        // Data rows
-        for row in self.rows.clone() {
+        // Data rows — een rij met een vet lettertype (hoofdstuktitels) is
+        // breder dan de reguliere schatting; die vlag gaat mee de terugloop in.
+        for (i, row) in self.rows.clone().into_iter().enumerate() {
+            let bold = self
+                .row_overrides
+                .get(i)
+                .and_then(|o| o.as_ref())
+                .and_then(|o| o.font_name.as_deref())
+                .map(|f| f.contains("Bold"))
+                .unwrap_or(false);
             self.row_layouts
-                .push(self.compute_row_layout(&row, false));
+                .push(self.compute_row_layout(&row, false, bold));
         }
 
         self.wrapped_height = Pt(self.row_layouts.iter().map(|r| r.height.0).sum());

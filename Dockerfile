@@ -34,6 +34,7 @@ RUN mkdir -p /app/uploads /app/data && chown -R appuser:appuser /app
 # Default tenant is de neutrale open-source placeholder onder tenants/default.
 # Productie-deployments kunnen een andere tenant bind-mounten en de env
 # vars OPENAEC_DEFAULT_BRAND + OPENAEC_TENANT_DIR overschrijven.
+ENV OPENAEC_STATIC_DIR=/app/static
 ENV OPENAEC_TENANTS_ROOT=/app/tenants
 ENV OPENAEC_TENANT_DIR=/app/tenants/default
 ENV OPENAEC_DEFAULT_BRAND=default

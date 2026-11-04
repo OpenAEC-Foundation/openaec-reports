@@ -94,6 +94,20 @@ pub fn generate_pdf_with_config(
     brand: &BrandConfig,
     output: &Path,
 ) -> Result<Vec<u8>, EngineError> {
+    let pdf_bytes = generate_pdf_bytes_with_config(data, tenant, brand)?;
+    std::fs::write(output, &pdf_bytes)?;
+    Ok(pdf_bytes)
+}
+
+/// Generate a PDF with explicit tenant and brand configuration and return the bytes.
+///
+/// Use this instead of `generate_pdf_bytes` when the caller picks the tenant,
+/// so the house style doesn't depend on `OPENAEC_TENANT_DIR`.
+pub fn generate_pdf_bytes_with_config(
+    data: &ReportData,
+    tenant: &TenantConfig,
+    brand: &BrandConfig,
+) -> Result<Vec<u8>, EngineError> {
     let fonts = shared_font_registry();
     setup_fonts(&fonts, tenant);
 
@@ -123,9 +137,7 @@ pub fn generate_pdf_with_config(
     add_special_pages(&mut doc, data, brand);
 
     let flowables = build_flowables(data, brand);
-    let pdf_bytes = doc.build_to_bytes(flowables).map_err(EngineError::Layout)?;
-    std::fs::write(output, &pdf_bytes)?;
-    Ok(pdf_bytes)
+    doc.build_to_bytes(flowables).map_err(EngineError::Layout)
 }
 
 // ── Special page integration ────────────────────────────────────────────
@@ -383,6 +395,9 @@ fn setup_fonts(fonts: &SharedFontRegistry, tenant: &TenantConfig) {
         PathBuf::from("../src/openaec_reports/assets/fonts"),     // CWD = rust/
         PathBuf::from("src/openaec_reports/assets/fonts"),         // CWD = monorepo root
         PathBuf::from("../../src/openaec_reports/assets/fonts"),   // CWD = rust/crates/X
+        // Relative to this crate, so apps that depend on openaec-core by path
+        // (e.g. Open Requirements Studio) find them from any CWD.
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../src/openaec_reports/assets/fonts"),
     ];
     for candidate in &candidates {
         if candidate.is_dir() {

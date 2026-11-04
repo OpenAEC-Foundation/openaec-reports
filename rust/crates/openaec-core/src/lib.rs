@@ -24,7 +24,7 @@ pub use schema::ReportData;
 pub use brand::{BrandConfig, BrandLoader};
 pub use tenant::TenantConfig;
 pub use font_manager::FontManager;
-pub use engine::{generate_pdf, generate_pdf_bytes, EngineError};
+pub use engine::{generate_pdf, generate_pdf_bytes, generate_pdf_bytes_with_config, generate_pdf_with_config, EngineError};
 
 // Re-exports — Phase 2
 pub use document::{DocumentConfig, Margins, PageFormatMm};

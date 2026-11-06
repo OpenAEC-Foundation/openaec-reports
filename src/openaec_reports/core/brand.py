@@ -132,11 +132,18 @@ class BrandConfig:
 
 
 def _parse_signatures(raw: list | None) -> list[dict]:
-    """``email_signatures`` uit brand.yaml: alleen items met een template, als ``{name, template, default}``."""
+    """``email_signatures`` uit brand.yaml: alleen items met een template.
+
+    Elk item wordt ``{name, template, default}``.
+    """
     if not isinstance(raw, list):
         return []
     return [
-        {"name": str(s.get("name") or ""), "template": str(s["template"]), "default": s.get("default") is True}
+        {
+            "name": str(s.get("name") or ""),
+            "template": str(s["template"]),
+            "default": s.get("default") is True,
+        }
         for s in raw
         if isinstance(s, dict) and s.get("template")
     ]

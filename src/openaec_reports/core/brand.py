@@ -104,6 +104,9 @@ class BrandConfig:
         modules: Module-specifieke styling (table, calculation, etc.).
         tenant_modules: Beschikbare tenant-specifieke module types.
         module_config: Configuratie voor tenant modules (kleuren, sizes).
+        email_signatures: Mailhandtekeningen (``[{name, template, default}]``, HTML met
+            plaatshouders); niet voor de PDF, wel onderdeel van de huisstijl
+            (zie docs/huisstijl-maken.md).
         brand_dir: Directory van het YAML bestand (voor relatieve paden).
     """
 
@@ -124,7 +127,26 @@ class BrandConfig:
     tenant_modules: list[str] = field(default_factory=list)
     module_config: dict = field(default_factory=dict)
     font_files: dict[str, str] = field(default_factory=dict)
+    email_signatures: list[dict] = field(default_factory=list)
     brand_dir: Path | None = None
+
+
+def _parse_signatures(raw: list | None) -> list[dict]:
+    """``email_signatures`` uit brand.yaml: alleen items met een template.
+
+    Elk item wordt ``{name, template, default}``.
+    """
+    if not isinstance(raw, list):
+        return []
+    return [
+        {
+            "name": str(s.get("name") or ""),
+            "template": str(s["template"]),
+            "default": s.get("default") is True,
+        }
+        for s in raw
+        if isinstance(s, dict) and s.get("template")
+    ]
 
 
 def _parse_elements(raw_elements: list[dict] | None) -> list[ElementConfig]:
@@ -317,6 +339,7 @@ class BrandLoader:
             tenant_modules=tenant_modules,
             module_config=data.get("module_config", {}),
             font_files=data.get("font_files", {}),
+            email_signatures=_parse_signatures(data.get("email_signatures")),
             brand_dir=path.parent,
         )
 

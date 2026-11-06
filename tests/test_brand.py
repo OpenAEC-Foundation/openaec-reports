@@ -132,7 +132,8 @@ class TestBrandLoader:
         assert types == ["line", "text", "text"]
 
     @pytest.mark.skip(
-        reason="default tenant fixtures incomplete post-purge (verwachte tenant-specifieke brand assertions)"
+        reason="default tenant fixtures incomplete post-purge "
+        "(verwachte tenant-specifieke brand assertions)"
     )
     def test_load_tenant_brand(self):
         loader = BrandLoader()
@@ -146,7 +147,8 @@ class TestBrandLoader:
         assert brand.footer.height == 17  # was 25
 
     @pytest.mark.skip(
-        reason="default tenant fixtures incomplete post-purge (verwachte tenant-specifieke footer)"
+        reason="default tenant fixtures incomplete post-purge "
+        "(verwachte tenant-specifieke footer)"
     )
     def test_load_tenant_brand_footer_elements(self):
         loader = BrandLoader()
@@ -161,7 +163,8 @@ class TestBrandLoader:
         assert text_elem.size == 9.5
 
     @pytest.mark.skip(
-        reason="default tenant fixtures incomplete post-purge (verwachte tenant-specifieke styles)"
+        reason="default tenant fixtures incomplete post-purge "
+        "(verwachte tenant-specifieke styles)"
     )
     def test_load_tenant_brand_styles(self):
         loader = BrandLoader()
@@ -172,7 +175,8 @@ class TestBrandLoader:
         assert brand.styles["Heading2"]["textColor"] == "#56B49B"
 
     @pytest.mark.skip(
-        reason="default tenant fixtures incomplete post-purge (verwachte tenant-specifieke pages)"
+        reason="default tenant fixtures incomplete post-purge "
+        "(verwachte tenant-specifieke pages)"
     )
     def test_load_tenant_brand_pages(self):
         loader = BrandLoader()
@@ -570,3 +574,30 @@ class TestIntegration:
 
         assert result.exists()
         assert result.stat().st_size > 1000
+
+
+# ============================================================
+# email_signatures — mailhandtekeningen als onderdeel van de huisstijl
+# ============================================================
+
+class TestEmailSignatures:
+    def test_default_leeg(self):
+        assert BrandConfig().email_signatures == []
+
+    def test_laden_uit_brand_yaml(self, tmp_path):
+        tenant = tmp_path / "bureau"
+        tenant.mkdir()
+        (tenant / "brand.yaml").write_text(
+            "brand:\n  name: Bureau\n  slug: bureau\n"
+            "email_signatures:\n"
+            "  - name: Standaard\n    default: true\n    template: '<p>{naam}</p>'\n"
+            "  - name: Kort\n    template: '<p>{naam}</p>'\n"
+            "  - name: Leeg\n"
+            "  - geen object\n",
+            encoding="utf-8",
+        )
+        config = BrandLoader(tenants_root=tmp_path).load("bureau")
+        assert config.email_signatures == [
+            {"name": "Standaard", "template": "<p>{naam}</p>", "default": True},
+            {"name": "Kort", "template": "<p>{naam}</p>", "default": False},
+        ]

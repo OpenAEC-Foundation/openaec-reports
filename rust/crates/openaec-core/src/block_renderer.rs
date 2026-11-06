@@ -539,6 +539,7 @@ mod tests {
             module_config: std::collections::HashMap::new(),
             tenant_modules: serde_yaml::Value::Null,
             font_files: std::collections::HashMap::new(),
+            email_signatures: Vec::new(),
             brand_dir: None,
         }
     }

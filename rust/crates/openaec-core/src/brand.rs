@@ -85,10 +85,31 @@ pub struct BrandConfig {
     #[serde(default)]
     pub font_files: HashMap<String, String>,
 
+    /// E-mail signatures of the house style (HTML with placeholders such as `{naam}`).
+    /// Not used for rendering; carried along so a tenant folder holds the complete
+    /// house style (see docs/huisstijl-maken.md). The OpenAEC SuperCloud imports them.
+    #[serde(default)]
+    pub email_signatures: Vec<EmailSignature>,
+
     /// Directory of the YAML file (for resolving relative paths).
     /// Not serialized — set by the loader.
     #[serde(skip)]
     pub brand_dir: Option<PathBuf>,
+}
+
+/// One e-mail signature design in brand.yaml (`email_signatures`).
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+pub struct EmailSignature {
+    /// Name of the design, e.g. "Standaard" or "Kort".
+    #[serde(default)]
+    pub name: String,
+    /// HTML template with placeholders: {naam}, {functie}, {telefoon}, {mobiel}, {email},
+    /// {handelsnaam}, {website}, {adres}, {logo_url}.
+    #[serde(default)]
+    pub template: String,
+    /// The default design (at most one; without one, the first is the default).
+    #[serde(default)]
+    pub default: bool,
 }
 
 /// Brand identity fields.
@@ -895,5 +916,18 @@ pages:
         let empty: BrandConfig = BrandConfig::default();
         assert_eq!(empty.resolve_font_name("heading"), "LiberationSans-Bold");
         assert_eq!(empty.resolve_font_name("body"), "LiberationSans");
+    }
+
+    #[test]
+    fn email_signatures_are_parsed_and_default_to_empty() {
+        let brand: BrandConfig = serde_yaml::from_str(
+            "brand:\n  name: X\nemail_signatures:\n  - name: Standaard\n    default: true\n    template: '<p>{naam}</p>'\n  - name: Kort\n    template: '<p>{naam}</p>'\n",
+        )
+        .unwrap();
+        assert_eq!(brand.email_signatures.len(), 2);
+        assert!(brand.email_signatures[0].default);
+        assert_eq!(brand.email_signatures[1].name, "Kort");
+        let leeg: BrandConfig = serde_yaml::from_str("brand:\n  name: X\n").unwrap();
+        assert!(leeg.email_signatures.is_empty());
     }
 }

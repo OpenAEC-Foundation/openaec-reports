@@ -570,3 +570,30 @@ class TestIntegration:
 
         assert result.exists()
         assert result.stat().st_size > 1000
+
+
+# ============================================================
+# email_signatures — mailhandtekeningen als onderdeel van de huisstijl
+# ============================================================
+
+class TestEmailSignatures:
+    def test_default_leeg(self):
+        assert BrandConfig().email_signatures == []
+
+    def test_laden_uit_brand_yaml(self, tmp_path):
+        tenant = tmp_path / "bureau"
+        tenant.mkdir()
+        (tenant / "brand.yaml").write_text(
+            "brand:\n  name: Bureau\n  slug: bureau\n"
+            "email_signatures:\n"
+            "  - name: Standaard\n    default: true\n    template: '<p>{naam}</p>'\n"
+            "  - name: Kort\n    template: '<p>{naam}</p>'\n"
+            "  - name: Leeg\n"
+            "  - geen object\n",
+            encoding="utf-8",
+        )
+        config = BrandLoader(tenants_root=tmp_path).load("bureau")
+        assert config.email_signatures == [
+            {"name": "Standaard", "template": "<p>{naam}</p>", "default": True},
+            {"name": "Kort", "template": "<p>{naam}</p>", "default": False},
+        ]

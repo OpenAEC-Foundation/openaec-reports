@@ -767,6 +767,7 @@ mod tests {
             module_config: HashMap::new(),
             tenant_modules: serde_yaml::Value::Null,
             font_files: HashMap::new(),
+            email_signatures: Vec::new(),
             brand_dir: None,
         }
     }
@@ -873,6 +874,7 @@ mod tests {
             module_config: HashMap::new(),
             tenant_modules: serde_yaml::Value::Null,
             font_files: HashMap::new(),
+            email_signatures: Vec::new(),
             brand_dir: None,
         };
         // Should fall back to OpenAEC defaults

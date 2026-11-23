@@ -114,7 +114,9 @@ fn resolve_font<'a, V>(fonts: &'a HashMap<String, V>, name: &str) -> Option<&'a 
         .or_else(|| fonts.get(&format!("{}-Regular", name)))
         .or_else(|| {
             let base = name.split('-').next().unwrap_or(name);
-            fonts.get(base).or_else(|| fonts.get(&format!("{}-Regular", base)))
+            fonts
+                .get(base)
+                .or_else(|| fonts.get(&format!("{}-Regular", base)))
         })
         .or_else(|| {
             // "Inter-Bold" → "Inter-Bold", "Inter-RegularItalic" → "Inter-Regular-Italic"
@@ -477,20 +479,14 @@ impl DocTemplate {
         }
     }
 
-    /// Measure text width using the font registry.
-    fn measure_text_width(&self, font_name: &str, text: &str, size: f32) -> Pt {
-        if let Ok(mut reg) = self.fonts.lock() {
-            // Try original name, then CamelCase → hyphenated
-            let font_id = reg
-                .get(font_name)
-                .or_else(|| reg.get(&camel_to_hyphen(font_name)));
-
-            if let Some(id) = font_id {
-                return reg.text_width(id, text, Pt(size));
-            }
+    /// Measure text width in the font that draws it (resolved by
+    /// [`resolve_font`]), so centred and right-aligned text lines up.
+    fn measure_text_width(&self, font_id: FontId, text: &str, size: f32) -> Pt {
+        match self.fonts.lock() {
+            Ok(mut reg) => reg.text_width(font_id, text, Pt(size)),
+            // Fallback: approximate average character width
+            Err(_) => Pt(text.chars().count() as f32 * size * 0.55),
         }
-        // Fallback: approximate average character width
-        Pt(text.chars().count() as f32 * size * 0.55)
     }
 
     /// Write `text` in the current text section, switching to a fallback
@@ -537,14 +533,12 @@ impl DocTemplate {
     ) {
         let mut current_font: Option<&(FontId, printpdf::IndirectFontRef)> = None;
         let mut current_font_size: f32 = 10.0;
-        let mut current_font_name = String::new();
         let mut current_fill_rgb: (u8, u8, u8) = (255, 255, 255); // for alpha compositing
 
         for op in &draw_list.ops {
             match op {
                 DrawOp::SetFont { name, size } => {
                     current_font_size = size.0;
-                    current_font_name = name.clone();
                     current_font = resolve_font(fonts, name);
                     if current_font.is_none() {
                         tracing::warn!(font = %name, "Font not found, text will be invisible");
@@ -557,41 +551,54 @@ impl DocTemplate {
                         layer.begin_text_section();
                         layer.set_font(font, current_font_size);
                         layer.set_text_cursor(to_pdf_mm(*x), to_pdf_mm(Pt(pdf_y)));
-                        self.write_text_runs(layer, *font_id, font, text, current_font_size, fallback_fonts);
+                        self.write_text_runs(
+                            layer,
+                            *font_id,
+                            font,
+                            text,
+                            current_font_size,
+                            fallback_fonts,
+                        );
                         layer.end_text_section();
                     }
                 }
 
                 DrawOp::DrawTextCenter { x, y, text } => {
                     if let Some((font_id, font)) = current_font {
-                        let tw = self.measure_text_width(
-                            &current_font_name,
-                            text,
-                            current_font_size,
-                        );
+                        let tw = self.measure_text_width(*font_id, text, current_font_size);
                         let adjusted_x = Pt(x.0 - tw.0 / 2.0);
                         let pdf_y = page_height.0 - y.0;
                         layer.begin_text_section();
                         layer.set_font(font, current_font_size);
                         layer.set_text_cursor(to_pdf_mm(adjusted_x), to_pdf_mm(Pt(pdf_y)));
-                        self.write_text_runs(layer, *font_id, font, text, current_font_size, fallback_fonts);
+                        self.write_text_runs(
+                            layer,
+                            *font_id,
+                            font,
+                            text,
+                            current_font_size,
+                            fallback_fonts,
+                        );
                         layer.end_text_section();
                     }
                 }
 
                 DrawOp::DrawTextRight { x, y, text } => {
                     if let Some((font_id, font)) = current_font {
-                        let tw = self.measure_text_width(
-                            &current_font_name,
-                            text,
-                            current_font_size,
-                        );
+                        let tw = self.measure_text_width(*font_id, text, current_font_size);
                         let adjusted_x = Pt(x.0 - tw.0);
                         let pdf_y = page_height.0 - y.0;
                         layer.begin_text_section();
                         layer.set_font(font, current_font_size);
                         layer.set_text_cursor(to_pdf_mm(adjusted_x), to_pdf_mm(Pt(pdf_y)));
-                        self.write_text_runs(layer, *font_id, font, text, current_font_size, fallback_fonts);
+                        self.write_text_runs(
+                            layer,
+                            *font_id,
+                            font,
+                            text,
+                            current_font_size,
+                            fallback_fonts,
+                        );
                         layer.end_text_section();
                     }
                 }
@@ -845,19 +852,25 @@ impl DocTemplate {
 mod fallback_tests {
     use super::*;
     use crate::fonts::shared_font_registry;
-    use crate::{Frame, PageTemplate, Paragraph, ParagraphStyle, Rect, A4};
+    use crate::{A4, Alignment, Frame, PageTemplate, Paragraph, ParagraphStyle, Rect};
     use printpdf::lopdf;
 
     // Liberation Sans lacks ₹; Space Grotesk has it.
     const LIBERATION: &[u8] =
         include_bytes!("../../../../src/openaec_reports/assets/fonts/LiberationSans-Regular.ttf");
-    const GROTESK: &[u8] = include_bytes!("../../../../tenants/default/fonts/SpaceGrotesk-Regular.ttf");
+    const GROTESK: &[u8] =
+        include_bytes!("../../../../tenants/default/fonts/SpaceGrotesk-Regular.ttf");
 
     fn pdf(text: &str, with_fallback: bool) -> lopdf::Document {
+        pdf_styled(text, ParagraphStyle::default(), with_fallback)
+    }
+
+    fn pdf_styled(text: &str, style: ParagraphStyle, with_fallback: bool) -> lopdf::Document {
         let fonts = shared_font_registry();
         {
             let mut reg = fonts.lock().unwrap();
-            reg.register_ttf_bytes("LiberationSans", LIBERATION.to_vec()).unwrap();
+            reg.register_ttf_bytes("LiberationSans", LIBERATION.to_vec())
+                .unwrap();
             if with_fallback {
                 reg.add_fallback_ttf_bytes(GROTESK.to_vec()).unwrap();
             }
@@ -865,7 +878,7 @@ mod fallback_tests {
         let mut doc = DocTemplate::new("Test", fonts);
         let frame = Frame::new(Rect::new(Pt(56.7), Pt(56.7), Pt(481.9), Pt(728.5)));
         doc.add_page_template(PageTemplate::new("content", A4, frame));
-        let paragraph = Paragraph::new(text, ParagraphStyle::default());
+        let paragraph = Paragraph::new(text, style);
         let bytes = doc.build_to_bytes(vec![Box::new(paragraph)]).unwrap();
         lopdf::Document::load_mem(&bytes).unwrap()
     }
@@ -888,7 +901,10 @@ mod fallback_tests {
     }
 
     fn count(doc: &lopdf::Document, operator: &str) -> usize {
-        page_ops(doc).iter().filter(|op| op.operator == operator).count()
+        page_ops(doc)
+            .iter()
+            .filter(|op| op.operator == operator)
+            .count()
     }
 
     /// Bytes of glyph ids written by all text operations (2 per glyph).
@@ -919,6 +935,27 @@ mod fallback_tests {
         assert_eq!(count(&doc, "Tf"), 1);
         // ₹ is left out: 13 of the 14 characters are drawn.
         assert_eq!(glyph_bytes(&doc), 2 * "Totaal  1.000".chars().count());
+    }
+
+    #[test]
+    fn right_aligned_text_is_measured_in_the_font_that_draws_it() {
+        // "LiberationSans-SemiBold" is not registered: it is drawn in
+        // LiberationSans (the base name), so it must be measured in it too.
+        let start_x = |font_name: &str| {
+            let style = ParagraphStyle {
+                font_name: font_name.to_string(),
+                alignment: Alignment::Right,
+                ..ParagraphStyle::default()
+            };
+            let doc = pdf_styled("Totaal ₹ 1.000", style, true);
+            let ops = page_ops(&doc);
+            let td = ops.iter().find(|op| op.operator == "Td").expect("Td");
+            td.operands[0].as_float().unwrap()
+        };
+        assert_eq!(
+            start_x("LiberationSans-SemiBold"),
+            start_x("LiberationSans")
+        );
     }
 
     #[test]

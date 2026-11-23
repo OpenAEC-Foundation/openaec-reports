@@ -75,7 +75,7 @@ impl FontEntry {
     }
 
     /// Whether the font has a real glyph for `ch`. A cmap entry that points
-    /// at glyph 0 (`.notdef`) does not count: printpdf leaves those out.
+    /// at glyph 0 (`.notdef`) does not count: that would draw an empty box.
     fn has_char(&mut self, ch: char) -> bool {
         if let Some(&has) = self.covered.get(&ch) {
             return has;
@@ -90,18 +90,23 @@ impl FontEntry {
 }
 
 /// Control and other invisible formatting characters: line breaks, tabs,
-/// zero-width spaces and joiners, direction marks, variation selectors.
+/// zero-width spaces and joiners, direction marks and isolates, variation
+/// selectors, tag characters.
 /// They never switch to a fallback font; a fallback that happens to map one
 /// would only add width and a font switch.
 fn is_invisible(ch: char) -> bool {
     ch.is_control()
         || matches!(
             ch,
-            '\u{200B}'..='\u{200F}'
+            '\u{061C}'
+                | '\u{180E}'
+                | '\u{200B}'..='\u{200F}'
                 | '\u{2028}'..='\u{202E}'
-                | '\u{2060}'..='\u{2064}'
+                | '\u{2060}'..='\u{206F}'
                 | '\u{FE00}'..='\u{FE0F}'
                 | '\u{FEFF}'
+                | '\u{E0000}'..='\u{E007F}'
+                | '\u{E0100}'..='\u{E01EF}'
         )
 }
 
@@ -350,6 +355,7 @@ mod tests {
         include_bytes!("../../../../src/openaec_reports/assets/fonts/LiberationSans-Regular.ttf");
     const GROTESK: &[u8] =
         include_bytes!("../../../../tenants/default/fonts/SpaceGrotesk-Regular.ttf");
+    const INTER: &[u8] = include_bytes!("../../../../tenants/default/fonts/Inter-Regular.ttf");
 
     fn advance(data: &[u8], ch: char) -> f32 {
         let face = ttf_parser::Face::parse(data, 0).unwrap();
@@ -416,7 +422,6 @@ mod tests {
 
     #[test]
     fn fallbacks_are_tried_in_order() {
-        const INTER: &[u8] = include_bytes!("../../../../tenants/default/fonts/Inter-Regular.ttf");
         let mut reg = FontRegistry::new();
         let id = reg
             .register_ttf_bytes("LiberationSans", LIBERATION.to_vec())
@@ -457,6 +462,7 @@ mod tests {
             .register_ttf_bytes("LiberationSans", LIBERATION.to_vec())
             .unwrap();
         reg.add_fallback_ttf_bytes(GROTESK.to_vec()).unwrap();
+        let inter = reg.add_fallback_ttf_bytes(INTER.to_vec()).unwrap();
         // Space Grotesk maps U+000D (carriage return) to a glyph with width,
         // Liberation does not; text from a CRLF source must not grow.
         assert_eq!(reg.font_for_char(id, '\r'), id);
@@ -464,7 +470,12 @@ mod tests {
             reg.text_width(id, "A\r", Pt(10.0)),
             reg.text_width(id, "A", Pt(10.0))
         );
-        for ch in ['\t', '\n', '\u{200B}', '\u{200F}', '\u{FE0F}', '\u{FEFF}'] {
+        // Inter maps U+FEFF (byte order mark) and Liberation does not, while
+        // a visible character only Inter has still falls back to it.
+        assert_eq!(reg.font_for_char(id, '\u{FEFF}'), id);
+        assert_eq!(reg.font_for_char(id, '\u{0376}'), inter);
+        // These no font here maps; they must stay in the text font too.
+        for ch in ['\t', '\n', '\u{2066}', '\u{FE0F}', '\u{E0001}'] {
             assert_eq!(reg.font_for_char(id, ch), id, "{:?}", ch);
         }
     }
@@ -493,10 +504,14 @@ mod tests {
         data[record..record + 4].copy_from_slice(b"glyX");
 
         let mut reg = FontRegistry::new();
-        assert!(matches!(
-            reg.add_fallback_ttf_bytes(data),
-            Err(LayoutError::FontParseError(_))
-        ));
+        // The face still parses: it is the outline check that refuses it.
+        assert!(ttf_parser::Face::parse(&data, 0).is_ok());
+        match reg.add_fallback_ttf_bytes(data) {
+            Err(LayoutError::FontParseError(message)) => {
+                assert!(message.contains("glyf"), "{message}")
+            }
+            other => panic!("expected a refusal, got {:?}", other.map(|_| ())),
+        }
         assert!(reg.fallbacks().is_empty());
         assert!(reg.is_empty());
     }
